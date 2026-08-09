@@ -1,6 +1,6 @@
 ---
 title: 逆向计划
-status: draft
+status: approved
 version: v0.1
 updated: 2026-08-09
 ---

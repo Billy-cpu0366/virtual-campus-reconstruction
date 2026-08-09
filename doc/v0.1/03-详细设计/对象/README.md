@@ -1,6 +1,6 @@
 ---
 title: 对象详细设计模板
-status: draft
+status: approved
 version: v0.1
 updated: 2026-08-09
 ---
