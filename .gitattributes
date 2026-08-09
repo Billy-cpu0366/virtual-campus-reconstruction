@@ -1,0 +1,3 @@
+# Preserve captured evidence byte-for-byte across checkouts.
+/sample/original-public-build/** -text
+/sample/analysis/runtime-network.json -text

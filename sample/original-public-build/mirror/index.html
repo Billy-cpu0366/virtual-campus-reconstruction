@@ -1,0 +1,1626 @@
+<!--
+  Hello :-)
+-->
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <base href="/" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
+    <style>
+      @-webkit-keyframes touch-me-hint {
+        0%,
+        to {
+          transform: translate3d(-50%, -50%, 0) translate3d(-15px, -15px, 0);
+        }
+        50% {
+          transform: translate3d(-50%, -50%, 0) translate3d(15px, 15px, 0);
+        }
+      }
+      html,
+      body {
+        cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAzElEQVRYR+2X0Q6AIAhF5f8/2jYXZkwEjNSVvVUjDpcrGgT7FUkI2D9xRfQETwNIiWO85wfINfQUEyxBG2ArsLwC0jioGt5zFcwF4OYDPi/mBYKm4t0U8ATgRm3ThFoAqkhNgWkA0jJLvaOVSs7j3qMnSgXWBMiWPXe94QqMBMBc1VZIvaTu5u5pQewq0EqNZvIEMCmxAawK0DNkay9QmfFNAJUXfgGgUkLaE7j/h8fnASkxHTz0DGIBMCnBeeM7AArpUd3mz2x3C7wADglA8BcWMZhZAAAAAElFTkSuQmCC)
+            14 0,
+          auto;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: border-box;
+      }
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+      }
+      * {
+        outline: none !important;
+      }
+      *:focus,
+      *:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+      *::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      *::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+      *::-webkit-scrollbar-thumb {
+        background-color: #0006;
+        border-radius: 9999px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+      }
+      *::-webkit-scrollbar-thumb:hover {
+        background-color: #0009;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+        overflow: hidden;
+        font-family: "Press Start 2P", "Press Start 2P Fallback", monospace;
+      }
+      .progress-percentage {
+        position: absolute;
+        left: 0%;
+        top: 50%;
+        margin-top: -230px;
+        padding: 0;
+        color: #000;
+        font-size: 25px;
+        width: 100%;
+        line-height: 1em;
+        text-align: center;
+        z-index: 99999;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+      }
+      @media (max-height: 450px) {
+        .progress-percentage {
+          margin-top: -200px;
+        }
+      }
+    </style>
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+    <meta name="color-scheme" content="light" />
+
+    <meta name="google-site-verification" content="5i1GF__hbKwpgNj6HjuBenzSmMo3SIDzQgJzwItH5a4" />
+
+    <title>Peter Oravec - Front-end Developer | Javascript | Angular | Node.js</title>
+    <meta name="title" content="Peter Oravec - Front-end Developer | Javascript | Angular | Node.js" />
+    <meta
+      name="description"
+      content="I'm Peter Oravec, a front-end developer with over 19 years of experience. I specialize in Angular, TypeScript, and JavaScript, building modern web applications with a focus on performance and user experience." />
+    <meta
+      name="keywords"
+      content="portfolio, showcase, projects, websites, javascript, nodejs, node, js, php, mysql, phaser, lotus notes, ibm, wp, wordpress, mean, stack, programmer, programming, seo, web, dev, development, quizeditor, angular, angularjs, bratislava, slovakia, cv, developer, phaser, game, engine, 2d" />
+    <meta name="author" content="Peter Oravec" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://peteroravec.com/" />
+    <meta property="og:title" content="Peter Oravec - Front-end Developer | Javascript | Angular | Node.js" />
+    <meta
+      property="og:description"
+      content="Front-end developer with 19+ years of experience. Specializing in Angular, TypeScript, and modern JavaScript." />
+    <meta property="og:image" content="https://peteroravec.com/assets/images/og-image.png" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://peteroravec.com/" />
+    <meta name="twitter:title" content="Peter Oravec - Front-end Developer | Javascript | Angular | Node.js" />
+    <meta
+      name="twitter:description"
+      content="Front-end developer with 19+ years of experience. Specializing in Angular, TypeScript, and modern JavaScript." />
+    <meta name="twitter:image" content="https://peteroravec.com/assets/images/og-image.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Font: non-blocking load with preload + async pattern -->
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
+    </noscript>
+    <!-- Preload critical assets for faster loading -->
+    <link rel="preload" href="assets/js/phaser.min.js" as="script" fetchpriority="low" />
+    <link rel="preload" href="assets/images/peter-oravec.gif" as="image" fetchpriority="high" />
+    <link rel="preload" href="assets/images/peteroravec-logo.webp" as="image" fetchpriority="high" />
+    <!-- Preload game JSON data - low priority to not compete with critical resources -->
+    <link rel="preload" href="assets/maps/final_map_small.json" as="fetch" crossorigin fetchpriority="low" />
+    <link rel="preload" href="assets/maps/final_map.json" as="fetch" crossorigin fetchpriority="low" />
+    <link rel="preload" href="assets/maps/walls-layer.json" as="fetch" crossorigin fetchpriority="low" />
+    <link rel="preload" href="assets/maps/footsteps-layer.json" as="fetch" crossorigin fetchpriority="low" />
+    <link rel="preload" href="assets/maps/particle-trajectories.json" as="fetch" crossorigin fetchpriority="low" />
+
+    <!-- favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="assets/images/favicon/apple-touch-icon-57x57.png" />
+    <link
+      rel="apple-touch-icon-precomposed"
+      sizes="114x114"
+      href="assets/images/favicon/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/images/favicon/apple-touch-icon-72x72.png" />
+    <link
+      rel="apple-touch-icon-precomposed"
+      sizes="144x144"
+      href="assets/images/favicon/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="assets/images/favicon/apple-touch-icon-60x60.png" />
+    <link
+      rel="apple-touch-icon-precomposed"
+      sizes="120x120"
+      href="assets/images/favicon/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="assets/images/favicon/apple-touch-icon-76x76.png" />
+    <link
+      rel="apple-touch-icon-precomposed"
+      sizes="152x152"
+      href="assets/images/favicon/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-196x196.png" sizes="196x196" />
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-128.png" sizes="128x128" />
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="assets/images/favicon/mstile-144x144.png" />
+    <meta name="msapplication-square70x70logo" content="assets/images/favicon/mstile-70x70.png" />
+    <meta name="msapplication-square150x150logo" content="assets/images/favicon/mstile-150x150.png" />
+    <meta name="msapplication-wide310x150logo" content="assets/images/favicon/mstile-310x150.png" />
+    <meta name="msapplication-square310x310logo" content="assets/images/favicon/mstile-310x310.png" />
+
+    <script>
+      // Nastavenie CSS custom property pre devicePixelRatio hneď pri načítaní
+      (function () {
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        document.documentElement.style.setProperty("--device-pixel-ratio", devicePixelRatio.toString());
+        // Na Androide viewport-fit=cover spôsobuje, že viewport zahrnie aj lišty prehliadača
+        // Prepneme na contain, aby innerHeight/visualViewport vrátili správnu viditeľnú oblasť
+        if (/Android/i.test(navigator.userAgent)) {
+          var vp = document.querySelector('meta[name="viewport"]');
+          if (vp)
+            vp.setAttribute(
+              "content",
+              vp.getAttribute("content").replace("viewport-fit=cover", "viewport-fit=contain")
+            );
+        }
+      })();
+    </script>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Peter Oravec",
+        "jobTitle": "Front-end Developer",
+        "description": "Front-end developer s viac ako 19 ročnou praxou, špecializujúci sa na Angular, TypeScript a JavaScript",
+        "url": "https://peteroravec.com",
+        "image": "https://peteroravec.com/assets/images/peter-oravec.webp",
+        "sameAs": ["https://www.linkedin.com/in/peteroravec/"],
+        "knowsAbout": [
+          "JavaScript",
+          "TypeScript",
+          "Angular",
+          "Node.js",
+          "Express.js",
+          "MongoDB",
+          "HTML",
+          "CSS",
+          "SCSS",
+          "Phaser.js"
+        ],
+        "worksFor": {
+          "@type": "Organization",
+          "name": "VUB banka"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Bratislava",
+          "addressCountry": "SK"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="styles-DVTBSD34.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="styles-DVTBSD34.css" /></noscript>
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://peteroravec.com/" />
+
+    <!-- Hreflang odkazy pre jazykové verzie -->
+    <link rel="alternate" hreflang="en" href="https://peteroravec.com/" />
+    <link rel="alternate" hreflang="sk" href="https://peteroravec.com/sk/" />
+    <link rel="alternate" hreflang="x-default" href="https://peteroravec.com/" />
+  </head>
+  <body>
+    <div
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 9999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      "
+      id="init-load">
+      Loading...
+    </div>
+    <app-root>
+      <h1 class="visually-hidden">Peter Oravec - Front-end Developer | Javascript | Angular | Node.js</h1>
+      <div class="progress-percentage-cover hidden"></div>
+      <div class="progress-percentage">
+        <div class="preloader-text">
+          <img
+            width="310"
+            height="310"
+            src="assets/images/peter-oravec.gif"
+            alt="Peter Oravec portfolio preloader"
+            fetchpriority="high"
+            class="preloader-image" />
+        </div>
+        <div class="preloader"><div class="bar" style="width: 100%"></div></div>
+        <div class="preloader-text">100%</div>
+      </div>
+      <div class="play-box">
+        <div class="mini-text top-text">
+          <div class="box">Front-end, Angular, Node.js, Javascript developer portfolio</div>
+        </div>
+        <div class="wrp">
+          <div class="img-wrp">
+            <img
+              src="assets/images/peteroravec-logo.webp"
+              alt="Peter Oravec portfolio"
+              width="441"
+              height="282"
+              fetchpriority="high" />
+            <div class="btn-wrp"><button type="button" class="nes-btn is-error btn-play">Play</button></div>
+          </div>
+        </div>
+        <div class="mini-text bottom-text">
+          <div class="limiter">
+            <div class="linkedin-box">
+              <div class="box text"><span class="highlight-text">No time to explore my portfolio?</span></div>
+              <div class="box box-btn">
+                <a
+                  href="https://www.linkedin.com/in/peteroravec"
+                  target="_blank"
+                  class="nes-btn is-primary"
+                  style="text-shadow: none">
+                  LinkedIn
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <main id="main-content" class="game-container">
+        <div>
+          <canvas
+            width="480"
+            height="270"
+            style="
+              image-rendering: pixelated;
+              width: 1920px;
+              height: 1080px;
+              position: fixed;
+              left: 0px;
+              top: 0px;
+              margin: 0px;
+              padding: 0px;
+            "></canvas>
+        </div>
+        <div class="modal-backdrop"></div>
+        <div id="tech" class="modal" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 1200px">
+                  <div class="text-content">
+                    <div class="top-texts">
+                      <h2 class="big-title">Technologies</h2>
+                      <p class="text-center">
+                        I like to try new things and have gone through various technologies and positions, from
+                        front-end development, designing in Photoshop to backend development. Learn more about how I use
+                        technologies for my projects.
+                      </p>
+                    </div>
+                    <div class="tech-stack">
+                      <section>
+                        <div class="tech angular">
+                          <div class="tech-cols">
+                            <div class="logo">
+                              <img
+                                src="assets/images/logos/dev-angular.webp"
+                                alt="Angular"
+                                width="250"
+                                height="250"
+                                loading="lazy" />
+                            </div>
+                            <div class="texts">
+                              <h3 class="title">Angular</h3>
+                              <div class="desc">TypeScript JavaScript framework for building SPA applications</div>
+                              <p>
+                                I have extensive experience with Angular, using it mainly to build robust and large SPA
+                                applications (single-page applications) of various types and complexity.
+                              </p>
+                              <p class="last">
+                                If you're interested, I can provide you with a list of large Angular projects I've
+                                worked on.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      <section>
+                        <div class="tech nodejs">
+                          <div class="tech-cols">
+                            <div class="logo">
+                              <img
+                                src="assets/images/logos/dev-nodejs.webp"
+                                alt="Node.js"
+                                width="250"
+                                height="256"
+                                loading="lazy" />
+                            </div>
+                            <div class="texts">
+                              <h3 class="title">Node.js</h3>
+                              <div class="desc">
+                                Cross-platform environment for developing powerful server applications
+                              </div>
+                              <p class="last">
+                                Node.js is my favorite technology. Its asynchronous model, which allows parallel code
+                                execution, is something other technologies can't match. I also like the speed and
+                                flexibility of Node.js. It's my main go-to technology when I need to develop robust
+                                server-side solutions.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      <section>
+                        <div class="tech expressjs">
+                          <div class="tech-cols">
+                            <div class="logo">
+                              <img
+                                src="assets/images/logos/dev-expressjs.webp"
+                                alt="Express.js"
+                                width="250"
+                                height="250"
+                                loading="lazy" />
+                            </div>
+                            <div class="texts">
+                              <h3 class="title">Express.JS</h3>
+                              <div class="desc">Minimalist framework for Node.js</div>
+                              <p class="last">
+                                Whenever I create more complex applications in Node.js, I use Express.js as the backbone
+                                of my Node.js application.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      <section>
+                        <div class="tech js">
+                          <div class="tech-cols">
+                            <div class="logo">
+                              <img
+                                src="assets/images/logos/dev-javascript.webp"
+                                alt="Javascript"
+                                width="250"
+                                height="250"
+                                loading="lazy" />
+                            </div>
+                            <div class="texts">
+                              <h3 class="title">Javascript</h3>
+                              <div class="desc">My favourite language</div>
+                              <p class="last">
+                                I also love JavaScript. I consider it a very powerful language in which you can create
+                                anything today. Whether it's my favorite JS on the backend like Node.js or animations in
+                                canvas. No language has as much flexibility as JavaScript and I like that.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="other-wrp">
+                      <h4 class="other-title">Other technologies and experience</h4>
+                      <div class="other-skills">
+                        <div class="lists">
+                          <ul class="nes-list is-disc">
+                            <li>Automation via Puppeteer</li>
+                            <li>Automated tests via Midnight, Playwright</li>
+                            <li>MongoDB</li>
+                            <li>HTML / CSS</li>
+                            <li>Phaser.js - 2D canvas / WebGL game engine</li>
+                            <li>Photoshop</li>
+                            <li>MySQL</li>
+                            <li>Google Firestore</li>
+                            <li>Mockflow - wireframes</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-center up-btn">
+                      <button type="button" aria-label="Scroll to top" class="nes-btn is-primary is-centered">
+                        <span>Up</span>
+                        <span
+                          style="display: inline-block; transform: rotateZ(90deg); font-size: 16px; margin: 0 0 0 10px">
+                          &lt;
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="about" class="modal" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 900px">
+                  <div class="text-content">
+                    <h2 class="big-title">About me</h2>
+                    <div class="user-box pixel-corners-mini">
+                      <div class="col img">
+                        <img
+                          src="assets/images/peter-oravec.webp"
+                          alt="Peter Oravec CV photo"
+                          width="450"
+                          height="450"
+                          loading="lazy"
+                          class="cv-photo pixel-corners-mini" />
+                      </div>
+                      <div class="col info">
+                        <strong>Peter Oravec</strong>
+                        <div class="mini">Front-end &amp; MEAN Stack developer</div>
+                      </div>
+                      <div class="col social">
+                        <a href="https://www.linkedin.com/in/peteroravec" target="_blank">
+                          <i class="nes-icon linkedin is-large"></i>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="text-block">
+                      <div class="title">Bridging the Gap Between Design and Code</div>
+                      <p>
+                        I'm Peter Oravec, a creative web developer with over 19 years of experience, currently based in
+                        Bratislava, Slovakia.
+                      </p>
+                      <p>
+                        My primary focus is on Front-End, JavaScript and Angular, but I also have deep experience as a
+                        full-stack developer, especially in the MEAN stack (MongoDB, Express, Angular, Node.js).
+                      </p>
+                    </div>
+                    <div class="text-block">
+                      <span>
+                        I feel most at home building Single Page Applications (SPAs) in Angular, especially those
+                        requiring complex animations and fluid interactivity. However, my strongest asset isn't just my
+                        code—it's my ability to act as the vital link between graphics, front-end, and backend.
+                      </span>
+                    </div>
+                    <div class="text-block">
+                      <span>
+                        I understand the visual language of designers and the structural needs of backend engineers,
+                        ensuring a flawless final product.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="cv" class="modal" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 1000px">
+                  <div class="text-content">
+                    <h2 class="big-title">Curriculum Vitae</h2>
+                    <p>
+                      I have over 19 years of experience in web development. I would categorize myself as a front-end or
+                      JavaScript developer.
+                    </p>
+                    <p>
+                      I have a broader range of knowledge, having worked as a graphic designer, UI/UX designer and
+                      overall as a full-stack developer. I was often the bridge between designers and backend. I
+                      understand the needs of both sides and understand the visual language of designers as well as the
+                      structural needs of backend engineers, ensuring a flawless final product.
+                    </p>
+                    <p>
+                      During my career, I've had the opportunity to work in every type of company, from small,
+                      medium-sized, digital agencies to large corporations.
+                    </p>
+                    <div class="cv">
+                      <div class="line"></div>
+                      <div class="cv-item">
+                        <div class="col emp-wrp">
+                          <div class="back-wrp" style="background: white">
+                            <img
+                              src="assets/images/logos/cv-gamo.webp"
+                              alt="GAMO"
+                              width="830"
+                              height="190"
+                              loading="lazy"
+                              class="emp-logo" />
+                            <div class="date">2007</div>
+                          </div>
+                        </div>
+                        <div class="col data">
+                          <div class="company-title">GAMO a.s.</div>
+                          <div class="job-title">IBM Lotus Notes developer, webdesigner</div>
+                          <div class="job-desc">
+                            At GAMO I worked as a front-end developer who also did graphics. We programmed the backend
+                            in IBM Lotus Notes groupware technology.
+                          </div>
+                          <button type="button" class="nes-btn cv-projects-toggle"><span>Show projects</span></button>
+                          <div class="cv-projects-list">
+                            <div class="selected-projects">Selected projects:</div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">BBSK Portal</div>
+                                <div class="desc">Banská Bystrica self-governing region office</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">IRRR</div>
+                                <div class="desc">Institute for Gender Equality (BB Region)</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">SLEK</div>
+                                <div class="desc">Slovak Chamber of Pharmacists</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">KVLSR</div>
+                                <div class="desc">Chamber of Veterinary Doctors of Slovakia</div>
+                              </div>
+                              <div class="link">
+                                <a href="https://www.kvlsr.sk" target="_blank" class="nes-btn is-bordered visit-btn">
+                                  Visit
+                                </a>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">CRSZ</div>
+                                <div class="desc">Central Registry of Companion Animals</div>
+                              </div>
+                              <div class="link">
+                                <a href="https://www.crsz.sk" target="_blank" class="nes-btn is-bordered visit-btn">
+                                  Visit
+                                </a>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">Kremnica Gags</div>
+                                <div class="desc">European festival of humor and satire</div>
+                              </div>
+                              <div class="link">
+                                <a href="https://gagy.eu" target="_blank" class="nes-btn is-bordered visit-btn">
+                                  Visit
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="cv-item">
+                        <div class="col emp-wrp">
+                          <div class="back-wrp">
+                            <img
+                              src="assets/images/logos/cv-scr.webp"
+                              alt="SCR"
+                              width="708"
+                              height="133"
+                              loading="lazy"
+                              class="emp-logo" />
+                            <div class="date">2010</div>
+                          </div>
+                        </div>
+                        <div class="col data">
+                          <div class="company-title">SCR</div>
+                          <div class="job-title">Front-end developer, PHP developer</div>
+                          <div class="job-desc">
+                            In the SCR team I worked mainly as a front-end developer and PHP programmer. As a team of
+                            multiple programmers, we also worked on large projects like the TA3 portal or Radio Express.
+                            A significant part of the work consisted of creative contests and FB applications.
+                          </div>
+                          <button type="button" class="nes-btn cv-projects-toggle"><span>Show projects</span></button>
+                          <div class="cv-projects-list">
+                            <div class="selected-projects">Selected projects:</div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">TA3</div>
+                                <div class="desc">TA3 television web portal</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">Radio Express</div>
+                                <div class="desc">Radio Express web portal</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">SWAN</div>
+                                <div class="desc">Telecommunications service provider website</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">Energio</div>
+                                <div class="desc">Refrigeration services provider website</div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">Gas Familia</div>
+                                <div class="desc">Famous alcohol producer website</div>
+                              </div>
+                              <div class="link">
+                                <a
+                                  href="https://www.gasfamilia.com/"
+                                  target="_blank"
+                                  class="nes-btn is-bordered visit-btn">
+                                  Visit
+                                </a>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">Flatbook</div>
+                                <div class="desc">New building sales and rental portal</div>
+                              </div>
+                              <div class="link">
+                                <a href="http://flatbook.sk" target="_blank" class="nes-btn is-bordered visit-btn">
+                                  Visit
+                                </a>
+                              </div>
+                            </div>
+                            <p class="job-desc" style="margin-top: 30px">
+                              Besides larger and smaller web applications, I also created various Facebook applications
+                              and contests for brands like:
+                              <br />
+                              O2, Sony, Pelikan, Corgoň, Zlatý Bažant, Heineken...
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="cv-item">
+                        <div class="col emp-wrp">
+                          <div class="back-wrp">
+                            <img
+                              src="assets/images/logos/cv-kremsa.webp"
+                              alt="Kremsa Digital"
+                              width="748"
+                              height="792"
+                              loading="lazy"
+                              class="emp-logo" />
+                            <div class="date">2012</div>
+                          </div>
+                        </div>
+                        <div class="col data">
+                          <div class="company-title">Kremsa Digital</div>
+                          <div class="job-title">
+                            MEAN stack developer, Angular &amp; Front-end developer, PHP &amp; Wordpress developer
+                          </div>
+                          <div class="job-desc">
+                            At Kremsa Digital I worked as a front-end developer in MEAN (MongoDB, Express.js, Angular,
+                            Node.js) and LAMP (Linux, Apache, MySQL, PHP) stack. I worked on various projects from
+                            WordPress websites to large Angular projects in MEAN stack with fully automated CI.
+                          </div>
+                          <button type="button" class="nes-btn cv-projects-toggle"><span>Show projects</span></button>
+                          <div class="cv-projects-list">
+                            <div class="selected-projects">Selected projects:</div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">Pioneer Projects CRM</div>
+                                <div class="desc">
+                                  Custom CRM system programmed in MEAN stack and Angular. It includes a dynamic map
+                                  cluster with filtering by arbitrary conditions and complex data structures, which is
+                                  why MongoDB was used as the database.
+                                </div>
+                                <div class="desc tech">
+                                  <strong>Technologies used:</strong>
+                                  <span>MongoDB, Node.js, Angular, ExpressJS</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="project">
+                              <div class="texts">
+                                <div class="title">SMBee</div>
+                                <div class="desc">
+                                  Social media dashboard that allows you to create a graphical dashboard from over 50
+                                  different metrics from Facebook, Instagram, Twitter, LinkedIn and Google Analytics in
+                                  real-time using drag-and-drop functionality.
+                                </div>
+                                <div class="desc tech">
+                                  <strong>Technologies used:</strong>
+                                  <span>Node.js, MySQL, InfluxDB, Angular, Google Firebase, ExpressJS</span>
+                                </div>
+                              </div>
+                            </div>
+                            <p class="job-desc" style="margin-top: 30px">
+                              <strong>Work on various PHP, WP, FB projects for brands like:</strong>
+                              Legrand, Slovakia Chips, Karloff, Rajo, FONA, Amoeba, HB Reavis, Atheer Labs
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="cv-item">
+                        <div class="col emp-wrp">
+                          <div class="back-wrp">
+                            <img
+                              src="assets/images/logos/cv-bethereum.webp"
+                              alt="Bethereum"
+                              width="373"
+                              height="418"
+                              loading="lazy"
+                              class="emp-logo" />
+                            <div class="date">2018</div>
+                          </div>
+                        </div>
+                        <div class="col data">
+                          <div class="company-title">Bethereum</div>
+                          <div class="job-title">Angular &amp; Front-end developer</div>
+                          <div class="job-desc">
+                            Bethereum is a crypto betting platform for sports and e-sports. For Bethereum I work as a
+                            Front-end &amp; Angular developer. It's probably the most complex Angular project I've
+                            worked on so far.
+                          </div>
+                        </div>
+                      </div>
+                      <div class="cv-item last">
+                        <div class="col emp-wrp bck">
+                          <div class="back-wrp">
+                            <img
+                              src="assets/images/logos/cv-vub.webp"
+                              alt="VÚB Banka"
+                              width="210"
+                              height="210"
+                              loading="lazy"
+                              class="emp-logo" />
+                            <div class="date">2020</div>
+                          </div>
+                        </div>
+                        <div class="col data">
+                          <div class="company-title">
+                            <span>VUB Bank</span>
+                            <span class="mini">Intesa Sanpaolo Group</span>
+                          </div>
+                          <div class="job-title">Angular &amp; Front-end developer</div>
+                          <span
+                            class="nes-badge"
+                            style="
+                              font-size: 12px;
+                              width: auto;
+                              padding: 0 0px;
+                              font-weight: bold;
+                              display: inline-block;
+                              min-width: 221px;
+                              margin: 0 0 20px 0;
+                              line-height: 25px;
+                            ">
+                            <span class="is-warning">Current position</span>
+                          </span>
+                          <div class="job-desc">
+                            My primary role at the bank is digitizing internal processes within the bank. If a process
+                            takes too long, costs a lot of money and can be replaced by an automated process, we program
+                            it.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-block-border">
+                      <div class="title">Want to know more?</div>
+                      <div class="inner-text">
+                        Contact me or visit my LinkedIn profile. However, you'll find everything important on this
+                        website.
+                        <div class="link-wrp">
+                          <a href="https://www.linkedin.com/in/peteroravec/" target="_blank">
+                            <i class="nes-icon linkedin is-large"></i>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <button type="button" aria-label="Scroll to top" class="nes-btn is-primary is-centered">
+                        <span>Up</span>
+                        <span
+                          style="display: inline-block; transform: rotateZ(90deg); font-size: 16px; margin: 0 0 0 10px">
+                          &lt;
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="memo1" class="modal memo" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 1150px">
+                  <div class="text-content">
+                    <div class="card-wrp">
+                      <div class="col card">
+                        <div class="touch-me">
+                          <img
+                            src="/assets/images/ui/pointer-hand.webp"
+                            alt=""
+                            width="512"
+                            height="512"
+                            loading="lazy" />
+                        </div>
+                        <div data-rarity="rare holo" data-subtypes="basic" class="card effect-card-holo interactive">
+                          <div class="card__translater">
+                            <div class="card__rotator">
+                              <div class="card__front">
+                                <img
+                                  src="/assets/images/cards/card1_base.webp"
+                                  alt="Collectible card - 100% Vibe coding"
+                                  loading="lazy"
+                                  width="200"
+                                  height="296"
+                                  class="effect-card-img" />
+                                <div class="card__shine"></div>
+                                <div class="card__glare"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <memo-nav-wrapper memoid="memo1">
+                          <div class="memo-nav-wrapper">
+                            <memo-nav-arrow direction="prev"></memo-nav-arrow>
+                            <button type="button" class="memo-hamburger-btn">
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                            </button>
+                            <memo-nav-arrow direction="next">
+                              <button class="memo-nav-arrow right" aria-label="Next memo">›</button>
+                            </memo-nav-arrow>
+                          </div>
+                        </memo-nav-wrapper>
+                      </div>
+                      <div class="card-text col">
+                        <h2 class="title" style="margin-bottom: 30px">100% Vibe coding</h2>
+                        <p class="mini-p">
+                          This entire website was created as an experiment with a modern approach to development –
+                          so-called vibe coding. My goal was to test the limits of human-AI collaboration when building
+                          a complex digital product completely from scratch.
+                        </p>
+                        <p class="mini-p">The result? A fascinating synergy that has its clear rules.</p>
+                        <p class="mini-p">
+                          AI provided speed, but I had to provide direction, logical consistency and the final
+                          integration of all parts into a functional whole.
+                        </p>
+                        <p class="mini-p">
+                          Context is king: Without deep understanding of the code and the ability to precisely define
+                          the task, AI quickly gets tangled up.
+                        </p>
+                        <p class="mini-p">
+                          Critical thinking: Every line generated by the machine went through rigorous human review and
+                          manual fine-tuning of details that escape the machine.
+                        </p>
+                        <p class="mini-p">
+                          This website is proof that AI can push the boundaries of what's possible, but only in the
+                          hands of someone who knows exactly what they're doing. It's a brilliant assistant, but you
+                          must remain the captain and architect.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="memo2" class="modal memo" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 950px">
+                  <div class="text-content">
+                    <div class="card-wrp">
+                      <div class="col card">
+                        <div class="touch-me">
+                          <img
+                            src="/assets/images/ui/pointer-hand.webp"
+                            alt=""
+                            width="512"
+                            height="512"
+                            loading="lazy" />
+                        </div>
+                        <hover-tilt
+                          shadow=""
+                          shadow-blur="60"
+                          scale-factor="1"
+                          glare-mask="url(/assets/images/cards/card2_pattern.webp)"
+                          glare-mask-mode="screen"
+                          glare-mask-composite="intersect"
+                          blend-mode="overlay"
+                          class="reverse-ball effect-card"
+                          style="--hover-tilt-etch-image: url(/assets/images/cards/card2_foil.webp)">
+                          <img
+                            src="/assets/images/cards/card2_base.webp"
+                            alt="Collectible card - Automated Testing"
+                            loading="lazy"
+                            width="248"
+                            height="372"
+                            class="effect-card-img" />
+                          <div class="reverse-ball-etch"></div>
+                        </hover-tilt>
+                        <memo-nav-wrapper memoid="memo2">
+                          <div class="memo-nav-wrapper">
+                            <memo-nav-arrow direction="prev">
+                              <button class="memo-nav-arrow left" aria-label="Previous memo">‹</button>
+                            </memo-nav-arrow>
+                            <button type="button" class="memo-hamburger-btn">
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                            </button>
+                            <memo-nav-arrow direction="next">
+                              <button class="memo-nav-arrow right" aria-label="Next memo">›</button>
+                            </memo-nav-arrow>
+                          </div>
+                        </memo-nav-wrapper>
+                      </div>
+                      <div class="card-text col">
+                        <h2 class="title" style="margin-bottom: 30px">Automatic testing</h2>
+                        <p class="mini-p">
+                          Nobody likes bugs. I personally have experience with automatic testing of both backend and
+                          frontend.
+                        </p>
+                        <p class="mini-p">
+                          My favorite tools for End-To-End frontend testing include Midnight, Playwright and Puppeteer.
+                          With them, I can create tests that run in a CI environment before every deployment or other
+                          browser automation.
+                        </p>
+                        <p class="mini-p">
+                          When API testing is needed, I use Mocha and Chai libraries. I'm a fan of automation.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="memo3" class="modal memo" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 950px">
+                  <div class="text-content">
+                    <div class="card-wrp">
+                      <div class="col card">
+                        <div class="touch-me">
+                          <img
+                            src="/assets/images/ui/pointer-hand.webp"
+                            alt=""
+                            width="512"
+                            height="512"
+                            loading="lazy" />
+                        </div>
+                        <hover-tilt
+                          shadow=""
+                          shadow-blur="60"
+                          scale-factor="1"
+                          glare-mask="url(/assets/images/cards/card3_pattern.webp)"
+                          glare-mask-mode="screen"
+                          glare-mask-composite="intersect"
+                          blend-mode="overlay"
+                          class="sparkles effect-card">
+                          <img
+                            src="/assets/images/cards/card3_base.webp"
+                            alt="Collectible card - From Node.js to Canvas"
+                            loading="lazy"
+                            width="224"
+                            height="340" />
+                        </hover-tilt>
+                        <memo-nav-wrapper memoid="memo3">
+                          <div class="memo-nav-wrapper">
+                            <memo-nav-arrow direction="prev">
+                              <button class="memo-nav-arrow left" aria-label="Previous memo">‹</button>
+                            </memo-nav-arrow>
+                            <button type="button" class="memo-hamburger-btn">
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                            </button>
+                            <memo-nav-arrow direction="next">
+                              <button class="memo-nav-arrow right" aria-label="Next memo">›</button>
+                            </memo-nav-arrow>
+                          </div>
+                        </memo-nav-wrapper>
+                      </div>
+                      <div class="card-text col">
+                        <h2 class="title" style="margin-bottom: 30px">From Node.js logic to visual art in Canvas</h2>
+                        <p class="mini-p">
+                          I've been specializing in the JS ecosystem for a long time, where I feel at home. Whether it's
+                          a robust backend in Node.js and Express.js, dynamic frontends in Angular, or creative visual
+                          solutions in Canvas, I see JavaScript as a tool with unlimited possibilities.
+                        </p>
+                        <p class="mini-p">
+                          My main strength is that I'm a mix of designer, front-end developer and backend developer in
+                          one. It has always been this way and I'm used to covering all the pain points of development.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="memo4" class="modal memo" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 950px">
+                  <div class="text-content">
+                    <div class="card-wrp">
+                      <div class="col card">
+                        <div class="touch-me">
+                          <img
+                            src="/assets/images/ui/pointer-hand.webp"
+                            alt=""
+                            width="512"
+                            height="512"
+                            loading="lazy" />
+                        </div>
+                        <div
+                          data-rarity="rare holo"
+                          data-subtypes="basic"
+                          class="card effect-card-holo interactive effect-memo4">
+                          <div class="card__translater">
+                            <div class="card__rotator">
+                              <div class="card__front">
+                                <img
+                                  src="/assets/images/cards/card4_base.webp"
+                                  alt="Collectible card - Deprecated Technologies"
+                                  loading="lazy"
+                                  width="168"
+                                  height="256"
+                                  class="effect-card-img" />
+                                <div class="card__shine"></div>
+                                <div class="card__glare"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <memo-nav-wrapper memoid="memo4">
+                          <div class="memo-nav-wrapper">
+                            <memo-nav-arrow direction="prev">
+                              <button class="memo-nav-arrow left" aria-label="Previous memo">‹</button>
+                            </memo-nav-arrow>
+                            <button type="button" class="memo-hamburger-btn">
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                            </button>
+                            <memo-nav-arrow direction="next">
+                              <button class="memo-nav-arrow right" aria-label="Next memo">›</button>
+                            </memo-nav-arrow>
+                          </div>
+                        </memo-nav-wrapper>
+                      </div>
+                      <div class="card-text col">
+                        <h2 class="title" style="margin-bottom: 30px">Technologies I buried</h2>
+                        <p class="mini-p">
+                          They say what doesn't kill you makes you stronger. Lotus Notes didn't kill me, although it
+                          tried very hard. After years of fighting with it, PHP and WordPress, I closed this chapter
+                          with relief (and a mild celebration).
+                        </p>
+                        <p class="mini-p">
+                          Today I use these battle scars to create better, faster and more stable solutions. Exclusively
+                          in JavaScript.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="memo5" class="modal memo" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 950px">
+                  <div class="text-content">
+                    <div class="card-wrp">
+                      <div class="col card">
+                        <div class="touch-me">
+                          <img
+                            src="/assets/images/ui/pointer-hand.webp"
+                            alt=""
+                            width="512"
+                            height="512"
+                            loading="lazy" />
+                        </div>
+                        <div
+                          data-rarity="rare holo"
+                          data-subtypes="basic"
+                          class="card effect-card-holo interactive effect-prism">
+                          <div class="card__translater">
+                            <div class="card__rotator">
+                              <div class="card__front">
+                                <img
+                                  src="/assets/images/cards/card5_base.webp"
+                                  alt="Collectible card - AI as Assistant"
+                                  loading="lazy"
+                                  width="224"
+                                  height="340"
+                                  class="effect-card-img" />
+                                <div class="card__shine"></div>
+                                <div class="card__glare"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <memo-nav-wrapper memoid="memo5">
+                          <div class="memo-nav-wrapper">
+                            <memo-nav-arrow direction="prev">
+                              <button class="memo-nav-arrow left" aria-label="Previous memo">‹</button>
+                            </memo-nav-arrow>
+                            <button type="button" class="memo-hamburger-btn">
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                            </button>
+                            <memo-nav-arrow direction="next">
+                              <button class="memo-nav-arrow right" aria-label="Next memo">›</button>
+                            </memo-nav-arrow>
+                          </div>
+                        </memo-nav-wrapper>
+                      </div>
+                      <div class="card-text col">
+                        <h2 class="title" style="margin-bottom: 30px">AI: Competitor or colleague?</h2>
+                        <p class="mini-p">
+                          The ability to write syntactically correct code is no longer rare. AI does it faster, for
+                          free, and 24/7.
+                        </p>
+                        <p class="mini-p">
+                          However, programming isn't about writing lines, but knowing which lines not to write. AI is
+                          just a powerful generator and I am the filter.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="memo6" class="modal memo" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 950px">
+                  <div class="text-content">
+                    <div class="card-wrp">
+                      <div class="col card">
+                        <div class="touch-me">
+                          <img
+                            src="/assets/images/ui/pointer-hand.webp"
+                            alt=""
+                            width="512"
+                            height="512"
+                            loading="lazy" />
+                        </div>
+                        <div
+                          data-rarity="rare holo"
+                          data-subtypes="basic"
+                          class="card effect-card-holo interactive effect-memo6">
+                          <div class="card__translater">
+                            <div class="card__rotator">
+                              <div class="card__front">
+                                <img
+                                  src="/assets/images/cards/card6_base.webp"
+                                  alt="Collectible card - I'm not a game developer"
+                                  loading="lazy"
+                                  width="224"
+                                  height="340"
+                                  class="effect-card-img" />
+                                <div class="card__shine"></div>
+                                <div class="card__foil"></div>
+                                <div class="card__glare"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <memo-nav-wrapper memoid="memo6">
+                          <div class="memo-nav-wrapper">
+                            <memo-nav-arrow direction="prev">
+                              <button class="memo-nav-arrow left" aria-label="Previous memo">‹</button>
+                            </memo-nav-arrow>
+                            <button type="button" class="memo-hamburger-btn">
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                              <span class="hamburger-line"></span>
+                            </button>
+                            <memo-nav-arrow direction="next"></memo-nav-arrow>
+                          </div>
+                        </memo-nav-wrapper>
+                      </div>
+                      <div class="card-text col">
+                        <h2 class="title" style="margin-bottom: 30px">I'm not a game developer</h2>
+                        <p class="mini-p">
+                          Don't be fooled by the visuals – I'm not a game developer. My priority is large, long-term
+                          projects that require clean architecture and logical solutions.
+                        </p>
+                        <p class="mini-p">
+                          At the same time, I can be creative and flexible when the situation calls for it.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="contact" class="modal" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners" style="max-width: 700px">
+                  <div class="text-content">
+                    <h2 class="big-title">Contact</h2>
+                    <div class="contact-info">
+                      <p class="text-center">Below you can find ways to get in touch with me.</p>
+                      <div class="contact-methods">
+                        <div class="contact-item">
+                          <div class="contact-icon"><i class="nes-icon linkedin is-medium"></i></div>
+                          <div class="contact-text">
+                            <div class="label">LinkedIn</div>
+                            <a href="https://www.linkedin.com/in/peteroravec" target="_blank" class="value">
+                              linkedin.com/in/peteroravec
+                            </a>
+                          </div>
+                        </div>
+                        <div class="contact-item">
+                          <div class="contact-icon"><i class="nes-icon gmail is-medium"></i></div>
+                          <div class="contact-text">
+                            <div class="label">Email</div>
+                            <a href="mailto:p.oravec@gmail.com" class="value">p.oravec@gmail.com</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="big-map" class="modal big-map-modal" style="visibility: hidden">
+          <div class="big-map-backdrop"></div>
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close map" class="nes-btn is-error close-btn-position">×</button>
+                <div class="big-map-wrapper">
+                  <div class="big-map-monitor-overlay"></div>
+                  <div class="big-map-legend">
+                    <div class="legend-item">
+                      <span class="legend-icon icon-sunburn"></span>
+                      <span class="legend-text">Info</span>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-icon icon-vortex"></span>
+                      <span class="legend-text">Memo</span>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-icon icon-visited"></span>
+                      <span class="legend-text">Visited</span>
+                    </div>
+                  </div>
+                  <div class="big-map-container">
+                    <img
+                      src="assets/maps/big-map.webp"
+                      alt="Portfolio game map with navigation points"
+                      width="187"
+                      height="187"
+                      loading="lazy" />
+                    <div class="vhs-rgb-layer red"></div>
+                    <div class="vhs-rgb-layer blue"></div>
+                    <div class="vhs-scanline-bar"></div>
+                    <div class="vhs-tracking-line">
+                      <div class="line-red"></div>
+                      <div class="line-white"></div>
+                      <div class="line-green"></div>
+                    </div>
+                    <div id="big-map-markers" class="big-map-markers"></div>
+                    <div id="big-map-player" class="big-map-player pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="projects" class="modal" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div style="max-width: 1000px">
+                  <div class="text-content">
+                    <div class="frame pixel-corners pixel-corners--wrapper space-down">
+                      <div class="top-texts">
+                        <h2 class="big-title">Projects</h2>
+                        <p class="text-block">
+                          Here is a selection of my personal projects. Besides these experiments, I have a lot of work
+                          on other large projects under my belt. You can find my full career path and a more detailed
+                          overview in the Resume (CV) section.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="frame pixel-corners space-down">
+                      <article class="portfolio-item">
+                        <h3>eUTxO.org</h3>
+                        <p class="subtitle">Visual Blockchain Explorer for Cardano</p>
+                        <p class="text-block">
+                          I have a general interest in crypto and blockchain technologies and this is one of my most
+                          complex side projects. It's a visual tool for Cardano cryptocurrency to help you understand
+                          the UTXO model and the content of Cardano blocks.
+                        </p>
+                        <ul class="tech-used">
+                          <li>Serverless Node.js</li>
+                          <li>Google Firestore DB</li>
+                          <li>BlockFrost API</li>
+                          <li>PhaserJS</li>
+                          <li>Tailwind CSS</li>
+                        </ul>
+                        <a href="https://eutxo.org" target="_blank" class="nes-btn is-bordered visit-btn">Visit</a>
+                      </article>
+                    </div>
+                    <div class="frame pixel-corners space-down">
+                      <article class="portfolio-item pixel-corners--wrapper">
+                        <h3>Angular.sk</h3>
+                        <p class="subtitle">Free online course for Angular 2+</p>
+                        <p class="text-block">
+                          Angular.sk is my side project. I created a series of instructional videos for beginners who
+                          want to learn working with Angular 2+.
+                        </p>
+                        <a href="https://angular.sk" target="_blank" class="nes-btn is-bordered visit-btn">Visit</a>
+                      </article>
+                    </div>
+                    <div class="frame pixel-corners space-down">
+                      <article class="portfolio-item pixel-corners--wrapper">
+                        <h3>Peter Oravec portfolio v1</h3>
+                        <p class="subtitle">100% human-coded, no AI</p>
+                        <p class="text-block">
+                          The first version of this pixel art portfolio, which I programmed entirely by myself without
+                          any help from artificial intelligence. Every line of code, every sprite and every mechanic is
+                          purely my work. The current version you are on right now is its successor.
+                        </p>
+                        <ul class="tech-used">
+                          <li>Angular</li>
+                          <li>PhaserJS</li>
+                          <li>Tiled</li>
+                        </ul>
+                        <a href="https://old.peteroravec.com" target="_blank" class="nes-btn is-bordered visit-btn">
+                          Visit
+                        </a>
+                      </article>
+                    </div>
+                    <div class="text-center up-btn">
+                      <button type="button" aria-label="Scroll to top" class="nes-btn is-primary is-centered">
+                        <span>Up</span>
+                        <span
+                          style="display: inline-block; transform: rotateZ(90deg); font-size: 16px; margin: 0 0 0 10px">
+                          &lt;
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="under-hood" class="modal" style="visibility: hidden">
+          <section>
+            <div class="frame-wrp">
+              <div class="frame-wrp-inner">
+                <button aria-label="Close" class="nes-btn is-error close-btn-position">×</button>
+                <div class="frame pixel-corners under-hood-modal" style="max-width: 1000px">
+                  <div class="under-hood-header">
+                    <h2 class="under-hood-title">Under the Hood</h2>
+                    <p class="under-hood-title2">How does this portfolio work?</p>
+                  </div>
+                  <div class="under-hood-layout">
+                    <nav class="under-hood-nav">
+                      <button type="button" class="under-hood-nav-item active">Architecture</button>
+                      <button type="button" class="under-hood-nav-item">Phaser.js</button>
+                      <button type="button" class="under-hood-nav-item">Chunk System</button>
+                      <button type="button" class="under-hood-nav-item">NPC System</button>
+                      <button type="button" class="under-hood-nav-item">Tiled Editor</button>
+                      <button type="button" class="under-hood-nav-item">Optimization</button>
+                    </nav>
+                    <div class="under-hood-content">
+                      <div class="under-hood-section">
+                        <h3>Architecture</h3>
+                        <p>
+                          This portfolio is built on Angular 19 and Phaser.js 3 game framework. Angular serves as the
+                          "shell" – it handles routing, modals, the translation system (i18n) and DOM communication.
+                          Inside, the Phaser scene runs in HTML5 Canvas via WebGL renderer, handling map rendering, the
+                          player, NPCs and all visual effects.
+                        </p>
+                        <p>
+                          The application is divided into multiple layers: the game scene, entity classes (Player, NPC,
+                          Monster), Angular components for UI overlay (menus, modals, minimap), Web Workers for heavy
+                          computations (pathfinding, smoke effects) and services for communication between the Angular
+                          and Phaser worlds.
+                        </p>
+                        <p>
+                          An interesting aspect is that Angular and Phaser live side by side – Angular renders an HTML
+                          layer above the canvas element, so modals, menus and text are regular DOM, while the game
+                          underneath runs in a GPU-accelerated WebGL context. Communication between them happens through
+                          shared Angular services and global callback functions.
+                        </p>
+                      </div>
+                      <div class="under-hood-section" hidden="">
+                        <h3>Phaser.js</h3>
+                        <p>
+                          At the heart of this portfolio is
+                          <a href="https://phaser.io" target="_blank" rel="noopener noreferrer">Phaser.js 3</a>
+                          – an open-source game framework for HTML5 games used by thousands of developers worldwide.
+                          Phaser can render via WebGL and Canvas 2D, handles physics, animations, sprite sheets, tile
+                          maps, audio and input from keyboard, mouse and touch – all in the browser without plugins.
+                        </p>
+                        <p>
+                          In this project, Phaser manages the entire game loop – 60 times per second it updates player
+                          and NPC positions, evaluates map collisions, renders tile map layers, manages the camera and
+                          animates hundreds of sprites. Thanks to the WebGL renderer, it's hardware-accelerated and runs
+                          smoothly even on mobile devices.
+                        </p>
+                        <p>
+                          Phaser was chosen for its mature tile map support (the foundation of the pixel art world),
+                          built-in camera system with smooth scrolling, rich animation engine and active community. The
+                          framework is modular – I only use what I need, and the rest (physics, particles) is handled by
+                          custom implementations optimized for this specific project.
+                        </p>
+                      </div>
+                      <div class="under-hood-section" hidden="">
+                        <h3>Chunk System</h3>
+                        <p>
+                          The game map contains thousands of tiles (16×16 pixels), which would mean enormous memory
+                          consumption if loaded all at once. That's why the map is divided into small chunks – square
+                          blocks that are dynamically loaded and released based on the player's position.
+                        </p>
+                        <p>
+                          The Chunk Manager tracks the camera position and calculates which chunks should be visible.
+                          When the player moves to a new area, chunks out of range are destroyed (including their tile
+                          layers and collision data) and new ones are created. This way, only the player's surroundings
+                          are kept in memory, dramatically reducing RAM consumption.
+                        </p>
+                        <p>
+                          After every map edit in the Tiled editor, a build script is executed that cuts the map into
+                          individual chunk files, cleans up unused tilesets and optimizes data for fast runtime loading.
+                        </p>
+                      </div>
+                      <div class="under-hood-section" hidden="">
+                        <h3>NPC System</h3>
+                        <p>
+                          NPC characters have their own viewport culling – when they leave the visible camera area,
+                          their sprite is completely destroyed (including wheels, brake lights and blinkers for cars).
+                          When they return to the field of view, they're recreated with full state. This saves hundreds
+                          of GPU draw calls.
+                        </p>
+                        <p>
+                          Pathfinding runs in a Web Worker using the EasyStar.js library. NPC routes are pre-calculated,
+                          so the worker doesn't need to compute paths in real-time and the main thread stays unblocked.
+                          Each NPC has defined waypoints and behaves according to its type – some walk, others drive
+                          cars with functional blinkers and brake lights.
+                        </p>
+                        <p>
+                          Special NPC types include ghosts, dancers, monsters and crowds of people. The Crowd Manager
+                          controls groups of NPCs that appear and disappear based on map areas. Cars have a complete
+                          visual system – 4 independent wheels, brake lights with glow effect and a blinker system that
+                          activates before and after each turn.
+                        </p>
+                      </div>
+                      <div class="under-hood-section" hidden="">
+                        <h3>Tiled Editor</h3>
+                        <p>
+                          The entire game map is designed in Tiled – an open-source editor for creating tile-based maps.
+                          The map consists of multiple layers: terrain, buildings, decorations, collision layer and
+                          object layers for NPC routes, markers and zones.
+                        </p>
+                        <p>
+                          Tiled saves the map in TMX format (XML). After every edit, a custom build pipeline processes
+                          the TMX file – cuts the map into chunks, extracts collision data, cleans unused tiles from
+                          tilesets and generates optimized JSON files for runtime.
+                        </p>
+                        <p>
+                          Object layers in Tiled are used to define game elements: NPC spawn points, their routes
+                          (series of waypoints), darkness zones, content marker positions and crowd management areas.
+                          This way, a designer can visually place game elements directly in the editor without needing
+                          to modify code.
+                        </p>
+                      </div>
+                      <div class="under-hood-section" hidden="">
+                        <h3>Optimization</h3>
+                        <p>
+                          Performance is a priority at every level. Chunk loading ensures only the player's surroundings
+                          are in memory. NPC viewport culling destroys and creates sprites based on visibility.
+                          Pathfinding runs in a separate Web Worker, so the game stays smooth even on weaker mobile
+                          devices.
+                        </p>
+                        <p>
+                          Assets are loaded lazily – textures, sounds and sprite sheets are downloaded only when needed,
+                          not at application startup. Images use the modern WebP format with PNG fallback. Fonts have
+                          pre-generated fallback metrics to prevent layout shifts during loading.
+                        </p>
+                        <p>
+                          The entire website is optimized for mobile devices – touch controls via virtual joystick,
+                          responsive UI layer, dynamic viewport (100dvh for correct height on iOS) and efficient
+                          rendering. On desktop, Phaser uses WebGL for hardware acceleration, while on weaker devices it
+                          automatically switches to Canvas 2D renderer.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+      <div class="landscape-overlay">
+        <img src="assets/images/ui/rotate-device.svg" alt="" width="80" height="80" loading="lazy" />
+        <span>Rotate your device</span>
+      </div>
+    </app-root>
+    <!-- Phaser loaded separately - after app-root so LOADING is visible during download -->
+    <script src="assets/js/phaser.min.js" fetchpriority="low"></script>
+    <link rel="modulepreload" href="chunk-RA2FASQA.js" />
+    <link rel="modulepreload" href="chunk-JI7HG47Y.js" />
+    <script src="polyfills-A7F7OIKC.js" type="module"></script>
+    <script src="main-RV3Z53H4.js" type="module"></script>
+  
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="2c8039d0-dfe1-49fd-9a84-4bfb401b49d6" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiMmM4MDM5ZDAtZGZlMS00OWZkLTlhODQtNGJmYjQwMWI0OWQ2IiwiYWNjb3VudF9pZCI6IjVjN2JjNjU1YWNkYmYwNjdlYWNiZTY5NiIsImRlcGxveV9pZCI6IjY5YThiNGYxYzlmYTdlMDAwODY3NGQ2MSIsImlzc3VlciI6Im5mc2VydmVyIn0.IQtvTZ0MsYG0F2E0fcJdP_ubzPPG_ugXNvDvQCn_zpM"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# 发现记录
+
+- 当前参考站：`https://peteroravec.com/`。
+- 公开发布文件可作为逆向材料；完整原始项目源码不属于爬取目标。
+- 当前已有 Phaser 实现位于 `C:\Users\inertnet\peter-oravec-clone-worktrees\m3-01-map-assets\`，不得在本任务中修改或迁移。
+- 新镜像唯一落盘位置：`sample/original-public-build/mirror/`。
+- 现有下载器 `scripts/fetch-assets.mjs` 固定使用 `https://peteroravec.com/assets`，显式清单加推测路径共尝试 86 个 URL；不能单独作为完整镜像依据。
+- 镜像路径规则：保留公开 URL 的 `/assets/` 后相对路径，例如 `/assets/maps/final_map.json` 保存为 `mirror/assets/maps/final_map.json`。
+- 第一批应先采集已知地图 JSON 入口，再从其引用解析后续资源；不按猜测路径批量下载 tileset 或 chunk。
+- 第一批 6 个地图 JSON 已于 2026-08-09 采集成功，均为 HTTP 200；镜像文件保存于 `mirror/assets/maps/`，每个文件的 URL、最终 URL、状态、类型、字节数、SHA-256、路径和时间均已写入 manifest 与 network 清单。
+- 采集脚本仅使用固定白名单；重跑时相同字节内容不会重写 mirror 文件。
+- 对已镜像地图 JSON 的独立复核确认：`final_map.json` 明确引用 `exterior.png`、`collisions-objects.png` 和 `tileset-particles.tsx`；`final_map_small.json` 明确引用 16 个 `exterior-small*.webp`、`collisions-objects.png` 和 `tileset-particles.tsx`。这些是下一批唯一可由地图文件直接确定的资源；chunk 文件名和 TSX 下游图片仍未知。
+- 第二批已请求 19 个地图直接依赖：18 个成功；`/assets/maps/exterior.png` 返回 HTTP 404，已记录而未镜像。已镜像的 `tileset-particles.tsx` 明确引用唯一下一层资源 `/assets/maps/tileset-particles.png`。
+- 原站根页 `https://peteroravec.com/` 使用 `<base href="/">`，明确引用同源 CSS `styles-DVTBSD34.css`、JS `assets/js/phaser.min.js`、`polyfills-A7F7OIKC.js`、`main-RV3Z53H4.js`、6 个 favicon，以及外部 Google Fonts CSS 与 Netlify RUM。下一步先镜像根 HTML 本身；其明确引用的资源仍需逐层白名单采集。
+- 根 HTML 已镜像。对其静态资源标签的只读解析得出 39 个同源直接引用，已有 5 个地图 JSON；剩余 34 个是精确白名单，包含根 CSS、Phaser/Angular JS bundle、favicon、页面图片、卡牌和大地图。Google Fonts、Netlify RUM、普通外链均未纳入。
+- 采集脚本当前重跑会重新请求既有白名单；作为历史镜像应改为默认不重取已成功镜像，只有显式 refresh 才能刷新，避免后续批次无意改变快照。
+- 快照保护已实施：默认保留既有成功镜像及其元数据，新增或本地缺失路径才请求；`--refresh` 才重新请求成功项。首批 HTML 静态引用清单需要复核：初次 Recon 漏掉了 HTML 头中的 Apple touch icon 与 Microsoft tile meta 资源，不能直接作为下一批白名单。
+- 已完成修正后的 HTML 资源解析：共识别 54 个同源静态资源声明，已有 5 个地图 JSON，剩余 47 个为精确白名单，包含 CSS、4 个 JS bundle、Phaser、卡牌/页面图、favicon/Apple/Microsoft 图标与大地图。外部 Google Fonts 与 Netlify RUM 仍明确排除。
+- CSS 静态解析发现 12 个尚未镜像的同源 `url(...)` 资源：卡牌 foil/pattern、sparkles、monitor、cable-handler、cables3；CSS 内 data URL 为内嵌内容，不应作为外部采集文件。
+- 第六批 CSS 依赖中 10 个成功；`card5_foil.webp` 与 `cables3.png` 均为 HTTP 404，已记录未镜像。加上既有 `exterior.png`，当前已有 3 个已确认 unavailable。快照保护还应覆盖已确认失败项，避免每个后续批次重复请求同一 404，除非使用 `--refresh`。
+- 应用 JS 静态解析发现 14 个尚未镜像的精确资源：2 个动态 import chunk、hover-tilt 脚本、4 个 Under the Hood 图片、卡牌 2/3 foil-pattern、3 个作品图和 mini-map。其余已分析的 polyfills/静态 chunk 无新增；动态 chunk 的内部依赖须在镜像后再单独分析。
+- 动态 gameplay chunk 的静态 Loader 常量解析表明存在约 140 个未镜像的地图、NPC、车辆、特效和精灵资源；Recon 报告的总数、缺失数与分类列表数量不一致，不能在未做机器化去重核验前直接据此进行大批量采集。
+- 主助手以独立正则与 manifest 复核：bundle 中有 152 个唯一 `/assets/` 字面量，其中 142 个未镜像；其中 `/assets/maps/` 是动态模板前缀而非完整资源，排除后得到 141 个精确静态 pathname。这与 Recon 的“141 未采集”结论一致，可作为下一批白名单来源。
+- 运行时 Network 与 manifest 对比得到 28 个真实未镜像同源响应：25 个 `maps/chunks/chunk0.json` 至 `chunk24.json`、2 个 UI WebP（`map-holder-mini3.webp`、`cable-handler2.webp`）可安全补采；唯一其余项是 Netlify RUM 脚本，属于分析/遥测，不纳入参考镜像。
+- 第九批已采集运行时验证的 27 项，全部 HTTP 200；当前镜像 265 个成功文件、3 个明确 404。主助手独立确认运行时记录中的 224 个同源 2xx 非 Netlify URL 均已镜像，缺失为 0；Verifier 对该集合报出 265 的计数错误，但其余文件/哈希/清单一致性检查通过。
