@@ -2,7 +2,32 @@
 
 - 当前参考站：`https://peteroravec.com/`。
 - 公开发布文件可作为逆向材料；完整原始项目源码不属于爬取目标。
-- 当前已有 Phaser 实现位于 `C:\Users\inertnet\peter-oravec-clone-worktrees\m3-01-map-assets\`，不得在本任务中修改或迁移。
+- 当前已有 Phaser 实现位于 `C:\Users\inertnet\peter-oravec-clone-worktrees\m3-01-map-assets\`，本阶段只读盘点，不修改或迁移。
+- 阶段1基线初查：该 worktree 位于旧仓库分支 `task/m3-01-map-assets`，提交 `3c27b81165056b947d1c64a9543445ed81e92a3d`，与 `origin/task/m3-01-map-assets` 同步且工作区 clean；旧仓库远程为 `Billy-cpu0366/virtual-campus-prototype`。
+- 旧仓库同时保留 main、M2碰撞、M2移动、M3地图资产和迁移实验等多个 worktree。`m3-01-map-assets` 不能仅凭名称直接视为全部历史进展的唯一集成版，必须先比较分支关系和实际差异；本阶段不会合并这些分支。
+- `m3-01-map-assets` 当前 tracked 文件185个；源码按 runtime、scenes、world、player、input、camera、ui、dev sandboxes 分层，另有地图合约、构建、冒烟、截图和审计脚本。`node_modules/` 与 `dist/` 已存在，但均未显示为 Git 修改。
+- 分支关系复核：远程集成分支最新提交为 `origin/main` 的 `aa2ab7e841ad4749bc63219d3d2e46ce50d4b193`（M3地图资产合约 PR #5）；`task/m3-01-map-assets` 的 `3c27b81` 是同一父提交 `5b04e05` 上的PR提交版本。两者完整 Git tree hash 均为 `bcfb60b0d30c42214f4a1c94526506038bc31855`，因此阶段1以 `origin/main@aa2ab7e` 作为权威集成提交，以当前 clean 的 M3 worktree作为字节等价可执行快照。
+- M2碰撞与移动分支保留了未压平的开发历史，但其最终播放器碰撞体、移动速度和八方向动画结果已进入当前集成树；它们不是需要在本阶段合并的缺失功能。M3新增的关键内容是地图资源合约脚本与粒子占位GID清理规则。
+- 旧仓库 `.planning/2026-08-01-clone-portfolio/` 是更早的 Rust/WASM 方案历史，里面的阶段状态与当前 Phaser 3 + Vite + TypeScript 实现不一致，只能作历史背景，不能作为当前代码状态源。
+- 当前运行入口由 `src/main.ts` 组合 DOM UI 与单一 `GameHandle`；runtime负责单实例替换、resize、状态与销毁；`CampusScene` 是生产组合点；world/player/input/camera为独立核心模块；DOM UI仅通过生命周期接口控制 Loading、Ready、Starting、Playing、Error。
+- 当前地图实现加载一份 `final_map_phaser.json` 与17个tileset，创建10个可见图层和隐藏walls碰撞层；它没有使用 `master.json` 或25个运行时chunk，因此尚未实现原站地图分块装载机制。地图中的动态粒子占位GID会在创建Tilemap前被清零，粒子行为明确后置。
+- 当前玩家实现包含WASD/方向键、归一化八方向输入、150速度、八方向动画、20x8脚部碰撞体、世界边界和墙体碰撞；相机提供0.1平滑跟随、世界边界与像素取整。Ready和Playing均允许移动，这是旧仓库显式决定，不应自动当作原站事实。
+- 当前UI具备加载封面、进度、Play淡出、HUD、启动错误和整页刷新Retry；没有实现标记、弹窗交互、NPC、车辆或其他gameplay features。Core Sandbox提供world/player/collision/camera四种聚焦验证视图，复用生产模块而非第二套实现。
+- `npm run smoke` 是静态合约检查：验证关键文件、加载样式、地图尺寸/tileset/碰撞标记、玩家参数、模块根目录和跨模块导入，但不启动浏览器。`scripts/m3-01-map-contract.mjs` 进一步验证地图尺寸、10个可见层、隐藏walls、17个tileset、GID范围、粒子占位和图片尺寸。阶段1仍需独立浏览器行为验证。
+- `scripts/smoke-test-result.md` 与 `scripts/b14-smoke-test.cjs` 属早期Rust/WASM/B1历史，前者记录cargo/trunk，后者仍探测`window.wasmBindings`；它们不能代表当前Phaser集成树的现状。当前有效检查以package scripts、M3地图合约和重新执行的浏览器基线为准。
+- 当前Sandbox开发页会请求未提供的 `/favicon.ico` 并得到HTTP 404；不影响地图、输入、碰撞或相机，但违反严格零网络失败基准，属于现有实现的非阻塞缺口，后续不能将其误报为全零404。
+- 阶段1命令复验全部通过：Node `v22.17.1`、npm `11.7.0`；`npm ci`、`npm run typecheck`、`npm run smoke`、`node scripts/m3-01-map-contract.mjs`、`npm run build` 均退出0。Vite构建36个模块，主JS约1495.54kB（gzip约344.82kB），触发大于500kB的chunk警告；这是当前性能/分包风险，不是构建失败。
+- 主流程浏览器复验通过：1920x1080桌面Canvas显示尺寸1920x1080、内部buffer 480x270（4x）；390x844移动视口Canvas显示尺寸390x844、内部buffer 195x422（2x）；两者均完成Ready→Play→HUD，浏览器异常0，控制台只有Phaser 3.90启动日志。
+- Sandbox浏览器复验 `STAGE1_SANDBOX_BROWSER_PASS`：camera模式玩家从(1048,300)右移到(1153,300)，相机从(1048,300)跟随到(1144,300)；collision模式从(1128,1928)向下只移动4px停在y=1932，向上可移动到y=1872；右边界玩家被世界边界限制在x=2230，相机midpoint限制在x=2000；world模式不创建玩家。浏览器异常0，唯一HTTP失败是已记录的favicon 404。
+- 执行安装、检查、构建和浏览器验证前后，旧 worktree 的 tracked 工作区均保持 clean；临时截图、JSON和测试脚本只写入系统临时目录，没有进入旧仓库或新仓库 `src/`。
+- `git ls-remote origin refs/heads/main` 返回 `aa2ab7e841ad4749bc63219d3d2e46ce50d4b193`，确认本地记录的权威集成提交与GitHub远程当前main一致，不是过期remote-tracking ref。
+- 当前24个地图层中，运行时仅创建`layer1`至`layer10`和隐藏`walls`；未创建`cars`、4个roof、4个bridge wall、3个particles和`footsteps`共13层。是否应显示或由动态系统消费仍需按原站证据逐项判断。
+- GitHub Code CI只执行`npm ci`、typecheck、静态smoke、build和git diff；未执行M3地图合约或浏览器/Sandbox验证。M3合约有效但未挂入package scripts/CI。
+- 其他现有风险：生产bundle主JS约1.5MB且无代码分割；`vite base: "/"`与绝对资源路径假定部署在站点根；`sourcemap: true`会发布source map；index仍包含Google Fonts和Peter原站SEO/外链；`getUiElements()`在Game创建前失败时不会进入现有Error UI；Loader事件监听未显式解绑；sanitizer会原地修改tilemap cache，同Game内Scene重启时无法恢复被清零GID。这些是当前代码风险，不代表都应在下一圈立即修复。
+- 全部14个旧Worktree只读状态复核发现3处dirty：主clone `C:/Users/inertnet/peter-oravec-clone` 有5个tracked修改和9个未跟踪B107/probe脚本；`b1-08`有`index.html`与`www/js/main.js`两处tracked修改；`phaser-assets-audit`只有未跟踪`.planning/mig-01-assets/`分析输出。其余11个Worktree clean。
+- 主clone的4个运行代码修改（`index.html`、`src/lib.rs`、`src/render.rs`、`www/js/main.js`）与detached快照 `30e65de`（`calibration: apply frozen B1-07 WIP`）一致；额外差异主要是扩展后的`capture-origin-p0-03.cjs`和未跟踪B107校准/探针脚本。该WIP属于Rust/WASM时代的marker gate、idle pulse、单tick循环、retry和帧校准调查，不属于当前Phaser集成树。
+- `b1-08`未提交修改是更早的Loading intro、0%进度与Play过渡实验；当前Phaser树已用`src/ui/`重新实现Loading/Ready/Play状态，不能直接合并旧JS。`phaser-assets-audit`未跟踪内容仅是资源审计计划输出；对应有效审计脚本已提交在worker历史并进入后续集成来源。
+- 非基线dirty Worktree均保持原样，未执行clean、checkout、stash、commit或merge。它们应作为历史/WIP清单保留，不能混入 `origin/main@aa2ab7e` 的已验证行为基线。
 - 新镜像唯一落盘位置：`sample/original-public-build/mirror/`。
 - 现有下载器 `scripts/fetch-assets.mjs` 固定使用 `https://peteroravec.com/assets`，显式清单加推测路径共尝试 86 个 URL；不能单独作为完整镜像依据。
 - 镜像路径规则：保留公开 URL 的 `/assets/` 后相对路径，例如 `/assets/maps/final_map.json` 保存为 `mirror/assets/maps/final_map.json`。
