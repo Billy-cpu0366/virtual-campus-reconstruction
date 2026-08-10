@@ -16,6 +16,19 @@ updated: 2026-08-10
 - `事件/`：点击 Play、进入区域、发生碰撞等运行过程。
 - `数据与约定/`：地图格式、坐标、资源命名等统一规则。
 
+## 工作稿与设计候选
+
+阶段研究可以建立两类 `draft` 文件：`system-reverse-engineering-dossier`（证据工作稿）和 `system-design-candidate`（设计候选）。它们必须声明对应 `node-id`，但使用 `main-definition: false`、不改变节点总账的工程状态，也不授权代码。
+
+候选只有在 Human 审查其事实、边界、未知项、验收标准和重构决定后，才能晋升为正式主定义。晋升时必须同时：
+
+1. 改为对应正式类型（系统使用 `system-detail`）；
+2. 设置 `main-definition: true`；
+3. 在正文标题前加入 `<a id="节点ID"></a>`；
+4. 在节点清单登记唯一主定义路径，并将工程状态更新为 `designed`；
+5. 更新证据追踪和对应验证计划；
+6. 仍需独立 Human Gate 才能授权正式 `src`。
+
 ## 节点主定义机器合同
 
 独立详细文档必须在 frontmatter 声明：
