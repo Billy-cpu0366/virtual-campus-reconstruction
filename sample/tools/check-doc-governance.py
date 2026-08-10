@@ -28,12 +28,14 @@ CAPABILITY_INDEX = DOC_ROOT / "目标与范围（01）" / "原站有哪些功能
 ORIGINAL_BASELINE = DOC_ROOT / "怎么验证与还差什么（04）" / "原站实际表现是什么（行为基准）.md"
 UNKNOWN_QUEUE = DOC_ROOT / "还不清楚什么（05）" / "还缺哪些答案（未知问题队列）.md"
 TASK_PLAN = PROJECT_ROOT / "task_plan.md"
+WORKFLOW_GUIDE = DOC_ROOT / "每轮工作怎么推进（流程速查）.md"
 VERIFICATION_REPORT = DOC_ROOT / "怎么验证与还差什么（04）" / "文档有没有对齐（治理检查报告）.md"
 
 REQUIRED_FILES = [
     PROJECT_ROOT / "AGENTS.md",
     PROJECT_ROOT / "README.md",
     TASK_PLAN,
+    WORKFLOW_GUIDE,
     DOC_ROOT / "README.md",
     FINAL_PLAN,
     OLD_PLAN,
@@ -71,6 +73,30 @@ ALLOWED_UNDERSTANDING = {"discovered", "partial", "confirmed"}
 ALLOWED_ENGINEERING = {"undesign", "designed", "implemented", "verified"}
 ALLOWED_EVIDENCE_TOKENS = {"FACT", "INFERRED", "UNKNOWN"}
 ALLOWED_SYNC_STATUS = {"updated", "verified"}
+ALLOWED_WORK_ITEM_LEVELS = {"level-1", "level-2"}
+ALLOWED_WORK_ITEM_TYPES = {
+    "investigation",
+    "design",
+    "implementation",
+    "verification",
+    "governance",
+    "defect",
+}
+ALLOWED_CURRENT_WORK_ITEM_STATUS = {
+    "awaiting-authorization",
+    "active",
+    "blocked",
+    "paused",
+}
+ALLOWED_WORK_ITEM_PHASES = {
+    "selection",
+    "investigation",
+    "design",
+    "implementation-authorization",
+    "implementation",
+    "verification",
+    "closure",
+}
 
 SOURCE_ARTIFACTS = {
     Path(r"C:\Users\inertnet\Desktop\项目讨论\luyin.txt"):
@@ -351,27 +377,144 @@ def check_frontmatter_and_decisions(result: Result) -> None:
     decision_section = ledger.split("### DEC-DOC-GOV-001 ", 1)[-1].split("## 4.", 1)[0]
     result.check("| 决策状态 | `accepted` |" in decision_section, "ledger accepted state missing")
     result.check("| 持久化状态 | `persisted`" in decision_section, "ledger persisted state missing")
+    result.check("### DEC-WORK-RELAY-001 " in ledger, "DEC-WORK-RELAY-001 ledger record missing")
+    relay_section = ledger.split("### DEC-WORK-RELAY-001 ", 1)[-1].split("### DEC-", 1)[0]
+    result.check("| 决策状态 | `accepted` |" in relay_section, "work relay decision must be accepted")
+    result.check("| 持久化状态 | `persisted`" in relay_section, "work relay decision must be persisted")
 
 
-def check_task_state(result: Result) -> None:
+def project_ref_path(raw: str) -> Path:
+    path_part = raw.split("#", 1)[0]
+    return PROJECT_ROOT / path_part
+
+
+def decision_section(decision_id: str) -> str:
+    marker = f"### {decision_id} "
+    ledger = read_text(LEDGER)
+    if marker not in ledger:
+        return ""
+    return ledger.split(marker, 1)[1].split("\n### ", 1)[0].split("\n## 4.", 1)[0]
+
+
+def check_task_state(result: Result) -> dict[str, str]:
     values = frontmatter(TASK_PLAN)
-    valid_states = {
-        "stage-6B-human-review": ("GATE-STAGE6B", "pending-human-review"),
-        "stage-6C-first-system-reverse-engineering": ("GATE-STAGE6C", "in-progress"),
-        "sys-chunk-implementation-authorization-review": (
-            "GATE-SYS-CHUNK-IMPLEMENTATION",
-            "pending-human-implementation-authorization",
-        ),
+    required = {
+        "workflow-ref",
+        "current-work-item",
+        "work-item-level",
+        "work-item-type",
+        "work-item-status",
+        "node-refs",
+        "current-phase",
+        "current-gate",
+        "gate-status",
+        "scope-ref",
+        "exit-criteria-ref",
+        "authorization-ref",
+        "next-phase",
+        "preauthorized-next-work-item",
     }
+    for key in sorted(required):
+        result.check(values.get(key) not in {None, ""}, f"task plan field missing: {key}")
+    work_item = values.get("current-work-item", "")
+    result.check(bool(re.fullmatch(r"WI-[A-Z0-9-]+", work_item)), f"invalid work item ID: {work_item}")
+    result.check(values.get("work-item-level") in ALLOWED_WORK_ITEM_LEVELS, "invalid work item level")
+    result.check(values.get("work-item-type") in ALLOWED_WORK_ITEM_TYPES, "invalid work item type")
+    result.check(values.get("work-item-status") in ALLOWED_CURRENT_WORK_ITEM_STATUS, "invalid current work item status")
     phase = values.get("current-phase")
-    result.check(phase in valid_states, f"unknown current phase: {phase}")
-    if phase in valid_states:
-        expected_gate, expected_status = valid_states[phase]
-        result.check(values.get("current-gate") == expected_gate, "current gate does not match phase")
-        result.check(values.get("gate-status") == expected_status, "gate status does not match phase")
+    result.check(phase in ALLOWED_WORK_ITEM_PHASES, f"unknown current phase: {phase}")
+    result.check(values.get("next-phase") in ALLOWED_WORK_ITEM_PHASES, "invalid next phase")
+    result.check(values.get("current-gate", "").startswith("GATE-"), "current gate ID is invalid")
+    workflow_ref = values.get("workflow-ref", "")
+    result.check(project_ref_path(workflow_ref).resolve() == WORKFLOW_GUIDE.resolve(), "workflow-ref must target the stable guide")
+    result.check(project_ref_path(workflow_ref).exists(), "workflow-ref does not exist")
+    next_work_item = values.get("preauthorized-next-work-item", "")
+    result.check(
+        next_work_item == "none" or bool(re.fullmatch(r"WI-[A-Z0-9-]+", next_work_item)),
+        "invalid preauthorized next work item",
+    )
+    if phase == "implementation-authorization":
+        result.check(values.get("work-item-status") == "awaiting-authorization", "authorization phase must await authorization")
+        result.check(
+            values.get("gate-status") == "pending-human-implementation-authorization",
+            "implementation authorization gate status is invalid",
+        )
+        result.check(values.get("authorization-ref") == "pending", "pending authorization must not cite a decision")
+    if phase == "implementation":
+        result.check(values.get("work-item-status") == "active", "implementation phase requires an active work item")
+        result.check(values.get("gate-status") == "passed", "implementation phase requires a passed gate")
+        result.check(values.get("authorization-ref", "").startswith("DEC-"), "active implementation requires a decision reference")
     text = read_text(TASK_PLAN)
     result.check(text.count("## 当前任务：") == 1, "exactly one current task is required")
     result.check(text.count("## 当前审查包：") == 0, "stale current review-package heading remains")
+    for heading in ("## 已阻塞或暂停工作项", "## 近期候选", "## 已关闭工作项索引"):
+        result.check(heading in text, f"work item section missing: {heading}")
+    return values
+
+
+def check_work_item_contract(
+    result: Result,
+    values: dict[str, str],
+    nodes: dict[str, dict[str, str]],
+) -> None:
+    work_item = values.get("current-work-item", "")
+    node_refs = {part.strip() for part in values.get("node-refs", "").split(";") if part.strip()}
+    result.check(bool(node_refs), "current work item has no node reference")
+    for node_id in sorted(node_refs):
+        result.check(node_id in nodes, f"current work item node does not exist: {node_id}")
+    scope_path = project_ref_path(values.get("scope-ref", ""))
+    exit_path = project_ref_path(values.get("exit-criteria-ref", ""))
+    result.check(scope_path.exists(), f"work item scope reference missing: {scope_path}")
+    result.check(exit_path.exists(), f"work item exit reference missing: {exit_path}")
+    if not scope_path.exists():
+        return
+    package = frontmatter(scope_path)
+    result.check(package.get("type") == "implementation-authorization-package", "scope-ref must be an authorization package")
+    result.check(package.get("work-item-id") == work_item, "authorization package work item mismatch")
+    result.check(package.get("node-refs") == values.get("node-refs"), "authorization package node scope mismatch")
+    result.check(package.get("main-definition") == "false", "authorization package must not be a main definition")
+    status = values.get("work-item-status")
+    if status == "awaiting-authorization":
+        result.check(package.get("status") == "proposed", "awaiting work item package must be proposed")
+        result.check(package.get("implementation-authorization") == "pending", "awaiting package authorization must be pending")
+    if status == "active" and values.get("work-item-type") == "implementation":
+        result.check(package.get("status") == "approved", "active implementation package must be approved")
+        result.check(package.get("decision-status") == "accepted", "active implementation package decision must be accepted")
+        result.check(package.get("implementation-authorization") == "authorized", "active implementation package must be authorized")
+        authorization = values.get("authorization-ref", "")
+        section = decision_section(authorization)
+        result.check(bool(section), f"authorization decision missing: {authorization}")
+        result.check("| 决策状态 | `accepted` |" in section, "authorization decision is not accepted")
+        result.check(work_item in section, "authorization decision does not name current work item")
+        for node_id in sorted(node_refs):
+            result.check(node_id in section, f"authorization decision does not include node: {node_id}")
+
+
+def check_activation(result: Result, values: dict[str, str]) -> None:
+    result.check(values.get("work-item-status") == "active", "activation mode requires an active work item")
+    result.check(values.get("current-phase") == "implementation", "activation mode requires implementation phase")
+    try:
+        status = subprocess.run(
+            ["git", "-C", str(PROJECT_ROOT), "status", "--porcelain=v1", "--untracked-files=all"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        result.check(not status.stdout.strip(), "activation requires a clean worktree")
+        changed = subprocess.run(
+            ["git", "-C", str(PROJECT_ROOT), "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        formal_src = [
+            path for path in changed.stdout.splitlines()
+            if path.replace("\\", "/").startswith("src/")
+            and path.replace("\\", "/") != "src/README.md"
+        ]
+        result.check(not formal_src, f"activation commit contains formal source: {formal_src}")
+    except (OSError, subprocess.CalledProcessError) as error:
+        result.check(False, f"activation Git check failed: {error}")
 
 
 def check_node_registry(result: Result) -> dict[str, dict[str, str]]:
@@ -500,18 +643,24 @@ def check_source_artifacts(result: Result) -> None:
 
 
 def check_known_drift(result: Result) -> None:
-    quick = read_text(DOC_ROOT / "每轮工作怎么推进（流程速查）.md")
+    quick = read_text(WORKFLOW_GUIDE)
     plain = read_text(DOC_ROOT / "项目为什么这样做（通俗说明）.md")
     architecture = read_text(DOC_ROOT / "整体怎么运作（02）" / "各部分怎样配合（系统依赖）.md")
+    roadmap = read_text(DOC_ROOT / "项目走到哪一步（路线图与关卡）.md")
+    report = read_text(VERIFICATION_REPORT)
+    src_readme = read_text(PROJECT_ROOT / "src" / "README.md")
     result.check("系统全景与文档框架      🔄 正在确认" not in quick, "stale quick-guide phase remains")
     result.check("验收当前文档框架和执行约束" not in plain, "stale plain-guide next step remains")
     result.check(
         "原站地图分块是否按位置动态装载或卸载" not in architecture,
         "closed Q-MAP-001 still appears as open UNKNOWN",
     )
+    result.check("| 阶段 6B Human 审查 | 是否接受 P0 差距映射和先研究地图分块的建议 | 等待 Human |" not in roadmap, "stale stage-6B roadmap state remains")
+    result.check("| 阶段 6C | blocked |" not in report, "stale stage-6C report state remains")
+    result.check("首个系统尚未完成详细设计" not in src_readme, "stale src entry remains")
 
 
-def check_write_boundaries(result: Result) -> None:
+def check_write_boundaries(result: Result, allow_formal_src: bool) -> None:
     commands = (
         ["git", "diff", "--name-only", "-z"],
         ["git", "diff", "--cached", "--name-only", "-z"],
@@ -533,9 +682,13 @@ def check_write_boundaries(result: Result) -> None:
     except (OSError, subprocess.CalledProcessError) as error:
         result.warn(f"git boundary check unavailable: {error}")
         return
-    protected = ("sample/original-public-build/", "src/")
     for path in sorted(changed):
-        result.check(not path.startswith(protected), f"protected path changed: {path}")
+        result.check(
+            not path.startswith("sample/original-public-build/"),
+            f"protected evidence path changed: {path}",
+        )
+        if path.startswith("src/") and path != "src/README.md":
+            result.check(allow_formal_src, f"formal source changed without active authorization: {path}")
 
 
 def check_pilot(result: Result, nodes: dict[str, dict[str, str]]) -> None:
@@ -566,19 +719,27 @@ def run(mode: str) -> Result:
     if result.errors:
         return result
     check_frontmatter_and_decisions(result)
-    check_task_state(result)
+    task_values = check_task_state(result)
     check_markdown_shape(result)
     check_human_first_titles(result)
     check_links(result)
     nodes = check_node_registry(result)
+    check_work_item_contract(result, task_values, nodes)
     check_affected_files(result)
     check_source_artifacts(result)
     check_known_drift(result)
-    check_write_boundaries(result)
+    allow_formal_src = (
+        mode != "activation"
+        and task_values.get("work-item-status") == "active"
+        and task_values.get("authorization-ref", "").startswith("DEC-")
+    )
+    check_write_boundaries(result, allow_formal_src)
     if mode in {"pilot", "final-coverage"}:
         check_pilot(result, nodes)
     if mode == "final-coverage":
         check_final_coverage(result, nodes)
+    if mode == "activation":
+        check_activation(result, task_values)
     return result
 
 
@@ -586,7 +747,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--mode",
-        choices=("sync", "pilot", "final-coverage"),
+        choices=("sync", "pilot", "final-coverage", "activation"),
         default="sync",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)

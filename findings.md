@@ -57,3 +57,5 @@
 - 运行时 Network 与 manifest 对比得到 28 个真实未镜像同源响应：25 个 `maps/chunks/chunk0.json` 至 `chunk24.json`、2 个 UI WebP（`map-holder-mini3.webp`、`cable-handler2.webp`）可安全补采；唯一其余项是 Netlify RUM 脚本，属于分析/遥测，不纳入参考镜像。
 - 第九批已采集运行时验证的 27 项，全部 HTTP 200；当前镜像 265 个成功文件、3 个明确 404。主助手独立确认运行时记录中的 224 个同源 2xx 非 Netlify URL 均已镜像，缺失为 0；Verifier 对该集合报出 265 的计数错误，但其余文件/哈希/清单一致性检查通过。
 - 阶段6C SYS-CHUNK直接证据复核：master证明5×5、每块28×28、16px和行优先文件公式；Bundle证明玩家3×3与相机范围+1块边距合并为目标集合、场景和manager两层缓存、场景卸载清除Tilemap，以及Play前相机序列空闲预载。并发请求去重、取消、重试、场景销毁清理和多视口预载边界仍为 UNKNOWN。manager虽定义缓存淘汰方法，但已检查Bundle未发现调用方，不能推定其动态缓存淘汰语义。独立复核曾发现未清除图层数误记为11，已更正为13。
+- Human 已明确接受轻量任务接力方案：节点与工作项分离；只持久化正式工作项；普通工作项使用单次原子提交；正式代码、技术栈或范围扩大使用一页授权包与 Human Gate；完整 P/A 只在破坏性、真实数据、并行写入或跨仓库高风险事务中启用。
+- 首次真实试点限定为 `WI-SYS-CHUNK-CORE-001` 的 proposed 授权包与 `awaiting-authorization` 任务卡；当前只准备最小 TypeScript 测试环境和分块确定性核心，不授权正式 `src`，也不预建 Phaser 集成工作项。

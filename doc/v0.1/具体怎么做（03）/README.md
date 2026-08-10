@@ -33,6 +33,17 @@ updated: 2026-08-10
 5. 更新证据追踪和对应验证计划；
 6. 仍需独立 Human Gate 才能授权正式 `src`。
 
+## 实施授权包
+
+正式代码或全局技术栈进入 Human Gate 时，可以建立一份轻量 `implementation-authorization-package`。它不是节点主定义，必须使用 `main-definition: false`，并分别记录 `work-item-id`、节点、设计和验证引用。
+
+- `status: proposed`、`implementation-authorization: pending` 只表示审查材料存在，禁止写代码；
+- Human 接受准确范围后才改为 `approved`，并链接 accepted 授权决定；
+- 工作项还必须在 `task_plan.md` 激活并进入 clean Git 基线，正式代码才可开始；
+- 授权包完成后保留为该工作项的审计边界，不复制节点正式设计。
+
+当前首次试点：[[系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]]。
+
 ## 节点主定义机器合同
 
 独立详细文档必须在 frontmatter 声明：
