@@ -325,12 +325,19 @@ def check_frontmatter_and_decisions(result: Result) -> None:
 
 def check_task_state(result: Result) -> None:
     values = frontmatter(TASK_PLAN)
-    result.check(values.get("current-phase") == "stage-6B-human-review", "unexpected current phase")
-    result.check(values.get("current-gate") == "GATE-STAGE6B", "unexpected current gate")
-    result.check(values.get("gate-status") == "pending-human-review", "stage 6B gate must remain pending")
+    valid_states = {
+        "stage-6B-human-review": ("GATE-STAGE6B", "pending-human-review"),
+        "stage-6C-first-system-reverse-engineering": ("GATE-STAGE6C", "in-progress"),
+    }
+    phase = values.get("current-phase")
+    result.check(phase in valid_states, f"unknown current phase: {phase}")
+    if phase in valid_states:
+        expected_gate, expected_status = valid_states[phase]
+        result.check(values.get("current-gate") == expected_gate, "current gate does not match phase")
+        result.check(values.get("gate-status") == expected_status, "gate status does not match phase")
     text = read_text(TASK_PLAN)
-    result.check(text.count("## 当前任务：") == 0, "legacy duplicate current-task headings remain")
-    result.check(text.count("## 当前审查包：") == 1, "exactly one current review package is required")
+    result.check(text.count("## 当前任务：") == 1, "exactly one current task is required")
+    result.check(text.count("## 当前审查包：") == 0, "stale current review-package heading remains")
 
 
 def check_node_registry(result: Result) -> dict[str, dict[str, str]]:
