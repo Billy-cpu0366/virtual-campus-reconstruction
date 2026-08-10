@@ -134,7 +134,7 @@ updated: 2026-08-11
 | — | — | — | — | — | — |
 
 ## Next Step
-完成 `DEC-SYS-CHUNK-CORE-001` 原子激活提交并运行 activation 治理检查；确认 HEAD 含 active 状态且工作区 clean 后，开始批准范围内的 CORE 实现。
+在批准路径内建立 Node.js 22 LTS、npm、TypeScript strict 和 Vitest 最小工程；先实现 master 契约与坐标/索引纯函数，再补玩家3×3、相机+1、目标集合及成功/失败单元测试。
 
 ## 错误记录
 | 错误 | 处理 |
