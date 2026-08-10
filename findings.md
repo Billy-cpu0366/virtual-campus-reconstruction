@@ -1,6 +1,6 @@
 # 发现记录
 
-> 本文件是非权威调查日志。当前规则、Human 决定、当前 Gate 和正式工程结论分别以 `AGENTS.md`、`doc/v0.1/需求来源与决策台账.md`、`task_plan.md` 和对应权威文档为准。
+> 本文件是非权威调查日志。当前规则、Human 决定、当前 Gate 和正式工程结论分别以 `AGENTS.md`、`doc/v0.1/谁确认过什么（来源与决策记录）.md`、`task_plan.md` 和对应权威文档为准。
 
 - 当前参考站：`https://peteroravec.com/`。
 - 公开发布文件可作为逆向材料；完整原始项目源码不属于爬取目标。
@@ -35,7 +35,7 @@
 - 运行时Network中master在导航响应后约5.194秒返回；首个chunk约5.800秒、最后一个约6.730秒，chunk响应自身跨度约0.930秒，master到最后一个chunk约1.536秒。它们均发生在采集脚本14秒Ready检查和Play点击之前；四方向输入期间没有新增chunk URL。
 - 公开Bundle直接证明动态机制：分块管理器用`chunk{y * nbChunksHorizontal + x}.json`按坐标请求并缓存；GameScene按玩家周围3×3集合与相机可见范围加1块边距加载缺失chunk，并卸载目标集合外chunk。
 - Q-MAP-003已关闭：`startCameraSequence`在Play前调用`preloadChunksForCameraSequence`，该方法汇总六个相机位置、视口和2块边距，通过空闲回调预载；有效坐标覆盖当前5×5地图，因此解释首屏全部25个请求。首屏预载和玩家阶段动态装卸是两个连续阶段，不矛盾。
-- Human 已接受 `DEC-DOC-GOV-001` 并授权第二轮文档治理同步；决定、来源、替代关系和 Gate 历史的正式记录已迁入 `doc/v0.1/需求来源与决策台账.md`。本条只记录过程，不替代台账。
+- Human 已接受 `DEC-DOC-GOV-001` 并授权第二轮文档治理同步；决定、来源、替代关系和 Gate 历史的正式记录已迁入 `doc/v0.1/谁确认过什么（来源与决策记录）.md`。本条只记录过程，不替代台账。
 - 新镜像唯一落盘位置：`sample/original-public-build/mirror/`。
 - 现有下载器 `scripts/fetch-assets.mjs` 固定使用 `https://peteroravec.com/assets`，显式清单加推测路径共尝试 86 个 URL；不能单独作为完整镜像依据。
 - 镜像路径规则：保留公开 URL 的 `/assets/` 后相对路径，例如 `/assets/maps/final_map.json` 保存为 `mirror/assets/maps/final_map.json`。
