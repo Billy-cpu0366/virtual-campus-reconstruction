@@ -4,7 +4,7 @@ type: system-verification-plan
 status: approved
 version: v0.1
 node-id: SYS-CHUNK
-design-ref: ../03-详细设计/系统/SYS-CHUNK-地图分块.md#SYS-CHUNK
+design-ref: ../具体怎么做（03）/系统/SYS-CHUNK-地图分块.md#SYS-CHUNK
 implementation-status: not-authorized
 updated: 2026-08-10
 ---

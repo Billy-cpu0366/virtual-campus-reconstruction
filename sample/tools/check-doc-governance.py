@@ -23,12 +23,12 @@ DOC_ROOT = PROJECT_ROOT / "doc" / "v0.1"
 FINAL_PLAN = DOC_ROOT / "文档治理补漏方案-最终方案.md"
 OLD_PLAN = DOC_ROOT / "文档完整拆解与复用治理方案.md"
 LEDGER = DOC_ROOT / "需求来源与决策台账.md"
-NODE_REGISTRY = DOC_ROOT / "02-概要设计" / "节点清单.md"
-CAPABILITY_INDEX = DOC_ROOT / "01-需求分析" / "原站能力与行为清单.md"
-ORIGINAL_BASELINE = DOC_ROOT / "04-验证" / "原站行为基准.md"
-UNKNOWN_QUEUE = DOC_ROOT / "05-逆向计划" / "未知问题队列.md"
+NODE_REGISTRY = DOC_ROOT / "整体怎么运作（02）" / "节点清单.md"
+CAPABILITY_INDEX = DOC_ROOT / "目标与范围（01）" / "原站能力与行为清单.md"
+ORIGINAL_BASELINE = DOC_ROOT / "怎么验证与还差什么（04）" / "原站行为基准.md"
+UNKNOWN_QUEUE = DOC_ROOT / "还不清楚什么（05）" / "未知问题队列.md"
 TASK_PLAN = PROJECT_ROOT / "task_plan.md"
-VERIFICATION_REPORT = DOC_ROOT / "04-验证" / "文档治理一致性报告.md"
+VERIFICATION_REPORT = DOC_ROOT / "怎么验证与还差什么（04）" / "文档治理一致性报告.md"
 
 REQUIRED_FILES = [
     PROJECT_ROOT / "AGENTS.md",
@@ -478,7 +478,7 @@ def check_source_artifacts(result: Result) -> None:
 def check_known_drift(result: Result) -> None:
     quick = read_text(DOC_ROOT / "重构逆向工程-工作流程速查.md")
     plain = read_text(DOC_ROOT / "重构逆向工程方案-通俗精简版.md")
-    architecture = read_text(DOC_ROOT / "02-概要设计" / "系统依赖与技术架构.md")
+    architecture = read_text(DOC_ROOT / "整体怎么运作（02）" / "系统依赖与技术架构.md")
     result.check("系统全景与文档框架      🔄 正在确认" not in quick, "stale quick-guide phase remains")
     result.check("验收当前文档框架和执行约束" not in plain, "stale plain-guide next step remains")
     result.check(
