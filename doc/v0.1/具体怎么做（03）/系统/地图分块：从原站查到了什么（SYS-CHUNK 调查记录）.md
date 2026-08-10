@@ -1,5 +1,5 @@
 ---
-title: SYS-CHUNK 地图分块逆向工作稿
+title: 地图分块：从原站查到了什么（SYS-CHUNK 调查记录）
 type: system-reverse-engineering-dossier
 status: draft
 version: v0.1
@@ -21,7 +21,9 @@ main-definition: false
 updated: 2026-08-10
 ---
 
-# SYS-CHUNK 地图分块：逆向工作稿
+# 地图分块：从原站查到了什么（SYS-CHUNK 调查记录）
+
+> **一句话：这是调查过程记录：哪些地图分块行为有证据，哪些仍不确定；它不是最终做法。**
 
 > 这是阶段6C的证据工作稿，不是 `SYS-CHUNK` 的唯一详细主定义，不代表工程状态已经 `designed`，也不授权写正式 `src`。它只把可定位的原站事实、必要推断和尚未解决的问题整理出来，供后续设计和 Human 审查使用。
 
@@ -40,7 +42,7 @@ updated: 2026-08-10
 | 数据请求与缓存 | `sample/original-public-build/mirror/chunk-RA2FASQA.js`，搜索 `loadMasterData`、`getChunkFileName`、`loadChunk` | master 请求、文件名公式、manager 缓存 |
 | 场景目标集合与写入 | `sample/original-public-build/mirror/chunk-WMFY56ZM.js`，搜索 `getVisibleChunksForCamera`、`loadChunk(e,t)`、`unloadChunk(e,t)` | 玩家/相机目标集合、场景缓存、清除 Tilemap |
 | 相机预载 | 同上，搜索 `startCameraSequence`、`preloadChunksForCameraSequence`、`requestIdleCallback` | Play 前预载过程 |
-| 运行时结果 | [[../../怎么验证与还差什么（04）/原站行为基准]] 的 `BASE-MAP-001` 行、[[../../整体怎么运作（02）/P0系统对照与推进顺序#3. 地图分块新增事实]] | 25个 chunk 请求与首屏时序 |
+| 运行时结果 | [[../../怎么验证与还差什么（04）/原站实际表现是什么（行为基准）]] 的 `BASE-MAP-001` 行、[[../../整体怎么运作（02）/先做什么（P0系统对照与顺序）#3. 地图分块新增事实]] | 25个 chunk 请求与首屏时序 |
 
 公开 Bundle 只能证明发布后的运行机制，不能证明原始 TypeScript 文件边界或命名。
 
@@ -124,7 +126,7 @@ master 成功后，场景启动相机展示；约 `100ms` 后调用 `preloadChun
 2. 说明两个 Map 的状态所有权、转换条件和销毁责任；
 3. 写清加载、失败、重复、取消、卸载和场景退出的路径；
 4. 明确分块与世界、图层、资源加载、玩家、相机之间的输入/输出边界；
-5. 从 [[../../怎么验证与还差什么（04）/原站行为基准]] 拆出可重复的分块验收步骤和失败判定；
+5. 从 [[../../怎么验证与还差什么（04）/原站实际表现是什么（行为基准）]] 拆出可重复的分块验收步骤和失败判定；
 6. 由 Human 审查后，才将节点主定义登记为正式设计并讨论是否授权实现。
 
 ## 7. 当前结论

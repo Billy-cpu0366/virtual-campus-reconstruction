@@ -1,15 +1,17 @@
 ---
-title: SYS-CHUNK 验证计划
+title: 地图分块：怎样验证做对了（SYS-CHUNK 验证计划）
 type: system-verification-plan
 status: approved
 version: v0.1
 node-id: SYS-CHUNK
-design-ref: ../具体怎么做（03）/系统/SYS-CHUNK-地图分块.md#SYS-CHUNK
+design-ref: ../具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
 implementation-status: not-authorized
 updated: 2026-08-10
 ---
 
-# SYS-CHUNK 验证计划
+# 地图分块：怎样验证做对了（SYS-CHUNK 验证计划）
+
+> **一句话：这份文件列出未来怎样检查地图分块是否按设计工作、是否接近原站。**
 
 > 本计划验证已接受的地图分块详细设计，不代表已有代码实现。原站事实基准、重构设计验证和实现结果必须分别记录。
 
@@ -17,7 +19,7 @@ updated: 2026-08-10
 
 | ID | 要证明什么 | 证据 |
 |---|---|---|
-| BASE-MAP-001 | 游戏世界请求 `chunk0.json` 至 `chunk24.json` | [[原站行为基准]]、运行时 Network、镜像文件 |
+| BASE-MAP-001 | 游戏世界请求 `chunk0.json` 至 `chunk24.json` | [[原站实际表现是什么（行为基准）]]、运行时 Network、镜像文件 |
 | CHUNK-DATA-001 | master 是5×5、每块28×28，索引为 `y*5+x` | master、25块重组与 `final_map.json` 对照 |
 | CHUNK-RUNTIME-001 | 玩家3×3与相机范围+1块边距共同形成玩家阶段目标集合 | Bundle 搜索锚点 `getCurrentChunkIndex`、`getVisibleChunksForCamera` |
 | CHUNK-PRELOAD-001 | Play 前相机序列预载与玩家阶段动态目标集合是两段不同流程 | `startCameraSequence`、`preloadChunksForCameraSequence`、Network 时序 |
@@ -40,7 +42,7 @@ updated: 2026-08-10
 - 在正式 `src` 上运行数据重组、目标集合、单一在途、失败和销毁测试；
 - 对至少一个桌面视口复核首屏预载和玩家阶段装卸；
 - 报告多视口、完整图层语义、原站取消/重试策略仍未验证的范围；
-- 回写 [[证据追踪与实现差距]]，但不得为迁就代码修改原站事实基准。
+- 回写 [[原站和旧版本差在哪（证据与差距）]]，但不得为迁就代码修改原站事实基准。
 
 ## 4. 当前状态
 

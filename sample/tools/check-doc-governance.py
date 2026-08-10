@@ -20,15 +20,15 @@ from typing import Iterable
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DOC_ROOT = PROJECT_ROOT / "doc" / "v0.1"
 
-FINAL_PLAN = DOC_ROOT / "文档治理补漏方案-最终方案.md"
-OLD_PLAN = DOC_ROOT / "文档完整拆解与复用治理方案.md"
-LEDGER = DOC_ROOT / "需求来源与决策台账.md"
-NODE_REGISTRY = DOC_ROOT / "整体怎么运作（02）" / "节点清单.md"
-CAPABILITY_INDEX = DOC_ROOT / "目标与范围（01）" / "原站能力与行为清单.md"
-ORIGINAL_BASELINE = DOC_ROOT / "怎么验证与还差什么（04）" / "原站行为基准.md"
-UNKNOWN_QUEUE = DOC_ROOT / "还不清楚什么（05）" / "未知问题队列.md"
+FINAL_PLAN = DOC_ROOT / "文档怎样保持清楚（治理方案）.md"
+OLD_PLAN = DOC_ROOT / "旧版文档治理方案（已被替代）.md"
+LEDGER = DOC_ROOT / "谁确认过什么（来源与决策记录）.md"
+NODE_REGISTRY = DOC_ROOT / "整体怎么运作（02）" / "功能总目录（节点清单）.md"
+CAPABILITY_INDEX = DOC_ROOT / "目标与范围（01）" / "原站有哪些功能（能力清单）.md"
+ORIGINAL_BASELINE = DOC_ROOT / "怎么验证与还差什么（04）" / "原站实际表现是什么（行为基准）.md"
+UNKNOWN_QUEUE = DOC_ROOT / "还不清楚什么（05）" / "还缺哪些答案（未知问题队列）.md"
 TASK_PLAN = PROJECT_ROOT / "task_plan.md"
-VERIFICATION_REPORT = DOC_ROOT / "怎么验证与还差什么（04）" / "文档治理一致性报告.md"
+VERIFICATION_REPORT = DOC_ROOT / "怎么验证与还差什么（04）" / "文档有没有对齐（治理检查报告）.md"
 
 REQUIRED_FILES = [
     PROJECT_ROOT / "AGENTS.md",
@@ -261,6 +261,30 @@ def check_markdown_shape(result: Result) -> None:
             )
 
 
+def check_human_first_titles(result: Result) -> None:
+    for path in doc_files():
+        if path.name == "README.md":
+            continue
+        text = read_text(path)
+        title = re.search(r"(?m)^title: (.+)$", text)
+        heading = re.search(r"(?m)^# (.+)$", text)
+        result.check(
+            title is not None and title.group(1) == path.stem,
+            f"frontmatter title must match human-first file name: "
+            f"{path.relative_to(PROJECT_ROOT)}",
+        )
+        result.check(
+            heading is not None and heading.group(1) == path.stem,
+            f"H1 must match human-first file name: "
+            f"{path.relative_to(PROJECT_ROOT)}",
+        )
+        result.check(
+            "> **一句话：" in text,
+            f"missing human summary after title: "
+            f"{path.relative_to(PROJECT_ROOT)}",
+        )
+
+
 def collect_table_ids(path: Path, first_header: str, prefix: str) -> set[str]:
     table = find_table(path, first_header)
     if not table:
@@ -476,9 +500,9 @@ def check_source_artifacts(result: Result) -> None:
 
 
 def check_known_drift(result: Result) -> None:
-    quick = read_text(DOC_ROOT / "重构逆向工程-工作流程速查.md")
-    plain = read_text(DOC_ROOT / "重构逆向工程方案-通俗精简版.md")
-    architecture = read_text(DOC_ROOT / "整体怎么运作（02）" / "系统依赖与技术架构.md")
+    quick = read_text(DOC_ROOT / "每轮工作怎么推进（流程速查）.md")
+    plain = read_text(DOC_ROOT / "项目为什么这样做（通俗说明）.md")
+    architecture = read_text(DOC_ROOT / "整体怎么运作（02）" / "各部分怎样配合（系统依赖）.md")
     result.check("系统全景与文档框架      🔄 正在确认" not in quick, "stale quick-guide phase remains")
     result.check("验收当前文档框架和执行约束" not in plain, "stale plain-guide next step remains")
     result.check(
@@ -544,6 +568,7 @@ def run(mode: str) -> Result:
     check_frontmatter_and_decisions(result)
     check_task_state(result)
     check_markdown_shape(result)
+    check_human_first_titles(result)
     check_links(result)
     nodes = check_node_registry(result)
     check_affected_files(result)

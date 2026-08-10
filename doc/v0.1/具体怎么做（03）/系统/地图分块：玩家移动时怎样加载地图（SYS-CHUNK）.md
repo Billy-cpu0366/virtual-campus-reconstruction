@@ -1,5 +1,5 @@
 ---
-title: SYS-CHUNK 地图分块
+title: 地图分块：玩家移动时怎样加载地图（SYS-CHUNK）
 type: system-detail
 status: approved
 decision-status: accepted
@@ -25,9 +25,11 @@ updated: 2026-08-10
 
 <a id="SYS-CHUNK"></a>
 
-# SYS-CHUNK 地图分块
+# 地图分块：玩家移动时怎样加载地图（SYS-CHUNK）
 
-> 本文是 `SYS-CHUNK` 的唯一详细主定义。FACT 描述原站公开证据；`DECISION` 描述 Human 已接受的重构设计。本文完成详细设计，不授权正式 `src`；代码实施仍须通过 `GATE-SYS-CHUNK-IMPLEMENTATION`。证据调查过程保留在 [[SYS-CHUNK-地图分块-逆向工作稿]]。
+> **一句话：这是地图分块的正式做法：玩家移动时该加载什么、清掉什么，以及出错时怎么办。**
+
+> 本文是 `SYS-CHUNK` 的唯一详细主定义。FACT 描述原站公开证据；`DECISION` 描述 Human 已接受的重构设计。本文完成详细设计，不授权正式 `src`；代码实施仍须通过 `GATE-SYS-CHUNK-IMPLEMENTATION`。证据调查过程保留在 [[地图分块：从原站查到了什么（SYS-CHUNK 调查记录）]]。
 
 ## 1. 说人话解释
 
@@ -55,7 +57,7 @@ updated: 2026-08-10
 - 场景卸载会清除已定位图层的对应 Tilemap 区域；
 - 原站公开产物显示数据缓存与场景显示状态不是同一层；manager 虽定义淘汰方法，但当前发布 Bundle 未定位外部调用入口，不能断言其缓存永远不淘汰。
 
-可定位证据见 [[SYS-CHUNK-地图分块-逆向工作稿#2. 证据定位]]。
+可定位证据见 [[地图分块：从原站查到了什么（SYS-CHUNK 调查记录）#2. 证据定位]]。
 
 ## 4. 职责边界
 
