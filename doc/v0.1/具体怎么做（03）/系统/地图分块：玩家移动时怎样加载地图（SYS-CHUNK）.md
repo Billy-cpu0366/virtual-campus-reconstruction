@@ -19,8 +19,9 @@ source-refs:
 decision-refs:
   - DEC-STAGE6B-001
   - DEC-SYS-CHUNK-001
+  - DEC-SYS-CHUNK-CORE-001
 main-definition: true
-updated: 2026-08-10
+updated: 2026-08-11
 ---
 
 <a id="SYS-CHUNK"></a>
@@ -29,7 +30,7 @@ updated: 2026-08-10
 
 > **一句话：这是地图分块的正式做法：玩家移动时该加载什么、清掉什么，以及出错时怎么办。**
 
-> 本文是 `SYS-CHUNK` 的唯一详细主定义。FACT 描述原站公开证据；`DECISION` 描述 Human 已接受的重构设计。本文完成详细设计，不授权正式 `src`；代码实施仍须通过 `GATE-SYS-CHUNK-IMPLEMENTATION`。证据调查过程保留在 [[地图分块：从原站查到了什么（SYS-CHUNK 调查记录）]]。
+> 本文是 `SYS-CHUNK` 的唯一详细主定义。FACT 描述原站公开证据；`DECISION` 描述 Human 已接受的重构设计。`GATE-SYS-CHUNK-IMPLEMENTATION` 已授权并验证确定性 CORE 子集；Phaser、网络、缓存、渲染和完整生命周期仍未授权。证据调查过程保留在 [[地图分块：从原站查到了什么（SYS-CHUNK 调查记录）]]。
 
 ## 1. 说人话解释
 
@@ -179,7 +180,20 @@ WorldRenderer 写入对应 Tilemap 区域，登记已渲染
 
 当前只有地图分块这一项真实场景，状态为：**未发现**。本候选没有申请提取任何通用加载器、坐标系统或缓存框架。
 
-## 12. Human 已接受的设计决定
+## 12. CORE 实现与验证结果
+
+`DEC-SYS-CHUNK-CORE-001` 授权的确定性子集已在提交 `f04568f953821e8cc56c33a694171ddab759051f` 实现：
+
+- `src/chunk/contract.ts`：校验公开 `master.json` 的关键契约并导出规范化几何信息；
+- `src/chunk/coordinates.ts`：行优先索引、文件名、索引反解和世界坐标边界换算；
+- `src/chunk/targets.ts`：玩家3×3、相机 scroll/zoom +1块边距和确定性去重并集；
+- `tests/chunk/*.test.ts`：真实镜像 master、边界、成功和失败路径共26项单元测试。
+
+结果基线通过 TypeScript strict typecheck、3文件26项单元测试、npm官方源审计0漏洞、治理 sync 835项和 pilot 840项检查；lightweight-verifier 最终只读复核 PASS，无 blocking/high/medium/low 缺陷。
+
+本轮没有实现请求、缓存、重试、取消、销毁、Tilemap 写入/清除或 Phaser 集成，因此 `SYS-CHUNK` 节点继续保持 `designed`，不能标记为完整 `implemented`。复用观察再次检查为“未发现”，没有提取通用坐标库或加载器。
+
+## 13. Human 已接受的设计决定
 
 Human 已通过阶段6C，并接受以下决定：
 

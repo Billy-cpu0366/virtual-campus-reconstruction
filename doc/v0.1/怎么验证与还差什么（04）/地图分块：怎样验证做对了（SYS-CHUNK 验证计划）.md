@@ -5,7 +5,7 @@ status: approved
 version: v0.1
 node-id: SYS-CHUNK
 design-ref: ../具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
-implementation-status: authorized-core-only
+implementation-status: core-verified-closure-blocked
 updated: 2026-08-11
 ---
 
@@ -44,9 +44,25 @@ updated: 2026-08-11
 - 报告多视口、完整图层语义、原站取消/重试策略仍未验证的范围；
 - 回写 [[原站和旧版本差在哪（证据与差距）]]，但不得为迁就代码修改原站事实基准。
 
-## 4. 当前状态
+## 4. CORE 实现结果
+
+| 检查 | 结果 |
+|---|---|
+| 结果提交 | `f04568f953821e8cc56c33a694171ddab759051f` |
+| TypeScript strict | `npm run typecheck` PASS |
+| 单元测试 | `npm test` PASS；3文件、26项测试 |
+| 供应链审计 | npm 官方 registry：0 vulnerabilities |
+| 治理边界 | sync 835项、pilot 840项 PASS；只修改授权路径 |
+| 独立复核 | lightweight-verifier PASS；无 blocking/high/medium/low 缺陷 |
+| 证据和旧项目 | `sample/` 零修改；旧 Phaser 零修改 |
+
+本轮覆盖 master 关键契约、行优先索引、世界边界、玩家3×3、相机 scroll/zoom +1块边距和目标集合并集。`CHUNK-DESIGN-003` 至 `006` 的请求、渲染、失败/销毁和图层覆盖仍属于后续 Phaser 集成范围，不计入本轮通过结论。
+
+## 5. 当前状态
 
 - 详细设计：已通过 Human 审查；
-- 正式实现：CORE 子集已由 `DEC-SYS-CHUNK-CORE-001` 授权，尚未实现；Phaser 集成未授权；
+- 正式实现：CORE 子集已实现并验证；Phaser 集成未授权；
+- 节点状态：继续保持 `designed`，因为完整请求、缓存、渲染和生命周期尚未实现；
+- 工作项状态：验证完成，关闭被“无预授权下一工作项时缺少空闲状态合同”阻塞；
 - 原站未知：并发实现细节、取消、重试、销毁清理和13个图层语义仍保留；
 - 复用观察：未发现。

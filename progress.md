@@ -45,4 +45,8 @@
 - Human 已通过 SYS-CHUNK 详细设计：正式主定义为`具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK`，节点升为`designed`，验证计划已建立；当前转入`GATE-SYS-CHUNK-IMPLEMENTATION`等待独立 Human 实现授权，未写正式`src`。
 - Human 已明确接受 `DEC-WORK-RELAY-001` 轻量任务接力方案并授权开始首次真实试点同步。本轮建立稳定接力规则、`WI-SYS-CHUNK-CORE-001` 的 awaiting-authorization 任务卡和 proposed 一页授权包，修正已知动态状态漂移并扩展最小检查器；本轮不授权正式 `src`、技术栈或 Phaser 集成。
 - 轻量接力首次同步 dirty transaction preflight 已通过：Python内存编译 PASS，治理 `sync` 854项 PASS，`pilot` 859项 PASS，`git diff --check` PASS；正式源码和证据快照零修改，`src/README.md` 只修正未授权状态说明。lightweight-verifier只读复核PASS，无blocking/high/medium缺陷。
-- 轻量接力制度和 proposed CORE 试点已提交为 `e9c0c552673a5d32d7dea860978c4a214ebac12a`；提交后工作区 clean，`sync` 840项、`pilot` 845项结构复验PASS。当前达到 `sync-verified`，真实 `pilot-verified` 仍等待 CORE 授权、激活、实现和关闭。
+- 轻量接力制度和 proposed CORE 试点已提交为 `e9c0c552673a5d32d7dea860978c4a214ebac12a`；提交后工作区 clean，`sync` 840项、`pilot` 845项结构复验PASS。当前达到 `sync-verified`。
+- Human 已通过 `DEC-SYS-CHUNK-CORE-001`；原子激活提交为 `981a21e54ed7cd3eac3ec3bc5b26ce12bd8086a4`，激活验证落盘提交为 `cb7ae0e9d386aee9045c8ebddab057a263d483cd`，activation/sync/pilot 均在 clean 基线上通过。
+- CORE 实现提交为 `f04568f953821e8cc56c33a694171ddab759051f`：TypeScript strict PASS，3文件26项测试 PASS，npm 官方源 audit 0漏洞，治理 sync 835项/pilot 840项 PASS；最终 lightweight-verifier PASS，无 blocking/high/medium/low 缺陷，`sample/` 和旧 Phaser 零修改。
+- 已完成设计、授权包、验证计划、证据与差距、工程入口和过程记录回写；节点继续保持 `designed`，因为 Phaser、请求、缓存、渲染和生命周期未实现。
+- 工作项关闭被 `BLK-WI-CLOSURE-001` 阻塞：无预授权下一项时，协议和检查器缺少合法的“无当前工作项/等待选择”状态。等待 Human 接受最小空闲合同或直接选择下一工作项。

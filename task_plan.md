@@ -3,15 +3,15 @@ workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
 current-work-item: WI-SYS-CHUNK-CORE-001
 work-item-level: level-2
 work-item-type: implementation
-work-item-status: active
+work-item-status: blocked
 node-refs: SYS-CHUNK
-current-phase: implementation
+current-phase: closure
 current-gate: GATE-SYS-CHUNK-IMPLEMENTATION
 gate-status: passed
 scope-ref: doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）.md
 exit-criteria-ref: doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）.md
 authorization-ref: DEC-SYS-CHUNK-CORE-001
-next-phase: verification
+next-phase: closure
 preauthorized-next-work-item: none
 updated: 2026-08-11
 ---
@@ -102,12 +102,14 @@ updated: 2026-08-11
 | 工作项 | `WI-SYS-CHUNK-CORE-001` |
 | 节点 | `SYS-CHUNK` |
 | 级别与类型 | `level-2 / implementation` |
-| 当前状态 | `active` |
-| 当前阶段 | `implementation` |
+| 当前状态 | `blocked`（实现与验证已通过，只阻塞在关闭后的空闲状态表达） |
+| 当前阶段 | `closure` |
 | 授权包 | [[doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]] |
 | 退出标准 | [[doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] |
 | 授权决定 | `DEC-SYS-CHUNK-CORE-001`（accepted） |
 | 预授权下一工作项 | `none` |
+| 结果提交 | `f04568f953821e8cc56c33a694171ddab759051f` |
+| 验证结果 | typecheck PASS；3文件26项测试 PASS；独立复核 PASS |
 
 目标：使用已接受的最小 TypeScript 测试环境，实现并验证 SYS-CHUNK 确定性 CORE。
 
@@ -117,7 +119,9 @@ updated: 2026-08-11
 
 ## 已阻塞或暂停工作项
 
-暂无。出现阻塞时必须记录 blocker ID、恢复条件、当前允许动作及是否需要新工作项。
+| Blocker ID | 工作项 | 阻塞点 | 恢复条件 | 当前允许动作 | 是否需要新工作项 |
+|---|---|---|---|---|---|
+| BLK-WI-CLOSURE-001 | WI-SYS-CHUNK-CORE-001 | 当前协议和检查器要求永远存在一个非终态 `current-work-item`，但本工作项已满足完成标准且没有预授权下一工作项；直接写 completed 会违反机器合同，继续写 active 会造成状态漂移 | Human 接受“显式空闲/无当前工作项”最小合同，或直接选择并授权下一工作项 | 只允许维护验证结果和提出两个关闭选项；禁止继续扩大 CORE 或建立 Phaser 代码 | 若选择空闲合同，只需治理修正；若选择下一实现，必须另建 level-2 WI 和 Human Gate |
 
 ## 近期候选
 
@@ -134,7 +138,7 @@ updated: 2026-08-11
 | — | — | — | — | — | — |
 
 ## Next Step
-在批准路径内建立 Node.js 22 LTS、npm、TypeScript strict 和 Vitest 最小工程；先实现 master 契约与坐标/索引纯函数，再补玩家3×3、相机+1、目标集合及成功/失败单元测试。
+等待 Human 处理 `BLK-WI-CLOSURE-001`：推荐接受最小“无当前工作项/等待选择”状态合同，关闭 CORE 并保持 Phaser 未授权；或者直接选择下一工作项，再原子关闭并接力。未决定前不继续写代码。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -152,4 +156,6 @@ updated: 2026-08-11
 | 首次进程清理脚本的匹配条件包含仓库路径和端口文本，误匹配并终止了执行清理的shell自身 | 改为根据netstat确认唯一残留监听PID 16460后精确终止；8197/8198均无监听，旧worktree保持clean。 |
 | 阶段6B按旧工程路径读取 `assets/maps/master.json` 返回ENOENT | 不猜测路径；从manifest和镜像磁盘定位真实公开URL路径后再读取。 |
 | 打印minified Bundle片段时Windows控制台GBK无法编码符号并中止 | 设置Python UTF-8输出并只截取目标类片段，不重复原命令。 |
+| CORE 实现时首次打印 chunk manager Bundle 片段再次触发 GBK 编码错误 | 未重复原命令；立即设置 `PYTHONIOENCODING=utf-8` 后成功定位公式。 |
+| `npm audit` 使用本机 npmmirror 返回未实现的审计端点 | 改用 `--registry=https://registry.npmjs.org`；审计完成，0 vulnerabilities。 |
 | 轻量接力首次同步检查发现3个旧章节锚点和1个合并路径表格单元无法解析 | 将3处链接同步到历史授权新标题；把 `findings.md` 与 `progress.md` 拆为两行受影响文件；删除 `py_compile` 生成的未跟踪缓存，后续用内存编译检查。 |

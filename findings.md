@@ -58,4 +58,7 @@
 - 第九批已采集运行时验证的 27 项，全部 HTTP 200；当前镜像 265 个成功文件、3 个明确 404。主助手独立确认运行时记录中的 224 个同源 2xx 非 Netlify URL 均已镜像，缺失为 0；Verifier 对该集合报出 265 的计数错误，但其余文件/哈希/清单一致性检查通过。
 - 阶段6C SYS-CHUNK直接证据复核：master证明5×5、每块28×28、16px和行优先文件公式；Bundle证明玩家3×3与相机范围+1块边距合并为目标集合、场景和manager两层缓存、场景卸载清除Tilemap，以及Play前相机序列空闲预载。并发请求去重、取消、重试、场景销毁清理和多视口预载边界仍为 UNKNOWN。manager虽定义缓存淘汰方法，但已检查Bundle未发现调用方，不能推定其动态缓存淘汰语义。独立复核曾发现未清除图层数误记为11，已更正为13。
 - Human 已明确接受轻量任务接力方案：节点与工作项分离；只持久化正式工作项；普通工作项使用单次原子提交；正式代码、技术栈或范围扩大使用一页授权包与 Human Gate；完整 P/A 只在破坏性、真实数据、并行写入或跨仓库高风险事务中启用。
-- 首次真实试点限定为 `WI-SYS-CHUNK-CORE-001` 的 proposed 授权包与 `awaiting-authorization` 任务卡；当前只准备最小 TypeScript 测试环境和分块确定性核心，不授权正式 `src`，也不预建 Phaser 集成工作项。
+- 首次真实试点最初限定为 `WI-SYS-CHUNK-CORE-001` 的 proposed 授权包与 `awaiting-authorization` 任务卡；后续 Human 已通过 `DEC-SYS-CHUNK-CORE-001` 授权最小 TypeScript 环境和确定性 CORE，Phaser 集成继续未授权。
+- CORE 结果提交 `f04568f953821e8cc56c33a694171ddab759051f` 只包含批准路径：master 契约、行优先索引/文件名、世界坐标边界、玩家3×3、相机 scroll/zoom +1块边距和确定性目标并集；3文件26项测试、strict typecheck、官方源 audit 0漏洞、治理 sync/pilot 和最终独立复核均通过。
+- 独立复核发现的唯一 LOW 是内部坐标合并 helper 被公开导出；Main 已在结果提交前改为模块私有，并用重叠玩家/相机目标测试继续证明去重和稳定顺序。没有出现第二个独立复用场景，复用观察保持“未发现”。
+- 首次真实接力暴露治理缺口：工作项完成且 `preauthorized-next-work-item: none` 时，当前机器合同不允许 `current-work-item: none` 或终态 `completed`，导致无法同时做到“关闭索引已完成”和“当前状态不漂移”。已登记 `BLK-WI-CLOSURE-001`，禁止通过伪造 active/completed 状态绕过。
