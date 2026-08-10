@@ -56,3 +56,4 @@
 - 主助手以独立正则与 manifest 复核：bundle 中有 152 个唯一 `/assets/` 字面量，其中 142 个未镜像；其中 `/assets/maps/` 是动态模板前缀而非完整资源，排除后得到 141 个精确静态 pathname。这与 Recon 的“141 未采集”结论一致，可作为下一批白名单来源。
 - 运行时 Network 与 manifest 对比得到 28 个真实未镜像同源响应：25 个 `maps/chunks/chunk0.json` 至 `chunk24.json`、2 个 UI WebP（`map-holder-mini3.webp`、`cable-handler2.webp`）可安全补采；唯一其余项是 Netlify RUM 脚本，属于分析/遥测，不纳入参考镜像。
 - 第九批已采集运行时验证的 27 项，全部 HTTP 200；当前镜像 265 个成功文件、3 个明确 404。主助手独立确认运行时记录中的 224 个同源 2xx 非 Netlify URL 均已镜像，缺失为 0；Verifier 对该集合报出 265 的计数错误，但其余文件/哈希/清单一致性检查通过。
+- 阶段6C SYS-CHUNK直接证据复核：master证明5×5、每块28×28、16px和行优先文件公式；Bundle证明玩家3×3与相机范围+1块边距合并为目标集合、场景和manager两层缓存、场景卸载清除Tilemap，以及Play前相机序列空闲预载。并发请求去重、取消、重试、场景销毁清理和多视口预载边界仍为 UNKNOWN。manager虽定义缓存淘汰方法，但已检查Bundle未发现调用方，不能推定其动态缓存淘汰语义。独立复核曾发现未清除图层数误记为11，已更正为13。
