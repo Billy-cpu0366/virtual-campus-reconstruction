@@ -1,9 +1,9 @@
 ---
 title: 地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）
 type: implementation-authorization-package
-status: proposed
-decision-status: proposed
-implementation-authorization: pending
+status: approved
+decision-status: accepted
+implementation-authorization: authorized
 version: v0.1
 work-item-id: WI-SYS-CHUNK-CORE-001
 work-item-level: level-2
@@ -11,15 +11,15 @@ node-refs: SYS-CHUNK
 design-ref: doc/v0.1/具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
 verification-ref: doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）.md
 main-definition: false
-updated: 2026-08-10
+updated: 2026-08-11
 ---
 
 # 地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）
 
-> **一句话：这是一份待 Human 审查的一页授权材料，只提议建立最小正式工程基础和地图分块确定性核心，不代表已经允许写代码。**
+> **一句话：Human 已批准最小正式工程基础和地图分块确定性核心；只有原子激活提交通过治理检查并进入 clean Git 基线后才能开始实现。**
 
-> [!warning]
-> 当前状态为 `proposed / pending`。提交本文件只为提供审查材料，不授权正式 `src`；只有本包改为 `approved`、对应 Human 决定为 `accepted`、`task_plan.md` 激活本工作项且激活状态已提交到 clean Git 基线后，才能开始实现。
+> [!important]
+> 当前授权为 `approved / accepted / authorized`，决定引用为 `DEC-SYS-CHUNK-CORE-001`。授权只覆盖本文第3节和指定路径；Phaser、Vite、网络、缓存、渲染和旧项目修改继续未授权。
 
 ## 1. 这轮为什么现在做
 
@@ -34,7 +34,7 @@ updated: 2026-08-10
 | 工作项 | `WI-SYS-CHUNK-CORE-001` |
 | 类型与级别 | `implementation / level-2` |
 | 涉及节点 | `SYS-CHUNK` |
-| 当前状态 | `awaiting-authorization` |
+| 当前状态 | `active`（以原子激活提交进入 clean Git 基线后生效） |
 | 正式主定义 | [[地图分块：玩家移动时怎样加载地图（SYS-CHUNK）#SYS-CHUNK]] |
 | 退出标准 | [[../../怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）#2. 重构设计验收]] 中与本轮范围对应的确定性检查 |
 
@@ -50,7 +50,7 @@ updated: 2026-08-10
 - Vitest 单元测试；
 - 最小的 `typecheck` 和 `test` 命令。
 
-这是待 Human 接受的工程提案，不是当前有效技术栈决定。接受后应建立独立工程决定并同步到稳定工程入口。
+Human 已通过 `DEC-SYS-CHUNK-CORE-001` 接受这组最小工具链；它只服务当前 CORE，不自动授权 Phaser、Vite 或后续完整工程栈。
 
 ### 3.2 SYS-CHUNK 确定性核心
 
@@ -63,7 +63,7 @@ updated: 2026-08-10
 
 ### 3.3 允许建立或修改的路径
 
-Human 接受前下列路径仍不得创建；接受后只允许在本工作项范围内使用：
+原子激活进入 clean Git 基线后，只允许在本工作项范围内使用：
 
 ```text
 package.json
@@ -91,7 +91,7 @@ tests/chunk/*.test.ts
 
 本工作项只有同时满足以下条件才能关闭：
 
-1. Human 已接受本包及准确范围，并建立可定位的授权决定；
+1. Human 已接受本包及准确范围，授权决定为 `DEC-SYS-CHUNK-CORE-001`；
 2. 类型检查和全部单元测试在 clean 结果基线上通过；
 3. master、行优先索引、边界裁剪、玩家3×3、相机+1及集合并集均有成功与失败用例；
 4. 实际文件未超出授权路径，`sample/` 与旧 Phaser 项目没有修改；
@@ -109,10 +109,12 @@ tests/chunk/*.test.ts
 | 控制方式 | 只实现当前证据支持的字段；明确 tile/world/chunk 单位；代码保留在 `chunk` 领域内，不抽取通用模块 |
 | 回退方式 | 全部改动位于新正式工程且由 Git 跟踪；不触碰旧项目，可整体回退本工作项提交 |
 
-## 7. 需要 Human 决定
+## 7. Human 决定
 
-1. 是否接受 Node.js 22 LTS、npm、TypeScript strict 和 Vitest 作为当前 CORE 所需的最小工具链；
-2. 是否接受第3节范围并授权 `WI-SYS-CHUNK-CORE-001`；
-3. 是否保持 Phaser 集成未授权。默认答案是“保持未授权，CORE 完成后再审”。
+Human 于 2026-08-11 明确接受：
 
-Human 未明确回答前，本包保持 `proposed`，当前工作项保持 `awaiting-authorization`，正式代码继续禁止。
+1. Node.js 22 LTS、npm、TypeScript strict 和 Vitest 作为当前 CORE 的最小工具链；
+2. 第3节准确范围，并授权 `WI-SYS-CHUNK-CORE-001`；
+3. Phaser 集成继续未授权，CORE 完成后另行审查。
+
+决定引用：`DEC-SYS-CHUNK-CORE-001`。本包不允许通过实现细节扩大范围。

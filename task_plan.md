@@ -3,17 +3,17 @@ workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
 current-work-item: WI-SYS-CHUNK-CORE-001
 work-item-level: level-2
 work-item-type: implementation
-work-item-status: awaiting-authorization
+work-item-status: active
 node-refs: SYS-CHUNK
-current-phase: implementation-authorization
+current-phase: implementation
 current-gate: GATE-SYS-CHUNK-IMPLEMENTATION
-gate-status: pending-human-implementation-authorization
+gate-status: passed
 scope-ref: doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）.md
 exit-criteria-ref: doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）.md
-authorization-ref: pending
-next-phase: implementation
+authorization-ref: DEC-SYS-CHUNK-CORE-001
+next-phase: verification
 preauthorized-next-work-item: none
-updated: 2026-08-10
+updated: 2026-08-11
 ---
 
 # 原站逆向重构计划
@@ -25,7 +25,7 @@ updated: 2026-08-10
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 当前工作项只建立实施审查材料和任务接力试点；未获独立实现授权前不建立正式 `src`，不修改现有 Phaser 项目。
+- 当前工作项已获 CORE 独立实现授权；只允许在批准路径中建立确定性纯逻辑和测试，不修改现有 Phaser 项目。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -47,7 +47,7 @@ updated: 2026-08-10
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
 | 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
 | 轻量任务接力制度 | 已通过 | 建立 WI、proposed 授权包和最小检查器 | 把内部小步骤全部升级为 Gate 或完整 P/A | 以 CORE 工作项完成首次真实试点 |
-| SYS-CHUNK CORE 实现授权审查 | 待 Human 明确授权 | 审查最小工具链、纯逻辑 CORE 范围、退出标准和成本 | 写入正式 `src`、修改旧 Phaser、接入 Phaser/Vite、扩大为通用框架 | Human 明确接受授权包后完成一次原子激活提交 |
+| SYS-CHUNK CORE 实现授权审查 | 已通过 | 在原子激活提交和 clean 基线后实现批准的纯逻辑 CORE 与测试 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 完成类型检查、单元测试、文档回写和工作项关闭 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -95,25 +95,25 @@ updated: 2026-08-10
 
 完成标准：SYS-CHUNK 的原站事实、推断、未知项、边界、生命周期、失败路径和验收方式可定位且可审查；相关节点从 `undesign` 进入 `designed` 只能在 Human 审查该详细设计后发生；本阶段不写正式源码。
 
-## 当前任务：WI-SYS-CHUNK-CORE-001 实现授权审查
+## 当前任务：WI-SYS-CHUNK-CORE-001 CORE 实现
 
 | 字段 | 当前值 |
 |---|---|
 | 工作项 | `WI-SYS-CHUNK-CORE-001` |
 | 节点 | `SYS-CHUNK` |
 | 级别与类型 | `level-2 / implementation` |
-| 当前状态 | `awaiting-authorization` |
-| 当前阶段 | `implementation-authorization` |
+| 当前状态 | `active` |
+| 当前阶段 | `implementation` |
 | 授权包 | [[doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]] |
 | 退出标准 | [[doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] |
-| 授权决定 | `pending` |
+| 授权决定 | `DEC-SYS-CHUNK-CORE-001`（accepted） |
 | 预授权下一工作项 | `none` |
 
-目标：在不写正式 `src` 的前提下，让 Human 审查最小 TypeScript 测试环境和 SYS-CHUNK 确定性 CORE 的准确范围，并单独决定是否授权。
+目标：使用已接受的最小 TypeScript 测试环境，实现并验证 SYS-CHUNK 确定性 CORE。
 
-当前提案只包含 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合单元测试；不包含 Phaser、Vite、网络请求、缓存、重试、Tilemap 或浏览器集成。
+授权范围只包含 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合单元测试；不包含 Phaser、Vite、网络请求、缓存、重试、Tilemap 或浏览器集成。
 
-通过标准：Human 明确接受授权包中的工具链和准确范围；随后同步 accepted 授权决定、工程入口和任务状态，形成一次原子激活提交并确认工作区 clean。完成这些条件前禁止正式代码。
+通过标准：原子激活提交和治理检查通过；批准路径内的实现完成；类型检查和全部单元测试通过；成功与失败用例覆盖授权范围；`sample/` 和旧 Phaser 零修改；结果提交、文档回写和关闭索引可定位。
 
 ## 已阻塞或暂停工作项
 
@@ -134,7 +134,7 @@ updated: 2026-08-10
 | — | — | — | — | — | — |
 
 ## Next Step
-等待 Human 审查 [[doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]] 中的最小工具链、CORE 范围和 Phaser 保持未授权三项；未获明确授权不写正式 `src`。
+完成 `DEC-SYS-CHUNK-CORE-001` 原子激活提交并运行 activation 治理检查；确认 HEAD 含 active 状态且工作区 clean 后，开始批准范围内的 CORE 实现。
 
 ## 错误记录
 | 错误 | 处理 |

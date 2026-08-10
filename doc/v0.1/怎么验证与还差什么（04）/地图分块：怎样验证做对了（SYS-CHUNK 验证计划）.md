@@ -5,8 +5,8 @@ status: approved
 version: v0.1
 node-id: SYS-CHUNK
 design-ref: ../具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
-implementation-status: not-authorized
-updated: 2026-08-10
+implementation-status: authorized-core-only
+updated: 2026-08-11
 ---
 
 # 地图分块：怎样验证做对了（SYS-CHUNK 验证计划）
@@ -37,7 +37,7 @@ updated: 2026-08-10
 
 ## 3. 实现后附加验证
 
-只有 `GATE-SYS-CHUNK-IMPLEMENTATION` 明确通过后才执行：
+`GATE-SYS-CHUNK-IMPLEMENTATION` 已通过；当前先执行 `DEC-SYS-CHUNK-CORE-001` 授权的确定性 CORE 子集：
 
 - 在正式 `src` 上运行数据重组、目标集合、单一在途、失败和销毁测试；
 - 对至少一个桌面视口复核首屏预载和玩家阶段装卸；
@@ -47,6 +47,6 @@ updated: 2026-08-10
 ## 4. 当前状态
 
 - 详细设计：已通过 Human 审查；
-- 正式实现：未授权；
+- 正式实现：CORE 子集已由 `DEC-SYS-CHUNK-CORE-001` 授权，尚未实现；Phaser 集成未授权；
 - 原站未知：并发实现细节、取消、重试、销毁清理和13个图层语义仍保留；
 - 复用观察：未发现。
