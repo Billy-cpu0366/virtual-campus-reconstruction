@@ -44,4 +44,5 @@
 - 已提交`6a397a0`形成`地图分块：玩家移动时怎样加载地图（SYS-CHUNK）-详细设计候选.md`：状态所有权、重复请求、失败、取消、销毁和验收均为 `DECISION（proposed）`，待 Human 审查；节点仍为`undesign`，正式实现仍未授权。
 - Human 已通过 SYS-CHUNK 详细设计：正式主定义为`具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK`，节点升为`designed`，验证计划已建立；当前转入`GATE-SYS-CHUNK-IMPLEMENTATION`等待独立 Human 实现授权，未写正式`src`。
 - Human 已明确接受 `DEC-WORK-RELAY-001` 轻量任务接力方案并授权开始首次真实试点同步。本轮建立稳定接力规则、`WI-SYS-CHUNK-CORE-001` 的 awaiting-authorization 任务卡和 proposed 一页授权包，修正已知动态状态漂移并扩展最小检查器；本轮不授权正式 `src`、技术栈或 Phaser 集成。
-- 轻量接力首次同步 dirty transaction preflight 已通过：Python内存编译 PASS，治理 `sync` 854项 PASS，`pilot` 859项 PASS，`git diff --check` PASS；正式源码和证据快照零修改，`src/README.md` 只修正未授权状态说明。lightweight-verifier只读复核PASS，无blocking/high/medium缺陷；clean基线仍待提交后复验。
+- 轻量接力首次同步 dirty transaction preflight 已通过：Python内存编译 PASS，治理 `sync` 854项 PASS，`pilot` 859项 PASS，`git diff --check` PASS；正式源码和证据快照零修改，`src/README.md` 只修正未授权状态说明。lightweight-verifier只读复核PASS，无blocking/high/medium缺陷。
+- 轻量接力制度和 proposed CORE 试点已提交为 `e9c0c552673a5d32d7dea860978c4a214ebac12a`；提交后工作区 clean，`sync` 840项、`pilot` 845项结构复验PASS。当前达到 `sync-verified`，真实 `pilot-verified` 仍等待 CORE 授权、激活、实现和关闭。
