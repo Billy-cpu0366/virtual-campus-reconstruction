@@ -28,6 +28,11 @@
 - 主clone的4个运行代码修改（`index.html`、`src/lib.rs`、`src/render.rs`、`www/js/main.js`）与detached快照 `30e65de`（`calibration: apply frozen B1-07 WIP`）一致；额外差异主要是扩展后的`capture-origin-p0-03.cjs`和未跟踪B107校准/探针脚本。该WIP属于Rust/WASM时代的marker gate、idle pulse、单tick循环、retry和帧校准调查，不属于当前Phaser集成树。
 - `b1-08`未提交修改是更早的Loading intro、0%进度与Play过渡实验；当前Phaser树已用`src/ui/`重新实现Loading/Ready/Play状态，不能直接合并旧JS。`phaser-assets-audit`未跟踪内容仅是资源审计计划输出；对应有效审计脚本已提交在worker历史并进入后续集成来源。
 - 非基线dirty Worktree均保持原样，未执行clean、checkout、stash、commit或merge。它们应作为历史/WIP清单保留，不能混入 `origin/main@aa2ab7e` 的已验证行为基线。
+- 阶段6B地图分块证据：`master.json`真实路径是`assets/maps/chunks/master.json`，定义28×28 tile分块、5×5网格、原图140×140和3个tileset；25个chunk均为28×28、24层、相同tileset。
+- 将chunk按`index = y * 5 + x`逐层拼接后，24个图层与`final_map.json`的140×140数据逐格完全一致，错位数0；按列优先拼接则24层全部不匹配。Q-MAP-002的数据关系已经由文件直接证明。
+- 运行时Network中master在导航响应后约5.194秒返回；首个chunk约5.800秒、最后一个约6.730秒，chunk响应自身跨度约0.930秒，master到最后一个chunk约1.536秒。它们均发生在采集脚本14秒Ready检查和Play点击之前；四方向输入期间没有新增chunk URL。
+- 公开Bundle直接证明动态机制：分块管理器用`chunk{y * nbChunksHorizontal + x}.json`按坐标请求并缓存；GameScene按玩家周围3×3集合与相机可见范围加1块边距加载缺失chunk，并卸载目标集合外chunk。
+- Q-MAP-003已关闭：`startCameraSequence`在Play前调用`preloadChunksForCameraSequence`，该方法汇总六个相机位置、视口和2块边距，通过空闲回调预载；有效坐标覆盖当前5×5地图，因此解释首屏全部25个请求。首屏预载和玩家阶段动态装卸是两个连续阶段，不矛盾。
 - 新镜像唯一落盘位置：`sample/original-public-build/mirror/`。
 - 现有下载器 `scripts/fetch-assets.mjs` 固定使用 `https://peteroravec.com/assets`，显式清单加推测路径共尝试 86 个 URL；不能单独作为完整镜像依据。
 - 镜像路径规则：保留公开 URL 的 `/assets/` 后相对路径，例如 `/assets/maps/final_map.json` 保存为 `mirror/assets/maps/final_map.json`。
