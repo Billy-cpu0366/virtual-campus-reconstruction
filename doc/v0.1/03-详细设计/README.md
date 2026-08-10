@@ -1,8 +1,8 @@
 ---
 title: 详细设计
 status: approved
-version: v0.1
-updated: 2026-08-09
+version: v0.2
+updated: 2026-08-10
 ---
 
 # 03-详细设计
@@ -16,6 +16,34 @@ updated: 2026-08-09
 - `事件/`：点击 Play、进入区域、发生碰撞等运行过程。
 - `数据与约定/`：地图格式、坐标、资源命名等统一规则。
 
+## 节点主定义机器合同
+
+独立详细文档必须在 frontmatter 声明：
+
+```yaml
+node-id: SYS-EXAMPLE
+node-type: 系统
+parent-ref: GRP-WORLD
+scope-disposition: in-scope
+understanding-status: partial
+engineering-status: designed
+source-refs:
+  - CAP-EXAMPLE-001
+decision-refs:
+  - DEC-DOC-GOV-001
+main-definition: true
+```
+
+正文标题前必须建立与节点 ID 相同的稳定锚点：
+
+```html
+<a id="SYS-EXAMPLE"></a>
+```
+
+如果一个简单子节点的主定义保留在父文档章节中，该章节同样使用唯一节点 ID 锚点，节点总账记录 `相对路径#节点ID`。一个节点只能有一个 `main-definition: true` 或一个登记的主定义章节。
+
+节点总账是节点状态的唯一所有者。详细文档可以复制当前状态用于检查，但状态变化必须先更新 [[../02-概要设计/节点清单]]，再同步主定义文档。
+
 ## 节点晋升条件
 
 节点同时满足以下条件，才创建独立详细文档：
@@ -25,9 +53,10 @@ updated: 2026-08-09
 3. 能初步说明负责什么、不负责什么；
 4. 当前或近期复刻需要研究；
 5. 已列出关键未知项；
-6. 独立文档比继续留在节点清单更清楚。
+6. 独立文档比继续留在节点清单更清楚；
+7. 对应 Human Gate 允许开始该节点的正式详细设计。
 
-不满足条件的节点继续保留在 [[../02-概要设计/节点清单]] 或 [[../05-逆向计划/未知问题队列]]。
+不满足条件的节点继续保留在 [[../02-概要设计/节点清单]]、候选关注点去向表或 [[../05-逆向计划/未知问题队列]]。创建文档不等于允许实现；代码仍需独立 Human Gate。
 
 ## 复用观察规则
 

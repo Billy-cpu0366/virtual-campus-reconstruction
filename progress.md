@@ -1,5 +1,7 @@
 # 进度记录
 
+> 本文件是非权威执行历史。当前阶段和当前 Human Gate 只以 `task_plan.md` 为准；Human 决策和 Gate 历史只以 `doc/v0.1/需求来源与决策台账.md` 为准。
+
 - 已建立原 `samples/`（现为 `sample/`）目录骨架、空清单模板与分析占位文档。
 - 已启动公开发布文件参考包建立任务；尚未下载任何原站文件。
 - 已启用 Mode A 子 agent：新增 `recon`、`lightweight-worker`、`lightweight-verifier`，均使用官方 `openai-codex/gpt-5.6-terra:medium`。
@@ -35,4 +37,6 @@
 - 阶段6B已完成P0初步对照并新增`02-概要设计/P0系统对照与推进顺序.md`：建议先详细逆向地图分块，再推进世界/图层、分块所需加载、玩家/输入/移动和相机。
 - 地图分块结构化复核已证明：5×5个28×28 chunk按`index=y*5+x`重组后，24层与`final_map.json`逐格完全一致；Bundle证明按玩家邻域与相机范围动态加载和卸载。Q-MAP-001、Q-MAP-002已关闭。
 - Q-MAP-003已关闭：Play前相机序列通过`preloadChunksForCameraSequence`覆盖当前5×5地图并空闲预载全部25块；进入玩家阶段后再按玩家邻域和相机范围动态装卸。Network时间口径已修正为chunk自身跨度约0.930秒、master至最后chunk约1.536秒。
-- 阶段6B最终独立复核PASS：P0系统对照、25块重组、Bundle动态装卸、三项未知关闭和PROPOSED边界均可重复验证，sample/src零修改。阶段6B已完成并等待Human审查，阶段6C和正式详细设计尚未开始。
+- 阶段6B最终独立复核PASS：P0系统对照、25块重组、Bundle动态装卸、三项未知关闭和DECISION/proposed边界均可重复验证，sample/src零修改。阶段6B已完成并等待Human审查，阶段6C和正式详细设计尚未开始。
+- 已将阶段6B审查包单独提交为`4b87ac742acf1bd1bb86273f5da855b18a4bdb5a`；提交只保存待审材料，不代表Human Gate通过。
+- Human 已授权执行 `DEC-DOC-GOV-001` 第二轮权威同步；当前只修改治理文档、模板、状态检查和验证记录，不推进阶段6B/6C，不修改旧Phaser或正式`src`。

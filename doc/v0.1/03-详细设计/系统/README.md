@@ -1,8 +1,8 @@
 ---
 title: 系统详细设计模板
 status: approved
-version: v0.1
-updated: 2026-08-09
+version: v0.2
+updated: 2026-08-10
 ---
 
 # 系统详细设计
@@ -12,12 +12,32 @@ updated: 2026-08-09
 ## 文件命名
 
 ```text
-SYS-领域-编号-系统名称.md
+<节点ID>-<系统名称>.md
 ```
 
 ## 统一模板
 
 ```markdown
+---
+title: 系统名称
+type: system-detail
+status: draft
+version: v0.1
+node-id: SYS-EXAMPLE
+node-type: 系统
+parent-ref: GRP-WORLD
+scope-disposition: in-scope
+understanding-status: partial
+engineering-status: designed
+source-refs:
+  - CAP-EXAMPLE-001
+decision-refs:
+  - DEC-EXAMPLE-001
+main-definition: true
+---
+
+<a id="SYS-EXAMPLE"></a>
+
 # 系统名称
 
 ## 1. 说人话解释
@@ -79,4 +99,4 @@ SYS-领域-编号-系统名称.md
 
 ## 拆分规则
 
-子能力先写在所属系统文档中；只有被多个系统实际使用或自身明显复杂时，才拆为独立文档。
+子能力先写在所属系统文档中；只有被多个系统实际使用或自身明显复杂时，才拆为独立文档。新增子节点时必须先登记节点 ID、父级、范围、来源和唯一主定义；不得只创建文件而不更新节点总账。

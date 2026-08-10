@@ -1,8 +1,8 @@
 ---
 title: 事件详细设计模板
 status: approved
-version: v0.1
-updated: 2026-08-09
+version: v0.2
+updated: 2026-08-10
 ---
 
 # 事件详细设计
@@ -12,12 +12,32 @@ updated: 2026-08-09
 ## 文件命名
 
 ```text
-EVT-领域-编号-事件名称.md
+<节点ID>-<事件名称>.md
 ```
 
 ## 统一模板
 
 ```markdown
+---
+title: 事件名称
+type: event-detail
+status: draft
+version: v0.1
+node-id: EVT-EXAMPLE
+node-type: 事件
+parent-ref: SYS-EXAMPLE
+scope-disposition: in-scope
+understanding-status: partial
+engineering-status: designed
+source-refs:
+  - BASE-EXAMPLE-001
+decision-refs:
+  - DEC-EXAMPLE-001
+main-definition: true
+---
+
+<a id="EVT-EXAMPLE"></a>
+
 # 事件名称
 
 ## 1. 事件目的
@@ -54,4 +74,4 @@ EVT-领域-编号-事件名称.md
 是否有多个实际流程共享相同触发、状态变化或结果；没有真实证据时写“未发现”，不得把所有调用预先事件化。发现真实重复时必须同步详细设计入口的观察表；Human 批准提取后，由观察表指定唯一主归属文档。
 ```
 
-事件文档描述流程；对象属性和系统内部算法分别链接到对象、系统文档。事件文档不等于必须实现事件总线：必须立即返回结果的一对一操作优先使用同步调用，已经发生的状态变化或一对多通知才优先使用事件。
+事件文档描述流程；对象属性和系统内部算法分别链接到对象、系统文档。事件文档不等于必须实现事件总线：必须立即返回结果的一对一操作优先使用同步调用，已经发生的状态变化或一对多通知才优先使用事件。事件关闭的未知问题使用 `Q-*` 链接，不复制其完整调查结论。
