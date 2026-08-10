@@ -42,3 +42,4 @@
 - Human 已授权执行 `DEC-DOC-GOV-001` 第二轮权威同步；当前只修改治理文档、模板、状态检查和验证记录，不推进阶段6B/6C，不修改旧Phaser或正式`src`。
 - Human 以`开始`通过阶段6B并授权阶段6C的SYS-CHUNK有界详细逆向。Gate迁移已提交`9cd7895`；已建立`03-详细设计/系统/SYS-CHUNK-地图分块-逆向工作稿.md`，仍为非主定义、`undesign`，未修改旧Phaser或正式`src`。独立证据复核发现并修正13个未清除图层的计数；修正后在干净提交`4af281b`上复核PASS。
 - 已提交`6a397a0`形成`SYS-CHUNK-地图分块-详细设计候选.md`：状态所有权、重复请求、失败、取消、销毁和验收均为 `DECISION（proposed）`，待 Human 审查；节点仍为`undesign`，正式实现仍未授权。
+- Human 已通过 SYS-CHUNK 详细设计：正式主定义为`03-详细设计/系统/SYS-CHUNK-地图分块.md#SYS-CHUNK`，节点升为`designed`，验证计划已建立；当前转入`GATE-SYS-CHUNK-IMPLEMENTATION`等待独立 Human 实现授权，未写正式`src`。

@@ -1,15 +1,15 @@
 ---
-title: SYS-CHUNK 地图分块详细设计候选
-type: system-design-candidate
-status: draft
-decision-status: proposed
-version: v0.1
+title: SYS-CHUNK 地图分块
+type: system-detail
+status: approved
+decision-status: accepted
+version: v0.2
 node-id: SYS-CHUNK
 node-type: 系统
 parent-ref: SYS-WORLD
 scope-disposition: in-scope
 understanding-status: confirmed
-engineering-status: undesign
+engineering-status: designed
 source-refs:
   - CAP-MAP-001
   - BASE-MAP-001
@@ -18,13 +18,16 @@ source-refs:
   - Q-MAP-003
 decision-refs:
   - DEC-STAGE6B-001
-main-definition: false
+  - DEC-SYS-CHUNK-001
+main-definition: true
 updated: 2026-08-10
 ---
 
-# SYS-CHUNK 地图分块：详细设计候选
+<a id="SYS-CHUNK"></a>
 
-> 这是根据 [[SYS-CHUNK-地图分块-逆向工作稿]] 形成的**重构设计候选**。其中 FACT 描述原站公开证据；`DECISION（proposed）` 是我们为可控重构提出的方案，尚未获 Human 批准。本文件不是唯一主定义，不改变节点 `undesign`，不授权正式 `src`。
+# SYS-CHUNK 地图分块
+
+> 本文是 `SYS-CHUNK` 的唯一详细主定义。FACT 描述原站公开证据；`DECISION` 描述 Human 已接受的重构设计。本文完成详细设计，不授权正式 `src`；代码实施仍须通过 `GATE-SYS-CHUNK-IMPLEMENTATION`。证据调查过程保留在 [[SYS-CHUNK-地图分块-逆向工作稿]]。
 
 ## 1. 说人话解释
 
@@ -40,9 +43,9 @@ updated: 2026-08-10
 | FACT | 原站玩家 3×3 邻域与相机范围加 1 块边距合并为目标集合；约每500ms更新 |
 | FACT | 原站 manager 缓存原始 JSON，场景另有已写入 Tilemap 的集合；在已定位动态路径中，场景卸载未删除 JSON 缓存 |
 | FACT | Play 前相机序列以不同策略预载，现有 1920×1080 证据覆盖全部25块 |
-| DECISION（proposed） | 重构中保持“原始数据缓存 / 场景渲染状态 / 请求中的工作”三类状态分离 |
-| DECISION（proposed） | 一个坐标同一时刻只允许一个在途请求；请求完成后只在该坐标仍属于当前目标集合时写入场景 |
-| DECISION（proposed） | 失败显式记录；不做无界自动重试；由下一次目标更新或明确重试操作触发有限重试 |
+| DECISION（accepted） | 重构中保持“原始数据缓存 / 场景渲染状态 / 请求中的工作”三类状态分离 |
+| DECISION（accepted） | 一个坐标同一时刻只允许一个在途请求；请求完成后只在该坐标仍属于当前目标集合时写入场景 |
+| DECISION（accepted） | 失败显式记录；不做无界自动重试；由下一次目标更新或明确重试操作触发有限重试 |
 | UNKNOWN | 原站的并发合并、取消、重试、销毁清理及13个未定位图层的完整卸载语义尚未确认 |
 
 ## 3. 原站可观察行为
@@ -86,7 +89,7 @@ updated: 2026-08-10
 
 这些是 `SYS-CHUNK` 内部子能力，不因可能相似就拆成独立复用系统。
 
-## 6. 数据与状态所有权（DECISION，proposed）
+## 6. 数据与状态所有权（DECISION，accepted）
 
 | 状态 | 唯一拥有者 | 读取者 | 允许修改者 | 说明 |
 |---|---|---|---|---|
@@ -99,7 +102,7 @@ updated: 2026-08-10
 
 `ChunkDataStore`、`ChunkCoordinator`、`WorldRenderer` 是职责名称，不预先要求对应三个代码目录或三个可复用类。
 
-## 7. 协作与流程（DECISION，proposed）
+## 7. 协作与流程（DECISION，accepted）
 
 ```text
 玩家位置 + 相机视口
@@ -174,10 +177,12 @@ WorldRenderer 写入对应 Tilemap 区域，登记已渲染
 
 当前只有地图分块这一项真实场景，状态为：**未发现**。本候选没有申请提取任何通用加载器、坐标系统或缓存框架。
 
-## 12. 请 Human 审查的决定
+## 12. Human 已接受的设计决定
 
-1. 是否接受“数据缓存 / 目标协调 / 场景渲染”三类状态分离；
-2. 是否接受同坐标单一在途请求、有限重试、过期结果不写场景的重构策略；
-3. 是否接受先只支持已证实边界，并把13个图层语义单列为后续工作；
-4. 是否允许将本候选升级为 `SYS-CHUNK` 的正式主定义；
-5. 是否在正式设计确认后，再单独讨论实现授权。
+Human 已通过阶段6C，并接受以下决定：
+
+1. 采用“数据缓存 / 目标协调 / 场景渲染”三类状态分离；
+2. 采用同坐标单一在途请求、有限重试、过期结果不写场景的重构策略；
+3. 先只支持已证实边界，把13个图层语义单列为后续工作；
+4. 将本文登记为 `SYS-CHUNK` 的正式唯一主定义；
+5. 正式实现授权独立留给 `GATE-SYS-CHUNK-IMPLEMENTATION`。

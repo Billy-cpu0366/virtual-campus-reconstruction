@@ -162,10 +162,16 @@ def find_table(path: Path, first_header: str) -> tuple[list[str], list[list[str]
 
 
 def heading_set(path: Path) -> set[str]:
-    return {
+    text = read_text(path)
+    headings = {
         match.group(1).strip()
-        for match in re.finditer(r"(?m)^#{1,6}\s+(.+?)\s*$", read_text(path))
+        for match in re.finditer(r"(?m)^#{1,6}\s+(.+?)\s*$", text)
     }
+    explicit_anchors = {
+        match.group(1)
+        for match in re.finditer(r'<a\s+id=["\']([^"\']+)["\']\s*></a>', text)
+    }
+    return headings | explicit_anchors
 
 
 def doc_files() -> list[Path]:
@@ -328,6 +334,10 @@ def check_task_state(result: Result) -> None:
     valid_states = {
         "stage-6B-human-review": ("GATE-STAGE6B", "pending-human-review"),
         "stage-6C-first-system-reverse-engineering": ("GATE-STAGE6C", "in-progress"),
+        "sys-chunk-implementation-authorization-review": (
+            "GATE-SYS-CHUNK-IMPLEMENTATION",
+            "pending-human-implementation-authorization",
+        ),
     }
     phase = values.get("current-phase")
     result.check(phase in valid_states, f"unknown current phase: {phase}")

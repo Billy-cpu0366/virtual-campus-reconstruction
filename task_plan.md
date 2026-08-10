@@ -1,8 +1,8 @@
 ---
-current-phase: stage-6C-first-system-reverse-engineering
-current-gate: GATE-STAGE6C
-gate-status: in-progress
-next-phase: stage-6C-human-design-review
+current-phase: sys-chunk-implementation-authorization-review
+current-gate: GATE-SYS-CHUNK-IMPLEMENTATION
+gate-status: pending-human-implementation-authorization
+next-phase: sys-chunk-formal-implementation
 updated: 2026-08-10
 ---
 
@@ -26,7 +26,7 @@ updated: 2026-08-10
 6. **选择首个系统逐项逆向填充** — in_progress
    - 6A. **现有复刻代码全局盘点** — complete（Human 已通过）
    - 6B. **原站系统与现有代码差距映射** — complete（Human 已通过）
-   - 6C. **选择并详细逆向首个系统** — in_progress（SYS-CHUNK；仅详细逆向与设计）
+   - 6C. **选择并详细逆向首个系统** — complete（SYS-CHUNK；Human 已通过详细设计）
 
 ## 当前 Human 确认
 
@@ -35,7 +35,8 @@ updated: 2026-08-10
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
-| 阶段6C首个系统详细逆向 | 进行中 | 读取直接相关公开证据；创建和修订 SYS-CHUNK 详细设计、验证和未知问题记录 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | Human 审查 SYS-CHUNK 的边界、证据、未知项和验收标准，再决定是否授权实现 |
+| 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
+| SYS-CHUNK 实现授权审查 | 待 Human 明确授权 | 审查实现范围、验证计划、失败/清理边界和成本 | 写入正式 `src`、修改旧 Phaser、扩大为通用框架 | Human 明确授权后才开始有界正式实现 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -67,7 +68,7 @@ updated: 2026-08-10
 
 完成标准：P0系统均有证据、旧代码映射、差距、未知项和建议处理方式；首个系统选择有明确依据；没有把旧代码直接宣布为可复用或正确实现。
 
-## 当前任务：阶段6C——SYS-CHUNK 地图分块详细逆向
+## 已完成任务：阶段6C——SYS-CHUNK 地图分块详细逆向
 
 目标：在不修改旧 Phaser 项目和正式 `src/` 的前提下，基于已定位公开证据，形成 `SYS-CHUNK` 的有界详细设计与验收包。
 
@@ -83,8 +84,16 @@ updated: 2026-08-10
 
 完成标准：SYS-CHUNK 的原站事实、推断、未知项、边界、生命周期、失败路径和验收方式可定位且可审查；相关节点从 `undesign` 进入 `designed` 只能在 Human 审查该详细设计后发生；本阶段不写正式源码。
 
+## 当前任务：SYS-CHUNK 实现授权审查
+
+目标：在不写正式 `src` 的前提下，让 Human 审查已接受的详细设计、验证计划、实现范围、失败/清理边界和成本，并单独决定是否授权首个有界实现。
+
+当前输入：[[doc/v0.1/03-详细设计/系统/SYS-CHUNK-地图分块#SYS-CHUNK]] 与 [[doc/v0.1/04-验证/SYS-CHUNK-验证计划]]。
+
+通过标准：Human 明确指定允许的正式实现范围；未获授权前，保持文档和验证计划，不写代码。
+
 ## Next Step
-执行 SYS-CHUNK 有界详细逆向；完成后交 Human 审查其详细设计与验收包。
+等待 Human 审查 SYS-CHUNK 实现授权包；未获明确授权不写正式 `src`。
 
 ## 错误记录
 | 错误 | 处理 |
