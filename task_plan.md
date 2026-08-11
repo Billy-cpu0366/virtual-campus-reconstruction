@@ -1,18 +1,10 @@
 ---
 workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
-current-work-item: WI-SYS-CHUNK-CORE-001
-work-item-level: level-2
-work-item-type: implementation
-work-item-status: blocked
-node-refs: SYS-CHUNK
-current-phase: closure
-current-gate: GATE-SYS-CHUNK-IMPLEMENTATION
-gate-status: passed
-scope-ref: doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）.md
-exit-criteria-ref: doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）.md
-authorization-ref: DEC-SYS-CHUNK-CORE-001
-next-phase: closure
-preauthorized-next-work-item: none
+current-work-item: none
+current-phase: work-item-selection
+current-gate: none
+gate-status: not-applicable
+next-phase: pending-work-item-selection
 updated: 2026-08-11
 ---
 
@@ -25,7 +17,7 @@ updated: 2026-08-11
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 当前工作项已获 CORE 独立实现授权；只允许在批准路径中建立确定性纯逻辑和测试，不修改现有 Phaser 项目。
+- 当前没有激活的正式工作项；只允许依据既有节点、顺序、依赖、未知和差距整理下一项候选，不修改正式源码或现有 Phaser 项目。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -46,8 +38,8 @@ updated: 2026-08-11
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
 | 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
-| 轻量任务接力制度 | 已通过 | 建立 WI、proposed 授权包和最小检查器 | 把内部小步骤全部升级为 Gate 或完整 P/A | 以 CORE 工作项完成首次真实试点 |
-| SYS-CHUNK CORE 实现授权审查 | 已通过 | 在原子激活提交和 clean 基线后实现批准的纯逻辑 CORE 与测试 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 完成类型检查、单元测试、文档回写和工作项关闭 |
+| 轻量任务接力制度 | Human 已通过；首次试点关闭待 clean 复验 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
+| SYS-CHUNK CORE 实现授权与执行 | 实现已验证；工作项关闭待 clean 复验 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | CORE 已登记关闭；下一项需重新选择和授权 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -95,50 +87,46 @@ updated: 2026-08-11
 
 完成标准：SYS-CHUNK 的原站事实、推断、未知项、边界、生命周期、失败路径和验收方式可定位且可审查；相关节点从 `undesign` 进入 `designed` 只能在 Human 审查该详细设计后发生；本阶段不写正式源码。
 
-## 当前任务：WI-SYS-CHUNK-CORE-001 CORE 实现
-
-| 字段 | 当前值 |
-|---|---|
-| 工作项 | `WI-SYS-CHUNK-CORE-001` |
-| 节点 | `SYS-CHUNK` |
-| 级别与类型 | `level-2 / implementation` |
-| 当前状态 | `blocked`（实现与验证已通过，只阻塞在关闭后的空闲状态表达） |
-| 当前阶段 | `closure` |
-| 授权包 | [[doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]] |
-| 退出标准 | [[doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] |
-| 授权决定 | `DEC-SYS-CHUNK-CORE-001`（accepted） |
-| 预授权下一工作项 | `none` |
-| 结果提交 | `f04568f953821e8cc56c33a694171ddab759051f` |
-| 验证结果 | typecheck PASS；3文件26项测试 PASS；独立复核 PASS |
+## 已完成工作项：WI-SYS-CHUNK-CORE-001
 
 目标：使用已接受的最小 TypeScript 测试环境，实现并验证 SYS-CHUNK 确定性 CORE。
 
-授权范围只包含 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合单元测试；不包含 Phaser、Vite、网络请求、缓存、重试、Tilemap 或浏览器集成。
+结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-通过标准：原子激活提交和治理检查通过；批准路径内的实现完成；类型检查和全部单元测试通过；成功与失败用例覆盖授权范围；`sample/` 和旧 Phaser 零修改；结果提交、文档回写和关闭索引可定位。
+## 当前任务：选择下一正式工作项
+
+| 字段 | 当前值 |
+|---|---|
+| 当前正式工作项 | `none` |
+| 当前阶段 | `work-item-selection` |
+| 当前 Gate | `none / not-applicable` |
+| 正式代码授权 | 无；现有 CORE 结果只允许维护，不得扩大 |
+| 选择依据 | [[doc/v0.1/整体怎么运作（02）/先做什么（P0系统对照与顺序）]]、[[doc/v0.1/整体怎么运作（02）/功能总目录（节点清单）]]、[[doc/v0.1/整体怎么运作（02）/各部分怎样配合（系统依赖）]]、[[doc/v0.1/还不清楚什么（05）/还缺哪些答案（未知问题队列）]]、[[doc/v0.1/怎么验证与还差什么（04）/原站和旧版本差在哪（证据与差距）]] |
+
+目标：根据既有权威来源和最新 CORE 结果整理最多三个有边界候选，说明依赖、证据、成本和授权要求，再交 Human 选择。当前不创建新的正式 WI，不写代码。
 
 ## 已阻塞或暂停工作项
 
-| Blocker ID | 工作项 | 阻塞点 | 恢复条件 | 当前允许动作 | 是否需要新工作项 |
-|---|---|---|---|---|---|
-| BLK-WI-CLOSURE-001 | WI-SYS-CHUNK-CORE-001 | 当前协议和检查器要求永远存在一个非终态 `current-work-item`，但本工作项已满足完成标准且没有预授权下一工作项；直接写 completed 会违反机器合同，继续写 active 会造成状态漂移 | Human 接受“显式空闲/无当前工作项”最小合同，或直接选择并授权下一工作项 | 只允许维护验证结果和提出两个关闭选项；禁止继续扩大 CORE 或建立 Phaser 代码 | 若选择空闲合同，只需治理修正；若选择下一实现，必须另建 level-2 WI 和 Human Gate |
+暂无。`BLK-WI-CLOSURE-001` 已由 `DEC-WORK-RELAY-002` 解决：正式工作项允许为零或一个，CORE 可以正常关闭并进入选择状态。
 
 ## 近期候选
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| SYS-CHUNK Phaser 世界集成 | SYS-CHUNK 正式设计中尚未实现的请求、缓存、渲染和生命周期范围 | 只保留候选；未建立 WI、未授权，CORE 结果形成后重新排序 |
+| SYS-WORLD 世界装配与 SYS-LAYER 图层边界 | [[doc/v0.1/整体怎么运作（02）/先做什么（P0系统对照与顺序）#4. 调查顺序（DECISION，decision-status: accepted）]] | 原 accepted 调查顺序中的下一项；尚未建立 WI 或新阶段授权 |
+| SYS-ASSET 分块所需资源加载与失败路径 | P0顺序、SYS-CHUNK 未完成范围和证据差距 | 依赖世界/图层边界进一步明确；尚未建立 WI 或授权 |
+| SYS-CHUNK Phaser 世界集成 | SYS-CHUNK 正式设计中尚未实现的请求、缓存、渲染和生命周期范围 | 只保留候选；需结合世界、图层和资源边界重新排序并独立授权 |
 
 ## 已关闭工作项索引
 
-不追溯为历史阶段补建 WI。首个正式工作项关闭后，按下表追加一行。
+不追溯为历史阶段补建 WI。只为实际建立过的正式工作项保留轻量关闭记录。
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
-| — | — | — | — | — | — |
+| `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [[doc/v0.1/具体怎么做（03）/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]]；`src/chunk/`；[[doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
 
 ## Next Step
-等待 Human 处理 `BLK-WI-CLOSURE-001`：推荐接受最小“无当前工作项/等待选择”状态合同，关闭 CORE 并保持 Phaser 未授权；或者直接选择下一工作项，再原子关闭并接力。未决定前不继续写代码。
+基于现有 P0 顺序、依赖、节点状态、未知问题和证据差距整理最多三个下一工作项候选，交 Human 选择。选择和授权完成前保持 `current-work-item: none`，不继续写正式代码。
 
 ## 错误记录
 | 错误 | 处理 |

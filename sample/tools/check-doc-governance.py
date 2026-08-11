@@ -97,6 +97,12 @@ ALLOWED_WORK_ITEM_PHASES = {
     "verification",
     "closure",
 }
+ALLOWED_CLOSED_WORK_ITEM_RESULTS = {
+    "completed",
+    "cancelled",
+    "rejected",
+    "superseded",
+}
 
 SOURCE_ARTIFACTS = {
     Path(r"C:\Users\inertnet\Desktop\项目讨论\luyin.txt"):
@@ -381,6 +387,10 @@ def check_frontmatter_and_decisions(result: Result) -> None:
     relay_section = ledger.split("### DEC-WORK-RELAY-001 ", 1)[-1].split("### DEC-", 1)[0]
     result.check("| 决策状态 | `accepted` |" in relay_section, "work relay decision must be accepted")
     result.check("| 持久化状态 | `persisted`" in relay_section, "work relay decision must be persisted")
+    result.check("### DEC-WORK-RELAY-002 " in ledger, "DEC-WORK-RELAY-002 ledger record missing")
+    idle_section = ledger.split("### DEC-WORK-RELAY-002 ", 1)[-1].split("### DEC-", 1)[0]
+    result.check("| 决策状态 | `accepted` |" in idle_section, "idle work-item decision must be accepted")
+    result.check("| 持久化状态 | `persisted`" in idle_section, "idle work-item decision must be persisted")
 
 
 def project_ref_path(raw: str) -> Path:
@@ -398,52 +408,65 @@ def decision_section(decision_id: str) -> str:
 
 def check_task_state(result: Result) -> dict[str, str]:
     values = frontmatter(TASK_PLAN)
-    required = {
+    base_required = {
         "workflow-ref",
         "current-work-item",
+        "current-phase",
+        "current-gate",
+        "gate-status",
+        "next-phase",
+    }
+    for key in sorted(base_required):
+        result.check(values.get(key) not in {None, ""}, f"task plan field missing: {key}")
+    workflow_ref = values.get("workflow-ref", "")
+    result.check(project_ref_path(workflow_ref).resolve() == WORKFLOW_GUIDE.resolve(), "workflow-ref must target the stable guide")
+    result.check(project_ref_path(workflow_ref).exists(), "workflow-ref does not exist")
+
+    work_item = values.get("current-work-item", "")
+    active_fields = {
         "work-item-level",
         "work-item-type",
         "work-item-status",
         "node-refs",
-        "current-phase",
-        "current-gate",
-        "gate-status",
         "scope-ref",
         "exit-criteria-ref",
         "authorization-ref",
-        "next-phase",
         "preauthorized-next-work-item",
     }
-    for key in sorted(required):
-        result.check(values.get(key) not in {None, ""}, f"task plan field missing: {key}")
-    work_item = values.get("current-work-item", "")
-    result.check(bool(re.fullmatch(r"WI-[A-Z0-9-]+", work_item)), f"invalid work item ID: {work_item}")
-    result.check(values.get("work-item-level") in ALLOWED_WORK_ITEM_LEVELS, "invalid work item level")
-    result.check(values.get("work-item-type") in ALLOWED_WORK_ITEM_TYPES, "invalid work item type")
-    result.check(values.get("work-item-status") in ALLOWED_CURRENT_WORK_ITEM_STATUS, "invalid current work item status")
-    phase = values.get("current-phase")
-    result.check(phase in ALLOWED_WORK_ITEM_PHASES, f"unknown current phase: {phase}")
-    result.check(values.get("next-phase") in ALLOWED_WORK_ITEM_PHASES, "invalid next phase")
-    result.check(values.get("current-gate", "").startswith("GATE-"), "current gate ID is invalid")
-    workflow_ref = values.get("workflow-ref", "")
-    result.check(project_ref_path(workflow_ref).resolve() == WORKFLOW_GUIDE.resolve(), "workflow-ref must target the stable guide")
-    result.check(project_ref_path(workflow_ref).exists(), "workflow-ref does not exist")
-    next_work_item = values.get("preauthorized-next-work-item", "")
-    result.check(
-        next_work_item == "none" or bool(re.fullmatch(r"WI-[A-Z0-9-]+", next_work_item)),
-        "invalid preauthorized next work item",
-    )
-    if phase == "implementation-authorization":
-        result.check(values.get("work-item-status") == "awaiting-authorization", "authorization phase must await authorization")
+    if work_item == "none":
+        result.check(values.get("current-phase") == "work-item-selection", "no-current-WI state must select a work item")
+        result.check(values.get("current-gate") == "none", "no-current-WI state must not claim a gate")
+        result.check(values.get("gate-status") == "not-applicable", "no-current-WI gate status must be not-applicable")
+        result.check(values.get("next-phase") == "pending-work-item-selection", "no-current-WI next phase is invalid")
+        for key in sorted(active_fields):
+            result.check(values.get(key) in {None, ""}, f"no-current-WI state must omit field: {key}")
+    else:
+        for key in sorted(active_fields):
+            result.check(values.get(key) not in {None, ""}, f"task plan field missing: {key}")
+        result.check(bool(re.fullmatch(r"WI-[A-Z0-9-]+", work_item)), f"invalid work item ID: {work_item}")
+        result.check(values.get("work-item-level") in ALLOWED_WORK_ITEM_LEVELS, "invalid work item level")
+        result.check(values.get("work-item-type") in ALLOWED_WORK_ITEM_TYPES, "invalid work item type")
+        result.check(values.get("work-item-status") in ALLOWED_CURRENT_WORK_ITEM_STATUS, "invalid current work item status")
+        phase = values.get("current-phase")
+        result.check(phase in ALLOWED_WORK_ITEM_PHASES, f"unknown current phase: {phase}")
+        result.check(values.get("next-phase") in ALLOWED_WORK_ITEM_PHASES, "invalid next phase")
+        result.check(values.get("current-gate", "").startswith("GATE-"), "current gate ID is invalid")
+        next_work_item = values.get("preauthorized-next-work-item", "")
         result.check(
-            values.get("gate-status") == "pending-human-implementation-authorization",
-            "implementation authorization gate status is invalid",
+            next_work_item == "none" or bool(re.fullmatch(r"WI-[A-Z0-9-]+", next_work_item)),
+            "invalid preauthorized next work item",
         )
-        result.check(values.get("authorization-ref") == "pending", "pending authorization must not cite a decision")
-    if phase == "implementation":
-        result.check(values.get("work-item-status") == "active", "implementation phase requires an active work item")
-        result.check(values.get("gate-status") == "passed", "implementation phase requires a passed gate")
-        result.check(values.get("authorization-ref", "").startswith("DEC-"), "active implementation requires a decision reference")
+        if phase == "implementation-authorization":
+            result.check(values.get("work-item-status") == "awaiting-authorization", "authorization phase must await authorization")
+            result.check(
+                values.get("gate-status") == "pending-human-implementation-authorization",
+                "implementation authorization gate status is invalid",
+            )
+            result.check(values.get("authorization-ref") == "pending", "pending authorization must not cite a decision")
+        if phase == "implementation":
+            result.check(values.get("work-item-status") == "active", "implementation phase requires an active work item")
+            result.check(values.get("gate-status") == "passed", "implementation phase requires a passed gate")
+            result.check(values.get("authorization-ref", "").startswith("DEC-"), "active implementation requires a decision reference")
     text = read_text(TASK_PLAN)
     result.check(text.count("## 当前任务：") == 1, "exactly one current task is required")
     result.check(text.count("## 当前审查包：") == 0, "stale current review-package heading remains")
@@ -457,7 +480,43 @@ def check_work_item_contract(
     values: dict[str, str],
     nodes: dict[str, dict[str, str]],
 ) -> None:
+    closed_table = find_table(TASK_PLAN, "工作项 ID")
+    result.check(closed_table is not None, "closed work-item index missing")
+    closed_ids: set[str] = set()
+    if closed_table:
+        header, rows, _ = closed_table
+        result.check(
+            header == ["工作项 ID", "结果", "涉及节点", "产物", "result-commit", "Human 决定"],
+            "closed work-item index columns changed",
+        )
+        for row in rows:
+            result.check(len(row) == 6, f"closed work-item row width invalid: {row[:1]}")
+            if len(row) != 6 or row[0] == "—":
+                continue
+            item_id, outcome, node_cell, artifacts, result_commit, decision_refs = row
+            result.check(bool(re.fullmatch(r"WI-[A-Z0-9-]+", item_id)), f"invalid closed work item ID: {item_id}")
+            result.check(item_id not in closed_ids, f"duplicate closed work item ID: {item_id}")
+            closed_ids.add(item_id)
+            result.check(outcome in ALLOWED_CLOSED_WORK_ITEM_RESULTS, f"invalid closed work item result: {item_id}={outcome}")
+            result.check(artifacts not in {"", "—"}, f"closed work item has no artifact: {item_id}")
+            result.check(bool(re.fullmatch(r"[0-9a-f]{40}", result_commit)), f"closed work item result commit is invalid: {item_id}")
+            result.check(decision_refs not in {"", "—"}, f"closed work item decision reference missing: {item_id}")
+            for node_id in [part.strip() for part in node_cell.split(";") if part.strip()]:
+                result.check(node_id in nodes, f"closed work item node does not exist: {item_id}={node_id}")
+            if re.fullmatch(r"[0-9a-f]{40}", result_commit):
+                try:
+                    subprocess.run(
+                        ["git", "-C", str(PROJECT_ROOT), "cat-file", "-e", f"{result_commit}^{{commit}}"],
+                        check=True,
+                        capture_output=True,
+                    )
+                except (OSError, subprocess.CalledProcessError):
+                    result.check(False, f"closed work item result commit is unavailable: {item_id}={result_commit}")
+
     work_item = values.get("current-work-item", "")
+    if work_item == "none":
+        return
+    result.check(work_item not in closed_ids, f"current work item is already closed: {work_item}")
     node_refs = {part.strip() for part in values.get("node-refs", "").split(";") if part.strip()}
     result.check(bool(node_refs), "current work item has no node reference")
     for node_id in sorted(node_refs):

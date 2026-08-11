@@ -19,8 +19,8 @@ doc/v0.1/       当前版本唯一权威工程文档
 1. 完整读取本文件。
 2. 读取 `doc/v0.1/README.md`。
 3. 读取 `doc/v0.1/谁确认过什么（来源与决策记录）.md` 中的当前有效决定和 Human Gate 历史。
-4. 读取 `task_plan.md`，确认唯一当前工作项、阶段、Gate 和下一步；按其中 `workflow-ref` 读取稳定任务接力规则。
-5. 只读取当前工作项直接关联的授权包、设计、验证文档和 `sample/` 证据。
+4. 读取 `task_plan.md`，确认当前工作项、阶段、Gate 和下一步；按其中 `workflow-ref` 读取稳定任务接力规则。`current-work-item: none` 表示当前处于合法选择状态，不得写正式代码。
+5. 有当前工作项时，只读取其直接关联的授权包、设计、验证文档和 `sample/` 证据；没有当前工作项时，只读取 `task_plan.md` 列出的候选来源。
 6. 讨论未收敛或 Human 未确认前，不修改设计、代码或项目协议。
 
 禁止为了“了解项目”递归读取整个项目或猜测未公开资源。
@@ -31,7 +31,7 @@ doc/v0.1/       当前版本唯一权威工程文档
 |---|---|
 | 项目文档入口、规则和当前结论 | `doc/v0.1/README.md` 及其链接文档 |
 | 需求来源、Human 决定、替代关系和 Gate 历史 | `doc/v0.1/谁确认过什么（来源与决策记录）.md` |
-| 当前工作项、可执行阶段和当前 Human Gate | `task_plan.md` |
+| 当前工作项（允许为 `none`）、可执行阶段和当前 Human Gate | `task_plan.md` |
 | 稳定工作项生命周期、选择和激活规则 | `doc/v0.1/每轮工作怎么推进（流程速查）.md` |
 | 原站公开文件 | `sample/original-public-build/mirror/` |
 | 镜像状态和哈希 | `sample/original-public-build/manifest.json` |

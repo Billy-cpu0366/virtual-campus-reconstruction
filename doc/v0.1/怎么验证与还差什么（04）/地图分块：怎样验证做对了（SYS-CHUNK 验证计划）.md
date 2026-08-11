@@ -5,7 +5,7 @@ status: approved
 version: v0.1
 node-id: SYS-CHUNK
 design-ref: ../具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
-implementation-status: core-verified-closure-blocked
+implementation-status: core-verified-work-item-closed
 updated: 2026-08-11
 ---
 
@@ -63,6 +63,6 @@ updated: 2026-08-11
 - 详细设计：已通过 Human 审查；
 - 正式实现：CORE 子集已实现并验证；Phaser 集成未授权；
 - 节点状态：继续保持 `designed`，因为完整请求、缓存、渲染和生命周期尚未实现；
-- 工作项状态：验证完成，关闭被“无预授权下一工作项时缺少空闲状态合同”阻塞；
+- 工作项状态：`WI-SYS-CHUNK-CORE-001` 已完成并进入关闭索引；当前没有激活的正式工作项；
 - 原站未知：并发实现细节、取消、重试、销毁清理和13个图层语义仍保留；
 - 复用观察：未发现。

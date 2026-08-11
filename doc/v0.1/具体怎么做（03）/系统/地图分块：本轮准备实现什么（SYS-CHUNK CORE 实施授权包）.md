@@ -16,7 +16,7 @@ updated: 2026-08-11
 
 # 地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）
 
-> **一句话：Human 已批准最小正式工程基础和地图分块确定性核心；只有原子激活提交通过治理检查并进入 clean Git 基线后才能开始实现。**
+> **一句话：Human 已批准并完成最小正式工程基础和地图分块确定性核心；本包保留为该工作项的实施与审计边界。**
 
 > [!important]
 > 当前授权为 `approved / accepted / authorized`，决定引用为 `DEC-SYS-CHUNK-CORE-001`。授权只覆盖本文第3节和指定路径；Phaser、Vite、网络、缓存、渲染和旧项目修改继续未授权。
@@ -34,7 +34,7 @@ updated: 2026-08-11
 | 工作项 | `WI-SYS-CHUNK-CORE-001` |
 | 类型与级别 | `implementation / level-2` |
 | 涉及节点 | `SYS-CHUNK` |
-| 当前状态 | `active`（以原子激活提交进入 clean Git 基线后生效） |
+| 当前状态 | `completed`；结果提交、验证和关闭索引均可定位 |
 | 正式主定义 | [[地图分块：玩家移动时怎样加载地图（SYS-CHUNK）#SYS-CHUNK]] |
 | 退出标准 | [[../../怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）#2. 重构设计验收]] 中与本轮范围对应的确定性检查 |
 
@@ -127,4 +127,5 @@ Human 于 2026-08-11 明确接受：
 - 治理：sync 835项、pilot 840项 PASS；`sample/` 与旧 Phaser 零修改；
 - 独立复核：PASS，无 blocking/high/medium/low 缺陷；
 - 复用观察：未发现，没有提取通用模块；
-- 未完成范围：Phaser、网络、缓存、渲染和完整生命周期继续未授权。
+- 未完成范围：Phaser、网络、缓存、渲染和完整生命周期继续未授权；
+- 工作项关闭：`DEC-WORK-RELAY-002` 允许无预授权下一项时正常关闭；当前正式工作项为 `none`。

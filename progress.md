@@ -50,3 +50,4 @@
 - CORE 实现提交为 `f04568f953821e8cc56c33a694171ddab759051f`：TypeScript strict PASS，3文件26项测试 PASS，npm 官方源 audit 0漏洞，治理 sync 835项/pilot 840项 PASS；最终 lightweight-verifier PASS，无 blocking/high/medium/low 缺陷，`sample/` 和旧 Phaser 零修改。
 - 已完成设计、授权包、验证计划、证据与差距、工程入口和过程记录回写；节点继续保持 `designed`，因为 Phaser、请求、缓存、渲染和生命周期未实现。
 - 工作项关闭被 `BLK-WI-CLOSURE-001` 阻塞：无预授权下一项时，协议和检查器缺少合法的“无当前工作项/等待选择”状态。等待 Human 接受最小空闲合同或直接选择下一工作项。
+- Human 已接受 `DEC-WORK-RELAY-002` 最小修补；已将 CORE 关闭、task_plan 切换为 `current-work-item: none / work-item-selection`，并让检查器按零或一个当前 WI 条件检查。dirty transaction preflight：Python内存编译 PASS、最终 sync 851项 PASS、pilot 856项 PASS、`git diff --check` PASS；等待内容提交后的 clean 基线复验。

@@ -62,3 +62,4 @@
 - CORE 结果提交 `f04568f953821e8cc56c33a694171ddab759051f` 只包含批准路径：master 契约、行优先索引/文件名、世界坐标边界、玩家3×3、相机 scroll/zoom +1块边距和确定性目标并集；3文件26项测试、strict typecheck、官方源 audit 0漏洞、治理 sync/pilot 和最终独立复核均通过。
 - 独立复核发现的唯一 LOW 是内部坐标合并 helper 被公开导出；Main 已在结果提交前改为模块私有，并用重叠玩家/相机目标测试继续证明去重和稳定顺序。没有出现第二个独立复用场景，复用观察保持“未发现”。
 - 首次真实接力暴露治理缺口：工作项完成且 `preauthorized-next-work-item: none` 时，当前机器合同不允许 `current-work-item: none` 或终态 `completed`，导致无法同时做到“关闭索引已完成”和“当前状态不漂移”。已登记 `BLK-WI-CLOSURE-001`，禁止通过伪造 active/completed 状态绕过。
+- Human 已接受 `DEC-WORK-RELAY-002`：正式工作项允许为零或一个；没有预授权下一项时正常关闭并回到既有 P0、节点、依赖、未知和差距来源，不制造虚假选择 WI。CORE 已写入关闭索引，当前正式工作项为 `none`，新的正式代码继续未授权。
