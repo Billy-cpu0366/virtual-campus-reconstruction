@@ -450,7 +450,11 @@ def check_task_state(result: Result) -> dict[str, str]:
         phase = values.get("current-phase")
         result.check(phase in ALLOWED_WORK_ITEM_PHASES, f"unknown current phase: {phase}")
         result.check(values.get("next-phase") in ALLOWED_WORK_ITEM_PHASES, "invalid next phase")
-        result.check(values.get("current-gate", "").startswith("GATE-"), "current gate ID is invalid")
+        if values.get("work-item-level") == "level-1":
+            result.check(values.get("current-gate") == "none", "level-1 work item must not claim a gate")
+            result.check(values.get("gate-status") == "not-applicable", "level-1 gate status must be not-applicable")
+        else:
+            result.check(values.get("current-gate", "").startswith("GATE-"), "level-2 current gate ID is invalid")
         next_work_item = values.get("preauthorized-next-work-item", "")
         result.check(
             next_work_item == "none" or bool(re.fullmatch(r"WI-[A-Z0-9-]+", next_work_item)),
@@ -528,11 +532,29 @@ def check_work_item_contract(
     if not scope_path.exists():
         return
     package = frontmatter(scope_path)
-    result.check(package.get("type") == "implementation-authorization-package", "scope-ref must be an authorization package")
+    level = values.get("work-item-level")
+    status = values.get("work-item-status")
+    authorization = values.get("authorization-ref", "")
+    if level == "level-1":
+        result.check(package.get("type") == "work-item-task-card", "level-1 scope-ref must be a task card")
+        result.check(package.get("work-item-id") == work_item, "task card work item mismatch")
+        result.check(package.get("work-item-level") == level, "task card level mismatch")
+        result.check(package.get("work-item-type") == values.get("work-item-type"), "task card type mismatch")
+        result.check(package.get("node-refs") == values.get("node-refs"), "task card node scope mismatch")
+        result.check(package.get("main-definition") == "false", "task card must not be a main definition")
+        result.check(package.get("status") == status, "task card status mismatch")
+        section = decision_section(authorization)
+        result.check(bool(section), f"level-1 selection decision missing: {authorization}")
+        result.check("| 决策状态 | `accepted` |" in section, "level-1 selection decision is not accepted")
+        result.check(work_item in section, "level-1 selection decision does not name current work item")
+        for node_id in sorted(node_refs):
+            result.check(node_id in section, f"level-1 selection decision does not include node: {node_id}")
+        return
+
+    result.check(package.get("type") == "implementation-authorization-package", "level-2 scope-ref must be an authorization package")
     result.check(package.get("work-item-id") == work_item, "authorization package work item mismatch")
     result.check(package.get("node-refs") == values.get("node-refs"), "authorization package node scope mismatch")
     result.check(package.get("main-definition") == "false", "authorization package must not be a main definition")
-    status = values.get("work-item-status")
     if status == "awaiting-authorization":
         result.check(package.get("status") == "proposed", "awaiting work item package must be proposed")
         result.check(package.get("implementation-authorization") == "pending", "awaiting package authorization must be pending")
@@ -540,7 +562,6 @@ def check_work_item_contract(
         result.check(package.get("status") == "approved", "active implementation package must be approved")
         result.check(package.get("decision-status") == "accepted", "active implementation package decision must be accepted")
         result.check(package.get("implementation-authorization") == "authorized", "active implementation package must be authorized")
-        authorization = values.get("authorization-ref", "")
         section = decision_section(authorization)
         result.check(bool(section), f"authorization decision missing: {authorization}")
         result.check("| 决策状态 | `accepted` |" in section, "authorization decision is not accepted")

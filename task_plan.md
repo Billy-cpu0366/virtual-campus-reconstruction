@@ -1,10 +1,18 @@
 ---
 workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
-current-work-item: none
-current-phase: work-item-selection
+current-work-item: WI-SYS-WORLD-LAYER-DESIGN-001
+work-item-level: level-1
+work-item-type: investigation
+work-item-status: active
+node-refs: SYS-WORLD; SYS-LAYER
+scope-ref: doc/v0.1/03-具体怎么做/系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）.md
+exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）.md
+current-phase: investigation
 current-gate: none
 gate-status: not-applicable
-next-phase: pending-work-item-selection
+authorization-ref: DEC-SYS-WORLD-LAYER-INVESTIGATION-001
+preauthorized-next-work-item: none
+next-phase: design
 updated: 2026-08-11
 ---
 
@@ -17,7 +25,7 @@ updated: 2026-08-11
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 当前没有激活的正式工作项；只允许依据既有节点、顺序、依赖、未知和差距整理下一项候选，不修改正式源码或现有 Phaser 项目。
+- 当前已激活世界装配与图层边界level-1调查；只允许在任务卡范围内使用既有证据形成调查记录、设计候选和验证计划，不修改正式源码、冻结证据或现有Phaser项目。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -25,10 +33,11 @@ updated: 2026-08-11
 3. **搭建 doc v0.1 框架** — complete
 4. **将执行约束和实践驱动复用规则落盘** — complete
 5. **Human 验收文档框架** — complete
-6. **选择首个系统逐项逆向填充** — in_progress
+6. **按P0顺序逐项逆向与有界实现** — in_progress
    - 6A. **现有复刻代码全局盘点** — complete（Human 已通过）
    - 6B. **原站系统与现有代码差距映射** — complete（Human 已通过）
    - 6C. **选择并详细逆向首个系统** — complete（SYS-CHUNK；Human 已通过详细设计）
+   - 6D. **世界装配与图层边界调查设计** — in_progress（level-1；无代码Gate）
 
 ## 当前 Human 确认
 
@@ -40,6 +49,7 @@ updated: 2026-08-11
 | 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
+| 世界装配与图层边界调查 | 已选择并激活 | 只读调查现有公开证据和旧基线，建立调查记录、设计候选与验证计划 | 正式代码、Phaser/Vite集成、证据刷新、旧项目修改和复用提取 | 满足退出标准后交Human审查正式设计 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -93,17 +103,24 @@ updated: 2026-08-11
 
 结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-## 当前任务：选择下一正式工作项
+## 当前任务：WI-SYS-WORLD-LAYER-DESIGN-001
 
 | 字段 | 当前值 |
 |---|---|
-| 当前正式工作项 | `none` |
-| 当前阶段 | `work-item-selection` |
+| 工作项 | `WI-SYS-WORLD-LAYER-DESIGN-001` |
+| 级别与类型 | `level-1 / investigation` |
+| 涉及节点 | `SYS-WORLD; SYS-LAYER` |
+| 当前阶段 | `investigation` |
 | 当前 Gate | `none / not-applicable` |
-| 正式代码授权 | 无；现有 CORE 结果只允许维护，不得扩大 |
-| 选择依据 | [[doc/v0.1/02-整体怎么运作/先做什么（P0系统对照与顺序）]]、[[doc/v0.1/02-整体怎么运作/功能总目录（节点清单）]]、[[doc/v0.1/02-整体怎么运作/各部分怎样配合（系统依赖）]]、[[doc/v0.1/05-还不清楚什么/还缺哪些答案（未知问题队列）]]、[[doc/v0.1/04-怎么验证与还差什么/原站和旧版本差在哪（证据与差距）]] |
+| Human决定 | `DEC-SYS-WORLD-LAYER-INVESTIGATION-001` |
+| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）]] |
+| 正式代码授权 | 无；本轮只调查和设计 |
 
-目标：根据既有权威来源和最新 CORE 结果整理最多三个有边界候选，说明依赖、证据、成本和授权要求，再交 Human 选择。当前不创建新的正式 WI，不写代码。
+目标：查清25个分块怎样组成世界、24个图层怎样渲染/遮挡/碰撞/卸载，并划清`SYS-CHUNK`、`SYS-WORLD`、`SYS-LAYER`和`SYS-ASSET`的职责。完成后停在Human正式设计审查，不自动进入代码实现。
+
+当前允许：只读使用既有公开证据、现有分析和旧Phaser基线；建立`main-definition: false`的调查记录、设计候选和验证计划；按任务卡使用低成本Subagent。
+
+当前禁止：修改正式`src/`、`sample/`冻结证据、旧Phaser或dirty Worktree；接入Phaser/Vite/网络/缓存/渲染；提取通用模块。
 
 ## 已阻塞或暂停工作项
 
@@ -113,8 +130,7 @@ updated: 2026-08-11
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| SYS-WORLD 世界装配与 SYS-LAYER 图层边界 | [[doc/v0.1/02-整体怎么运作/先做什么（P0系统对照与顺序）#4. 调查顺序（DECISION，decision-status: accepted）]] | 原 accepted 调查顺序中的下一项；尚未建立 WI 或新阶段授权 |
-| SYS-ASSET 分块所需资源加载与失败路径 | P0顺序、SYS-CHUNK 未完成范围和证据差距 | 依赖世界/图层边界进一步明确；尚未建立 WI 或授权 |
+| SYS-ASSET 分块所需资源加载与失败路径 | P0顺序、SYS-CHUNK 未完成范围和证据差距 | 依赖当前世界/图层边界工作项；尚未建立 WI 或授权 |
 | SYS-CHUNK Phaser 世界集成 | SYS-CHUNK 正式设计中尚未实现的请求、缓存、渲染和生命周期范围 | 只保留候选；需结合世界、图层和资源边界重新排序并独立授权 |
 
 ## 已关闭工作项索引
@@ -126,7 +142,7 @@ updated: 2026-08-11
 | `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [[doc/v0.1/03-具体怎么做/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]]；`src/chunk/`；[[doc/v0.1/04-怎么验证与还差什么/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
 
 ## Next Step
-基于现有 P0 顺序、依赖、节点状态、未知问题和证据差距整理最多三个下一工作项候选，交 Human 选择。选择和授权完成前保持 `current-work-item: none`，不继续写正式代码。
+按调查任务卡先用确定性提取建立24个图层的完整清单，再定位世界创建、chunk写入/清除和图层处理证据。Main只抽查关键证据并整合边界；本轮不写正式代码。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -147,3 +163,4 @@ updated: 2026-08-11
 | CORE 实现时首次打印 chunk manager Bundle 片段再次触发 GBK 编码错误 | 未重复原命令；立即设置 `PYTHONIOENCODING=utf-8` 后成功定位公式。 |
 | `npm audit` 使用本机 npmmirror 返回未实现的审计端点 | 改用 `--registry=https://registry.npmjs.org`；审计完成，0 vulnerabilities。 |
 | 轻量接力首次同步检查发现3个旧章节锚点和1个合并路径表格单元无法解析 | 将3处链接同步到历史授权新标题；把 `findings.md` 与 `progress.md` 拆为两行受影响文件；删除 `py_compile` 生成的未跟踪缓存，后续用内存编译检查。 |
+| level-1激活首次治理检查把`findings.md`与`progress.md`合并单元解析成不存在路径 | 将两个受影响文件拆成独立表格行；不修改路径解析器或降低检查标准。 |

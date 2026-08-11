@@ -35,6 +35,12 @@ updated: 2026-08-11
 5. 更新证据追踪和对应验证计划；
 6. 仍需独立 Human Gate 才能授权正式 `src`。
 
+## level-1调查与设计任务卡
+
+Human选择不写正式代码的调查、设计、验证或治理工作项后，使用一份`work-item-task-card`记录目标、范围、证据、步骤、退出标准和Human停点。它使用`main-definition: false`，不改变节点工程状态，也不是实施授权包。
+
+当前任务卡：[[系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）]]。
+
 ## 实施授权包
 
 正式代码或全局技术栈进入 Human Gate 时，可以建立一份轻量 `implementation-authorization-package`。它不是节点主定义，必须使用 `main-definition: false`，并分别记录 `work-item-id`、节点、设计和验证引用。
