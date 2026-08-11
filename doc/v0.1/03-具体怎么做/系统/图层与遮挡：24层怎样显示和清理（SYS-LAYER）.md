@@ -12,7 +12,13 @@ engineering-status: designed
 source-refs:
   - CAP-LAYER-001
   - CAP-MAP-001
+  - BASE-LAYER-001
+  - BASE-ROOF-001
+  - BASE-BRIDGE-001
+  - BASE-PARTICLE-001
+  - BASE-FOOTSTEP-001
   - Q-LAYER-001
+  - Q-LAYER-002
 decision-refs:
   - DEC-SYS-WORLD-LAYER-INVESTIGATION-001
   - DEC-SYS-WORLD-LAYER-DESIGN-001
@@ -38,7 +44,8 @@ updated: 2026-08-11
 - FACT：地图visible会被运行时代码覆盖；
 - FACT：玩家depth动态变化，桥、怪物和龙卷风会覆盖常态depth；
 - FACT：footsteps grid与footsteps tilelayer位置完全一致；
-- UNKNOWN：particles3、特殊13层卸载和最终视觉遮挡仍未完整证明；
+- FACT：1280×720公开运行补证已验证layer8遮挡、roof淡隐、bridge切换和footsteps生成；
+- UNKNOWN：particles3 marker到trajectory消费者的直接链路，以及特殊13层为何不随原站chunk卸载；
 - 项目约束：不能只实现11层却宣称24层完成，也不能把未来可能复用当作当前抽象理由。
 
 ## 2. 负责与不负责（DECISION，accepted）
@@ -77,7 +84,7 @@ updated: 2026-08-11
 
 说明：
 
-- 第一版采用发布初始创建的layer6–10 depth 1500–1900作为设计默认，不采用只在“缺层补建”分支出现的1100–1500；最终视觉验收仍受`Q-LAYER-001`阻塞；
+- 第一版采用发布初始创建的layer6–10 depth 1500–1900作为设计默认，不采用只在“缺层补建”分支出现的1100–1500；该默认已由`BASE-LAYER-001`的桌面运行补证验证；
 - hidden marker层不等于丢弃数据；它们必须进入明确消费者或保留为可诊断未消费状态；
 - 第一版不复制“特殊13层永不卸载”的发布代码表现；所有来源于chunk的数据都必须有对称移除策略；
 - roof/bridge目前作为SYS-LAYER内部子能力，不因名称特殊就提前建立独立系统。
@@ -136,7 +143,7 @@ playerDepth = base + footY * scale
 
 ### roof
 
-SYS-LAYER拥有roof分组句柄和当前alpha状态；“玩家是否进入区域”的判定可以来自后续区域能力，但图层系统负责幂等应用显示/淡隐结果。第一版保留发布的300ms行为参考，最终参数等待行为验证。
+SYS-LAYER拥有roof分组句柄和当前alpha状态；“玩家是否进入区域”的判定可以来自后续区域能力，但图层系统负责幂等应用显示/淡隐结果。第一版保留Bundle的300ms行为参数；`BASE-ROOF-001`已验证进入淡隐与离开恢复结果。
 
 ### bridge
 
@@ -171,22 +178,22 @@ SYS-LAYER保存每座桥当前上下状态，并以一次状态切换同时更�
 - 24层全部显式建模比只处理11层工作量更高，但避免长期隐藏缺口；
 - 使用chunk中的footsteps可减少一份运行状态，但与原站加载独立grid的内部方式不同，需要行为验证；
 - particles消费者仍未知，第一版可能只能保留marker和明确未完成状态；
-- layer6–10与玩家的精确遮挡尚缺运行证据，不能仅凭静态设计宣称视觉一致；
+- layer6–10、roof、bridge和footsteps已获得桌面运行证据，但移动视口和自然长路径仍不在本轮覆盖；
 - roof和bridge若后续出现独立复杂生命周期，再根据真实实现考虑拆节点，当前不提前拆。
 
 ## 10. 已接受决定
 
 1. 24层策略表作为唯一图层合同；
 2. 所有chunk来源层都具有对称移除，不照搬特殊13层不清除；
-3. layer6–10第一版使用1500–1900设计默认，并保留视觉证据阻塞；
+3. layer6–10第一版使用1500–1900设计默认；桌面视觉证据已通过；
 4. footsteps以chunk tilelayer为运行来源，外部grid只作Oracle；
 5. particles3在消费者未知时保留marker并明确未完成；
-6. 单独建立有边界原站视觉补证工作项以继续处理`Q-LAYER-001`。
+6. 已完成有边界原站视觉补证并关闭`Q-LAYER-001`；particles3直连问题转入`Q-LAYER-002`。
 
 ## 11. 当前状态
 
 - 调查：24层数据和主要静态调用链已建立；
-- 未知：`Q-LAYER-001`仍open；
+- 未知：`Q-LAYER-001`已关闭；`Q-LAYER-002`继续open；
 - 设计：`accepted`；
 - 节点：`designed`；
 - 实现：未授权；

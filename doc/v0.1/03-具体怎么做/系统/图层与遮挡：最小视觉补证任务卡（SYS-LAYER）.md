@@ -58,6 +58,8 @@ updated: 2026-08-11
 | `doc/v0.1/03-具体怎么做/系统/图层与遮挡：从原站查到了什么（SYS-LAYER 调查记录）.md` | 回写FACT与残余UNKNOWN |
 | `doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）.md` | 只在证据要求修正已接受设计时回写；不能静默改变DECISION |
 | `doc/v0.1/04-怎么验证与还差什么/图层与遮挡：怎样验证做对了（SYS-LAYER 验证计划）.md` | 记录场景结果 |
+| `doc/v0.1/04-怎么验证与还差什么/原站实际表现是什么（行为基准）.md` | 按项目协议登记可重复BASE行为 |
+| `doc/v0.1/04-怎么验证与还差什么/原站和旧版本差在哪（证据与差距）.md` | 按项目协议同步旧复刻差距证据入口 |
 | `doc/v0.1/05-还不清楚什么/还缺哪些答案（未知问题队列）.md` | 关闭或收窄`Q-LAYER-001` |
 | `doc/v0.1/谁确认过什么（来源与决策记录）.md` | 决定和验证基线 |
 | `doc/v0.1/04-怎么验证与还差什么/文档有没有对齐（治理检查报告）.md` | 结构与语义复验 |
@@ -93,3 +95,15 @@ updated: 2026-08-11
 - 没有扩大公开镜像、修改旧项目或写正式代码；
 - 复用观察仍为“未发现”，除非出现第二个独立真实场景；
 - 工作项结果进入clean Git基线并停在Human审查。
+
+## 8. 当前结果
+
+| 场景 | 状态 | 证据 |
+|---|---|---|
+| layer8遮挡 | VERIFIED | `01-upper-before.png`至`03-upper-after.png`和observations |
+| factory roof | VERIFIED | `04-roof-before.png`至`06-roof-after.png`和observations |
+| bridge1 | VERIFIED | `07-bridge-before.png`至`10-bridge-exit.png`和observations |
+| particles3位置 | VERIFIED_WITH_RESIDUAL_UNKNOWN | `11-particles3.png`；运行表现已记录，直接消费者链转`Q-LAYER-002` |
+| footsteps | VERIFIED | `12-footsteps-before.png`、`13-footsteps-after.png`和active footprint 0→5 |
+
+证据目录：`sample/analysis/layer-visual-evidence/`。当前已满足内容退出标准，正在建立clean验证基线，尚未关闭工作项。

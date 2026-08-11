@@ -7,12 +7,12 @@ work-item-status: active
 node-refs: SYS-LAYER
 scope-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
 exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
-current-phase: investigation
+current-phase: verification
 current-gate: none
 gate-status: not-applicable
 authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
 preauthorized-next-work-item: none
-next-phase: verification
+next-phase: closure
 updated: 2026-08-11
 ---
 
@@ -112,7 +112,7 @@ updated: 2026-08-11
 | 工作项 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` |
 | 级别与类型 | `level-1 / investigation` |
 | 涉及节点 | `SYS-LAYER` |
-| 当前阶段 | `investigation` |
+| 当前阶段 | `verification` |
 | 当前 Gate | `none / not-applicable` |
 | Human决定 | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
 | 范围与退出标准 | [[doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）]] |
@@ -145,7 +145,7 @@ updated: 2026-08-11
 | `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | 两份调查记录；[[doc/v0.1/03-具体怎么做/系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；[[doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；两份验证计划 | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
 
 ## Next Step
-先用既有地图数据确定任务卡5个场景的最小候选坐标，再只访问公开原站验证Play可用性和场景可达性；保存最小截图/JSON并更新`Q-LAYER-001`。正式代码仍不授权。
+验证13张截图、observations.json、5条行为基准、`Q-LAYER-001`关闭与`Q-LAYER-002`残余拆分是否互相一致；运行治理检查和独立客观复核，建立clean结果提交后停在Human证据结论审查。正式代码仍不授权。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -171,3 +171,6 @@ updated: 2026-08-11
 | Recon将普通chunk分支的全层遍历误报为可写全部24层 | 独立verifier检查守卫`o=["layer1"]`后发现实际只写layer1；Main核对Bundle并同步修正调查记录、设计候选、验证计划和findings。 |
 | 正式设计接受后首次sync/pilot提示`level-1 selection decision does not name current work item` | 在`DEC-SYS-WORLD-LAYER-DESIGN-001`适用范围显式加入`WI-SYS-WORLD-LAYER-DESIGN-001`；不降低检查标准。 |
 | 视觉补证首次激活检查提示工作项类型、节点范围和任务卡状态不匹配 | 使用检查合同允许的`investigation`类型；将任务卡`node-refs`改为与task_plan一致的标量并将顶层status同步为active；不修改检查器。 |
+| Chrome DevTools MCP导航和连接连续超时 | 未产生采集结果；改用本机既有Puppeteer和系统Chrome访问同一公开URL，不增加项目依赖或扩大范围。 |
+| 首轮视觉脚本直接warp进bridge区未触发方向切换，且脚印统计误把95个inactive对象池成员当现有脚印 | 不采纳首轮对应结论；改为从入口/出口外用方向键自然跨入，并只统计active footprint。重跑后bridge上下状态均观察到，active脚印由0增至5。 |
+| 独立复核指出行为基准和证据差距回写未逐字列入视觉任务卡白名单 | 两项都是AGENTS.md第8节要求的强制闭环；将其显式补入任务卡允许路径，避免依赖隐含协议解释，不扩大采集或实现范围。 |

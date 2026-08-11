@@ -1,0 +1,2989 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-11T16:49:43.801Z",
+  "origin": "https://peteroravec.com/",
+  "httpStatus": 200,
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "deviceScaleFactor": 1
+  },
+  "browser": "Chrome/151.0.7922.76",
+  "hook": {
+    "purpose": "Expose existing Angular-owned Phaser game and scene only",
+    "mainBundleAnchorMatches": 1,
+    "changesPersistentFilesOnOrigin": false
+  },
+  "method": {
+    "probeAssisted": true,
+    "positionWarp": "player.setPosition + body.reset; no persistent origin change",
+    "warning": "Warp-assisted state is evidence of behavior at a coordinate, not natural path timing."
+  },
+  "introComplete": true,
+  "points": {
+    "spawn": {
+      "x": 1088,
+      "y": 304
+    },
+    "upperClear": {
+      "x": 1096,
+      "y": 1192
+    },
+    "upperLayer8": {
+      "x": 1096,
+      "y": 1208
+    },
+    "factoryRoof": {
+      "x": 360,
+      "y": 904
+    },
+    "bridgeApproach": {
+      "x": 1416,
+      "y": 952
+    },
+    "bridgeExitApproach": {
+      "x": 1784,
+      "y": 952
+    },
+    "particles3": {
+      "x": 1816,
+      "y": 1176
+    },
+    "footstepsStart": {
+      "x": 216,
+      "y": 1832
+    }
+  },
+  "records": [
+    {
+      "scenario": "upper-layer-occlusion",
+      "phase": "before",
+      "capturedAt": "2026-08-11T16:49:30.879Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1096,
+        "y": 1192,
+        "depth": 621.6,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 936,
+        "scrollY": 1102,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "3",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 800,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "4",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 944,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "5",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1152,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "7",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912.3044818699548,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 8
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 8
+        },
+        {
+          "key": "22",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 872,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "23",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1264,
+          "y": 672,
+          "alive": 4
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [
+        {
+          "id": "water_namestie_right_bottom",
+          "type": "water",
+          "tileCount": 59,
+          "depth": 550,
+          "bbox": {
+            "minX": 1088,
+            "maxX": 1248,
+            "minY": 1072,
+            "maxY": 1216
+          },
+          "playerInBbox": true
+        }
+      ],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj2",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "01-upper-before.png"
+    },
+    {
+      "scenario": "upper-layer-occlusion",
+      "phase": "inside",
+      "capturedAt": "2026-08-11T16:49:31.897Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1096,
+        "y": 1208,
+        "depth": 623.2,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 936,
+        "scrollY": 1118,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "3",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 800,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "4",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 944,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "5",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1152,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "7",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912.3044818699548,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 16
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 16
+        },
+        {
+          "key": "22",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 872,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "23",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1264,
+          "y": 672,
+          "alive": 4
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [
+        {
+          "id": "water_namestie_right_bottom",
+          "type": "water",
+          "tileCount": 59,
+          "depth": 550,
+          "bbox": {
+            "minX": 1088,
+            "maxX": 1248,
+            "minY": 1072,
+            "maxY": 1216
+          },
+          "playerInBbox": true
+        }
+      ],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj2",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "02-upper-inside.png"
+    },
+    {
+      "scenario": "upper-layer-occlusion",
+      "phase": "after",
+      "capturedAt": "2026-08-11T16:49:32.904Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1096,
+        "y": 1192,
+        "depth": 621.6,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 936,
+        "scrollY": 1102,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "3",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 800,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "4",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 944,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "5",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1152,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "7",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912.3044818699548,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "22",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 872,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "23",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1264,
+          "y": 672,
+          "alive": 4
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [
+        {
+          "id": "water_namestie_right_bottom",
+          "type": "water",
+          "tileCount": 59,
+          "depth": 550,
+          "bbox": {
+            "minX": 1088,
+            "maxX": 1248,
+            "minY": 1072,
+            "maxY": 1216
+          },
+          "playerInBbox": true
+        }
+      ],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "03-upper-after.png"
+    },
+    {
+      "scenario": "factory-roof",
+      "phase": "before",
+      "capturedAt": "2026-08-11T16:49:33.899Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1088,
+        "y": 304,
+        "depth": 532.8,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 928,
+        "scrollY": 214,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "3",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 800,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "4",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 944,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "5",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1152,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "7",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912.3044818699548,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 24
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 24
+        },
+        {
+          "key": "22",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 872,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "23",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1264,
+          "y": 672,
+          "alive": 4
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "04-roof-before.png"
+    },
+    {
+      "scenario": "factory-roof",
+      "phase": "inside",
+      "capturedAt": "2026-08-11T16:49:34.914Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 360,
+        "y": 904,
+        "depth": 592.8,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 200,
+        "scrollY": 814,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "3",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 800,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "4",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 944,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "5",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1152,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "7",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912.3044818699548,
+          "y": 928,
+          "alive": 4
+        },
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 4
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "22",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 872,
+          "y": 672,
+          "alive": 4
+        },
+        {
+          "key": "23",
+          "type": "water2",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1264,
+          "y": 672,
+          "alive": 4
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 97,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        },
+        {
+          "type": "N",
+          "texture": "lizard",
+          "x": 604.7825000000028,
+          "y": 784,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "05-roof-inside.png"
+    },
+    {
+      "scenario": "factory-roof",
+      "phase": "after",
+      "capturedAt": "2026-08-11T16:49:35.908Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1088,
+        "y": 304,
+        "depth": 532.8,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 928,
+        "scrollY": 214,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 20
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "06-roof-after.png"
+    },
+    {
+      "scenario": "bridge1",
+      "phase": "before",
+      "capturedAt": "2026-08-11T16:49:36.901Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1416,
+        "y": 952,
+        "depth": 597.6,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 1256,
+        "scrollY": 862,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 4
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 24
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [
+        {
+          "id": null,
+          "type": "crowd",
+          "tileCount": 18,
+          "bbox": {
+            "minX": 1384,
+            "maxX": 1448,
+            "minY": 872,
+            "maxY": 952
+          },
+          "playerInBbox": true
+        }
+      ],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "07-bridge-before.png"
+    },
+    {
+      "scenario": "bridge1",
+      "phase": "entry",
+      "capturedAt": "2026-08-11T16:49:37.462Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1427.0682997800002,
+        "y": 952,
+        "depth": 1650,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 1267,
+        "scrollY": 862,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 82
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": false,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 28
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [
+        {
+          "id": null,
+          "type": "crowd",
+          "tileCount": 18,
+          "bbox": {
+            "minX": 1384,
+            "maxX": 1448,
+            "minY": 872,
+            "maxY": 952
+          },
+          "playerInBbox": true
+        }
+      ],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "08-bridge-entry.png"
+    },
+    {
+      "scenario": "bridge1",
+      "phase": "middle",
+      "capturedAt": "2026-08-11T16:49:38.459Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1784,
+        "y": 952,
+        "depth": 1650,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 1624,
+        "scrollY": 862,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 82
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": false,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 28
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj2",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "09-bridge-middle.png"
+    },
+    {
+      "scenario": "bridge1",
+      "phase": "exit",
+      "capturedAt": "2026-08-11T16:49:39.255Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1826.9930457200014,
+        "y": 952,
+        "depth": 597.6,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 1666,
+        "scrollY": 862,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 28
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj2",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "10-bridge-exit.png"
+    },
+    {
+      "scenario": "particles3",
+      "phase": "at-marker",
+      "capturedAt": "2026-08-11T16:49:40.251Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 1816,
+        "y": 1176,
+        "depth": 620,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 1656,
+        "scrollY": 1086,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 20
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 28
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [
+        {
+          "id": null,
+          "type": "crowd_up",
+          "tileCount": 16,
+          "bbox": {
+            "minX": 1768,
+            "maxX": 1864,
+            "minY": 1176,
+            "maxY": 1240
+          },
+          "playerInBbox": true
+        },
+        {
+          "id": null,
+          "type": "protesters_rising",
+          "tileCount": 86,
+          "bbox": {
+            "minX": 1672,
+            "maxX": 1896,
+            "minY": 1096,
+            "maxY": 1304
+          },
+          "playerInBbox": true
+        }
+      ],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj2",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "11-particles3.png"
+    },
+    {
+      "scenario": "footsteps",
+      "phase": "before-move",
+      "capturedAt": "2026-08-11T16:49:41.264Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 216,
+        "y": 1832,
+        "depth": 685.6,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 56,
+        "scrollY": 1742,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "9",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 912,
+          "y": 1144,
+          "alive": 12
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 20
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "npc-dj2",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "12-footsteps-before.png"
+    },
+    {
+      "scenario": "footsteps",
+      "phase": "after-move",
+      "capturedAt": "2026-08-11T16:49:43.705Z",
+      "probeAssisted": true,
+      "player": {
+        "x": 483.9532605899983,
+        "y": 1832,
+        "depth": 685.6,
+        "velocityX": 0,
+        "velocityY": 0,
+        "active": true
+      },
+      "camera": {
+        "scrollX": 323,
+        "scrollY": 1742,
+        "zoom": 1
+      },
+      "introComplete": true,
+      "layers": [
+        {
+          "name": "layer5",
+          "visible": true,
+          "alpha": 1,
+          "depth": 500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer6",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer7",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1600,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer8",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1700,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer9",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1800,
+          "collidingTiles": 0
+        },
+        {
+          "name": "layer10",
+          "visible": true,
+          "alpha": 1,
+          "depth": 1900,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3000,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_factory2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3100,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3200,
+          "collidingTiles": 0
+        },
+        {
+          "name": "roof_concert2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 3300,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge1_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 14
+        },
+        {
+          "name": "bridge1_up_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "bridge2_down_wall",
+          "visible": true,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 16
+        },
+        {
+          "name": "bridge2_up_wall",
+          "visible": false,
+          "alpha": 0,
+          "depth": 3500,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        {
+          "name": "particles2",
+          "visible": true,
+          "alpha": 1,
+          "depth": 0,
+          "collidingTiles": 0
+        },
+        null,
+        null
+      ],
+      "bridgeState": {
+        "bridge1Down": true,
+        "bridge2Down": true
+      },
+      "mapHasParticles3": false,
+      "mapHasFootsteps": false,
+      "particleEmitterCount": 15,
+      "areaParticleEmitterCount": 29,
+      "activeAreaEmitterStates": [
+        {
+          "key": "8",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1167.695518130045,
+          "y": 928,
+          "alive": 8
+        },
+        {
+          "key": "10",
+          "type": "water",
+          "active": true,
+          "emitting": false,
+          "visible": true,
+          "x": 1168,
+          "y": 1144,
+          "alive": 8
+        },
+        {
+          "key": "15",
+          "type": "water",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 832,
+          "y": 2032,
+          "alive": 0
+        },
+        {
+          "key": "26",
+          "type": "water2",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 880,
+          "y": 2104,
+          "alive": 4
+        },
+        {
+          "key": "28",
+          "type": "water2",
+          "active": true,
+          "emitting": true,
+          "visible": true,
+          "x": 631.6955181300452,
+          "y": 2040,
+          "alive": 12
+        }
+      ],
+      "particleRegionCount": 88,
+      "playerRegions": [],
+      "depth450PoolCount": 96,
+      "depth450": [
+        {
+          "type": "initialize",
+          "texture": "footprint",
+          "x": 272.5701816899999,
+          "y": 1842,
+          "alpha": 0.6,
+          "active": true
+        },
+        {
+          "type": "initialize",
+          "texture": "footprint",
+          "x": 287.3332313399998,
+          "y": 1842,
+          "alpha": 0.6,
+          "active": true
+        },
+        {
+          "type": "initialize",
+          "texture": "footprint",
+          "x": 302.08903121999964,
+          "y": 1842,
+          "alpha": 0.6,
+          "active": true
+        },
+        {
+          "type": "initialize",
+          "texture": "footprint",
+          "x": 316.1886892499996,
+          "y": 1842,
+          "alpha": 0.6,
+          "active": true
+        },
+        {
+          "type": "initialize",
+          "texture": "footprint",
+          "x": 330.2228473799995,
+          "y": 1842,
+          "alpha": 0.6,
+          "active": true
+        },
+        {
+          "type": "initialize",
+          "texture": "npc-dj1",
+          "x": 1944,
+          "y": 632,
+          "alpha": 1,
+          "active": true
+        }
+      ],
+      "screenshot": "13-footsteps-after.png"
+    }
+  ],
+  "scenarioResults": {
+    "bridgeUpObserved": true,
+    "bridgeDownRestored": true
+  },
+  "footstepsDelta": {
+    "beforeActive": 0,
+    "afterActive": 5
+  },
+  "pageErrors": []
+}

@@ -12,7 +12,13 @@ engineering-status: undesign
 source-refs:
   - CAP-LAYER-001
   - CAP-MAP-001
+  - BASE-LAYER-001
+  - BASE-ROOF-001
+  - BASE-BRIDGE-001
+  - BASE-PARTICLE-001
+  - BASE-FOOTSTEP-001
   - Q-LAYER-001
+  - Q-LAYER-002
 decision-refs:
   - DEC-SYS-WORLD-LAYER-INVESTIGATION-001
 main-definition: false
@@ -130,6 +136,18 @@ layer6–10 = 1500, 1600, 1700, 1800, 1900
 
 玩家常态depth不是固定值：已定位更新规则约为`500 + (player.y + 24) * 0.1`。桥上可强制为1650；怪物抓取设为2001；龙卷风路径还会按发射器depth覆盖。因而玩家与基础层、roof和bridge的最终遮挡关系必须同时考虑动态玩家depth，不能只比较静态图层depth。
 
+### 4.8 公开原站最小运行补证
+
+`SRC-20260811-007`在1280×720公开原站运行中记录13个阶段状态和13张截图：
+
+- 玩家从clear tile `(68,74)`进入layer8非零tile `(68,75)`时，player depth由621.6变为623.2，layer8 depth为1700；画面中上层灌木覆盖玩家下半身，离开后恢复；
+- 进入factory区域`(360,904)`后，factory两个roof层alpha由1变0，离开后恢复1；concert两个roof层保持1；
+- bridge1从左入口方向键进入后，down wall碰撞tile由14变0、up wall由0变82、player depth变1650；从右出口离开后反向恢复；
+- 优化运行Tilemap没有particles3或footsteps层；在particles3的86格marker区域，玩家同时落入`protesters_rising(tileCount=86)`与`crowd_up`region，画面显示抗议人群；
+- 玩家沿独立footsteps grid路径移动后，active footprint sprites由0增至5，depth均为450。
+
+采集使用内存探针暴露既有GameScene，并用warp到达远距离场景；bridge和footsteps关键切换由原站方向输入触发。因此这些是对应坐标下的运行FACT，不证明自然步行路线耗时。
+
 ## 5. 暂定边界（INFERRED）
 
 - 图层系统应拥有“图层定义到运行时策略”的映射，而不是让SYS-CHUNK硬编码所有名称；
@@ -139,16 +157,15 @@ layer6–10 = 1500, 1600, 1700, 1800, 1900
 
 ## 6. `Q-LAYER-001`当前状态
 
-仍保持`open`。静态证据已回答大部分创建顺序、depth、可见性和碰撞调用，但以下问题仍会影响正式设计或视觉验收：
+`closed`。静态规则与`SRC-20260811-007`最小运行证据现在可以共同解释：
 
-1. 玩家、roof和基础层在真实运行中的前后遮挡是否与静态depth一致；
-2. 两套layer6–10 depth公式是否会在实际路径中产生差异；
-3. bridge上下层切换与玩家depth 1650的完整时序；
-4. particles、particles2、particles3的视觉消费者和清理方式；
-5. footsteps tilelayer与独立grid虽然位置完全一致，但为何同时发布、运行时为何只消费grid；
-6. 特殊13层不随chunk卸载是否为有意的全局层策略。
+1. 发布运行采用layer6–10初始depth 1500–1900；玩家常态约500–724，因此上方视觉层可以遮挡玩家；
+2. roof使用3000–3300并通过alpha动态淡隐，不依赖改变depth；
+3. bridge wall使用3500，方向切换同步改变可见碰撞墙和player depth 1650，离开后恢复常态；
+4. 优化运行不创建particles3和footsteps tilelayer；footsteps行为来自独立grid，particles3位置的动态表现来自trajectory region体系而不是可见raw tilelayer；
+5. walls和cars保持隐藏数据/碰撞职责，不参与直接视觉遮挡。
 
-关闭该问题至少需要：进一步静态调用链核对，并在确有必要时申请有边界的浏览器截图或Canvas采样；当前工作项没有授权刷新证据。
+仍有两个不影响关闭本问题的残余：特殊13层为何不随原站chunk卸载继续留在SYS-WORLD生命周期UNKNOWN；particles3的86个marker怎样直接对应到`protesters_rising`消费者转入`Q-LAYER-002`。
 
 ## 7. 对后续设计的约束
 

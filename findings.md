@@ -79,3 +79,8 @@
 - 当前设计候选建议第一版以master+chunk作为唯一运行数据来源，final_map/final_map_small只作Oracle；SYS-WORLD拥有Tilemap、图层实例和已渲染集合，SYS-LAYER提供24层完整策略，SYS-CHUNK继续拥有目标/请求状态。该设计避免复制发布Bundle整图优化与chunk动态写入并存的状态分叉，代价是需要行为验证证明视觉一致。
 - 图层设计候选将基础视觉、隐藏碰撞、动态roof/bridge和marker数据分开；所有chunk来源数据都要求对称remove，不照搬特殊13层未清除。footsteps建议以chunk tilelayer为运行来源、外部grid作Oracle；particles3在消费者未知时保留marker并明确未完成。
 - Human已接受SYS-WORLD与SYS-LAYER当前详细设计，并授权当前项关闭后的5场景最小视觉补证。设计接受不关闭Q-LAYER-001，也不授权正式代码；补证只允许公开原站、白名单截图/JSON和必要采集脚本。
+- 原站1280x720运行补证：玩家从clear tile(68,74)进入layer8 tile(68,75)时player depth 621.6→623.2、layer8 depth 1700，截图显示上层灌木遮住玩家下半身；离开恢复。
+- factory roof运行补证：进入(360,904)后roof_factory/roof_factory2 alpha由1变0，离开恢复1；concert两层保持1。
+- bridge1运行补证：方向键从左入口进入后down wall碰撞tile 14→0、up wall 0→82、玩家depth变1650；从右出口离开后down wall和玩家常态depth恢复。
+- particles3位置运行补证：优化运行Tilemap没有particles3层；在86格marker范围内玩家同时落入protesters_rising(tileCount=86)和crowd_up region，截图有抗议人群。marker到trajectory消费者的直接链路仍UNKNOWN。
+- footsteps运行补证：优化运行Tilemap没有footsteps层；玩家沿独立grid对应路径移动后active footprint sprites由0增至5，depth 450。5场景均获得可定位运行证据。

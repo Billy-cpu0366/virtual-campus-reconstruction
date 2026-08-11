@@ -2,7 +2,7 @@
 title: 图层与遮挡：怎样验证做对了（SYS-LAYER 验证计划）
 type: system-verification-plan
 status: approved
-version: v0.2
+version: v0.3
 node-id: SYS-LAYER
 design-ref: ../03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）.md#SYS-LAYER
 implementation-status: not-authorized
@@ -41,17 +41,19 @@ updated: 2026-08-11
 | LAYER-DESIGN-008 | particles3没有消费者 | 数据保留并明确报告未完成 | 静默删除后宣称24层完成 |
 | LAYER-DESIGN-009 | 注入非法GID或缺层 | 整个chunk转换失败且错误含层名、坐标和GID | 部分写入或静默降级 |
 
-## 3. `Q-LAYER-001`行为补证计划
+## 3. `Q-LAYER-001`行为补证结果
 
-静态证据不足以证明最终视觉顺序。若Human单独允许有边界补证，只采集以下最小场景，不扩大资源镜像：
+`WI-SYS-LAYER-VISUAL-EVIDENCE-001`按授权只采集公开原站5个场景。原始截图与状态在`sample/analysis/layer-visual-evidence/`。
 
-1. 玩家从layer1–5区域移动到layer6–10遮挡区域；
-2. 进入和离开factory或concert roof区域；
-3. 从桥下切换到桥上并反向离开；
-4. 包含particles3或footsteps标记的位置；
-5. 每个场景只记录必要截图、玩家世界坐标、玩家depth、相关层visible/alpha/depth和碰撞状态。
+| 基准 | 场景 | 结果 | 关键证据 |
+|---|---|---|---|
+| BASE-LAYER-001 | layer8遮挡 | VERIFIED | player depth约623，layer8 depth 1700；进入tile后上层灌木遮挡玩家下半身 |
+| BASE-ROOF-001 | factory roof | VERIFIED | factory两个roof alpha 1→0→1；concert保持1 |
+| BASE-BRIDGE-001 | bridge1进入与离开 | VERIFIED | down/up碰撞tile 14/0→0/82→14/0；player depth常态→1650→常态 |
+| BASE-PARTICLE-001 | particles3 marker区域 | PARTIAL | 运行Tilemap无particles3；画面有抗议人群并落入protesters_rising region；直接消费者链仍UNKNOWN |
+| BASE-FOOTSTEP-001 | footsteps grid移动 | VERIFIED | 运行Tilemap无footsteps；active footprint 0→5，depth 450 |
 
-通过条件：静态depth、动态状态和实际前后遮挡能相互解释。若无法访问运行状态，只能保留UNKNOWN，不能凭截图猜内部规则。
+静态depth、动态状态和画面现在能够互相解释，`Q-LAYER-001`关闭。particles3 marker到trajectory消费者的直接关系转入`Q-LAYER-002`，不伪装成已证明。
 
 ## 4. 未来实现测试
 
@@ -70,7 +72,8 @@ updated: 2026-08-11
 ## 5. 当前状态
 
 - 数据事实：24层完整性、footsteps等价和主要Bundle锚点已验证；
-- `Q-LAYER-001`：open；等待Human决定是否允许最小行为补证；
+- `Q-LAYER-001`：closed；5场景补证已完成；
+- `Q-LAYER-002`：open；只保留particles3 marker到trajectory消费者的直接关系；
 - 正式设计：Human已接受；
 - 实现：未授权；
 - 节点：`designed`；
