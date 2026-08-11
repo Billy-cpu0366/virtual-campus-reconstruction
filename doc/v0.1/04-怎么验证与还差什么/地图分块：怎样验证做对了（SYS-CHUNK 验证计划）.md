@@ -4,7 +4,7 @@ type: system-verification-plan
 status: approved
 version: v0.1
 node-id: SYS-CHUNK
-design-ref: ../具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
+design-ref: ../03-具体怎么做/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
 implementation-status: core-verified-work-item-closed
 updated: 2026-08-11
 ---

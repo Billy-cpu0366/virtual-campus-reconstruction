@@ -42,7 +42,7 @@ updated: 2026-08-10
 | 数据请求与缓存 | `sample/original-public-build/mirror/chunk-RA2FASQA.js`，搜索 `loadMasterData`、`getChunkFileName`、`loadChunk` | master 请求、文件名公式、manager 缓存 |
 | 场景目标集合与写入 | `sample/original-public-build/mirror/chunk-WMFY56ZM.js`，搜索 `getVisibleChunksForCamera`、`loadChunk(e,t)`、`unloadChunk(e,t)` | 玩家/相机目标集合、场景缓存、清除 Tilemap |
 | 相机预载 | 同上，搜索 `startCameraSequence`、`preloadChunksForCameraSequence`、`requestIdleCallback` | Play 前预载过程 |
-| 运行时结果 | [[../../怎么验证与还差什么（04）/原站实际表现是什么（行为基准）]] 的 `BASE-MAP-001` 行、[[../../整体怎么运作（02）/先做什么（P0系统对照与顺序）#3. 地图分块新增事实]] | 25个 chunk 请求与首屏时序 |
+| 运行时结果 | [[../../04-怎么验证与还差什么/原站实际表现是什么（行为基准）]] 的 `BASE-MAP-001` 行、[[../../02-整体怎么运作/先做什么（P0系统对照与顺序）#3. 地图分块新增事实]] | 25个 chunk 请求与首屏时序 |
 
 公开 Bundle 只能证明发布后的运行机制，不能证明原始 TypeScript 文件边界或命名。
 
@@ -126,7 +126,7 @@ master 成功后，场景启动相机展示；约 `100ms` 后调用 `preloadChun
 2. 说明两个 Map 的状态所有权、转换条件和销毁责任；
 3. 写清加载、失败、重复、取消、卸载和场景退出的路径；
 4. 明确分块与世界、图层、资源加载、玩家、相机之间的输入/输出边界；
-5. 从 [[../../怎么验证与还差什么（04）/原站实际表现是什么（行为基准）]] 拆出可重复的分块验收步骤和失败判定；
+5. 从 [[../../04-怎么验证与还差什么/原站实际表现是什么（行为基准）]] 拆出可重复的分块验收步骤和失败判定；
 6. 由 Human 审查后，才将节点主定义登记为正式设计并讨论是否授权实现。
 
 ## 7. 当前结论

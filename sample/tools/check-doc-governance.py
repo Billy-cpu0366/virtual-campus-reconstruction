@@ -23,13 +23,13 @@ DOC_ROOT = PROJECT_ROOT / "doc" / "v0.1"
 FINAL_PLAN = DOC_ROOT / "文档怎样保持清楚（治理方案）.md"
 OLD_PLAN = DOC_ROOT / "旧版文档治理方案（已被替代）.md"
 LEDGER = DOC_ROOT / "谁确认过什么（来源与决策记录）.md"
-NODE_REGISTRY = DOC_ROOT / "整体怎么运作（02）" / "功能总目录（节点清单）.md"
-CAPABILITY_INDEX = DOC_ROOT / "目标与范围（01）" / "原站有哪些功能（能力清单）.md"
-ORIGINAL_BASELINE = DOC_ROOT / "怎么验证与还差什么（04）" / "原站实际表现是什么（行为基准）.md"
-UNKNOWN_QUEUE = DOC_ROOT / "还不清楚什么（05）" / "还缺哪些答案（未知问题队列）.md"
+NODE_REGISTRY = DOC_ROOT / "02-整体怎么运作" / "功能总目录（节点清单）.md"
+CAPABILITY_INDEX = DOC_ROOT / "01-目标与范围" / "原站有哪些功能（能力清单）.md"
+ORIGINAL_BASELINE = DOC_ROOT / "04-怎么验证与还差什么" / "原站实际表现是什么（行为基准）.md"
+UNKNOWN_QUEUE = DOC_ROOT / "05-还不清楚什么" / "还缺哪些答案（未知问题队列）.md"
 TASK_PLAN = PROJECT_ROOT / "task_plan.md"
 WORKFLOW_GUIDE = DOC_ROOT / "每轮工作怎么推进（流程速查）.md"
-VERIFICATION_REPORT = DOC_ROOT / "怎么验证与还差什么（04）" / "文档有没有对齐（治理检查报告）.md"
+VERIFICATION_REPORT = DOC_ROOT / "04-怎么验证与还差什么" / "文档有没有对齐（治理检查报告）.md"
 
 REQUIRED_FILES = [
     PROJECT_ROOT / "AGENTS.md",
@@ -704,7 +704,7 @@ def check_source_artifacts(result: Result) -> None:
 def check_known_drift(result: Result) -> None:
     quick = read_text(WORKFLOW_GUIDE)
     plain = read_text(DOC_ROOT / "项目为什么这样做（通俗说明）.md")
-    architecture = read_text(DOC_ROOT / "整体怎么运作（02）" / "各部分怎样配合（系统依赖）.md")
+    architecture = read_text(DOC_ROOT / "02-整体怎么运作" / "各部分怎样配合（系统依赖）.md")
     roadmap = read_text(DOC_ROOT / "项目走到哪一步（路线图与关卡）.md")
     report = read_text(VERIFICATION_REPORT)
     src_readme = read_text(PROJECT_ROOT / "src" / "README.md")

@@ -8,8 +8,8 @@ version: v0.1
 work-item-id: WI-SYS-CHUNK-CORE-001
 work-item-level: level-2
 node-refs: SYS-CHUNK
-design-ref: doc/v0.1/具体怎么做（03）/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
-verification-ref: doc/v0.1/怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）.md
+design-ref: doc/v0.1/03-具体怎么做/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK
+verification-ref: doc/v0.1/04-怎么验证与还差什么/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）.md
 main-definition: false
 updated: 2026-08-11
 ---
@@ -36,7 +36,7 @@ updated: 2026-08-11
 | 涉及节点 | `SYS-CHUNK` |
 | 当前状态 | `completed`；结果提交、验证和关闭索引均可定位 |
 | 正式主定义 | [[地图分块：玩家移动时怎样加载地图（SYS-CHUNK）#SYS-CHUNK]] |
-| 退出标准 | [[../../怎么验证与还差什么（04）/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）#2. 重构设计验收]] 中与本轮范围对应的确定性检查 |
+| 退出标准 | [[../../04-怎么验证与还差什么/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）#2. 重构设计验收]] 中与本轮范围对应的确定性检查 |
 
 ## 3. 提议纳入的范围
 
