@@ -52,4 +52,5 @@
 - 工作项关闭被 `BLK-WI-CLOSURE-001` 阻塞：无预授权下一项时，协议和检查器缺少合法的“无当前工作项/等待选择”状态。等待 Human 接受最小空闲合同或直接选择下一工作项。
 - Human 已接受 `DEC-WORK-RELAY-002` 最小修补；已将 CORE 关闭、task_plan 切换为 `current-work-item: none / work-item-selection`，并让检查器按零或一个当前 WI 条件检查。dirty transaction preflight：Python内存编译 PASS、sync 851项 PASS、pilot 856项 PASS、`git diff --check` PASS；该计数包含按脏工作树变更路径执行的写入边界检查。
 - 最小关闭合同内容提交为 `df93d97f2ff8dfb88d54dd58f2d58351bd7c0720`；clean 基线上 Python compile、sync 840项、pilot 845项和 `git diff --check` 均 PASS。lightweight-verifier 只读复核 PASS，无 blocking/high/medium 缺陷；CORE 工作项已合法关闭，当前等待下一项选择。
-- Human 已要求按阅读顺序重命名01至05一级目录，并以SYS-CHUNK建立第一份纵向人话解读。目录、内部引用、机器入口和治理检查器已同步；新建`用地图分块看懂01到05（SYS-CHUNK 人话解读）.md`并接入项目入口与03入口。dirty工作树结构检查为sync 916项、pilot 921项PASS，正式clean Git验证仍pending。
+- Human 已要求按阅读顺序重命名01至05一级目录，并以SYS-CHUNK建立第一份纵向人话解读。目录、内部引用、机器入口和治理检查器已同步；新建`用地图分块看懂01到05（SYS-CHUNK 人话解读）.md`并接入项目入口与03入口。dirty工作树结构检查为sync 916项、pilot 921项PASS。
+- 导航内容提交为`71919ca`，Python缓存清理提交为`85586f4`；在clean内容基线`85586f4`上完成sync 878项、pilot 883项、`git diff --check`、旧路径扫描和Main语义复验，`DEC-DOC-NAV-004/005`进入verified。
