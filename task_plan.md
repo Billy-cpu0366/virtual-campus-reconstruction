@@ -1,18 +1,18 @@
 ---
 workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
-current-work-item: WI-SYS-WORLD-LAYER-DESIGN-001
+current-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
 work-item-level: level-1
 work-item-type: investigation
 work-item-status: active
-node-refs: SYS-WORLD; SYS-LAYER
-scope-ref: doc/v0.1/03-具体怎么做/系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）.md
-exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）.md
-current-phase: verification
+node-refs: SYS-LAYER
+scope-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
+exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
+current-phase: investigation
 current-gate: none
 gate-status: not-applicable
-authorization-ref: DEC-SYS-WORLD-LAYER-DESIGN-001
-preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
-next-phase: closure
+authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
+preauthorized-next-work-item: none
+next-phase: verification
 updated: 2026-08-11
 ---
 
@@ -25,7 +25,7 @@ updated: 2026-08-11
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计已由Human接受；当前只允许完成设计审查包验证与关闭。最小视觉补证已预授权，但必须等当前工作项关闭并独立激活后才能采集。
+- 世界装配与图层详细设计已由Human接受、验证并关闭；当前激活最小视觉补证，只允许任务卡5个公开原站场景和白名单输出。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -37,7 +37,8 @@ updated: 2026-08-11
    - 6A. **现有复刻代码全局盘点** — complete（Human 已通过）
    - 6B. **原站系统与现有代码差距映射** — complete（Human 已通过）
    - 6C. **选择并详细逆向首个系统** — complete（SYS-CHUNK；Human 已通过详细设计）
-   - 6D. **世界装配与图层边界调查设计** — in_progress（设计已接受；正在验证和关闭）
+   - 6D. **世界装配与图层边界调查设计** — complete（设计已接受、验证并关闭）
+   - 6E. **图层最小视觉补证** — in_progress（level-1；无代码Gate）
 
 ## 当前 Human 确认
 
@@ -49,7 +50,8 @@ updated: 2026-08-11
 | 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
-| 世界装配与图层边界调查及设计 | 已通过设计审查 | 验证并关闭当前工作项 | 正式代码、Phaser/Vite集成、当前项内证据刷新、旧项目修改和复用提取 | 关闭后原子激活已预授权的最小视觉补证 |
+| 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
+| 图层最小视觉补证 | 已授权并激活 | 任务卡5场景、公开原站、白名单截图/JSON和必要采集脚本 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 更新Q-LAYER-001后停在Human证据审查 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -103,24 +105,24 @@ updated: 2026-08-11
 
 结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-## 当前任务：WI-SYS-WORLD-LAYER-DESIGN-001
+## 当前任务：WI-SYS-LAYER-VISUAL-EVIDENCE-001
 
 | 字段 | 当前值 |
 |---|---|
-| 工作项 | `WI-SYS-WORLD-LAYER-DESIGN-001` |
+| 工作项 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` |
 | 级别与类型 | `level-1 / investigation` |
-| 涉及节点 | `SYS-WORLD; SYS-LAYER` |
-| 当前阶段 | `verification` |
+| 涉及节点 | `SYS-LAYER` |
+| 当前阶段 | `investigation` |
 | 当前 Gate | `none / not-applicable` |
-| Human决定 | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
-| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）]] |
-| 正式代码授权 | 无；本轮只调查和设计 |
+| Human决定 | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
+| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）]] |
+| 正式代码授权 | 无；本轮只做最小公开运行证据补充 |
 
-目标：查清25个分块怎样组成世界、24个图层怎样渲染/遮挡/碰撞/卸载，并划清`SYS-CHUNK`、`SYS-WORLD`、`SYS-LAYER`和`SYS-ASSET`的职责。完成后停在Human正式设计审查，不自动进入代码实现。
+目标：只检查玩家遮挡、roof、bridge、particles3和footsteps共5个原站公开运行场景，为`Q-LAYER-001`补充最小截图和运行状态。
 
-当前允许：验证两份调查记录、两份已接受正式设计和两份验证计划；更新决定、节点状态、路线、治理报告与关闭记录。
+当前允许：访问`https://peteroravec.com/`公开页面；在任务卡白名单路径保存最小截图、JSON观测和必要采集脚本；回写调查、验证与未知问题。
 
-当前禁止：修改正式`src/`、`sample/`证据、旧Phaser或dirty Worktree；接入Phaser/Vite/网络/缓存/渲染；提前执行下一工作项或提取通用模块。
+当前禁止：访问私有资源或source map、扩大整站镜像、修改正式`src/`或旧Phaser、接入Phaser/Vite、实现图层/玩家/碰撞/渲染、提取通用模块。
 
 ## 已阻塞或暂停工作项
 
@@ -140,9 +142,10 @@ updated: 2026-08-11
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
 | `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [[doc/v0.1/03-具体怎么做/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]]；`src/chunk/`；[[doc/v0.1/04-怎么验证与还差什么/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
+| `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | 两份调查记录；[[doc/v0.1/03-具体怎么做/系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；[[doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；两份验证计划 | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
 
 ## Next Step
-对已接受的SYS-WORLD与SYS-LAYER正式设计运行结构、语义和独立客观复核，建立clean内容基线并关闭`WI-SYS-WORLD-LAYER-DESIGN-001`。随后按`DEC-SYS-LAYER-VISUAL-EVIDENCE-001`原子激活预授权下一项；正式代码仍不授权。
+先用既有地图数据确定任务卡5个场景的最小候选坐标，再只访问公开原站验证Play可用性和场景可达性；保存最小截图/JSON并更新`Q-LAYER-001`。正式代码仍不授权。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -167,3 +170,4 @@ updated: 2026-08-11
 | Main首次脚印grid抽查脚本因集合推导式变量遮蔽误报与tilelayer不一致 | 不采纳初次输出；改用明确`(y,x)`坐标集合审计，368个位置直接交集368、双方独有0，确认逐格一致。 |
 | Recon将普通chunk分支的全层遍历误报为可写全部24层 | 独立verifier检查守卫`o=["layer1"]`后发现实际只写layer1；Main核对Bundle并同步修正调查记录、设计候选、验证计划和findings。 |
 | 正式设计接受后首次sync/pilot提示`level-1 selection decision does not name current work item` | 在`DEC-SYS-WORLD-LAYER-DESIGN-001`适用范围显式加入`WI-SYS-WORLD-LAYER-DESIGN-001`；不降低检查标准。 |
+| 视觉补证首次激活检查提示工作项类型、节点范围和任务卡状态不匹配 | 使用检查合同允许的`investigation`类型；将任务卡`node-refs`改为与task_plan一致的标量并将顶层status同步为active；不修改检查器。 |

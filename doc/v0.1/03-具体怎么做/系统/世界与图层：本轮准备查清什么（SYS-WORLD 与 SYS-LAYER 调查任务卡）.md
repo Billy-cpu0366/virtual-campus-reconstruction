@@ -1,7 +1,7 @@
 ---
 title: 世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）
 type: work-item-task-card
-status: active
+status: completed
 work-item-id: WI-SYS-WORLD-LAYER-DESIGN-001
 work-item-level: level-1
 work-item-type: investigation
@@ -10,6 +10,7 @@ main-definition: false
 decision-refs:
   - DEC-SYS-WORLD-LAYER-INVESTIGATION-001
   - DEC-SYS-WORLD-LAYER-DESIGN-001
+result-commit: 8c7fff7525e8dd77c6367b662f65fec12175d33f
 updated: 2026-08-11
 ---
 
