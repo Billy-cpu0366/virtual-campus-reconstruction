@@ -106,4 +106,4 @@ updated: 2026-08-11
 | particles3位置 | VERIFIED_WITH_RESIDUAL_UNKNOWN | `11-particles3.png`；运行表现已记录，直接消费者链转`Q-LAYER-002` |
 | footsteps | VERIFIED | `12-footsteps-before.png`、`13-footsteps-after.png`和active footprint 0→5 |
 
-证据目录：`sample/analysis/layer-visual-evidence/`。当前已满足内容退出标准，正在建立clean验证基线，尚未关闭工作项。
+证据目录：`sample/analysis/layer-visual-evidence/`。clean结果提交`f1652629d436ce7f8a7821c760036fdf071ef397`已通过自动检查、Main画面审查和独立客观复核。当前停在Human证据结论审查，尚未关闭工作项。

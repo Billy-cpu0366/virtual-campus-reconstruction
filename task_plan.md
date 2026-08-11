@@ -145,7 +145,7 @@ updated: 2026-08-11
 | `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | 两份调查记录；[[doc/v0.1/03-具体怎么做/系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；[[doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；两份验证计划 | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
 
 ## Next Step
-验证13张截图、observations.json、5条行为基准、`Q-LAYER-001`关闭与`Q-LAYER-002`残余拆分是否互相一致；运行治理检查和独立客观复核，建立clean结果提交后停在Human证据结论审查。正式代码仍不授权。
+等待Human审查5场景证据结论：接受后关闭`WI-SYS-LAYER-VISUAL-EVIDENCE-001`并进入下一工作项选择；要求补充时只在当前任务卡范围内修订。`Q-LAYER-002`继续open，正式代码仍不授权。
 
 ## 错误记录
 | 错误 | 处理 |
