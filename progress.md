@@ -55,3 +55,4 @@
 - Human 已要求按阅读顺序重命名01至05一级目录，并以SYS-CHUNK建立第一份纵向人话解读。目录、内部引用、机器入口和治理检查器已同步；新建`用地图分块看懂01到05（SYS-CHUNK 人话解读）.md`并接入项目入口与03入口。dirty工作树结构检查为sync 916项、pilot 921项PASS。
 - 导航内容提交为`71919ca`，Python缓存清理提交为`85586f4`；在clean内容基线`85586f4`上完成sync 878项、pilot 883项、`git diff --check`、旧路径扫描和Main语义复验，`DEC-DOC-NAV-004/005`进入verified。
 - Human已接受世界装配与图层边界作为下一level-1工作项。已建立`WI-SYS-WORLD-LAYER-DESIGN-001`调查任务卡，task_plan进入active/investigation且保持无代码Gate；同步修正检查器将level-1误当实施授权包的合同缺口，正式代码和旧项目继续未授权。
+- level-1原子激活提交为`dd199de16fcf4dbe5ded678c9d7df218a7cd5832`；clean基线上Python内存编译、sync 909项、pilot 914项和`git diff --check`通过，lightweight-verifier独立复核PASS，节点继续保持undesign。
