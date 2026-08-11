@@ -9,6 +9,7 @@ node-refs: SYS-WORLD; SYS-LAYER
 main-definition: false
 decision-refs:
   - DEC-SYS-WORLD-LAYER-INVESTIGATION-001
+  - DEC-SYS-WORLD-LAYER-DESIGN-001
 updated: 2026-08-11
 ---
 
@@ -68,6 +69,15 @@ Human已通过`DEC-SYS-WORLD-LAYER-INVESTIGATION-001`选择本工作项。它是
 6. 运行文档治理检查，并在里程碑结束时做一次客观独立复核；
 7. 停在Human设计审查，不自动进入代码实现。
 
+当前已建立的工作产物：
+
+- [[世界与地图：从原站查到了什么（SYS-WORLD 调查记录）]]；
+- [[图层与遮挡：从原站查到了什么（SYS-LAYER 调查记录）]]；
+- [[世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；
+- [[图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；
+- [[../../04-怎么验证与还差什么/世界与地图：怎样验证做对了（SYS-WORLD 验证计划）]]；
+- [[../../04-怎么验证与还差什么/图层与遮挡：怎样验证做对了（SYS-LAYER 验证计划）]]。
+
 ## 7. 退出标准
 
 - 24个图层逐项有名称、顺序、证据位置和`FACT / INFERRED / UNKNOWN`状态，无遗漏或重复；
@@ -87,3 +97,7 @@ Human已通过`DEC-SYS-WORLD-LAYER-INVESTIGATION-001`选择本工作项。它是
 ## 9. 复用观察
 
 本工作项是第一次研究世界装配与图层边界，当前没有第二个独立真实场景。保持“未发现”，不得因未来校园设想提前抽象。
+
+## 10. Human审查结果
+
+Human已通过`DEC-SYS-WORLD-LAYER-DESIGN-001`接受两份正式设计，并通过`DEC-SYS-LAYER-VISUAL-EVIDENCE-001`预授权下一独立补证工作项。当前只完成验证与关闭；不在本工作项内执行新采集或正式代码。

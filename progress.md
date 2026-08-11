@@ -56,3 +56,10 @@
 - 导航内容提交为`71919ca`，Python缓存清理提交为`85586f4`；在clean内容基线`85586f4`上完成sync 878项、pilot 883项、`git diff --check`、旧路径扫描和Main语义复验，`DEC-DOC-NAV-004/005`进入verified。
 - Human已接受世界装配与图层边界作为下一level-1工作项。已建立`WI-SYS-WORLD-LAYER-DESIGN-001`调查任务卡，task_plan进入active/investigation且保持无代码Gate；同步修正检查器将level-1误当实施授权包的合同缺口，正式代码和旧项目继续未授权。
 - level-1原子激活提交为`dd199de16fcf4dbe5ded678c9d7df218a7cd5832`；clean基线上Python内存编译、sync 909项、pilot 914项和`git diff --check`通过，lightweight-verifier独立复核PASS，节点继续保持undesign。
+- 世界与图层调查第一步已由低成本Subagent并行完成：mechanical-worker验证25个chunk的24层结构一致且与final_map逐格差异0；recon定位空世界、tileset、层创建/depth、chunk写入/清除、roof/bridge/cars/footsteps和卸载锚点。Main随后抽查关键Bundle与地图证据，确认优化默认、22层清单、两套depth公式和11层卸载边界。
+- 已建立`世界与地图：从原站查到了什么（SYS-WORLD 调查记录）.md`和`图层与遮挡：从原站查到了什么（SYS-LAYER 调查记录）.md`，均为`main-definition: false / engineering-status: undesign`；当前仍在调查阶段，尚未形成正式设计或代码授权。
+- 第二轮低成本调查完成：mechanical-worker证明footsteps grid与tilelayer位置逐格一致，并量化particle layers与88个trajectory regions的有限关联；recon确认特殊13层无额外Tile清空、默认优化分支22层、无显式idle取消/Tilemap destroy及玩家动态depth覆盖。Main已完成关键计数和坐标抽查。
+- 已建立SYS-WORLD与SYS-LAYER两份`system-design-candidate`及各自验证计划，工作项进入design阶段。候选建议master+chunk单一运行真相、24层完整策略和对称清除；`Q-LAYER-001`继续open，等待Human决定是否单独授权最小视觉补证。节点仍为undesign，正式代码仍未授权。
+- dirty工作树独立客观复核9项PASS，并发现Recon把普通分支全层遍历误报为可写全部24层；Main核对`o=["layer1"]`守卫后确认实际只写layer1，已修正所有受影响文档。
+- Human已明确接受当前SYS-WORLD与SYS-LAYER设计并授权下一项最小视觉补证。两份候选已晋升为`system-detail / accepted / main-definition: true`，节点总账同步为designed；下一任务卡已建立为preauthorized，正式代码仍未授权。
+- 正式设计与接力包dirty独立复核PASS：两个accepted决定、两个唯一主定义、关键地图/Bundle事实、Q-LAYER open、5场景预授权任务卡和保护路径均正确；sync 1019项、pilot 1024项、`git diff --check`通过。下一步建立clean内容提交。

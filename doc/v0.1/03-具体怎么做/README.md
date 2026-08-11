@@ -41,6 +41,14 @@ Human选择不写正式代码的调查、设计、验证或治理工作项后，
 
 当前任务卡：[[系统/世界与图层：本轮准备查清什么（SYS-WORLD 与 SYS-LAYER 调查任务卡）]]。
 
+当前调查工作稿：[[系统/世界与地图：从原站查到了什么（SYS-WORLD 调查记录）]]、[[系统/图层与遮挡：从原站查到了什么（SYS-LAYER 调查记录）]]。
+
+当前正式设计：[[系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]、[[系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]。
+
+两份调查记录仍是过程材料；两份正式设计已由Human接受。正式代码仍需独立level-2授权。
+
+预授权下一任务卡：[[系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）]]。它只有在当前设计工作项关闭并由`task_plan.md`激活后才能执行。
+
 ## 实施授权包
 
 正式代码或全局技术栈进入 Human Gate 时，可以建立一份轻量 `implementation-authorization-package`。它不是节点主定义，必须使用 `main-definition: false`，并分别记录 `work-item-id`、节点、设计和验证引用。

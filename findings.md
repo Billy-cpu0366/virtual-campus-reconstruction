@@ -65,3 +65,17 @@
 - Human 已接受 `DEC-WORK-RELAY-002`：正式工作项允许为零或一个；没有预授权下一项时正常关闭并回到既有 P0、节点、依赖、未知和差距来源，不制造虚假选择 WI。CORE 已写入关闭索引，当前正式工作项为 `none`，新的正式代码继续未授权。
 - 下一项候选复核确认：SYS-WORLD与SYS-LAYER边界是accepted P0顺序的下一项，并同时解除SYS-ASSET和SYS-CHUNK Phaser集成的前置未知；Human已接受`WI-SYS-WORLD-LAYER-DESIGN-001`，范围仅为调查、设计候选和验证计划。
 - 激活level-1时发现治理检查器把所有非空工作项的`scope-ref`都强制解释为实施授权包，并要求`GATE-*`，与流程速查中level-1简短任务卡、无代码Gate的规则冲突。采用最小修正：level-1使用`work-item-task-card`和`none / not-applicable`，level-2继续使用实施授权包与Human Gate。
+- WI-SYS-WORLD-LAYER-DESIGN-001第一步确定性提取：25个chunk的24层名称、顺序、tilelayer类型、28x28尺寸和784项data完全一致；按5x5行主序拼接后与final_map的24层、470400格逐格差异为0。24层依次为layer1~10、cars、4个roof、4个bridge wall、walls、particles、particles2、particles3、footsteps。
+- 地图文件直接证明：layer1~10和walls为visible，cars、roof、bridge、particles与footsteps为hidden；仅walls opacity为0.84，其余为1；各层没有properties或offset字段。因此文件本身不能单独证明隐藏层的运行时语义。
+- Recon初步定位公开Bundle：由master originalWidth/originalHeight建立140x140空Tilemap并映射exterior、collisions-objects、tileset-particles；发布代码同时存在普通chunk写入路径和USE_OPTIMIZED_TILESETS相关整图small路径，实际运行选路仍需Main抽查或行为证据。
+- Recon初步定位图层处理：基础层、walls、cars、roof、bridge有明确创建/depth/碰撞或动态行为；particles/particles2进入优化处理清单，particles3未进入；footsteps tilelayer未进入已定位写入/清除清单，另有footsteps-layer网格驱动脚印，二者不能直接等同。
+- Recon初步定位卸载边界：已定位unloadChunk只清layer1~10和walls共11层并移除loadedChunks标记；其余13层的卸载、完整销毁、在途取消、重试与失败回滚仍是UNKNOWN。上述Bundle语义需Main对关键锚点做抽查后再进入正式调查记录。
+- Main关键锚点抽查确认：发布类字段`USE_OPTIMIZED_TILESETS=!0`且当前只定位到该赋值；优化loadChunk路径使用140x140的final_map_small并处理22层，明确排除particles3和footsteps。初始创建对layer6~10使用1500~1900 depth，而优化函数仅在层缺失时使用1100~1500公式，两套公式并存，不能合并成单一原站规则。
+- Main抽查确认：初始空世界创建layer1~10、4个roof、walls和bridge1上下层；优化路径可补建cars、particles/2和bridge2。unloadChunk仍只清11层。已据此建立SYS-WORLD和SYS-LAYER两份`main-definition: false`调查记录，节点状态不变。
+- 第二轮确定性对照证明：`footsteps-layer.json`的140x140布尔grid与final_map的footsteps层368个GID=69345位置逐格完全相等；两者是同一位置数据的不同编码，但运行时Bundle只读取独立grid，尚未定位tilelayer消费者。
+- final_map与final_map_small的particles、particles2、particles3三层逐格完全相同；particle-trajectories有88个多边形region，只有water/water2/protesters_rising三类全局tileCount与单一GID计数吻合，其余类型无法由纯数据键、bbox或多边形精确复现，因此不能宣称轨迹JSON由tilelayer机械生成。
+- 第二轮Recon补查：应用Bundle只有3个putTilesAt调用点，特殊13层没有unloadChunk之外的tile清空；普通分支虽然遍历chunk的24层，但`o=["layer1"]`守卫使其实际只写layer1；默认优化分支固定22层并排除particles3/footsteps。GameScene未定位统一Tilemap destroy或idle callback取消，完整teardown仍UNKNOWN。
+- 玩家常态depth约为`500 + (y+24)*0.1`，桥上可强制1650，怪物抓取和龙卷风另有覆盖；因此Q-LAYER-001的玩家遮挡不能只靠静态图层depth关闭，仍需核对动态时序和必要的既有/新增行为证据。
+- 当前设计候选建议第一版以master+chunk作为唯一运行数据来源，final_map/final_map_small只作Oracle；SYS-WORLD拥有Tilemap、图层实例和已渲染集合，SYS-LAYER提供24层完整策略，SYS-CHUNK继续拥有目标/请求状态。该设计避免复制发布Bundle整图优化与chunk动态写入并存的状态分叉，代价是需要行为验证证明视觉一致。
+- 图层设计候选将基础视觉、隐藏碰撞、动态roof/bridge和marker数据分开；所有chunk来源数据都要求对称remove，不照搬特殊13层未清除。footsteps建议以chunk tilelayer为运行来源、外部grid作Oracle；particles3在消费者未知时保留marker并明确未完成。
+- Human已接受SYS-WORLD与SYS-LAYER当前详细设计，并授权当前项关闭后的5场景最小视觉补证。设计接受不关闭Q-LAYER-001，也不授权正式代码；补证只允许公开原站、白名单截图/JSON和必要采集脚本。
