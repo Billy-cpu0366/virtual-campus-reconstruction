@@ -63,4 +63,5 @@
 - dirty工作树独立客观复核9项PASS，并发现Recon把普通分支全层遍历误报为可写全部24层；Main核对`o=["layer1"]`守卫后确认实际只写layer1，已修正所有受影响文档。
 - Human已明确接受当前SYS-WORLD与SYS-LAYER设计并授权下一项最小视觉补证。两份候选已晋升为`system-detail / accepted / main-definition: true`，节点总账同步为designed；下一任务卡已建立为preauthorized，正式代码仍未授权。
 - 正式设计与接力包dirty独立复核PASS：两个accepted决定、两个唯一主定义、关键地图/Bundle事实、Q-LAYER open、5场景预授权任务卡和保护路径均正确；sync 1019项、pilot 1024项、`git diff --check`通过。
-- clean设计内容提交`8c7fff7525e8dd77c6367b662f65fec12175d33f`通过sync 1001项、pilot 1006项、diff检查和独立只读复核。`WI-SYS-WORLD-LAYER-DESIGN-001`已同步关闭；`WI-SYS-LAYER-VISUAL-EVIDENCE-001`按accepted预授权进入原子激活事务，尚待clean激活复验。
+- clean设计内容提交`8c7fff7525e8dd77c6367b662f65fec12175d33f`通过sync 1001项、pilot 1006项、diff检查和独立只读复核。`WI-SYS-WORLD-LAYER-DESIGN-001`已关闭。
+- `WI-SYS-LAYER-VISUAL-EVIDENCE-001`原子激活提交`51b6f72f46b2cb3713eaaac8dcdc3050fe39bbbe`通过sync 1012项、pilot 1017项、diff检查和独立复核；HEAD含active状态且工作区clean。当前可以开始任务卡5场景调查，正式代码仍未授权。
