@@ -1,5 +1,7 @@
 # 发现记录
 
+> 本文件是非权威调查日志。当前规则、Human 决定、当前 Gate 和正式工程结论分别以 `AGENTS.md`、`doc/v0.1/谁确认过什么（来源与决策记录）.md`、`task_plan.md` 和对应权威文档为准。
+
 - 当前参考站：`https://peteroravec.com/`。
 - 公开发布文件可作为逆向材料；完整原始项目源码不属于爬取目标。
 - 当前已有 Phaser 实现位于 `C:\Users\inertnet\peter-oravec-clone-worktrees\m3-01-map-assets\`，本阶段只读盘点，不修改或迁移。
@@ -28,6 +30,12 @@
 - 主clone的4个运行代码修改（`index.html`、`src/lib.rs`、`src/render.rs`、`www/js/main.js`）与detached快照 `30e65de`（`calibration: apply frozen B1-07 WIP`）一致；额外差异主要是扩展后的`capture-origin-p0-03.cjs`和未跟踪B107校准/探针脚本。该WIP属于Rust/WASM时代的marker gate、idle pulse、单tick循环、retry和帧校准调查，不属于当前Phaser集成树。
 - `b1-08`未提交修改是更早的Loading intro、0%进度与Play过渡实验；当前Phaser树已用`src/ui/`重新实现Loading/Ready/Play状态，不能直接合并旧JS。`phaser-assets-audit`未跟踪内容仅是资源审计计划输出；对应有效审计脚本已提交在worker历史并进入后续集成来源。
 - 非基线dirty Worktree均保持原样，未执行clean、checkout、stash、commit或merge。它们应作为历史/WIP清单保留，不能混入 `origin/main@aa2ab7e` 的已验证行为基线。
+- 阶段6B地图分块证据：`master.json`真实路径是`assets/maps/chunks/master.json`，定义28×28 tile分块、5×5网格、原图140×140和3个tileset；25个chunk均为28×28、24层、相同tileset。
+- 将chunk按`index = y * 5 + x`逐层拼接后，24个图层与`final_map.json`的140×140数据逐格完全一致，错位数0；按列优先拼接则24层全部不匹配。Q-MAP-002的数据关系已经由文件直接证明。
+- 运行时Network中master在导航响应后约5.194秒返回；首个chunk约5.800秒、最后一个约6.730秒，chunk响应自身跨度约0.930秒，master到最后一个chunk约1.536秒。它们均发生在采集脚本14秒Ready检查和Play点击之前；四方向输入期间没有新增chunk URL。
+- 公开Bundle直接证明动态机制：分块管理器用`chunk{y * nbChunksHorizontal + x}.json`按坐标请求并缓存；GameScene按玩家周围3×3集合与相机可见范围加1块边距加载缺失chunk，并卸载目标集合外chunk。
+- Q-MAP-003已关闭：`startCameraSequence`在Play前调用`preloadChunksForCameraSequence`，该方法汇总六个相机位置、视口和2块边距，通过空闲回调预载；有效坐标覆盖当前5×5地图，因此解释首屏全部25个请求。首屏预载和玩家阶段动态装卸是两个连续阶段，不矛盾。
+- Human 已接受 `DEC-DOC-GOV-001` 并授权第二轮文档治理同步；决定、来源、替代关系和 Gate 历史的正式记录已迁入 `doc/v0.1/谁确认过什么（来源与决策记录）.md`。本条只记录过程，不替代台账。
 - 新镜像唯一落盘位置：`sample/original-public-build/mirror/`。
 - 现有下载器 `scripts/fetch-assets.mjs` 固定使用 `https://peteroravec.com/assets`，显式清单加推测路径共尝试 86 个 URL；不能单独作为完整镜像依据。
 - 镜像路径规则：保留公开 URL 的 `/assets/` 后相对路径，例如 `/assets/maps/final_map.json` 保存为 `mirror/assets/maps/final_map.json`。
@@ -48,3 +56,31 @@
 - 主助手以独立正则与 manifest 复核：bundle 中有 152 个唯一 `/assets/` 字面量，其中 142 个未镜像；其中 `/assets/maps/` 是动态模板前缀而非完整资源，排除后得到 141 个精确静态 pathname。这与 Recon 的“141 未采集”结论一致，可作为下一批白名单来源。
 - 运行时 Network 与 manifest 对比得到 28 个真实未镜像同源响应：25 个 `maps/chunks/chunk0.json` 至 `chunk24.json`、2 个 UI WebP（`map-holder-mini3.webp`、`cable-handler2.webp`）可安全补采；唯一其余项是 Netlify RUM 脚本，属于分析/遥测，不纳入参考镜像。
 - 第九批已采集运行时验证的 27 项，全部 HTTP 200；当前镜像 265 个成功文件、3 个明确 404。主助手独立确认运行时记录中的 224 个同源 2xx 非 Netlify URL 均已镜像，缺失为 0；Verifier 对该集合报出 265 的计数错误，但其余文件/哈希/清单一致性检查通过。
+- 阶段6C SYS-CHUNK直接证据复核：master证明5×5、每块28×28、16px和行优先文件公式；Bundle证明玩家3×3与相机范围+1块边距合并为目标集合、场景和manager两层缓存、场景卸载清除Tilemap，以及Play前相机序列空闲预载。并发请求去重、取消、重试、场景销毁清理和多视口预载边界仍为 UNKNOWN。manager虽定义缓存淘汰方法，但已检查Bundle未发现调用方，不能推定其动态缓存淘汰语义。独立复核曾发现未清除图层数误记为11，已更正为13。
+- Human 已明确接受轻量任务接力方案：节点与工作项分离；只持久化正式工作项；普通工作项使用单次原子提交；正式代码、技术栈或范围扩大使用一页授权包与 Human Gate；完整 P/A 只在破坏性、真实数据、并行写入或跨仓库高风险事务中启用。
+- 首次真实试点最初限定为 `WI-SYS-CHUNK-CORE-001` 的 proposed 授权包与 `awaiting-authorization` 任务卡；后续 Human 已通过 `DEC-SYS-CHUNK-CORE-001` 授权最小 TypeScript 环境和确定性 CORE，Phaser 集成继续未授权。
+- CORE 结果提交 `f04568f953821e8cc56c33a694171ddab759051f` 只包含批准路径：master 契约、行优先索引/文件名、世界坐标边界、玩家3×3、相机 scroll/zoom +1块边距和确定性目标并集；3文件26项测试、strict typecheck、官方源 audit 0漏洞、治理 sync/pilot 和最终独立复核均通过。
+- 独立复核发现的唯一 LOW 是内部坐标合并 helper 被公开导出；Main 已在结果提交前改为模块私有，并用重叠玩家/相机目标测试继续证明去重和稳定顺序。没有出现第二个独立复用场景，复用观察保持“未发现”。
+- 首次真实接力暴露治理缺口：工作项完成且 `preauthorized-next-work-item: none` 时，当前机器合同不允许 `current-work-item: none` 或终态 `completed`，导致无法同时做到“关闭索引已完成”和“当前状态不漂移”。已登记 `BLK-WI-CLOSURE-001`，禁止通过伪造 active/completed 状态绕过。
+- Human 已接受 `DEC-WORK-RELAY-002`：正式工作项允许为零或一个；没有预授权下一项时正常关闭并回到既有 P0、节点、依赖、未知和差距来源，不制造虚假选择 WI。CORE 已写入关闭索引，当前正式工作项为 `none`，新的正式代码继续未授权。
+- 下一项候选复核确认：SYS-WORLD与SYS-LAYER边界是accepted P0顺序的下一项，并同时解除SYS-ASSET和SYS-CHUNK Phaser集成的前置未知；Human已接受`WI-SYS-WORLD-LAYER-DESIGN-001`，范围仅为调查、设计候选和验证计划。
+- 激活level-1时发现治理检查器把所有非空工作项的`scope-ref`都强制解释为实施授权包，并要求`GATE-*`，与流程速查中level-1简短任务卡、无代码Gate的规则冲突。采用最小修正：level-1使用`work-item-task-card`和`none / not-applicable`，level-2继续使用实施授权包与Human Gate。
+- WI-SYS-WORLD-LAYER-DESIGN-001第一步确定性提取：25个chunk的24层名称、顺序、tilelayer类型、28x28尺寸和784项data完全一致；按5x5行主序拼接后与final_map的24层、470400格逐格差异为0。24层依次为layer1~10、cars、4个roof、4个bridge wall、walls、particles、particles2、particles3、footsteps。
+- 地图文件直接证明：layer1~10和walls为visible，cars、roof、bridge、particles与footsteps为hidden；仅walls opacity为0.84，其余为1；各层没有properties或offset字段。因此文件本身不能单独证明隐藏层的运行时语义。
+- Recon初步定位公开Bundle：由master originalWidth/originalHeight建立140x140空Tilemap并映射exterior、collisions-objects、tileset-particles；发布代码同时存在普通chunk写入路径和USE_OPTIMIZED_TILESETS相关整图small路径，实际运行选路仍需Main抽查或行为证据。
+- Recon初步定位图层处理：基础层、walls、cars、roof、bridge有明确创建/depth/碰撞或动态行为；particles/particles2进入优化处理清单，particles3未进入；footsteps tilelayer未进入已定位写入/清除清单，另有footsteps-layer网格驱动脚印，二者不能直接等同。
+- Recon初步定位卸载边界：已定位unloadChunk只清layer1~10和walls共11层并移除loadedChunks标记；其余13层的卸载、完整销毁、在途取消、重试与失败回滚仍是UNKNOWN。上述Bundle语义需Main对关键锚点做抽查后再进入正式调查记录。
+- Main关键锚点抽查确认：发布类字段`USE_OPTIMIZED_TILESETS=!0`且当前只定位到该赋值；优化loadChunk路径使用140x140的final_map_small并处理22层，明确排除particles3和footsteps。初始创建对layer6~10使用1500~1900 depth，而优化函数仅在层缺失时使用1100~1500公式，两套公式并存，不能合并成单一原站规则。
+- Main抽查确认：初始空世界创建layer1~10、4个roof、walls和bridge1上下层；优化路径可补建cars、particles/2和bridge2。unloadChunk仍只清11层。已据此建立SYS-WORLD和SYS-LAYER两份`main-definition: false`调查记录，节点状态不变。
+- 第二轮确定性对照证明：`footsteps-layer.json`的140x140布尔grid与final_map的footsteps层368个GID=69345位置逐格完全相等；两者是同一位置数据的不同编码，但运行时Bundle只读取独立grid，尚未定位tilelayer消费者。
+- final_map与final_map_small的particles、particles2、particles3三层逐格完全相同；particle-trajectories有88个多边形region，只有water/water2/protesters_rising三类全局tileCount与单一GID计数吻合，其余类型无法由纯数据键、bbox或多边形精确复现，因此不能宣称轨迹JSON由tilelayer机械生成。
+- 第二轮Recon补查：应用Bundle只有3个putTilesAt调用点，特殊13层没有unloadChunk之外的tile清空；普通分支虽然遍历chunk的24层，但`o=["layer1"]`守卫使其实际只写layer1；默认优化分支固定22层并排除particles3/footsteps。GameScene未定位统一Tilemap destroy或idle callback取消，完整teardown仍UNKNOWN。
+- 玩家常态depth约为`500 + (y+24)*0.1`，桥上可强制1650，怪物抓取和龙卷风另有覆盖；因此Q-LAYER-001的玩家遮挡不能只靠静态图层depth关闭，仍需核对动态时序和必要的既有/新增行为证据。
+- 当前设计候选建议第一版以master+chunk作为唯一运行数据来源，final_map/final_map_small只作Oracle；SYS-WORLD拥有Tilemap、图层实例和已渲染集合，SYS-LAYER提供24层完整策略，SYS-CHUNK继续拥有目标/请求状态。该设计避免复制发布Bundle整图优化与chunk动态写入并存的状态分叉，代价是需要行为验证证明视觉一致。
+- 图层设计候选将基础视觉、隐藏碰撞、动态roof/bridge和marker数据分开；所有chunk来源数据都要求对称remove，不照搬特殊13层未清除。footsteps建议以chunk tilelayer为运行来源、外部grid作Oracle；particles3在消费者未知时保留marker并明确未完成。
+- Human已接受SYS-WORLD与SYS-LAYER当前详细设计，并授权当前项关闭后的5场景最小视觉补证。设计接受不关闭Q-LAYER-001，也不授权正式代码；补证只允许公开原站、白名单截图/JSON和必要采集脚本。
+- 原站1280x720运行补证：玩家从clear tile(68,74)进入layer8 tile(68,75)时player depth 621.6→623.2、layer8 depth 1700，截图显示上层灌木遮住玩家下半身；离开恢复。
+- factory roof运行补证：进入(360,904)后roof_factory/roof_factory2 alpha由1变0，离开恢复1；concert两层保持1。
+- bridge1运行补证：方向键从左入口进入后down wall碰撞tile 14→0、up wall 0→82、玩家depth变1650；从右出口离开后down wall和玩家常态depth恢复。
+- particles3位置运行补证：优化运行Tilemap没有particles3层；在86格marker范围内玩家同时落入protesters_rising(tileCount=86)和crowd_up region，截图有抗议人群。marker到trajectory消费者的直接链路仍UNKNOWN。
+- footsteps运行补证：优化运行Tilemap没有footsteps层；玩家沿独立grid对应路径移动后active footprint sprites由0增至5，depth 450。5场景均获得可定位运行证据。

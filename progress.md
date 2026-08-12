@@ -1,5 +1,7 @@
 # 进度记录
 
+> 本文件是非权威执行历史。当前阶段和当前 Human Gate 只以 `task_plan.md` 为准；Human 决策和 Gate 历史只以 `doc/v0.1/谁确认过什么（来源与决策记录）.md` 为准。
+
 - 已建立原 `samples/`（现为 `sample/`）目录骨架、空清单模板与分析占位文档。
 - 已启动公开发布文件参考包建立任务；尚未下载任何原站文件。
 - 已启用 Mode A 子 agent：新增 `recon`、`lightweight-worker`、`lightweight-verifier`，均使用官方 `openai-codex/gpt-5.6-terra:medium`。
@@ -18,8 +20,8 @@
 - 已建立 `doc/v0.1/` 初始框架：需求分析、概要设计、详细设计、验证、逆向计划以及3份方案说明，初始共22份 Markdown；结构与相对链接自检通过，后续已完成 Human 验收。
 - 已将旧项目移至 `D:\虚拟校园项目旧资料`，将当前重构项目迁入 Obsidian Vault 的 `D:\复盘\虚拟校园项目重构`；迁移前后299个文件逐项大小和 SHA-256 一致，原位置已清理。三份当前方案说明也已从旧资料移入当前版本文档目录。
 - 已将本轮收敛结论写入 AI 必读链：不预设可复用系统、实践重复后记录、Human 批准后提取；同时加入唯一 Human Gate、按需门禁触发表、中央复用观察表和四类详细设计模板提醒。22份文档无空文件、相对链接缺失为0。
-- 已补齐 `01-需求分析/原站复刻目标与范围.md`：明确原站复刻是第一套实践场景、复用成果不限于用户示例、真实重复后才观察和提取、未来校园真实使用才证明跨项目复用；章节和必需规则自检通过。
-- 已完成框架一致性修正：三份辅助说明不再提前指定复用能力，节点清单移除预建的路线跟随能力，未知问题保留为实际机制调查，地图分块状态统一为 pending，验收状态改为直观中文；独立复核6项全部 PASS，无阻塞缺陷。
+- 已补齐 `01-目标与范围/这次要复刻什么（目标与范围）.md`：明确原站复刻是第一套实践场景、复用成果不限于用户示例、真实重复后才观察和提取、未来校园真实使用才证明跨项目复用；章节和必需规则自检通过。
+- 已完成框架一致性修正：三份辅助说明不再提前指定复用能力，功能总目录（节点清单）移除预建的路线跟随能力，未知问题保留为实际机制调查，地图分块状态统一为 pending，验收状态改为直观中文；独立复核6项全部 PASS，无阻塞缺陷。
 - 已按单仓库结构整理项目：`samples/` 改为 `sample/`，采集工具移入 `sample/tools/`，22份当前文档移入 `doc/v0.1/`，建立空 `src/` 入口；移动后逐文件校验275个样本文件、2个工具文件和22个文档文件一致。
 - 已在当前项目根初始化 Git 仓库，默认分支为 `main`；已绑定 Private GitHub 仓库 `Billy-cpu0366/virtual-campus-reconstruction` 并推送。`.gitattributes` 已禁止 Git 转换公开证据文件，270个证据文件的仓库对象与工作区字节一致。
 - 已补齐复用与解耦闭环：观察表增加批准/提取状态和唯一主归属，系统模板增加状态所有权、公开接口、调用/事件边界和依赖方向，四类模板统一同步观察表，并补充异步失败触发、三表状态口径和 P0 行为基准准入；独立审查 PASS，无阻塞缺陷。
@@ -28,7 +30,41 @@
 - 阶段1已确认权威旧代码基线为 `origin/main@aa2ab7e`；当前M3 Worktree提交 `3c27b81` 与其完整Git tree相同，验证前后tracked状态均为clean，GitHub远程main也已用`ls-remote`确认。
 - 阶段1命令验证全部通过：`npm ci`、typecheck、Phaser静态smoke、M3地图合约和Vite生产构建均exit 0；构建存在约1.5MB主JS的大Chunk警告。
 - 阶段1浏览器验证通过：桌面4x与移动2x内部buffer、Ready→Play→HUD、键盘移动、墙体阻挡、相机跟随与右边界均有实际结果；Runtime异常0，已知唯一HTTP失败为Sandbox `/favicon.ico` 404。
-- 已新增 `02-概要设计/现有复刻实现全景.md` 和 `04-验证/现有复刻行为基线.md`，并更新概要/验证入口与证据追踪矩阵；当前 `doc/v0.1/` 共24份Markdown。
+- 已新增 `02-整体怎么运作/旧版本现在做到什么（现有实现盘点）.md` 和 `04-怎么验证与还差什么/旧版本实际表现是什么（行为基线）.md`，并更新概要/验证入口与证据追踪矩阵；当前 `doc/v0.1/` 共24份Markdown。
 - 阶段1首轮结构检查通过：24份Markdown为14份approved框架与10份draft演进内容，链接缺失0、围栏异常0、版本异常0；复用观察保持“未发现”。独立复核同时发现旧仓库其他Worktree存在未提交Rust历史WIP，因此暂停交付并补充全局Worktree清单；阶段1遗留的8197/8198服务进程已清理。
 - 全部14个旧Worktree已完成只读清单：3处dirty分别是主clone的B107/Rust校准WIP、b1-08 Loading WIP和assets-audit未跟踪planning输出，其余11处clean；没有清理、合并或修改这些WIP。补充独立复核PASS，无阻塞缺陷。
-- Human 已确认阶段6A现有复刻代码全局盘点通过；两份基线文档晋升为`approved`，当前进入阶段6B原站系统与现有代码差距映射，仍禁止修改旧代码或写正式`src/`。
+- Human 已确认阶段6A现有复刻代码全局盘点通过；两份基线文档晋升为`approved`，提交`53f091a`已推送GitHub。当前进入阶段6B原站系统与现有代码差距映射，仍禁止修改旧代码或写正式`src/`。
+- 阶段6B已完成P0初步对照并新增`02-整体怎么运作/先做什么（P0系统对照与顺序）.md`：建议先详细逆向地图分块，再推进世界/图层、分块所需加载、玩家/输入/移动和相机。
+- 地图分块结构化复核已证明：5×5个28×28 chunk按`index=y*5+x`重组后，24层与`final_map.json`逐格完全一致；Bundle证明按玩家邻域与相机范围动态加载和卸载。Q-MAP-001、Q-MAP-002已关闭。
+- Q-MAP-003已关闭：Play前相机序列通过`preloadChunksForCameraSequence`覆盖当前5×5地图并空闲预载全部25块；进入玩家阶段后再按玩家邻域和相机范围动态装卸。Network时间口径已修正为chunk自身跨度约0.930秒、master至最后chunk约1.536秒。
+- 阶段6B最终独立复核PASS：P0系统对照、25块重组、Bundle动态装卸、三项未知关闭和DECISION/proposed边界均可重复验证，sample/src零修改。阶段6B已完成并等待Human审查，阶段6C和正式详细设计尚未开始。
+- 已将阶段6B审查包单独提交为`4b87ac742acf1bd1bb86273f5da855b18a4bdb5a`；提交只保存待审材料，不代表Human Gate通过。
+- Human 已授权执行 `DEC-DOC-GOV-001` 第二轮权威同步；当前只修改治理文档、模板、状态检查和验证记录，不推进阶段6B/6C，不修改旧Phaser或正式`src`。
+- Human 以`开始`通过阶段6B并授权阶段6C的SYS-CHUNK有界详细逆向。Gate迁移已提交`9cd7895`；已建立`03-具体怎么做/系统/地图分块：从原站查到了什么（SYS-CHUNK 调查记录）.md`，仍为非主定义、`undesign`，未修改旧Phaser或正式`src`。独立证据复核发现并修正13个未清除图层的计数；修正后在干净提交`4af281b`上复核PASS。
+- 已提交`6a397a0`形成`地图分块：玩家移动时怎样加载地图（SYS-CHUNK）-详细设计候选.md`：状态所有权、重复请求、失败、取消、销毁和验收均为 `DECISION（proposed）`，待 Human 审查；节点仍为`undesign`，正式实现仍未授权。
+- Human 已通过 SYS-CHUNK 详细设计：正式主定义为`03-具体怎么做/系统/地图分块：玩家移动时怎样加载地图（SYS-CHUNK）.md#SYS-CHUNK`，节点升为`designed`，验证计划已建立；当前转入`GATE-SYS-CHUNK-IMPLEMENTATION`等待独立 Human 实现授权，未写正式`src`。
+- Human 已明确接受 `DEC-WORK-RELAY-001` 轻量任务接力方案并授权开始首次真实试点同步。本轮建立稳定接力规则、`WI-SYS-CHUNK-CORE-001` 的 awaiting-authorization 任务卡和 proposed 一页授权包，修正已知动态状态漂移并扩展最小检查器；本轮不授权正式 `src`、技术栈或 Phaser 集成。
+- 轻量接力首次同步 dirty transaction preflight 已通过：Python内存编译 PASS，治理 `sync` 854项 PASS，`pilot` 859项 PASS，`git diff --check` PASS；正式源码和证据快照零修改，`src/README.md` 只修正未授权状态说明。lightweight-verifier只读复核PASS，无blocking/high/medium缺陷。
+- 轻量接力制度和 proposed CORE 试点已提交为 `e9c0c552673a5d32d7dea860978c4a214ebac12a`；提交后工作区 clean，`sync` 840项、`pilot` 845项结构复验PASS。当前达到 `sync-verified`。
+- Human 已通过 `DEC-SYS-CHUNK-CORE-001`；原子激活提交为 `981a21e54ed7cd3eac3ec3bc5b26ce12bd8086a4`，激活验证落盘提交为 `cb7ae0e9d386aee9045c8ebddab057a263d483cd`，activation/sync/pilot 均在 clean 基线上通过。
+- CORE 实现提交为 `f04568f953821e8cc56c33a694171ddab759051f`：TypeScript strict PASS，3文件26项测试 PASS，npm 官方源 audit 0漏洞，治理 sync 835项/pilot 840项 PASS；最终 lightweight-verifier PASS，无 blocking/high/medium/low 缺陷，`sample/` 和旧 Phaser 零修改。
+- 已完成设计、授权包、验证计划、证据与差距、工程入口和过程记录回写；节点继续保持 `designed`，因为 Phaser、请求、缓存、渲染和生命周期未实现。
+- 工作项关闭被 `BLK-WI-CLOSURE-001` 阻塞：无预授权下一项时，协议和检查器缺少合法的“无当前工作项/等待选择”状态。等待 Human 接受最小空闲合同或直接选择下一工作项。
+- Human 已接受 `DEC-WORK-RELAY-002` 最小修补；已将 CORE 关闭、task_plan 切换为 `current-work-item: none / work-item-selection`，并让检查器按零或一个当前 WI 条件检查。dirty transaction preflight：Python内存编译 PASS、sync 851项 PASS、pilot 856项 PASS、`git diff --check` PASS；该计数包含按脏工作树变更路径执行的写入边界检查。
+- 最小关闭合同内容提交为 `df93d97f2ff8dfb88d54dd58f2d58351bd7c0720`；clean 基线上 Python compile、sync 840项、pilot 845项和 `git diff --check` 均 PASS。lightweight-verifier 只读复核 PASS，无 blocking/high/medium 缺陷；CORE 工作项已合法关闭，当前等待下一项选择。
+- Human 已要求按阅读顺序重命名01至05一级目录，并以SYS-CHUNK建立第一份纵向人话解读。目录、内部引用、机器入口和治理检查器已同步；新建`用地图分块看懂01到05（SYS-CHUNK 人话解读）.md`并接入项目入口与03入口。dirty工作树结构检查为sync 916项、pilot 921项PASS。
+- 导航内容提交为`71919ca`，Python缓存清理提交为`85586f4`；在clean内容基线`85586f4`上完成sync 878项、pilot 883项、`git diff --check`、旧路径扫描和Main语义复验，`DEC-DOC-NAV-004/005`进入verified。
+- Human已接受世界装配与图层边界作为下一level-1工作项。已建立`WI-SYS-WORLD-LAYER-DESIGN-001`调查任务卡，task_plan进入active/investigation且保持无代码Gate；同步修正检查器将level-1误当实施授权包的合同缺口，正式代码和旧项目继续未授权。
+- level-1原子激活提交为`dd199de16fcf4dbe5ded678c9d7df218a7cd5832`；clean基线上Python内存编译、sync 909项、pilot 914项和`git diff --check`通过，lightweight-verifier独立复核PASS，节点继续保持undesign。
+- 世界与图层调查第一步已由低成本Subagent并行完成：mechanical-worker验证25个chunk的24层结构一致且与final_map逐格差异0；recon定位空世界、tileset、层创建/depth、chunk写入/清除、roof/bridge/cars/footsteps和卸载锚点。Main随后抽查关键Bundle与地图证据，确认优化默认、22层清单、两套depth公式和11层卸载边界。
+- 已建立`世界与地图：从原站查到了什么（SYS-WORLD 调查记录）.md`和`图层与遮挡：从原站查到了什么（SYS-LAYER 调查记录）.md`，均为`main-definition: false / engineering-status: undesign`；当前仍在调查阶段，尚未形成正式设计或代码授权。
+- 第二轮低成本调查完成：mechanical-worker证明footsteps grid与tilelayer位置逐格一致，并量化particle layers与88个trajectory regions的有限关联；recon确认特殊13层无额外Tile清空、默认优化分支22层、无显式idle取消/Tilemap destroy及玩家动态depth覆盖。Main已完成关键计数和坐标抽查。
+- 已建立SYS-WORLD与SYS-LAYER两份`system-design-candidate`及各自验证计划，工作项进入design阶段。候选建议master+chunk单一运行真相、24层完整策略和对称清除；`Q-LAYER-001`继续open，等待Human决定是否单独授权最小视觉补证。节点仍为undesign，正式代码仍未授权。
+- dirty工作树独立客观复核9项PASS，并发现Recon把普通分支全层遍历误报为可写全部24层；Main核对`o=["layer1"]`守卫后确认实际只写layer1，已修正所有受影响文档。
+- Human已明确接受当前SYS-WORLD与SYS-LAYER设计并授权下一项最小视觉补证。两份候选已晋升为`system-detail / accepted / main-definition: true`，节点总账同步为designed；下一任务卡已建立为preauthorized，正式代码仍未授权。
+- 正式设计与接力包dirty独立复核PASS：两个accepted决定、两个唯一主定义、关键地图/Bundle事实、Q-LAYER open、5场景预授权任务卡和保护路径均正确；sync 1019项、pilot 1024项、`git diff --check`通过。
+- clean设计内容提交`8c7fff7525e8dd77c6367b662f65fec12175d33f`通过sync 1001项、pilot 1006项、diff检查和独立只读复核。`WI-SYS-WORLD-LAYER-DESIGN-001`已关闭。
+- `WI-SYS-LAYER-VISUAL-EVIDENCE-001`原子激活提交`51b6f72f46b2cb3713eaaac8dcdc3050fe39bbbe`通过sync 1012项、pilot 1017项、diff检查和独立复核；HEAD含active状态且工作区clean。
+- 视觉补证采集已执行：公开原站HTTP 200、intro完成、13个阶段状态和13张截图生成；layer8遮挡、factory roof淡隐、bridge1上下切换、particles3区域表现和footsteps生成均得到运行证据。JSON确定性断言PASS；正式代码和旧Phaser零修改。
+- Main已逐张检查13张截图，确认上层灌木遮挡、factory屋顶显隐、bridge通行画面、抗议区域和脚印轨迹与JSON状态能互相解释。独立客观复核PASS，并将particles3直接消费者保持为Q-LAYER-002 UNKNOWN。
+- clean结果提交`f1652629d436ce7f8a7821c760036fdf071ef397`通过JSON 209项客观断言、sync 1017项、pilot 1022项和diff检查；视觉补证结果已验证，当前停在Human证据结论审查，工作项尚未关闭。
