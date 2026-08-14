@@ -92,3 +92,4 @@
 - clean基线`cda9817`独立复核确认：迁入范围旧路径残留0、11个关键物理路径存在、`src/tests`自安全基线零变化、`sample`只改治理检查器、`doc/v0.1`只改迁移治理记录和任务状态；路线第8步确未执行。
 - Human已独立授权执行第8步和普通GitHub推送。清理前旧目录28份Markdown中的26份已有迁入Git对象；另两份原迁移路线和迁移前README已按原字节归档进`migration-history/`，因此清理重复目录不会丢失不可恢复内容。
 - 第8步执行后`D:\复盘\虚拟校园项目·总文档`仅剩一份跳转README、子目录0，跳转页SHA-256为`eaac4b572e2eb6a460b0e18dea81de0ba62a11e12fb792919540a418766bbeba`；旧目录本身未删除。
+- cleanup clean基线`e037559`独立复核确认8项全部PASS：26份迁入内容零变化、两份原件哈希正确、`src/tests/sample`零变化、任务状态一致、Git对象正常；推送前无blocking/high/medium缺陷。
