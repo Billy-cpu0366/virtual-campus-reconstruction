@@ -1,5 +1,5 @@
 ---
-workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
+workflow-ref: 03-执行层/README.md
 current-work-item: WI-DOC-EXEC-LAYER-MIGRATION-001
 work-item-level: level-1
 work-item-type: governance
@@ -155,7 +155,7 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`两份原件；[[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 
 ## Next Step
-执行路线第4步：把`doc/v0.1/`历史内容按原结构移入`migration-history/doc-v0.1/`，但保留当前视觉任务卡原位；同时保存旧治理检查器历史快照，逐文件校验归档前后Git blob和路径清单。
+执行路线第5步：在`doc/v0.1/README.md`建立重定向说明，使旧目录只保留当前视觉任务卡和README；验证两文件白名单、当前任务卡路径不变、历史入口可到达。
 
 ## 错误记录
 | 错误 | 处理 |
