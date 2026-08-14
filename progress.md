@@ -75,4 +75,5 @@
 - Human随后授权第8步和GitHub推送。清理准备提交`d1e192a`把原路线与迁移前README按原字节归档到Git并建立accepted决定；激活提交`3911b55`暂停视觉审查并激活`WI-DOC-PORTAL-CLEANUP-001`。
 - 第8步已执行：旧总文档目录从28份Markdown收敛为一份跳转README、子目录0，旧目录本身保留。clean结果提交`e037559`通过sync1066项、pilot1071项、26项测试、typecheck、恢复/边界检查和lightweight-verifier独立复核；两份原件位于`migration-history/`且哈希不变。
 - 首次普通push因远端新增PR #1 merge提交`971d2a3`被拒，未使用force。fetch审计确认该远端提交与共同基线`03fe5ac`tree相同、内容差异0；无内容merge提交`2824d78`安全接入远端拓扑。final closure`2ff5b98390dfe5c528cbc384f2f83dfe15e8cc47`通过clean sync1075项、pilot1080项并与`origin/main`一致；清理工作项关闭，视觉证据Human审查恢复。
-- 2026-08-15 Human要求按`执行层迁移路线.md`继续迁移。已记录来源哈希、安全基线、accepted决定和`WI-DOC-EXEC-LAYER-MIGRATION-001`治理任务卡；视觉证据Human审查短暂暂停，证据与任务卡实质内容保持原位。当前准备提交路线第0步安全网与原子激活。
+- 2026-08-15 Human要求按`执行层迁移路线.md`继续迁移。路线第0步激活提交`4f339b8`记录来源哈希、安全基线、accepted决定和`WI-DOC-EXEC-LAYER-MIGRATION-001`；视觉证据Human审查短暂暂停，证据与任务卡实质内容保持原位。
+- 路线第1步已完成：`03-执行层/`新增3张有肉卡和13张空槽卡，路径与`01-理解层`16卡完全一致；脚本检查16卡、7节、极简frontmatter、3/13状态和无旧wiki链接全部PASS，`sample/src/tests`零变化。
