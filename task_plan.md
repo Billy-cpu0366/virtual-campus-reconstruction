@@ -1,17 +1,17 @@
 ---
 workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
-current-work-item: WI-DOC-PORTAL-MIGRATION-001
+current-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
 work-item-level: level-1
-work-item-type: governance
+work-item-type: investigation
 work-item-status: active
-node-refs: not-applicable
-scope-ref: doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）.md
-exit-criteria-ref: doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）.md
+node-refs: SYS-LAYER
+scope-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
+exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
 current-phase: verification
 current-gate: none
 gate-status: not-applicable
-authorization-ref: DEC-DOC-PORTAL-MIGRATION-001
-preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
+authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
+preauthorized-next-work-item: none
 next-phase: closure
 updated: 2026-08-14
 ---
@@ -25,7 +25,7 @@ updated: 2026-08-14
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计已由Human接受、验证并关闭；5场景最小视觉补证已完成并暂停在Human审查，当前只执行总文档入口单仓迁移。
+- 世界装配与图层详细设计已由Human接受、验证并关闭；总文档入口迁移已验证关闭，当前恢复5场景最小视觉补证的Human证据审查。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -38,8 +38,8 @@ updated: 2026-08-14
    - 6B. **原站系统与现有代码差距映射** — complete（Human 已通过）
    - 6C. **选择并详细逆向首个系统** — complete（SYS-CHUNK；Human 已通过详细设计）
    - 6D. **世界装配与图层边界调查设计** — complete（设计已接受、验证并关闭）
-   - 6E. **图层最小视觉补证** — paused（证据已验证；等待迁移后恢复Human审查）
-7. **总文档入口单仓迁移** — in_progress（level-1治理；无代码Gate）
+   - 6E. **图层最小视觉补证** — in_progress（证据已验证；等待Human审查）
+7. **总文档入口单仓迁移** — complete（26份文档、入口、指针和验证已进入clean基线）
 
 ## 当前 Human 确认
 
@@ -52,8 +52,8 @@ updated: 2026-08-14
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
 | 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
-| 图层最小视觉补证 | 已授权、证据已验证，当前暂停 | 保留既有5场景证据和Human审查材料 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 总文档迁移关闭后恢复Human证据审查 |
-| 总文档入口单仓迁移 | 已接受并激活 | 复制五层人话文档、修正同仓指针、重写根入口并执行文档/测试验证 | 删除来源目录、搬迁历史或Phase 2、重组精确文档/证据/代码、推送远端 | clean结果提交后关闭迁移，并恢复视觉证据Human审查 |
+| 图层最小视觉补证 | 已授权、证据已验证并恢复审查 | 保留既有5场景证据，等待Human判断证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | Human接受后关闭当前项；要求补充时只在任务卡范围修订 |
+| 总文档入口单仓迁移 | 已接受、验证并关闭 | 维护已迁入的人话入口、精确指针和单仓边界 | 删除来源目录、搬迁历史或Phase 2、重组精确文档/证据/代码、推送远端 | 第8步清理只有Human再次确认后才能执行 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -107,32 +107,28 @@ updated: 2026-08-14
 
 结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-## 当前任务：WI-DOC-PORTAL-MIGRATION-001
+## 当前任务：WI-SYS-LAYER-VISUAL-EVIDENCE-001
 
 | 字段 | 当前值 |
 |---|---|
-| 工作项 | `WI-DOC-PORTAL-MIGRATION-001` |
-| 级别与类型 | `level-1 / governance` |
-| 涉及节点 | `not-applicable`；纯文档与仓库入口治理 |
+| 工作项 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` |
+| 级别与类型 | `level-1 / investigation` |
+| 涉及节点 | `SYS-LAYER` |
 | 当前阶段 | `verification` |
 | 当前 Gate | `none / not-applicable` |
-| Human决定 | `DEC-DOC-PORTAL-MIGRATION-001` |
-| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）]] |
-| 正式代码授权 | 无；只允许文档迁入、入口和治理合同变更 |
+| Human决定 | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
+| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）]] |
+| 正式代码授权 | 无；本轮只做最小公开运行证据补充 |
 
-目标：把独立总文档中的五层人话入口复制进当前Git仓库，修正同仓指针，重写根README并完成可回滚验证。
+目标：只检查玩家遮挡、roof、bridge、particles3和footsteps共5个原站公开运行场景，为`Q-LAYER-001`补充最小截图和运行状态。
 
-当前允许：任务卡列出的26份迁入文档、根README、AGENTS入口、任务/决定/过程记录和必要治理检查合同。
+当前允许：保留已验证的5场景证据并等待Human审查；要求补充时只在原任务卡白名单内修订。
 
-当前禁止：删除来源目录、搬迁`虚拟校园项目/`历史与Phase 2材料、重组`doc/v0.1`/`sample`/`src`/`tests`、修改正式代码或推送远端。
+当前禁止：访问私有资源或source map、扩大整站镜像、修改正式`src/`或旧Phaser、接入Phaser/Vite、实现图层/玩家/碰撞/渲染、提取通用模块。
 
 ## 已阻塞或暂停工作项
 
-| 工作项 | 状态 | 暂停理由 | 恢复条件 | 暂停期间允许 |
-|---|---|---|---|---|
-| `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | paused | Human优先执行总文档迁移；5场景证据已验证并停在Human审查 | `WI-DOC-PORTAL-MIGRATION-001`关闭 | 只保留既有证据与审查材料，不扩大采集或进入代码 |
-
-`BLK-WI-CLOSURE-001` 已由 `DEC-WORK-RELAY-002` 解决：正式工作项允许为零或一个，CORE 可以正常关闭并进入选择状态。
+暂无。`BLK-WI-CLOSURE-001` 已由 `DEC-WORK-RELAY-002` 解决：正式工作项允许为零或一个，CORE 可以正常关闭并进入选择状态。
 
 ## 近期候选
 
@@ -149,9 +145,10 @@ updated: 2026-08-14
 |---|---|---|---|---|---|
 | `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [[doc/v0.1/03-具体怎么做/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]]；`src/chunk/`；[[doc/v0.1/04-怎么验证与还差什么/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
 | `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | 两份调查记录；[[doc/v0.1/03-具体怎么做/系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；[[doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；两份验证计划 | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
+| `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；[[doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）]] | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 
 ## Next Step
-完成治理sync/pilot、链接、Git边界和独立只读复核；全绿后关闭`WI-DOC-PORTAL-MIGRATION-001`并恢复`WI-SYS-LAYER-VISUAL-EVIDENCE-001`的Human证据审查。路线第8步清理仍未授权，正式代码仍不授权。
+等待Human审查5场景证据结论：接受后关闭`WI-SYS-LAYER-VISUAL-EVIDENCE-001`并进入下一工作项选择；要求补充时只在当前任务卡范围内修订。`Q-LAYER-002`继续open，路线第8步清理和正式代码均未授权。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -180,3 +177,4 @@ updated: 2026-08-14
 | Chrome DevTools MCP导航和连接连续超时 | 未产生采集结果；改用本机既有Puppeteer和系统Chrome访问同一公开URL，不增加项目依赖或扩大范围。 |
 | 首轮视觉脚本直接warp进bridge区未触发方向切换，且脚印统计误把95个inactive对象池成员当现有脚印 | 不采纳首轮对应结论；改为从入口/出口外用方向键自然跨入，并只统计active footprint。重跑后bridge上下状态均观察到，active脚印由0增至5。 |
 | 独立复核指出行为基准和证据差距回写未逐字列入视觉任务卡白名单 | 两项都是AGENTS.md第8节要求的强制闭环；将其显式补入任务卡允许路径，避免依赖隐含协议解释，不扩大采集或实现范围。 |
+| 迁移关闭索引使用`[[README]]`时治理检查发现两个同名README候选 | 改用明确的Markdown相对链接`[根README](README.md)`；不降低链接唯一性检查标准。 |
