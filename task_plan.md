@@ -155,7 +155,7 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`两份原件；[[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 
 ## Next Step
-执行路线第3步：从机器台账抽出仍生效Human决定和签字历史，重写根`决策记录.md`；把旧目标范围中的Phase 1边界抽进根`README.md`，不复制动态状态或旧治理壳。
+执行路线第4步：把`doc/v0.1/`历史内容按原结构移入`migration-history/doc-v0.1/`，但保留当前视觉任务卡原位；同时保存旧治理检查器历史快照，逐文件校验归档前后Git blob和路径清单。
 
 ## 错误记录
 | 错误 | 处理 |
