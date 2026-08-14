@@ -7,19 +7,19 @@ work-item-status: active
 node-refs: not-applicable
 scope-ref: 执行层迁移任务卡.md
 exit-criteria-ref: 执行层迁移任务卡.md
-current-phase: implementation
+current-phase: verification
 current-gate: none
 gate-status: not-applicable
 authorization-ref: DEC-DOC-EXEC-LAYER-MIGRATION-001
 preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
-next-phase: verification
+next-phase: closure
 updated: 2026-08-15
 ---
 
 # 原站逆向重构计划
 
 ## 目标
-以已完成的 `sample/` 公开证据为基础，建立文档先行的 `doc/v0.1/` 框架；先恢复原站系统知识，再决定正式 `src/` 实现。
+以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
 
 ## 范围
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
@@ -99,7 +99,7 @@ updated: 2026-08-15
 2. 明确数据契约、坐标/索引换算、目标集合、加载/卸载、缓存、失败、取消和销毁边界；
 3. 明确分块与世界装配、图层、资源加载、玩家和相机的职责边界；
 4. 将未证实内容保留为 `UNKNOWN` 并登记后续调查；
-5. 建立 [[doc/v0.1/03-具体怎么做/系统/地图分块：从原站查到了什么（SYS-CHUNK 调查记录）]]，更新证据追踪和验证计划；在 Human 审查前不登记为唯一详细主定义；
+5. 建立[SYS-CHUNK历史调查记录](migration-history/doc-v0.1/03-具体怎么做/系统/地图分块：从原站查到了什么（SYS-CHUNK 调查记录）.md)，更新证据追踪和验证计划；在Human审查前不登记为唯一详细主定义；
 6. 做只读独立复核，确认没有写入正式 `src`、没有修改旧 Phaser、没有提前抽取复用模块；
 7. 交 Human 审查工作稿、正式详细设计候选和验收标准。
 
@@ -118,7 +118,7 @@ updated: 2026-08-15
 | 工作项 | `WI-DOC-EXEC-LAYER-MIGRATION-001` |
 | 级别与类型 | `level-1 / governance` |
 | 涉及节点 | `not-applicable`；纯文档结构迁移 |
-| 当前阶段 | `implementation` |
+| 当前阶段 | `verification` |
 | 当前 Gate | `none / not-applicable` |
 | Human决定 | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
 | 范围与退出标准 | [执行层迁移任务卡](执行层迁移任务卡.md) |
@@ -149,13 +149,13 @@ updated: 2026-08-15
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
-| `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [[doc/v0.1/03-具体怎么做/系统/地图分块：本轮准备实现什么（SYS-CHUNK CORE 实施授权包）]]；`src/chunk/`；[[doc/v0.1/04-怎么验证与还差什么/地图分块：怎样验证做对了（SYS-CHUNK 验证计划）]] | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
-| `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | 两份调查记录；[[doc/v0.1/03-具体怎么做/系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；[[doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；两份验证计划 | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
-| `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；[[doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）]] | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
-| `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`两份原件；[[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
+| `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [当前SYS-CHUNK卡](03-执行层/01-地图线/04-地图分块.md)；`src/chunk/`；`tests/chunk/`；历史授权包在`migration-history/doc-v0.1/` | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
+| `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | [SYS-WORLD卡](03-执行层/01-地图线/02-世界与地图.md)；[SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；历史调查/验证在`migration-history/doc-v0.1/` | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
+| `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；历史任务卡在`migration-history/doc-v0.1/` | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
+| `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 
 ## Next Step
-执行路线第6步：把`AGENTS.md`机器启动/权威入口和根README的AI执行、仓库结构、SSOT、接力流程全部切到`03-执行层/`、根`决策记录.md`与`task_plan.md`，清除当前链上的旧`doc/v0.1`权威表述。
+执行路线第7步完整验收：核对18份执行层当前文档、doc两文件白名单、46份历史哈希、所有当前入口/链接、26项测试、typecheck和`sample/src/tests`零差异；形成clean结果提交后做独立只读复核，再关闭迁移并恢复视觉证据Human审查。
 
 ## 错误记录
 | 错误 | 处理 |
