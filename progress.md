@@ -72,4 +72,5 @@
 - 原样导入提交`383d2a8`新增26份人话文档，复制前后SHA-256差异0且`doc/sample/src/tests`零变更。随后已完成同仓指针、历史兄弟目录路径、根README、SSOT声明和AGENTS人话入口改造。
 - 迁移预验证：27份入口文档共19个Markdown内联链接缺失0；11个关键执行/素材/历史物理路径全部存在；错误旧仓库路径和称呼残留0；来源仍保留28份Markdown。`npm test`为3文件26项PASS，`npm run typecheck`PASS；dirty治理`sync`1068项、`pilot`1073项PASS。
 - clean验证基线`cda98173a24df1b605019d3b7126ea092dd4b6cf`通过sync1064项、pilot1069项、26项测试、typecheck、链接/路径/Git边界检查和lightweight-verifier只读复核；无blocking/high/medium/low缺陷。final closure基线`f23f3f43859ddf944868acea76f5a8a312a71b93`恢复视觉证据Human审查并通过sync1074项、pilot1079项。
-- Human随后授权第8步和GitHub推送。清理准备已把原路线与迁移前README按原字节归档到Git，建立`WI-DOC-PORTAL-CLEANUP-001`严格治理任务卡和accepted决定；当前尚未删除旧目录内容或推送。
+- Human随后授权第8步和GitHub推送。清理准备提交`d1e192a`把原路线与迁移前README按原字节归档到Git并建立accepted决定；激活提交`3911b55`暂停视觉审查并激活`WI-DOC-PORTAL-CLEANUP-001`。
+- 第8步已执行：旧总文档目录从28份Markdown收敛为一份跳转README、子目录0，旧目录本身保留。26项测试、typecheck、dirty sync1074项和pilot1079项PASS；两份原字节历史来源因正式文档合同移至`migration-history/`，哈希不变。当前等待clean独立复核，尚未推送GitHub。

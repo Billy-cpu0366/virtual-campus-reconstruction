@@ -7,12 +7,12 @@ work-item-status: active
 node-refs: not-applicable
 scope-ref: doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）.md
 exit-criteria-ref: doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）.md
-current-phase: implementation
+current-phase: verification
 current-gate: none
 gate-status: not-applicable
 authorization-ref: DEC-DOC-PORTAL-CLEANUP-001
 preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
-next-phase: verification
+next-phase: closure
 updated: 2026-08-14
 ---
 
@@ -116,7 +116,7 @@ updated: 2026-08-14
 | 工作项 | `WI-DOC-PORTAL-CLEANUP-001` |
 | 级别与类型 | `level-1 / governance` |
 | 涉及节点 | `not-applicable`；纯文档清理与远端同步 |
-| 当前阶段 | `implementation` |
+| 当前阶段 | `verification` |
 | 当前 Gate | `none / not-applicable` |
 | Human决定 | `DEC-DOC-PORTAL-CLEANUP-001` |
 | 范围与退出标准 | [[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] |
@@ -154,7 +154,7 @@ updated: 2026-08-14
 | `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；[[doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）]] | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 
 ## Next Step
-将旧总文档目录收敛为单一跳转README，验证可恢复性和Git边界；形成clean关闭提交后普通推送`origin main`并核对远端。完成后恢复`WI-SYS-LAYER-VISUAL-EVIDENCE-001`的Human证据审查。
+验证旧目录仅剩跳转README、28份原内容可由Git恢复、治理与Git边界全绿；形成clean结果提交后普通推送`origin main`并核对远端，再关闭清理并恢复视觉证据Human审查。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -184,3 +184,5 @@ updated: 2026-08-14
 | 首轮视觉脚本直接warp进bridge区未触发方向切换，且脚印统计误把95个inactive对象池成员当现有脚印 | 不采纳首轮对应结论；改为从入口/出口外用方向键自然跨入，并只统计active footprint。重跑后bridge上下状态均观察到，active脚印由0增至5。 |
 | 独立复核指出行为基准和证据差距回写未逐字列入视觉任务卡白名单 | 两项都是AGENTS.md第8节要求的强制闭环；将其显式补入任务卡允许路径，避免依赖隐含协议解释，不扩大采集或实现范围。 |
 | 迁移关闭索引使用无路径的README双链时治理检查发现两个同名候选 | 改用明确的Markdown相对链接指向根`README.md`；错误记录不再原样嵌入会被检查器解析的双链语法。 |
+| 第8步预检将两份原字节历史来源放入`doc/v0.1`后触发正式文档命名和无效双链检查，且插入决定时重复了一次迁移决定标题 | 不修改历史原件字节；将它们移到仓库根`migration-history/`并更新权威路径，同时删除重复标题。治理文档继续保持正式命名合同。 |
+| 清理结果首次暂存命令同时列出`git mv`后的新旧文件路径，旧路径已不存在导致pathspec失败 | 未形成提交或丢失变更；改为对`doc/v0.1`和`migration-history`目录执行`git add -A`，由Git记录重命名。 |
