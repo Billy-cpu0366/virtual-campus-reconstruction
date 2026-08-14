@@ -1,12 +1,12 @@
 ---
 title: 图层与遮挡：最小视觉补证任务卡（SYS-LAYER）
 type: work-item-task-card
-status: active
+status: paused
 version: v0.1
 work-item-id: WI-SYS-LAYER-VISUAL-EVIDENCE-001
 work-item-level: level-1
 work-item-type: investigation
-work-item-status: active
+work-item-status: paused
 node-refs: SYS-LAYER
 question-refs: Q-LAYER-001
 authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
@@ -20,7 +20,7 @@ updated: 2026-08-11
 
 > **一句话：只去原站看5个会影响图层设计验收的场景，留下最少但可重复的截图与运行状态；不扩大采集、不写正式代码。**
 
-> 本任务已由Human授权，并在`WI-SYS-WORLD-LAYER-DESIGN-001`完成后由`task_plan.md`激活。当前只允许执行本文的5场景证据调查。
+> 本任务已由Human授权，并在`WI-SYS-WORLD-LAYER-DESIGN-001`完成后由`task_plan.md`激活。5场景证据已经完成并停在Human审查；2026-08-14因Human优先执行总文档迁移而暂停，迁移关闭后恢复审查。
 
 ## 1. 目标
 
