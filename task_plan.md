@@ -1,17 +1,17 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-DOC-EXEC-LAYER-MIGRATION-001
+current-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
 work-item-level: level-1
-work-item-type: governance
+work-item-type: investigation
 work-item-status: active
-node-refs: not-applicable
-scope-ref: 执行层迁移任务卡.md
-exit-criteria-ref: 执行层迁移任务卡.md
+node-refs: SYS-LAYER
+scope-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
+exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
 current-phase: verification
 current-gate: none
 gate-status: not-applicable
-authorization-ref: DEC-DOC-EXEC-LAYER-MIGRATION-001
-preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
+authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
+preauthorized-next-work-item: none
 next-phase: closure
 updated: 2026-08-15
 ---
@@ -25,7 +25,7 @@ updated: 2026-08-15
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计已由Human接受、验证并关闭；5场景视觉证据已完成并等待Human审查；当前按Human路线迁移精确执行层，视觉审查短暂暂停。
+- 世界装配与图层详细设计已由Human接受、验证并关闭；执行层16卡与历史归档迁移已验证关闭，当前恢复5场景视觉证据的Human结论审查。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -41,7 +41,7 @@ updated: 2026-08-15
    - 6E. **图层最小视觉补证** — in_progress（证据已验证；等待Human审查）
 7. **总文档入口单仓迁移** — complete（26份文档、入口、指针和验证已进入clean基线）
 8. **旧总文档收敛与GitHub推送** — complete（旧目录单README；普通push已确认远端一致）
-9. **执行层16卡与doc/v0.1历史归档迁移** — in_progress（Human已授权第0至第7步）
+9. **执行层16卡与doc/v0.1历史归档迁移** — complete（18份当前执行文档、46份历史归档和入口切换已验证）
 
 ## 当前 Human 确认
 
@@ -54,10 +54,10 @@ updated: 2026-08-15
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
 | 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
-| 图层最小视觉补证 | 已授权、证据已验证，执行层迁移期间暂停 | 保留既有5场景证据和Human审查材料 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 执行层迁移关闭后恢复Human证据审查 |
+| 图层最小视觉补证 | 已授权、证据已验证并恢复审查 | 保留既有5场景证据，等待Human判断证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | Human接受后关闭；要求补充时只在任务卡白名单修订 |
 | 总文档入口单仓迁移 | 已接受、验证并关闭 | 维护已迁入的人话入口和单仓边界 | 修改证据或代码 | 已完成 |
 | 旧总文档收敛与GitHub推送 | 已接受、验证并关闭 | 维护单README跳转、两份可恢复原件和远端同步关系 | 删除旧目录本身、force-push、历史/Phase 2搬迁、代码或证据修改 | 已完成 |
-| 执行层16卡与历史归档迁移 | 已接受并激活 | 16卡、总账、操作手册、顶层归位、旧doc原结构归档和入口切换 | 修改`sample/src/tests`、旧Phaser、证据结论、内容TBD、force-push | 七步独立提交并全绿后关闭，恢复视觉审查 |
+| 执行层16卡与历史归档迁移 | 已接受、验证并关闭 | 维护16卡、总账、操作手册、旧doc归档和当前入口 | 修改`sample/src/tests`、旧Phaser、证据结论、内容TBD | 已完成；当前入口只认`03-执行层/` |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -111,30 +111,28 @@ updated: 2026-08-15
 
 结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-## 当前任务：WI-DOC-EXEC-LAYER-MIGRATION-001
+## 当前任务：WI-SYS-LAYER-VISUAL-EVIDENCE-001
 
 | 字段 | 当前值 |
 |---|---|
-| 工作项 | `WI-DOC-EXEC-LAYER-MIGRATION-001` |
-| 级别与类型 | `level-1 / governance` |
-| 涉及节点 | `not-applicable`；纯文档结构迁移 |
+| 工作项 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` |
+| 级别与类型 | `level-1 / investigation` |
+| 涉及节点 | `SYS-LAYER` |
 | 当前阶段 | `verification` |
 | 当前 Gate | `none / not-applicable` |
-| Human决定 | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
-| 范围与退出标准 | [执行层迁移任务卡](执行层迁移任务卡.md) |
-| 正式代码授权 | 无；只允许路线列出的文档抽取、归档、指针和治理同步 |
+| Human决定 | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
+| 范围与退出标准 | [图层最小视觉补证任务卡](doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md) |
+| 正式代码授权 | 无；本轮只做最小公开运行证据补充 |
 
-目标：按Human路线把旧精确工程知识收敛为16张执行卡、总账和操作手册，并把旧壳完整归档。
+目标：只检查玩家遮挡、roof、bridge、particles3和footsteps共5个原站公开运行场景，为图层结论提供最小截图和运行状态。
 
-当前允许：路线第0至第7步、逐步独立提交、必要只读检查与治理状态同步。
+当前允许：保留已验证的5场景证据并等待Human审查；要求补充时只在任务卡白名单内修订。
 
-当前禁止：修改`sample/src/tests`、旧Phaser、正式代码、证据结论、三个保留TBD或Git历史。
+当前禁止：访问私有资源或source map、扩大整站镜像、修改正式`src/`或旧Phaser、接入Phaser/Vite、实现图层/玩家/碰撞/渲染、提取通用模块。
 
 ## 已阻塞或暂停工作项
 
-| 工作项 | 状态 | 暂停理由 | 恢复条件 | 暂停期间允许 |
-|---|---|---|---|---|
-| `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | paused | Human优先执行精确执行层结构迁移 | `WI-DOC-EXEC-LAYER-MIGRATION-001`关闭 | 只保留既有证据与审查材料，不重新采集、不进入代码 |
+暂无。
 
 ## 近期候选
 
@@ -153,9 +151,10 @@ updated: 2026-08-15
 | `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | [SYS-WORLD卡](03-执行层/01-地图线/02-世界与地图.md)；[SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；历史调查/验证在`migration-history/doc-v0.1/` | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
 | `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；历史任务卡在`migration-history/doc-v0.1/` | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
+| `WI-DOC-EXEC-LAYER-MIGRATION-001` | completed | not-applicable | [当前执行层](03-执行层/README.md)；[16系统总账](03-执行层/00-总账.md)；[历史治理记录](migration-history/执行层迁移任务卡（治理记录）.md) | `293cbeb2d9bcf99f28c2a7cb62de10ee0e08f0c5` | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
 
 ## Next Step
-执行路线第7步完整验收：核对18份执行层当前文档、doc两文件白名单、46份历史哈希、所有当前入口/链接、26项测试、typecheck和`sample/src/tests`零差异；形成clean结果提交后做独立只读复核，再关闭迁移并恢复视觉证据Human审查。
+等待Human审查5场景证据结论：接受后关闭`WI-SYS-LAYER-VISUAL-EVIDENCE-001`并进入下一工作项选择；要求补充时只在当前任务卡白名单修订。`Q-LAYER-002`继续open，正式代码仍未授权。
 
 ## 错误记录
 | 错误 | 处理 |
@@ -192,3 +191,4 @@ updated: 2026-08-15
 | 首次打印16张理解卡标题时Windows GBK无法编码标题中的星号符号 | 未修改文件；设置`PYTHONIOENCODING=utf-8`后重新执行只读清单。 |
 | 第1步受影响清单把多个目录写成一个“从A至B”代码路径，治理检查器按单一路径解析而报缺失 | 改为登记实际存在的共同目录`03-执行层/`，具体16卡由步骤验收脚本逐项核对。 |
 | 第7步首次当前文档链接脚本递归进入`node_modules`并把依赖包README的发布链接误报为项目断链 | 未修改依赖；链接检查明确排除`node_modules`、`.git`和历史归档，只验证项目当前Markdown。 |
+| 关闭提交首次暂存同时列出已被`git mv`移走的源路线/任务卡旧路径，pathspec不存在导致失败 | 未形成提交或丢失变更；改用`git add -u -- .`记录全部已跟踪修改/删除，再显式加入`migration-history`新路径。 |
