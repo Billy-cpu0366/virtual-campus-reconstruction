@@ -155,7 +155,7 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`两份原件；[[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 
 ## Next Step
-执行路线第2步：从节点清单、未知队列和三份行为/差距文档建立`03-执行层/00-总账.md`，并把6条规矩和6步循环写入`03-执行层/README.md`；验证总账不替代根`task_plan.md`的动态状态权威。
+执行路线第3步：从机器台账抽出仍生效Human决定和签字历史，重写根`决策记录.md`；把旧目标范围中的Phase 1边界抽进根`README.md`，不复制动态状态或旧治理壳。
 
 ## 错误记录
 | 错误 | 处理 |
