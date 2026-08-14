@@ -69,4 +69,5 @@
 - Main已逐张检查13张截图，确认上层灌木遮挡、factory屋顶显隐、bridge通行画面、抗议区域和脚印轨迹与JSON状态能互相解释。独立客观复核PASS，并将particles3直接消费者保持为Q-LAYER-002 UNKNOWN。
 - clean结果提交`f1652629d436ce7f8a7821c760036fdf071ef397`通过JSON 209项客观断言、sync 1017项、pilot 1022项和diff检查；视觉补证结果已验证，当前停在Human证据结论审查，工作项尚未关闭。
 - Human已授权按`D:\复盘\虚拟校园项目·总文档\00-迁移结合路线.md`执行总文档单仓迁移。第0步发现的既有表格格式化差异已独立提交为`a2e303b`；准备提交`714774b`建立治理任务卡、accepted决定和纯治理工作项最小合同，激活提交`7d65f4f`暂停视觉审查并原子激活迁移。
-- 原样导入提交`383d2a8`新增26份人话文档，复制前后SHA-256差异0且`doc/sample/src/tests`零变更。随后已完成同仓指针、历史兄弟目录路径、根README、SSOT声明和AGENTS人话入口改造，等待完整验证。
+- 原样导入提交`383d2a8`新增26份人话文档，复制前后SHA-256差异0且`doc/sample/src/tests`零变更。随后已完成同仓指针、历史兄弟目录路径、根README、SSOT声明和AGENTS人话入口改造。
+- 迁移预验证：27份入口文档共19个Markdown内联链接缺失0；11个关键执行/素材/历史物理路径全部存在；错误旧仓库路径和称呼残留0；来源仍保留28份Markdown。`npm test`为3文件26项PASS，`npm run typecheck`PASS；dirty治理`sync`1068项、`pilot`1073项PASS，工作项进入verification，等待clean治理和独立复核。

@@ -7,12 +7,12 @@ work-item-status: active
 node-refs: not-applicable
 scope-ref: doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）.md
 exit-criteria-ref: doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）.md
-current-phase: implementation
+current-phase: verification
 current-gate: none
 gate-status: not-applicable
 authorization-ref: DEC-DOC-PORTAL-MIGRATION-001
 preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
-next-phase: verification
+next-phase: closure
 updated: 2026-08-14
 ---
 
@@ -114,7 +114,7 @@ updated: 2026-08-14
 | 工作项 | `WI-DOC-PORTAL-MIGRATION-001` |
 | 级别与类型 | `level-1 / governance` |
 | 涉及节点 | `not-applicable`；纯文档与仓库入口治理 |
-| 当前阶段 | `implementation` |
+| 当前阶段 | `verification` |
 | 当前 Gate | `none / not-applicable` |
 | Human决定 | `DEC-DOC-PORTAL-MIGRATION-001` |
 | 范围与退出标准 | [[doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）]] |
@@ -151,7 +151,7 @@ updated: 2026-08-14
 | `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | 两份调查记录；[[doc/v0.1/03-具体怎么做/系统/世界与地图：游戏世界怎样建立和装卸（SYS-WORLD）#SYS-WORLD]]；[[doc/v0.1/03-具体怎么做/系统/图层与遮挡：24层怎样显示和清理（SYS-LAYER）#SYS-LAYER]]；两份验证计划 | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
 
 ## Next Step
-按迁移任务卡原样复制26份人话文档并单独提交；随后修正同仓指针、根入口和AI入口，完成治理、链接、测试与类型检查。迁移关闭后恢复`WI-SYS-LAYER-VISUAL-EVIDENCE-001`的Human证据审查；正式代码仍不授权。
+完成治理sync/pilot、链接、Git边界和独立只读复核；全绿后关闭`WI-DOC-PORTAL-MIGRATION-001`并恢复`WI-SYS-LAYER-VISUAL-EVIDENCE-001`的Human证据审查。路线第8步清理仍未授权，正式代码仍不授权。
 
 ## 错误记录
 | 错误 | 处理 |
