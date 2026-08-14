@@ -1,18 +1,18 @@
 ---
 workflow-ref: doc/v0.1/每轮工作怎么推进（流程速查）.md
-current-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
+current-work-item: WI-DOC-PORTAL-CLEANUP-001
 work-item-level: level-1
-work-item-type: investigation
+work-item-type: governance
 work-item-status: active
-node-refs: SYS-LAYER
-scope-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
-exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
-current-phase: verification
+node-refs: not-applicable
+scope-ref: doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）.md
+exit-criteria-ref: doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）.md
+current-phase: implementation
 current-gate: none
 gate-status: not-applicable
-authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
-preauthorized-next-work-item: none
-next-phase: closure
+authorization-ref: DEC-DOC-PORTAL-CLEANUP-001
+preauthorized-next-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
+next-phase: verification
 updated: 2026-08-14
 ---
 
@@ -25,7 +25,7 @@ updated: 2026-08-14
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计已由Human接受、验证并关闭；总文档入口迁移已验证关闭，当前恢复5场景最小视觉补证的Human证据审查。
+- 世界装配与图层详细设计已由Human接受、验证并关闭；总文档入口迁移已验证，当前执行旧目录第8步清理和普通GitHub推送，视觉证据Human审查短暂暂停。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -40,6 +40,7 @@ updated: 2026-08-14
    - 6D. **世界装配与图层边界调查设计** — complete（设计已接受、验证并关闭）
    - 6E. **图层最小视觉补证** — in_progress（证据已验证；等待Human审查）
 7. **总文档入口单仓迁移** — complete（26份文档、入口、指针和验证已进入clean基线）
+8. **旧总文档收敛与GitHub推送** — in_progress（Human已授权第8步；严格治理清理）
 
 ## 当前 Human 确认
 
@@ -52,8 +53,9 @@ updated: 2026-08-14
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
 | 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
-| 图层最小视觉补证 | 已授权、证据已验证并恢复审查 | 保留既有5场景证据，等待Human判断证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | Human接受后关闭当前项；要求补充时只在任务卡范围修订 |
-| 总文档入口单仓迁移 | 已接受、验证并关闭 | 维护已迁入的人话入口、精确指针和单仓边界 | 删除来源目录、搬迁历史或Phase 2、重组精确文档/证据/代码、推送远端 | 第8步清理只有Human再次确认后才能执行 |
+| 图层最小视觉补证 | 已授权、证据已验证，清理期间暂停 | 保留既有5场景证据和Human审查材料 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 旧目录清理关闭后恢复Human证据审查 |
+| 总文档入口单仓迁移 | 已接受、验证并关闭 | 维护已迁入的人话入口、精确指针和单仓边界 | 重组精确文档/证据/代码 | 当前独立执行已授权的第8步清理 |
+| 旧总文档收敛与GitHub推送 | 已接受并激活 | 旧目录收敛为跳转README、保留可恢复原件、普通push并核对远端 | 删除旧目录本身、force-push、历史/Phase 2搬迁、代码或证据修改 | clean验证并确认远端main后关闭，恢复视觉审查 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -107,28 +109,32 @@ updated: 2026-08-14
 
 结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-## 当前任务：WI-SYS-LAYER-VISUAL-EVIDENCE-001
+## 当前任务：WI-DOC-PORTAL-CLEANUP-001
 
 | 字段 | 当前值 |
 |---|---|
-| 工作项 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` |
-| 级别与类型 | `level-1 / investigation` |
-| 涉及节点 | `SYS-LAYER` |
-| 当前阶段 | `verification` |
+| 工作项 | `WI-DOC-PORTAL-CLEANUP-001` |
+| 级别与类型 | `level-1 / governance` |
+| 涉及节点 | `not-applicable`；纯文档清理与远端同步 |
+| 当前阶段 | `implementation` |
 | 当前 Gate | `none / not-applicable` |
-| Human决定 | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
-| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）]] |
-| 正式代码授权 | 无；本轮只做最小公开运行证据补充 |
+| Human决定 | `DEC-DOC-PORTAL-CLEANUP-001` |
+| 范围与退出标准 | [[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] |
+| 正式代码授权 | 无；只允许旧目录跳转清理、治理记录和普通push |
 
-目标：只检查玩家遮挡、roof、bridge、particles3和footsteps共5个原站公开运行场景，为`Q-LAYER-001`补充最小截图和运行状态。
+目标：把旧总文档目录收敛成单一跳转README，在确认可恢复和本地验证通过后普通推送GitHub。
 
-当前允许：保留已验证的5场景证据并等待Human审查；要求补充时只在原任务卡白名单内修订。
+当前允许：归档两个未迁入原件、清理旧目录重复内容、写跳转README、维护治理记录、普通`git push origin main`和远端核对。
 
-当前禁止：访问私有资源或source map、扩大整站镜像、修改正式`src/`或旧Phaser、接入Phaser/Vite、实现图层/玩家/碰撞/渲染、提取通用模块。
+当前禁止：删除旧目录本身、force-push、改写Git历史、搬迁历史/Phase 2、修改正式代码、测试或原站证据。
 
 ## 已阻塞或暂停工作项
 
-暂无。`BLK-WI-CLOSURE-001` 已由 `DEC-WORK-RELAY-002` 解决：正式工作项允许为零或一个，CORE 可以正常关闭并进入选择状态。
+| 工作项 | 状态 | 暂停理由 | 恢复条件 | 暂停期间允许 |
+|---|---|---|---|---|
+| `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | paused | Human优先执行旧总文档第8步清理和GitHub推送 | `WI-DOC-PORTAL-CLEANUP-001`关闭 | 只保留既有证据与审查材料，不扩大采集或进入代码 |
+
+`BLK-WI-CLOSURE-001` 已由 `DEC-WORK-RELAY-002` 解决：正式工作项允许为零或一个，CORE 可以正常关闭并进入选择状态。
 
 ## 近期候选
 
@@ -148,7 +154,7 @@ updated: 2026-08-14
 | `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；[[doc/v0.1/03-具体怎么做/总文档迁移：本轮怎样合并文档入口（治理任务卡）]] | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 
 ## Next Step
-等待Human审查5场景证据结论：接受后关闭`WI-SYS-LAYER-VISUAL-EVIDENCE-001`并进入下一工作项选择；要求补充时只在当前任务卡范围内修订。`Q-LAYER-002`继续open，路线第8步清理和正式代码均未授权。
+将旧总文档目录收敛为单一跳转README，验证可恢复性和Git边界；形成clean关闭提交后普通推送`origin main`并核对远端。完成后恢复`WI-SYS-LAYER-VISUAL-EVIDENCE-001`的Human证据审查。
 
 ## 错误记录
 | 错误 | 处理 |
