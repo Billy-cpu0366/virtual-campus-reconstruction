@@ -74,4 +74,4 @@
 - clean验证基线`cda98173a24df1b605019d3b7126ea092dd4b6cf`通过sync1064项、pilot1069项、26项测试、typecheck、链接/路径/Git边界检查和lightweight-verifier只读复核；无blocking/high/medium/low缺陷。final closure基线`f23f3f43859ddf944868acea76f5a8a312a71b93`恢复视觉证据Human审查并通过sync1074项、pilot1079项。
 - Human随后授权第8步和GitHub推送。清理准备提交`d1e192a`把原路线与迁移前README按原字节归档到Git并建立accepted决定；激活提交`3911b55`暂停视觉审查并激活`WI-DOC-PORTAL-CLEANUP-001`。
 - 第8步已执行：旧总文档目录从28份Markdown收敛为一份跳转README、子目录0，旧目录本身保留。clean结果提交`e037559`通过sync1066项、pilot1071项、26项测试、typecheck、恢复/边界检查和lightweight-verifier独立复核；两份原件位于`migration-history/`且哈希不变。
-- 首次普通push因远端新增PR #1 merge提交`971d2a3`被拒，未使用force。fetch审计确认该远端提交与共同基线`03fe5ac`tree相同、内容差异0；无内容merge提交`2824d78`已安全接入远端拓扑，等待再次普通push。
+- 首次普通push因远端新增PR #1 merge提交`971d2a3`被拒，未使用force。fetch审计确认该远端提交与共同基线`03fe5ac`tree相同、内容差异0；无内容merge提交`2824d78`安全接入远端拓扑后，普通push基线`b2319041fc85974694d29fc607d60678bc139d33`成功且与`origin/main`一致。清理工作项关闭，视觉证据Human审查恢复。
