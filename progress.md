@@ -68,3 +68,4 @@
 - 视觉补证采集已执行：公开原站HTTP 200、intro完成、13个阶段状态和13张截图生成；layer8遮挡、factory roof淡隐、bridge1上下切换、particles3区域表现和footsteps生成均得到运行证据。JSON确定性断言PASS；正式代码和旧Phaser零修改。
 - Main已逐张检查13张截图，确认上层灌木遮挡、factory屋顶显隐、bridge通行画面、抗议区域和脚印轨迹与JSON状态能互相解释。独立客观复核PASS，并将particles3直接消费者保持为Q-LAYER-002 UNKNOWN。
 - clean结果提交`f1652629d436ce7f8a7821c760036fdf071ef397`通过JSON 209项客观断言、sync 1017项、pilot 1022项和diff检查；视觉补证结果已验证，当前停在Human证据结论审查，工作项尚未关闭。
+- Human已授权按`D:\复盘\虚拟校园项目·总文档\00-迁移结合路线.md`执行总文档单仓迁移。第0步发现的既有表格格式化差异已独立提交为`a2e303b`；随后建立`WI-DOC-PORTAL-MIGRATION-001`治理任务卡、accepted决定和纯治理工作项最小检查合同，当前处于严格迁移准备阶段。

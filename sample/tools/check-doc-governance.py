@@ -469,8 +469,9 @@ def check_task_state(result: Result) -> dict[str, str]:
             result.check(values.get("authorization-ref") == "pending", "pending authorization must not cite a decision")
         if phase == "implementation":
             result.check(values.get("work-item-status") == "active", "implementation phase requires an active work item")
-            result.check(values.get("gate-status") == "passed", "implementation phase requires a passed gate")
-            result.check(values.get("authorization-ref", "").startswith("DEC-"), "active implementation requires a decision reference")
+            if values.get("work-item-level") == "level-2":
+                result.check(values.get("gate-status") == "passed", "formal implementation requires a passed gate")
+                result.check(values.get("authorization-ref", "").startswith("DEC-"), "formal implementation requires a decision reference")
     text = read_text(TASK_PLAN)
     result.check(text.count("## 当前任务：") == 1, "exactly one current task is required")
     result.check(text.count("## 当前审查包：") == 0, "stale current review-package heading remains")
@@ -506,7 +507,8 @@ def check_work_item_contract(
             result.check(bool(re.fullmatch(r"[0-9a-f]{40}", result_commit)), f"closed work item result commit is invalid: {item_id}")
             result.check(decision_refs not in {"", "—"}, f"closed work item decision reference missing: {item_id}")
             for node_id in [part.strip() for part in node_cell.split(";") if part.strip()]:
-                result.check(node_id in nodes, f"closed work item node does not exist: {item_id}={node_id}")
+                if node_id != "not-applicable":
+                    result.check(node_id in nodes, f"closed work item node does not exist: {item_id}={node_id}")
             if re.fullmatch(r"[0-9a-f]{40}", result_commit):
                 try:
                     subprocess.run(
@@ -521,10 +523,16 @@ def check_work_item_contract(
     if work_item == "none":
         return
     result.check(work_item not in closed_ids, f"current work item is already closed: {work_item}")
-    node_refs = {part.strip() for part in values.get("node-refs", "").split(";") if part.strip()}
-    result.check(bool(node_refs), "current work item has no node reference")
-    for node_id in sorted(node_refs):
-        result.check(node_id in nodes, f"current work item node does not exist: {node_id}")
+    node_ref_value = values.get("node-refs", "")
+    is_governance = values.get("work-item-type") == "governance"
+    if is_governance:
+        result.check(node_ref_value == "not-applicable", "governance work item must use node-refs: not-applicable")
+        node_refs: set[str] = set()
+    else:
+        node_refs = {part.strip() for part in node_ref_value.split(";") if part.strip()}
+        result.check(bool(node_refs), "current work item has no node reference")
+        for node_id in sorted(node_refs):
+            result.check(node_id in nodes, f"current work item node does not exist: {node_id}")
     scope_path = project_ref_path(values.get("scope-ref", ""))
     exit_path = project_ref_path(values.get("exit-criteria-ref", ""))
     result.check(scope_path.exists(), f"work item scope reference missing: {scope_path}")

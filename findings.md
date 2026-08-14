@@ -84,3 +84,6 @@
 - bridge1运行补证：方向键从左入口进入后down wall碰撞tile 14→0、up wall 0→82、玩家depth变1650；从右出口离开后down wall和玩家常态depth恢复。
 - particles3位置运行补证：优化运行Tilemap没有particles3层；在86格marker范围内玩家同时落入protesters_rising(tileCount=86)和crowd_up region，截图有抗议人群。marker到trajectory消费者的直接链路仍UNKNOWN。
 - footsteps运行补证：优化运行Tilemap没有footsteps层；玩家沿独立grid对应路径移动后active footprint sprites由0增至5，depth 450。5场景均获得可定位运行证据。
+- 总文档迁移预检发现安全基线`03fe5ac`上存在一处非本轮产生的能力清单表格格式化差异；Human确认后已将其作为独立提交`a2e303b`保存，内容语义未变化，迁移工作区恢复clean。
+- `00-迁移结合路线.md`的SHA-256为`20bde27e97b7ec2bda2753bf1f31d33fa0baf186da43756661001de1d97825cd`。Human授权执行第0至第7步；来源目录删除和路线第8步仍未授权。
+- 现有工作项检查合同要求所有WI引用游戏节点，但稳定流程允许纯治理任务。迁移准备采用最小合同：仅`work-item-type: governance`可使用`node-refs: not-applicable`，正式代码level-2 Gate保持不变。
