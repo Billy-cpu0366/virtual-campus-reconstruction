@@ -155,7 +155,7 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`两份原件；[[doc/v0.1/03-具体怎么做/旧总文档清理：怎样保留跳转并推送（治理任务卡）]] | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 
 ## Next Step
-执行路线第5步：在`doc/v0.1/README.md`建立重定向说明，使旧目录只保留当前视觉任务卡和README；验证两文件白名单、当前任务卡路径不变、历史入口可到达。
+执行路线第6步：把`AGENTS.md`机器启动/权威入口和根README的AI执行、仓库结构、SSOT、接力流程全部切到`03-执行层/`、根`决策记录.md`与`task_plan.md`，清除当前链上的旧`doc/v0.1`权威表述。
 
 ## 错误记录
 | 错误 | 处理 |
