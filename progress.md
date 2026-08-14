@@ -81,4 +81,5 @@
 - 路线第3步已提交为`3e0689b`：根`决策记录.md`抽取仍生效决定与签字历史并认主当前Human决定，根README新增完整Phase 1边界并修正旧总文档过期描述；第6步AI执行入口尚未提前切换。
 - 路线第4步已提交为`7bc7054`：46份旧`doc/v0.1` Markdown按原结构移动到`migration-history/doc-v0.1/`，逐文件哈希一致；当前视觉任务卡原位保留。旧治理检查器在历史区保存同哈希快照，`sample/tools`原文件未动；`task_plan.workflow-ref`已切到现操作手册。
 - 路线第5步已提交为`1953796`：`doc/v0.1/README.md`成为兼容跳转页，旧目录只剩README和当前视觉任务卡两个文件；当前/历史入口均可定位。
-- 路线第6步已完成：AGENTS和根README当前入口已切到`03-执行层/`、根决策与task_plan；暗号表/术语表和3张有肉卡的旧源指针同步修复，task_plan进入verification。等待步骤检查和独立提交。
+- 路线第6步已提交为`139a0dd`：AGENTS和根README当前入口已切到`03-执行层/`、根决策与task_plan；暗号表/术语表和3张有肉卡的旧源指针同步修复，task_plan进入verification。
+- 路线第7步本地clean验收通过：18份执行层文档、16卡一一对应、3/13状态和7节完整；doc仅2文件；46份历史齐全且检查器快照同哈希；当前60份Markdown共69个内联链接缺失0；26项测试与typecheck PASS；Git对象正常，`sample/src/tests`自`1fabc8a`零差异。等待结果提交和独立只读复核。
