@@ -71,4 +71,5 @@
 - Human已授权按`D:\复盘\虚拟校园项目·总文档\00-迁移结合路线.md`执行总文档单仓迁移。第0步发现的既有表格格式化差异已独立提交为`a2e303b`；准备提交`714774b`建立治理任务卡、accepted决定和纯治理工作项最小合同，激活提交`7d65f4f`暂停视觉审查并原子激活迁移。
 - 原样导入提交`383d2a8`新增26份人话文档，复制前后SHA-256差异0且`doc/sample/src/tests`零变更。随后已完成同仓指针、历史兄弟目录路径、根README、SSOT声明和AGENTS人话入口改造。
 - 迁移预验证：27份入口文档共19个Markdown内联链接缺失0；11个关键执行/素材/历史物理路径全部存在；错误旧仓库路径和称呼残留0；来源仍保留28份Markdown。`npm test`为3文件26项PASS，`npm run typecheck`PASS；dirty治理`sync`1068项、`pilot`1073项PASS。
-- clean验证基线`cda98173a24df1b605019d3b7126ea092dd4b6cf`通过sync1064项、pilot1069项、26项测试、typecheck、链接/路径/Git边界检查和lightweight-verifier只读复核；无blocking/high/medium/low缺陷。final closure基线`f23f3f43859ddf944868acea76f5a8a312a71b93`恢复视觉证据Human审查并通过sync1074项、pilot1079项；来源目录与路线第8步保持未动。
+- clean验证基线`cda98173a24df1b605019d3b7126ea092dd4b6cf`通过sync1064项、pilot1069项、26项测试、typecheck、链接/路径/Git边界检查和lightweight-verifier只读复核；无blocking/high/medium/low缺陷。final closure基线`f23f3f43859ddf944868acea76f5a8a312a71b93`恢复视觉证据Human审查并通过sync1074项、pilot1079项。
+- Human随后授权第8步和GitHub推送。清理准备已把原路线与迁移前README按原字节归档到Git，建立`WI-DOC-PORTAL-CLEANUP-001`严格治理任务卡和accepted决定；当前尚未删除旧目录内容或推送。
