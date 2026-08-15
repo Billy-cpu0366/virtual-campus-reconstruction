@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level: none
-work-item-type: none
-work-item-status: none
-node-refs: none
-current-phase: selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref: none
+current-work-item: WI-SYS-ASSET-DESIGN-001
+work-item-level: level-1
+work-item-type: investigation
+work-item-status: active
+node-refs: SYS-ASSET
+current-phase: execution
+current-gate: design-review
+gate-status: pending
+authorization-ref: DEC-SYS-ASSET-INVESTIGATION-001
 preauthorized-next-work-item: none
-next-phase: selection
+next-phase: design-review
 updated: 2026-08-15
 ---
 
@@ -115,6 +115,14 @@ updated: 2026-08-15
 
 结果：5 场景证据全部 VERIFIED（layer8 遮挡、factory roof 淡隐恢复、bridge1 进出、footsteps 0→5），particles3 为 VERIFIED_WITH_RESIDUAL_UNKNOWN 并转 `Q-LAYER-002`；证据在 `sample/analysis/layer-visual-evidence/`。Human 证据结论审查 `通过`（2026-08-15），工作项关闭。历史任务卡归档于 [migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md](migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md)。
 
+## 当前工作项：WI-SYS-ASSET-DESIGN-001
+
+目标：只查证原站资源加载机制（加载什么、什么时候、失败怎么办、缓存怎么搞），把 SYS-ASSET 卡从空槽填成设计候选；不写正式代码。
+
+范围：只读 `sample/` 证据（`manifest.json`、`runtime-network.json`、`unavailable.json`、公开 Bundle）；结论写入 `03-执行层/01-地图线/01-资源加载.md` 七格并标四色；答不了的上总账未知队列。不写 `src/`、不扩大镜像采集、不碰其他系统、不碰内容 TBD。
+
+状态：查证与填卡已完成（BASE-ASSET-001/002/003/004 确认），设计候选待 Human 签字定稿（`DEC-SYS-ASSET-DESIGN-001`）。
+
 ## 已阻塞或暂停工作项
 
 暂无。
@@ -123,7 +131,6 @@ updated: 2026-08-15
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| SYS-ASSET 分块所需资源加载与失败路径 | P0顺序、SYS-CHUNK 未完成范围和证据差距 | 依赖当前世界/图层边界工作项；尚未建立 WI 或授权 |
 | SYS-CHUNK Phaser 世界集成 | SYS-CHUNK 正式设计中尚未实现的请求、缓存、渲染和生命周期范围 | 只保留候选；需结合世界、图层和资源边界重新排序并独立授权 |
 
 ## 已关闭工作项索引
@@ -140,7 +147,7 @@ updated: 2026-08-15
 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；证据在`sample/analysis/layer-visual-evidence/`；任务卡在`migration-history/doc-v0.1/` | `f1652629d436ce7f8a7821c760036fdf071ef397` | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
 
 ## Next Step
-当前无工作项，处于合法选择状态。`Q-LAYER-002`继续 open（particles3 直接消费者链），正式代码仍未授权。下一工作项候选见"近期候选"，需 Human 重新选择并授权。
+当前工作项 `WI-SYS-ASSET-DESIGN-001`（SYS-ASSET 资源加载详细逆向）已查证并填卡，设计候选待 Human 签字定稿。签字后晋升 SYS-ASSET 为 `designed`；正式实现仍需独立授权（`GATE-SYS-ASSET-IMPLEMENTATION`）。`Q-LAYER-002` 继续 open。
 
 ## 错误记录
 | 错误 | 处理 |
