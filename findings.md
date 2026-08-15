@@ -13,7 +13,7 @@
 - 旧仓库 `.planning/2026-08-01-clone-portfolio/` 是更早的 Rust/WASM 方案历史，里面的阶段状态与当前 Phaser 3 + Vite + TypeScript 实现不一致，只能作历史背景，不能作为当前代码状态源。
 - 当前运行入口由 `src/main.ts` 组合 DOM UI 与单一 `GameHandle`；runtime负责单实例替换、resize、状态与销毁；`CampusScene` 是生产组合点；world/player/input/camera为独立核心模块；DOM UI仅通过生命周期接口控制 Loading、Ready、Starting、Playing、Error。
 - 当前地图实现加载一份 `final_map_phaser.json` 与17个tileset，创建10个可见图层和隐藏walls碰撞层；它没有使用 `master.json` 或25个运行时chunk，因此尚未实现原站地图分块装载机制。地图中的动态粒子占位GID会在创建Tilemap前被清零，粒子行为明确后置。
-- 当前玩家实现包含WASD/方向键、归一化八方向输入、150速度、八方向动画、20x8脚部碰撞体、世界边界和墙体碰撞；相机提供0.1平滑跟随、世界边界与像素取整。Ready和Playing均允许移动，这是旧仓库显式决定，不应自动当作原站事实。
+- 当前玩家实现包含WASD/方向键、归一化八方向输入、150速度、八方向动画、20x8脚部碰撞体、世界边界和墙体碰撞；相机提供0.1平滑跟随、世界边界与像素取整。Ready和Playing均允许移动，这是旧仓库显式决定，不应自动当作原站事实。（注意：旧复刻的"相机0.1平滑跟随"≠原站行为——原站是硬跟随 `startFollow(player,true,1,1)` lerp=1，见 SYS-CAMERA 卡。）
 - 当前UI具备加载封面、进度、Play淡出、HUD、启动错误和整页刷新Retry；没有实现标记、弹窗交互、NPC、车辆或其他gameplay features。Core Sandbox提供world/player/collision/camera四种聚焦验证视图，复用生产模块而非第二套实现。
 - `npm run smoke` 是静态合约检查：验证关键文件、加载样式、地图尺寸/tileset/碰撞标记、玩家参数、模块根目录和跨模块导入，但不启动浏览器。`scripts/m3-01-map-contract.mjs` 进一步验证地图尺寸、10个可见层、隐藏walls、17个tileset、GID范围、粒子占位和图片尺寸。阶段1仍需独立浏览器行为验证。
 - `scripts/smoke-test-result.md` 与 `scripts/b14-smoke-test.cjs` 属早期Rust/WASM/B1历史，前者记录cargo/trunk，后者仍探测`window.wasmBindings`；它们不能代表当前Phaser集成树的现状。当前有效检查以package scripts、M3地图合约和重新执行的浏览器基线为准。
