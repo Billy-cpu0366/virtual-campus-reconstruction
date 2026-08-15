@@ -1,18 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-SYS-LAYER-VISUAL-EVIDENCE-001
-work-item-level: level-1
-work-item-type: investigation
-work-item-status: active
-node-refs: SYS-LAYER
-scope-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
-exit-criteria-ref: doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md
-current-phase: verification
+current-work-item: none
+work-item-level: none
+work-item-type: none
+work-item-status: none
+node-refs: none
+current-phase: selection
 current-gate: none
 gate-status: not-applicable
-authorization-ref: DEC-SYS-LAYER-VISUAL-EVIDENCE-001
+authorization-ref: none
 preauthorized-next-work-item: none
-next-phase: closure
+next-phase: selection
 updated: 2026-08-15
 ---
 
@@ -38,7 +36,7 @@ updated: 2026-08-15
    - 6B. **原站系统与现有代码差距映射** — complete（Human 已通过）
    - 6C. **选择并详细逆向首个系统** — complete（SYS-CHUNK；Human 已通过详细设计）
    - 6D. **世界装配与图层边界调查设计** — complete（设计已接受、验证并关闭）
-   - 6E. **图层最小视觉补证** — in_progress（证据已验证；等待Human审查）
+   - 6E. **图层最小视觉补证** — complete（5场景证据 Human 已通过，工作项关闭）
 7. **总文档入口单仓迁移** — complete（26份文档、入口、指针和验证已进入clean基线）
 8. **旧总文档收敛与GitHub推送** — complete（旧目录单README；普通push已确认远端一致）
 9. **执行层16卡与doc/v0.1历史归档迁移** — complete（18份当前执行文档、46份历史归档和入口切换已验证）
@@ -54,7 +52,7 @@ updated: 2026-08-15
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
 | 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
-| 图层最小视觉补证 | 已授权、证据已验证并恢复审查 | 保留既有5场景证据，等待Human判断证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | Human接受后关闭；要求补充时只在任务卡白名单修订 |
+| 图层最小视觉补证 | 已授权、证据已验证、Human通过并关闭 | 维护已关闭的5场景证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 已关闭；进入下一工作项选择 |
 | 总文档入口单仓迁移 | 已接受、验证并关闭 | 维护已迁入的人话入口和单仓边界 | 修改证据或代码 | 已完成 |
 | 旧总文档收敛与GitHub推送 | 已接受、验证并关闭 | 维护单README跳转、两份可恢复原件和远端同步关系 | 删除旧目录本身、force-push、历史/Phase 2搬迁、代码或证据修改 | 已完成 |
 | 执行层16卡与历史归档迁移 | 已接受、验证并关闭 | 维护16卡、总账、操作手册、旧doc归档和当前入口 | 修改`sample/src/tests`、旧Phaser、证据结论、内容TBD | 已完成；当前入口只认`03-执行层/` |
@@ -111,24 +109,11 @@ updated: 2026-08-15
 
 结果：批准路径内的 master 契约、行优先索引、坐标/边界换算、玩家3×3、相机+1和目标集合已实现；类型检查、3文件26项测试、供应链审计、治理检查和独立复核均通过。Phaser、Vite、网络、缓存、重试、Tilemap、浏览器集成和完整生命周期仍未授权。
 
-## 当前任务：WI-SYS-LAYER-VISUAL-EVIDENCE-001
-
-| 字段 | 当前值 |
-|---|---|
-| 工作项 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` |
-| 级别与类型 | `level-1 / investigation` |
-| 涉及节点 | `SYS-LAYER` |
-| 当前阶段 | `verification` |
-| 当前 Gate | `none / not-applicable` |
-| Human决定 | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
-| 范围与退出标准 | [图层最小视觉补证任务卡](doc/v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md) |
-| 正式代码授权 | 无；本轮只做最小公开运行证据补充 |
+## 已完成工作项：WI-SYS-LAYER-VISUAL-EVIDENCE-001
 
 目标：只检查玩家遮挡、roof、bridge、particles3和footsteps共5个原站公开运行场景，为图层结论提供最小截图和运行状态。
 
-当前允许：保留已验证的5场景证据并等待Human审查；要求补充时只在任务卡白名单内修订。
-
-当前禁止：访问私有资源或source map、扩大整站镜像、修改正式`src/`或旧Phaser、接入Phaser/Vite、实现图层/玩家/碰撞/渲染、提取通用模块。
+结果：5 场景证据全部 VERIFIED（layer8 遮挡、factory roof 淡隐恢复、bridge1 进出、footsteps 0→5），particles3 为 VERIFIED_WITH_RESIDUAL_UNKNOWN 并转 `Q-LAYER-002`；证据在 `sample/analysis/layer-visual-evidence/`。Human 证据结论审查 `通过`（2026-08-15），工作项关闭。历史任务卡归档于 [migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md](migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md)。
 
 ## 已阻塞或暂停工作项
 
@@ -152,9 +137,10 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；历史任务卡在`migration-history/doc-v0.1/` | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 | `WI-DOC-EXEC-LAYER-MIGRATION-001` | completed | not-applicable | [当前执行层](03-执行层/README.md)；[16系统总账](03-执行层/00-总账.md)；[历史治理记录](migration-history/执行层迁移任务卡（治理记录）.md) | `293cbeb2d9bcf99f28c2a7cb62de10ee0e08f0c5` | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
+| `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；证据在`sample/analysis/layer-visual-evidence/`；任务卡在`migration-history/doc-v0.1/` | `f1652629d436ce7f8a7821c760036fdf071ef397` | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
 
 ## Next Step
-等待Human审查5场景证据结论：接受后关闭`WI-SYS-LAYER-VISUAL-EVIDENCE-001`并进入下一工作项选择；要求补充时只在当前任务卡白名单修订。`Q-LAYER-002`继续open，正式代码仍未授权。
+当前无工作项，处于合法选择状态。`Q-LAYER-002`继续 open（particles3 直接消费者链），正式代码仍未授权。下一工作项候选见"近期候选"，需 Human 重新选择并授权。
 
 ## 错误记录
 | 错误 | 处理 |
