@@ -39,6 +39,7 @@ migration-history/doc-v0.1/  旧精确文档完整历史
 sample/           原站公开证据、运行记录、分析与采集工具
 src/              正式重构源码；当前已有SYS-CHUNK确定性CORE
 tests/            自动化测试
+scripts/          状态一致性检查等工具脚本
 ```
 
 ## 唯一事实源

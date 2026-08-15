@@ -16,6 +16,14 @@ updated: 2026-08-15
 
 # 原站逆向重构计划
 
+## ⏱ 当前状态（一眼看懂）
+
+- **正在做**：资源加载（SYS-ASSET）详细逆向 · 工作项 `WI-SYS-ASSET-DESIGN-001`
+- **到哪了**：查证 + 填卡完成，设计候选已落盘
+- **卡在哪**：等 **Human 签字定稿**（`DEC-SYS-ASSET-DESIGN-001`）
+- **能不能写代码**：❌ 不能（设计未签字；正式代码需另独立授权）
+- **下一步**：Human 审 `03-执行层/01-地图线/01-资源加载.md` → 签字「通过」→ 晋升 `designed`
+
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
 
@@ -121,8 +129,6 @@ updated: 2026-08-15
 
 范围：只读 `sample/` 证据（`manifest.json`、`runtime-network.json`、`unavailable.json`、公开 Bundle）；结论写入 `03-执行层/01-地图线/01-资源加载.md` 七格并标四色；答不了的上总账未知队列。不写 `src/`、不扩大镜像采集、不碰其他系统、不碰内容 TBD。
 
-状态：查证与填卡已完成（BASE-ASSET-001/002/003/004 确认），设计候选待 Human 签字定稿（`DEC-SYS-ASSET-DESIGN-001`）。
-
 ## 已阻塞或暂停工作项
 
 暂无。
@@ -145,9 +151,6 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 | `WI-DOC-EXEC-LAYER-MIGRATION-001` | completed | not-applicable | [当前执行层](03-执行层/README.md)；[16系统总账](03-执行层/00-总账.md)；[历史治理记录](migration-history/执行层迁移任务卡（治理记录）.md) | `293cbeb2d9bcf99f28c2a7cb62de10ee0e08f0c5` | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；证据在`sample/analysis/layer-visual-evidence/`；任务卡在`migration-history/doc-v0.1/` | `f1652629d436ce7f8a7821c760036fdf071ef397` | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
-
-## Next Step
-当前工作项 `WI-SYS-ASSET-DESIGN-001`（SYS-ASSET 资源加载详细逆向）已查证并填卡，设计候选待 Human 签字定稿。签字后晋升 SYS-ASSET 为 `designed`；正式实现仍需独立授权（`GATE-SYS-ASSET-IMPLEMENTATION`）。`Q-LAYER-002` 继续 open。
 
 ## 错误记录
 | 错误 | 处理 |

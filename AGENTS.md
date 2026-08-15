@@ -111,3 +111,4 @@ migration-history/doc-v0.1/  旧精确文档历史，只读可查
 5. 是否运行了与本次变更相符的结构、链接、哈希或行为验证？
 6. 是否检查并更新了复用观察，而不是凭设想提前抽象？
 7. 是否按`03-执行层/README.md`完成Human签字、验证、Git提交和总账回写，并停在Human要求的验收节点？
+8. 状态变化后是否运行 `python scripts/check-state-consistency.py` 并 PASS？（防止 task_plan 顶部状态块 / frontmatter / 理解层进度漂移）
