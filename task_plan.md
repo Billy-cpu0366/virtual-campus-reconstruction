@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level: none
-work-item-type: none
-work-item-status: closed
-node-refs: none
-current-phase: selection
-current-gate: none
-gate-status: none
-authorization-ref: DEC-SYS-ASSET-DESIGN-001
+current-work-item: WI-SYS-INPUT-DESIGN-001
+work-item-level: level-1
+work-item-type: investigation
+work-item-status: active
+node-refs: SYS-INPUT
+current-phase: execution
+current-gate: design-review
+gate-status: pending
+authorization-ref: DEC-SYS-INPUT-INVESTIGATION-001
 preauthorized-next-work-item: none
-next-phase: selection
+next-phase: design-review
 updated: 2026-08-15
 ---
 
@@ -18,11 +18,11 @@ updated: 2026-08-15
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：无（SYS-ASSET 已定稿关闭，进入合法选择状态）
-- **到哪了**：SYS-ASSET 资源加载已定稿 `designed`（画好图纸，[卡](03-执行层/01-地图线/01-资源加载.md)）
-- **卡在哪**：不卡；等 Human 从近期候选选下一项
-- **能不能写代码**：❌ 不能（SYS-ASSET 实现仍需独立授权；无预授权下一项）
-- **下一步**：Human 选下一项（例如授权 SYS-ASSET 写代码，需单独签字）
+- **正在做**：输入（SYS-INPUT）详细逆向 · 工作项 `WI-SYS-INPUT-DESIGN-001`
+- **到哪了**：查证 + 填卡完成，设计候选已落盘
+- **卡在哪**：等 **Human 签字定稿**（`DEC-SYS-INPUT-DESIGN-001`）
+- **能不能写代码**：❌ 不能（设计未签字；正式代码需另独立授权）
+- **下一步**：Human 审 [SYS-INPUT 卡（设计候选）](03-执行层/02-玩法线/01-输入.md) → 签字「通过」→ 晋升 `designed`
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -123,9 +123,11 @@ updated: 2026-08-15
 
 结果：5 场景证据全部 VERIFIED（layer8 遮挡、factory roof 淡隐恢复、bridge1 进出、footsteps 0→5），particles3 为 VERIFIED_WITH_RESIDUAL_UNKNOWN 并转 `Q-LAYER-002`；证据在 `sample/analysis/layer-visual-evidence/`。Human 证据结论审查 `通过`（2026-08-15），工作项关闭。历史任务卡归档于 [migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md](migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md)。
 
-## 当前工作项
+## 当前工作项：WI-SYS-INPUT-DESIGN-001
 
-无（`current-work-item: none`）。上一工作项 `WI-SYS-ASSET-DESIGN-001` 已关闭，见「已关闭工作项索引」。
+目标：只查证原站输入机制（键盘映射、摇杆插件参数、三输入归一化、多指跟踪），把 SYS-INPUT 卡从空槽填成设计候选；不写正式代码。
+
+范围：只读 `sample/` 证据（公开 Bundle 中输入相关代码）；结论写入 `03-执行层/02-玩法线/01-输入.md` 七格并标四色；答不了的上总账未知队列。不写 `src/`、不扩大镜像采集、不碰其他系统、不碰内容 TBD。
 
 ## 已阻塞或暂停工作项
 
