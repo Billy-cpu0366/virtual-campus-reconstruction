@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-SYS-CAMERA-DESIGN-001
-work-item-level: level-1
-work-item-type: investigation
-work-item-status: active
-node-refs: SYS-CAMERA
-current-phase: execution
-current-gate: design-review
-gate-status: pending
-authorization-ref: DEC-SYS-CAMERA-INVESTIGATION-001
+current-work-item: none
+work-item-level: none
+work-item-type: none
+work-item-status: closed
+node-refs: none
+current-phase: selection
+current-gate: none
+gate-status: none
+authorization-ref: DEC-SYS-CAMERA-DESIGN-001
 preauthorized-next-work-item: none
-next-phase: design-review
+next-phase: selection
 updated: 2026-08-15
 ---
 
@@ -18,11 +18,11 @@ updated: 2026-08-15
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：相机（SYS-CAMERA）详细逆向 · 工作项 `WI-SYS-CAMERA-DESIGN-001`
-- **到哪了**：查证中
-- **卡在哪**：不卡；查证后交 Human 签字定稿
-- **能不能写代码**：❌ 不能（level-1 调查，只查证填卡）
-- **下一步**：查证原站相机机制 → 填卡成设计候选 → Human 签字「通过」
+- **正在做**：无（SYS-CAMERA 已定稿关闭，进入合法选择状态）
+- **到哪了**：SYS-CAMERA 相机已定稿 `designed`（画好图纸，[卡](03-执行层/02-玩法线/04-相机.md)）
+- **卡在哪**：不卡；等 Human 从近期候选选下一项
+- **能不能写代码**：❌ 不能（SYS-CAMERA 实现仍需独立授权；无预授权下一项）
+- **下一步**：Human 选下一项（玩法线四系统已全部定稿，可转内容线/旁支/独立件，或授权某系统写代码，需单独签字）
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -125,7 +125,7 @@ updated: 2026-08-15
 
 ## 当前工作项
 
-`WI-SYS-CAMERA-DESIGN-001`：SYS-CAMERA 相机详细逆向（level-1 调查）——查证原站相机跟随/边界/缩放/开场航拍序列并填卡成设计候选。授权 `DEC-SYS-CAMERA-INVESTIGATION-001`（Human 签字「开始吧」2026-08-15）。不写正式 `src/`。
+无（`current-work-item: none`）。上一工作项 `WI-SYS-CAMERA-DESIGN-001` 已关闭，见「已关闭工作项索引」。
 
 ## 已阻塞或暂停工作项
 
@@ -153,6 +153,7 @@ updated: 2026-08-15
 | `WI-SYS-INPUT-DESIGN-001` | completed | SYS-INPUT | [SYS-INPUT卡](03-执行层/02-玩法线/01-输入.md) | `62e26e4caeeeeb46e63c5dce48a8877e625319d0` | `DEC-SYS-INPUT-DESIGN-001` |
 | `WI-SYS-MOVE-DESIGN-001` | completed | SYS-MOVE | [SYS-MOVE卡](03-执行层/02-玩法线/02-移动与碰撞.md) | `edbb2952186bf7a3e9f755ba2c21ac3904a50e06` | `DEC-SYS-MOVE-DESIGN-001` |
 | `WI-SYS-PLAYER-DESIGN-001` | completed | SYS-PLAYER | [SYS-PLAYER卡](03-执行层/02-玩法线/03-玩家.md) | `0e89e96b688ee56e1cd2f4f6e3a8841f673c6e8f` | `DEC-SYS-PLAYER-DESIGN-001` |
+| `WI-SYS-CAMERA-DESIGN-001` | completed | SYS-CAMERA | [SYS-CAMERA卡](03-执行层/02-玩法线/04-相机.md) | `RESULT-COMMIT-PLACEHOLDER` | `DEC-SYS-CAMERA-DESIGN-001` |
 
 ## 错误记录
 | 错误 | 处理 |
