@@ -151,7 +151,7 @@ updated: 2026-08-15
 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；证据在`sample/analysis/layer-visual-evidence/`；任务卡在`migration-history/doc-v0.1/` | `f1652629d436ce7f8a7821c760036fdf071ef397` | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
 | `WI-SYS-ASSET-DESIGN-001` | completed | SYS-ASSET | [SYS-ASSET卡](03-执行层/01-地图线/01-资源加载.md) | `a29211b737c6990e4b1c893c6c82b99e61752c8a` | `DEC-SYS-ASSET-DESIGN-001` |
 | `WI-SYS-INPUT-DESIGN-001` | completed | SYS-INPUT | [SYS-INPUT卡](03-执行层/02-玩法线/01-输入.md) | `62e26e4caeeeeb46e63c5dce48a8877e625319d0` | `DEC-SYS-INPUT-DESIGN-001` |
-| `WI-SYS-MOVE-DESIGN-001` | completed | SYS-MOVE | [SYS-MOVE卡](03-执行层/02-玩法线/02-移动与碰撞.md) | `RESULT-COMMIT-PLACEHOLDER` | `DEC-SYS-MOVE-DESIGN-001` |
+| `WI-SYS-MOVE-DESIGN-001` | completed | SYS-MOVE | [SYS-MOVE卡](03-执行层/02-玩法线/02-移动与碰撞.md) | `edbb2952186bf7a3e9f755ba2c21ac3904a50e06` | `DEC-SYS-MOVE-DESIGN-001` |
 
 ## 错误记录
 | 错误 | 处理 |
