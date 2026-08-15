@@ -149,7 +149,7 @@ updated: 2026-08-15
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 | `WI-DOC-EXEC-LAYER-MIGRATION-001` | completed | not-applicable | [当前执行层](03-执行层/README.md)；[16系统总账](03-执行层/00-总账.md)；[历史治理记录](migration-history/执行层迁移任务卡（治理记录）.md) | `293cbeb2d9bcf99f28c2a7cb62de10ee0e08f0c5` | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；证据在`sample/analysis/layer-visual-evidence/`；任务卡在`migration-history/doc-v0.1/` | `f1652629d436ce7f8a7821c760036fdf071ef397` | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
-| `WI-SYS-ASSET-DESIGN-001` | completed | SYS-ASSET | [SYS-ASSET卡](03-执行层/01-地图线/01-资源加载.md) | `RESULT-COMMIT-PLACEHOLDER` | `DEC-SYS-ASSET-DESIGN-001` |
+| `WI-SYS-ASSET-DESIGN-001` | completed | SYS-ASSET | [SYS-ASSET卡](03-执行层/01-地图线/01-资源加载.md) | `a29211b737c6990e4b1c893c6c82b99e61752c8a` | `DEC-SYS-ASSET-DESIGN-001` |
 
 ## 错误记录
 | 错误 | 处理 |
