@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level: none
-work-item-type: none
-work-item-status: closed
-node-refs: none
-current-phase: selection
-current-gate: none
-gate-status: none
-authorization-ref: DEC-SYS-PLAYER-DESIGN-001
+current-work-item: WI-SYS-CAMERA-DESIGN-001
+work-item-level: level-1
+work-item-type: investigation
+work-item-status: active
+node-refs: SYS-CAMERA
+current-phase: execution
+current-gate: design-review
+gate-status: pending
+authorization-ref: DEC-SYS-CAMERA-INVESTIGATION-001
 preauthorized-next-work-item: none
-next-phase: selection
+next-phase: design-review
 updated: 2026-08-15
 ---
 
@@ -18,11 +18,11 @@ updated: 2026-08-15
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：无（SYS-PLAYER 已定稿关闭，进入合法选择状态）
-- **到哪了**：SYS-PLAYER 玩家已定稿 `designed`（画好图纸，[卡](03-执行层/02-玩法线/03-玩家.md)）
-- **卡在哪**：不卡；等 Human 从近期候选选下一项
-- **能不能写代码**：❌ 不能（SYS-PLAYER 实现仍需独立授权；无预授权下一项）
-- **下一步**：Human 选下一项（例如继续逆向 SYS-CAMERA 相机，或授权某系统写代码，需单独签字）
+- **正在做**：相机（SYS-CAMERA）详细逆向 · 工作项 `WI-SYS-CAMERA-DESIGN-001`
+- **到哪了**：查证中
+- **卡在哪**：不卡；查证后交 Human 签字定稿
+- **能不能写代码**：❌ 不能（level-1 调查，只查证填卡）
+- **下一步**：查证原站相机机制 → 填卡成设计候选 → Human 签字「通过」
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -125,7 +125,7 @@ updated: 2026-08-15
 
 ## 当前工作项
 
-无（`current-work-item: none`）。上一工作项 `WI-SYS-PLAYER-DESIGN-001` 已关闭，见「已关闭工作项索引」。
+`WI-SYS-CAMERA-DESIGN-001`：SYS-CAMERA 相机详细逆向（level-1 调查）——查证原站相机跟随/边界/缩放/开场航拍序列并填卡成设计候选。授权 `DEC-SYS-CAMERA-INVESTIGATION-001`（Human 签字「开始吧」2026-08-15）。不写正式 `src/`。
 
 ## 已阻塞或暂停工作项
 
