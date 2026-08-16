@@ -1,3 +1,6 @@
+# 文本文件行尾规范化：仓库存 LF，Windows 工作区自动转 CRLF，避免反复「modified」空 diff
+*.md text=auto
+
 # Preserve captured evidence byte-for-byte across checkouts.
 /sample/original-public-build/** -text
 /sample/analysis/runtime-network.json -text
