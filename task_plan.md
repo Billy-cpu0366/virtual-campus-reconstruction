@@ -173,10 +173,10 @@ updated: 2026-08-15
 | 打印minified Bundle片段时Windows控制台GBK无法编码符号并中止 | 设置Python UTF-8输出并只截取目标类片段，不重复原命令。 |
 | CORE 实现时首次打印 chunk manager Bundle 片段再次触发 GBK 编码错误 | 未重复原命令；立即设置 `PYTHONIOENCODING=utf-8` 后成功定位公式。 |
 | `npm audit` 使用本机 npmmirror 返回未实现的审计端点 | 改用 `--registry=https://registry.npmjs.org`；审计完成，0 vulnerabilities。 |
-| 轻量接力首次同步检查发现3个旧章节锚点和1个合并路径表格单元无法解析 | 将3处链接同步到历史授权新标题；把 `findings.md` 与 `progress.md` 拆为两行受影响文件；删除 `py_compile` 生成的未跟踪缓存，后续用内存编译检查。 |
-| level-1激活首次治理检查把`findings.md`与`progress.md`合并单元解析成不存在路径 | 将两个受影响文件拆成独立表格行；不修改路径解析器或降低检查标准。 |
+| 轻量接力首次同步检查发现3个旧章节锚点和1个合并路径表格单元无法解析 | 将3处链接同步到历史授权新标题；把 `findings.md` 与 `progress.md`（现合并为 `工作日志.md`）拆为两行受影响文件；删除 `py_compile` 生成的未跟踪缓存，后续用内存编译检查。 |
+| level-1激活首次治理检查把`findings.md`与`progress.md`（现合并为 `工作日志.md`）合并单元解析成不存在路径 | 将两个受影响文件拆成独立表格行；不修改路径解析器或降低检查标准。 |
 | Main首次脚印grid抽查脚本因集合推导式变量遮蔽误报与tilelayer不一致 | 不采纳初次输出；改用明确`(y,x)`坐标集合审计，368个位置直接交集368、双方独有0，确认逐格一致。 |
-| Recon将普通chunk分支的全层遍历误报为可写全部24层 | 独立verifier检查守卫`o=["layer1"]`后发现实际只写layer1；Main核对Bundle并同步修正调查记录、设计候选、验证计划和findings。 |
+| Recon将普通chunk分支的全层遍历误报为可写全部24层 | 独立verifier检查守卫`o=["layer1"]`后发现实际只写layer1；Main核对Bundle并同步修正调查记录、设计候选、验证计划和findings（现合并为 `工作日志.md`）。 |
 | 正式设计接受后首次sync/pilot提示`level-1 selection decision does not name current work item` | 在`DEC-SYS-WORLD-LAYER-DESIGN-001`适用范围显式加入`WI-SYS-WORLD-LAYER-DESIGN-001`；不降低检查标准。 |
 | 视觉补证首次激活检查提示工作项类型、节点范围和任务卡状态不匹配 | 使用检查合同允许的`investigation`类型；将任务卡`node-refs`改为与task_plan一致的标量并将顶层status同步为active；不修改检查器。 |
 | Chrome DevTools MCP导航和连接连续超时 | 未产生采集结果；改用本机既有Puppeteer和系统Chrome访问同一公开URL，不增加项目依赖或扩大范围。 |
