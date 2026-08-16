@@ -156,38 +156,5 @@ updated: 2026-08-15
 | `WI-SYS-CAMERA-DESIGN-001` | completed | SYS-CAMERA | [SYS-CAMERA卡](03-执行层/02-玩法线/04-相机.md) | `9f838db4786a999c106a879719b59123de661a74` | `DEC-SYS-CAMERA-DESIGN-001` |
 
 ## 错误记录
-| 错误 | 处理 |
-|---|---|
-| Node/Python 内联命令含 shell 反引号导致解析失败 | 改用不含反引号的 Python 正则；成功提取 bundle 静态路径。 |
-| Verifier 报告运行时同源 2xx 数为 265，与主助手独立计数 224 不一致 | 不采纳 Verifier 的该计数；主助手确认 224 个运行时 URL 均已镜像，coverage 缺失仍为 0。 |
-| Windows 拒绝直接重命名新项目根目录 | 自动回滚后改用复制、299文件逐项 SHA-256 校验、再删除原目录；迁移成功。 |
-| 复用与执行约束只停留在对话，未及时写入 AI 必读文档 | 停止继续口头扩展；将有效原则、Human Gate、复用观察和按需门禁写入项目入口与模板。 |
-| 使用含反斜杠的内联 `rg` 正则检查路径时转义失败 | 改用 `rg -F` 分别执行固定字符串检查；后续路径检查不拼接复杂正则。 |
-| GitHub 仓库创建后首次两次 HTTPS 推送连接失败 | 保留已创建的 Private 仓库和正确 origin；Human 调整网络后重试成功，本地与远程提交一致。 |
-| 阶段1浏览器采集后的Python摘要脚本因Windows临时目录路径解析错误触发 `StopIteration` | 主采集已成功；不重复采集，改为定位既有输出并用明确的Windows绝对路径解析。 |
-| 首次Sandbox相机右边界断言在Scene首帧读取到未稳定的 midpoint 2240 | 测试读取时机早于resize与平滑跟随稳定；修改临时测试，在首次指标出现后等待并读取稳定帧，再复核真实边界。 |
-| Sandbox浏览器检查发现 `/favicon.ico` 返回404，严格零失败断言中止 | 记录为现有开发页非功能性缺口；测试仅豁免该已知favicon请求，其他HTTP失败仍阻塞。 |
-| 独立验证器超出只读要求，尝试重跑 `npm ci`，因遗留esbuild进程锁文件失败，随后用 `npm install` 恢复node_modules | tracked文件和lockfile均未变化；Main清理阶段1遗留服务进程并再次确认旧worktree clean。 |
-| 首次进程清理脚本的匹配条件包含仓库路径和端口文本，误匹配并终止了执行清理的shell自身 | 改为根据netstat确认唯一残留监听PID 16460后精确终止；8197/8198均无监听，旧worktree保持clean。 |
-| 阶段6B按旧工程路径读取 `assets/maps/master.json` 返回ENOENT | 不猜测路径；从manifest和镜像磁盘定位真实公开URL路径后再读取。 |
-| 打印minified Bundle片段时Windows控制台GBK无法编码符号并中止 | 设置Python UTF-8输出并只截取目标类片段，不重复原命令。 |
-| CORE 实现时首次打印 chunk manager Bundle 片段再次触发 GBK 编码错误 | 未重复原命令；立即设置 `PYTHONIOENCODING=utf-8` 后成功定位公式。 |
-| `npm audit` 使用本机 npmmirror 返回未实现的审计端点 | 改用 `--registry=https://registry.npmjs.org`；审计完成，0 vulnerabilities。 |
-| 轻量接力首次同步检查发现3个旧章节锚点和1个合并路径表格单元无法解析 | 将3处链接同步到历史授权新标题；把 `findings.md` 与 `progress.md`（现合并为 `工作日志.md`）拆为两行受影响文件；删除 `py_compile` 生成的未跟踪缓存，后续用内存编译检查。 |
-| level-1激活首次治理检查把`findings.md`与`progress.md`（现合并为 `工作日志.md`）合并单元解析成不存在路径 | 将两个受影响文件拆成独立表格行；不修改路径解析器或降低检查标准。 |
-| Main首次脚印grid抽查脚本因集合推导式变量遮蔽误报与tilelayer不一致 | 不采纳初次输出；改用明确`(y,x)`坐标集合审计，368个位置直接交集368、双方独有0，确认逐格一致。 |
-| Recon将普通chunk分支的全层遍历误报为可写全部24层 | 独立verifier检查守卫`o=["layer1"]`后发现实际只写layer1；Main核对Bundle并同步修正调查记录、设计候选、验证计划和findings（现合并为 `工作日志.md`）。 |
-| 正式设计接受后首次sync/pilot提示`level-1 selection decision does not name current work item` | 在`DEC-SYS-WORLD-LAYER-DESIGN-001`适用范围显式加入`WI-SYS-WORLD-LAYER-DESIGN-001`；不降低检查标准。 |
-| 视觉补证首次激活检查提示工作项类型、节点范围和任务卡状态不匹配 | 使用检查合同允许的`investigation`类型；将任务卡`node-refs`改为与task_plan一致的标量并将顶层status同步为active；不修改检查器。 |
-| Chrome DevTools MCP导航和连接连续超时 | 未产生采集结果；改用本机既有Puppeteer和系统Chrome访问同一公开URL，不增加项目依赖或扩大范围。 |
-| 首轮视觉脚本直接warp进bridge区未触发方向切换，且脚印统计误把95个inactive对象池成员当现有脚印 | 不采纳首轮对应结论；改为从入口/出口外用方向键自然跨入，并只统计active footprint。重跑后bridge上下状态均观察到，active脚印由0增至5。 |
-| 独立复核指出行为基准和证据差距回写未逐字列入视觉任务卡白名单 | 两项都是AGENTS.md第8节要求的强制闭环；将其显式补入任务卡允许路径，避免依赖隐含协议解释，不扩大采集或实现范围。 |
-| 迁移关闭索引使用无路径的README双链时治理检查发现两个同名候选 | 改用明确的Markdown相对链接指向根`README.md`；错误记录不再原样嵌入会被检查器解析的双链语法。 |
-| 第8步预检将两份原字节历史来源放入`doc/v0.1`后触发正式文档命名和无效双链检查，且插入决定时重复了一次迁移决定标题 | 不修改历史原件字节；将它们移到仓库根`migration-history/`并更新权威路径，同时删除重复标题。治理文档继续保持正式命名合同。 |
-| 清理结果首次暂存命令同时列出`git mv`后的新旧文件路径，旧路径已不存在导致pathspec失败 | 未形成提交或丢失变更；改为对`doc/v0.1`和`migration-history`目录执行`git add -A`，由Git记录重命名。 |
-| 首次普通push被拒绝，远端main多出PR #1的merge提交`971d2a3` | 停止推送且未使用force；fetch后确认该远端提交相对共同基线`03fe5ac`内容差异0、tree完全相同，使用无内容merge提交`2824d78`合并远端拓扑后再普通推送。 |
-| 执行层迁移首次激活检查发现插入位置重复了旧清理决定标题，且accepted决定不能把尚未执行的未来路径标为pending | 删除重复标题；受影响清单按每步实际变更追加并标updated，完整未来范围继续由任务卡约束，不伪报同步完成。 |
-| 首次打印16张理解卡标题时Windows GBK无法编码标题中的星号符号 | 未修改文件；设置`PYTHONIOENCODING=utf-8`后重新执行只读清单。 |
-| 第1步受影响清单把多个目录写成一个“从A至B”代码路径，治理检查器按单一路径解析而报缺失 | 改为登记实际存在的共同目录`03-执行层/`，具体16卡由步骤验收脚本逐项核对。 |
-| 第7步首次当前文档链接脚本递归进入`node_modules`并把依赖包README的发布链接误报为项目断链 | 未修改依赖；链接检查明确排除`node_modules`、`.git`和历史归档，只验证项目当前Markdown。 |
-| 关闭提交首次暂存同时列出已被`git mv`移走的源路线/任务卡旧路径，pathspec不存在导致失败 | 未形成提交或丢失变更；改用`git add -u -- .`记录全部已跟踪修改/删除，再显式加入`migration-history`新路径。 |
+
+> 已迁入[`工作日志.md`](工作日志.md)，本文件只保留动态状态，不重复过程日志。
