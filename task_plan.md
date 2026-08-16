@@ -1,28 +1,28 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level: none
-work-item-type: none
-work-item-status: closed
-node-refs: none
-current-phase: selection
+current-work-item: WI-SYS-CAMERA-CORE-001
+work-item-level: implementation
+work-item-type: core
+work-item-status: in-progress
+node-refs: SYS-CAMERA
+current-phase: implementation
 current-gate: none
 gate-status: none
-authorization-ref: DEC-SYS-CAMERA-DESIGN-001
+authorization-ref: DEC-SYS-CAMERA-CORE-001
 preauthorized-next-work-item: none
-next-phase: selection
-updated: 2026-08-15
+next-phase: implementation
+updated: 2026-08-16
 ---
 
 # 原站逆向重构计划
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：无（SYS-CAMERA 已定稿关闭，进入合法选择状态）
-- **到哪了**：SYS-CAMERA 相机已定稿 `designed`（画好图纸，[卡](03-执行层/02-玩法线/04-相机.md)）
-- **卡在哪**：不卡；等 Human 从近期候选选下一项
-- **能不能写代码**：❌ 不能（SYS-CAMERA 实现仍需独立授权；无预授权下一项）
-- **下一步**：Human 选下一项（玩法线四系统已全部定稿，可转内容线/旁支/独立件，或授权某系统写代码，需单独签字）
+- **正在做**：`WI-SYS-CAMERA-CORE-001`（SYS-CAMERA 确定性纯逻辑 CORE，已授权 `DEC-SYS-CAMERA-CORE-001`）
+- **到哪了**：地图线 4 系统（CHUNK/ASSET/LAYER/WORLD）+ SYS-INPUT/SYS-MOVE/SYS-PLAYER CORE 已验证关闭；SYS-CAMERA 已定稿 `designed`，实现授权已签字，`src/camera/` 纯逻辑已写完
+- **卡在哪**：不卡；实现 + 测试已完成，待 Human 验收
+- **能不能写代码**：✅ 能（仅 SYS-CAMERA 确定性 CORE：边界/缩放/硬跟随/像素取整/物理帧率、航拍 6 点序列、nativeScale 换算）
+- **下一步**：Human 验收 `src/camera/` + `tests/camera/`（typecheck + 132 测试全绿）
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -64,6 +64,13 @@ updated: 2026-08-15
 | 总文档入口单仓迁移 | 已接受、验证并关闭 | 维护已迁入的人话入口和单仓边界 | 修改证据或代码 | 已完成 |
 | 旧总文档收敛与GitHub推送 | 已接受、验证并关闭 | 维护单README跳转、两份可恢复原件和远端同步关系 | 删除旧目录本身、force-push、历史/Phase 2搬迁、代码或证据修改 | 已完成 |
 | 执行层16卡与历史归档迁移 | 已接受、验证并关闭 | 维护16卡、总账、操作手册、旧doc归档和当前入口 | 修改`sample/src/tests`、旧Phaser、证据结论、内容TBD | 已完成；当前入口只认`03-执行层/` |
+| SYS-ASSET CORE 实现授权与执行 | 已验证并关闭（typecheck + 37 测试通过） | 维护 `src/asset/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 已完成；转 SYS-LAYER |
+| SYS-LAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 12 项测试通过） | 维护 `src/layer/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Tilemap 写入、扩大为通用框架 | 已完成；转 SYS-WORLD |
+| SYS-WORLD CORE 实现授权与执行 | 已验证并关闭（typecheck + 29 项测试通过） | 维护 `src/world/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Tilemap 真实写入、碰撞重算、扩大为通用框架 | 已完成；地图线纯逻辑全线跑通，转 SYS-INPUT |
+| SYS-INPUT CORE 实现授权与执行 | 已验证并关闭（typecheck + 23 项测试通过） | 维护 `src/input/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、rexVirtualJoystick 插件集成、真实键鼠/触摸监听、扩大为通用框架 | 已完成；转 SYS-MOVE |
+| SYS-MOVE CORE 实现授权与执行 | 已验证并关闭（typecheck + 8 项测试通过） | 维护 `src/move/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Arcade 物理引擎集成、分轴碰撞、真实 body 注册、扩大为通用框架 | 已完成；转 SYS-PLAYER |
+| SYS-PLAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 13 项测试通过） | 维护 `src/player/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Phaser Sprite/动画创建、真实贴图加载、被抓/换装/传送完整流程、扩大为通用框架 | 已完成；转 SYS-CAMERA |
+| SYS-CAMERA CORE 实现授权与执行 | 已授权（签字 `继续`，2026-08-16） | 维护 SYS-CAMERA CORE 授权边界，实现 `src/camera/` 纯逻辑与测试 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、真实相机/tween/后处理管线创建、航拍逐帧推进机制、nativeScale 注入来源、扩大为通用框架 | 验证通过后关闭，玩法线 CORE 全齐 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -125,7 +132,7 @@ updated: 2026-08-15
 
 ## 当前工作项
 
-无（`current-work-item: none`）。上一工作项 `WI-SYS-CAMERA-DESIGN-001` 已关闭，见「已关闭工作项索引」。
+`WI-SYS-CAMERA-CORE-001`（SYS-CAMERA 确定性纯逻辑 CORE）：边界 2240×2240/缩放 1/硬跟随 lerp=1/offset·deadzone(0,0)/roundPixels/物理 30 FPS、开场航拍 6 点序列与总时长约 111s、结束 tween 3s Power2、nativeScale 换算（blur=16×scale、scaleFactor=1/scale、分块=ceil(10×scale)）。授权 `DEC-SYS-CAMERA-CORE-001`（签字 `继续`，2026-08-16）。nativeScale 为运行时注入非写死参数。范围见 SYS-CAMERA 卡 §2/§3；不含 Phaser/Vite、网络、缓存、渲染、真实相机/tween/后处理管线创建、航拍逐帧推进机制、nativeScale 注入来源、旧项目修改。
 
 ## 已阻塞或暂停工作项
 
@@ -154,6 +161,12 @@ updated: 2026-08-15
 | `WI-SYS-MOVE-DESIGN-001` | completed | SYS-MOVE | [SYS-MOVE卡](03-执行层/02-玩法线/02-移动与碰撞.md) | `edbb2952186bf7a3e9f755ba2c21ac3904a50e06` | `DEC-SYS-MOVE-DESIGN-001` |
 | `WI-SYS-PLAYER-DESIGN-001` | completed | SYS-PLAYER | [SYS-PLAYER卡](03-执行层/02-玩法线/03-玩家.md) | `0e89e96b688ee56e1cd2f4f6e3a8841f673c6e8f` | `DEC-SYS-PLAYER-DESIGN-001` |
 | `WI-SYS-CAMERA-DESIGN-001` | completed | SYS-CAMERA | [SYS-CAMERA卡](03-执行层/02-玩法线/04-相机.md) | `9f838db4786a999c106a879719b59123de661a74` | `DEC-SYS-CAMERA-DESIGN-001` |
+| `WI-SYS-ASSET-CORE-001` | completed | SYS-ASSET | [SYS-ASSET卡](03-执行层/01-地图线/01-资源加载.md)；`src/asset/`；`tests/asset/` | （未提交） | `DEC-SYS-ASSET-CORE-001` |
+| `WI-SYS-LAYER-CORE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；`src/layer/`；`tests/layer/` | （未提交） | `DEC-SYS-LAYER-CORE-001` |
+| `WI-SYS-WORLD-CORE-001` | completed | SYS-WORLD | [SYS-WORLD卡](03-执行层/01-地图线/02-世界与地图.md)；`src/world/`；`tests/world/` | （未提交） | `DEC-SYS-WORLD-CORE-001` |
+| `WI-SYS-INPUT-CORE-001` | completed | SYS-INPUT | [SYS-INPUT卡](03-执行层/02-玩法线/01-输入.md)；`src/input/`；`tests/input/` | （未提交） | `DEC-SYS-INPUT-CORE-001` |
+| `WI-SYS-MOVE-CORE-001` | completed | SYS-MOVE | [SYS-MOVE卡](03-执行层/02-玩法线/02-移动与碰撞.md)；`src/move/`；`tests/move/` | （未提交） | `DEC-SYS-MOVE-CORE-001` |
+| `WI-SYS-PLAYER-CORE-001` | completed | SYS-PLAYER | [SYS-PLAYER卡](03-执行层/02-玩法线/03-玩家.md)；`src/player/`；`tests/player/` | （未提交） | `DEC-SYS-PLAYER-CORE-001` |
 
 ## 错误记录
 
