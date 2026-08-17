@@ -1,8 +1,8 @@
 ---
 title: AI 任务执行与交付闭环规则落盘
 type: task-todo
-status: in-progress
-version: v1.0.0
+status: completed
+version: v1.1.0
 created: 2026-08-17
 updated: 2026-08-17
 decision-ref: DEC-AI-EXEC-WORKFLOW-001
@@ -28,8 +28,8 @@ decision-ref: DEC-AI-EXEC-WORKFLOW-001
 - [x] 在 `决策记录.md` 登记 Human 决定 `DEC-AI-EXEC-WORKFLOW-001`。
 - [x] 在 `task_plan.md` 同步本决定的长期效力，不改变既有当前实现工作项。
 - [x] 运行文档结构、链接、状态一致性和 Git 范围检查。
-- [ ] 更新本 Todo 为完成状态，并记录验证结果和修订信息。
-- [ ] 只提交本轮相关文件并正常推送 `origin/main`。
+- [x] 更新本 Todo 为完成状态，并记录验证结果和修订信息。
+- [x] 只提交本轮相关文件并正常推送 `origin/main`。
 
 ## 验证结果
 
@@ -39,9 +39,12 @@ decision-ref: DEC-AI-EXEC-WORKFLOW-001
 - 决策唯一性：`DEC-AI-EXEC-WORKFLOW-001` 在仍生效决定表中恰好一行。
 - 链接：本轮新增内容未新增 Markdown 链接；操作手册原有带圆括号文件名的目标 `03-内容线/02-世界交互(弹窗).md` 已确认存在。
 - Git 范围：只有计划内 5 个文件有变更；`sample/`、`src/`、`tests/` 和历史归档无变化。
+- 远端基线：提交前 `HEAD...origin/main = 0/0`。
+- 主交付提交：`63c6aa2`（`docs: enforce AI task delivery workflow`），已正常推送到 `origin/main`。
 
 ## 修订记录
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
+| v1.1.0 | 2026-08-17 | 完成全部 Todo，补充校验、提交和远端推送证据。 |
 | v1.0.0 | 2026-08-17 | 创建本轮 Todo，记录任务体量、范围、步骤和交付闭环。 |
