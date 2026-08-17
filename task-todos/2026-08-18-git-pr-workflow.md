@@ -2,7 +2,7 @@
 title: Git 功能分支与 PR 协作规范落盘
 type: task-todo
 status: completed
-version: v1.1.0
+version: v1.2.0
 created: 2026-08-18
 updated: 2026-08-18
 decision-ref: DEC-GIT-PR-WORKFLOW-001
@@ -60,13 +60,14 @@ branch: docs/git-pr-workflow
 
 - 主规则提交：`56def97`（`docs: enforce feature branch PR workflow`）。
 - Push 目标：`origin/docs/git-pr-workflow`；已建立远端跟踪分支。
-- PR 状态：需要创建。本机 `gh auth status` 显示 GitHub CLI 的默认账号令牌失效，按 GitHub 发布流程未绕过认证。
-- PR 创建入口：`https://github.com/Billy-cpu0366/virtual-campus-reconstruction/pull/new/docs/git-pr-workflow`。
+- PR 状态：Draft PR #2 已创建：`https://github.com/Billy-cpu0366/virtual-campus-reconstruction/pull/2`。
+- 创建方式：本机 GitHub CLI 令牌失效后未绕过认证；Human 明确要求 Codex 自行创建，随后通过已连接的 GitHub 应用完成创建。
 - 合并状态：未合并；`main` 未被本次任务直接 commit 或 push。
 
 ## 修订记录
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
+| v1.2.0 | 2026-08-18 | 记录 Draft PR #2 已通过 GitHub 应用创建；保持未合并状态。 |
 | v1.1.0 | 2026-08-18 | 完成规则修改、验证和功能分支推送；记录 PR 因 GitHub CLI 认证失效而需要创建，且未合并 main。 |
 | v1.0.0 | 2026-08-18 | 创建本轮 Todo，记录 Git 启动检查、功能分支、PR 规则替代范围与交付计划。 |
