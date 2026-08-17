@@ -1,8 +1,8 @@
 ---
 title: Git 功能分支与 PR 协作规范落盘
 type: task-todo
-status: in-progress
-version: v1.0.0
+status: completed
+version: v1.1.0
 created: 2026-08-18
 updated: 2026-08-18
 decision-ref: DEC-GIT-PR-WORKFLOW-001
@@ -34,9 +34,9 @@ branch: docs/git-pr-workflow
 - [x] 在 `task_plan.md` 同步长期协作约束，不改变当前实现工作项。
 - [x] 更新全部受影响正式文档的版本、日期与修订记录。
 - [x] 运行规则唯一性、状态一致性、Markdown、Git diff 与变更范围检查。
-- [ ] 更新本 Todo 为完成状态并记录验证结果。
-- [ ] 只提交本轮文件并推送 `docs/git-pr-workflow`。
-- [ ] 创建或明确交付 Pull Request；不自行合并 `main`。
+- [x] 更新本 Todo 为完成状态并记录验证结果。
+- [x] 只提交本轮文件并推送 `docs/git-pr-workflow`。
+- [x] 创建或明确交付 Pull Request；不自行合并 `main`。
 
 ## 当前证据
 
@@ -56,8 +56,17 @@ branch: docs/git-pr-workflow
 - Git 范围：只涉及计划内 5 个文档；`sample/`、`src/`、`tests/`、系统卡与历史归档正文无修改。
 - Markdown：本轮规则正文未新增 Markdown 链接；既有链接目标不受本次修改影响。
 
+## Git 与 PR 交付
+
+- 主规则提交：`56def97`（`docs: enforce feature branch PR workflow`）。
+- Push 目标：`origin/docs/git-pr-workflow`；已建立远端跟踪分支。
+- PR 状态：需要创建。本机 `gh auth status` 显示 GitHub CLI 的默认账号令牌失效，按 GitHub 发布流程未绕过认证。
+- PR 创建入口：`https://github.com/Billy-cpu0366/virtual-campus-reconstruction/pull/new/docs/git-pr-workflow`。
+- 合并状态：未合并；`main` 未被本次任务直接 commit 或 push。
+
 ## 修订记录
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
+| v1.1.0 | 2026-08-18 | 完成规则修改、验证和功能分支推送；记录 PR 因 GitHub CLI 认证失效而需要创建，且未合并 main。 |
 | v1.0.0 | 2026-08-18 | 创建本轮 Todo，记录 Git 启动检查、功能分支、PR 规则替代范围与交付计划。 |
