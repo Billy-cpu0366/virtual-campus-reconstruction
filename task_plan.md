@@ -1,14 +1,14 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-SYS-CAMERA-CORE-001
+current-work-item: WI-RENDER-PLAYABLE-001
 work-item-level: implementation
-work-item-type: core
+work-item-type: integration
 work-item-status: in-progress
-node-refs: SYS-CAMERA
+node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-INPUT; SYS-MOVE; SYS-PLAYER; SYS-CAMERA
 current-phase: implementation
 current-gate: none
 gate-status: none
-authorization-ref: DEC-SYS-CAMERA-CORE-001
+authorization-ref: DEC-RENDER-PLAYABLE-001
 preauthorized-next-work-item: none
 next-phase: implementation
 version: v1.1.0
@@ -19,11 +19,11 @@ updated: 2026-08-18
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-SYS-CAMERA-CORE-001`（SYS-CAMERA 确定性纯逻辑 CORE，已授权 `DEC-SYS-CAMERA-CORE-001`）
-- **到哪了**：地图线 4 系统（CHUNK/ASSET/LAYER/WORLD）+ SYS-INPUT/SYS-MOVE/SYS-PLAYER CORE 已验证关闭；SYS-CAMERA 已定稿 `designed`，实现授权已签字，`src/camera/` 纯逻辑已写完
-- **卡在哪**：不卡；实现 + 测试已完成，待 Human 验收
-- **能不能写代码**：✅ 能（仅 SYS-CAMERA 确定性 CORE：边界/缩放/硬跟随/像素取整/物理帧率、航拍 6 点序列、nativeScale 换算）
-- **下一步**：Human 验收 `src/camera/` + `tests/camera/`（typecheck + 132 测试全绿）
+- **正在做**：`WI-RENDER-PLAYABLE-001`（当前最小 Phaser 渲染雏形，已授权 `DEC-RENDER-PLAYABLE-001`）
+- **到哪了**：8 个地图线/玩法线 CORE 已写入；当前雏形已统一 `/assets/...` 资源路径，提供最小 Phaser、地图、瓦片和玩家资源，并补充资源测试
+- **卡在哪**：代码和资源 smoke test 已通过；仍待 Human 浏览器验收真实画面与操作
+- **能不能写代码**：✅ 能（仅当前最小雏形资源交付、路径、基础地图/玩家渲染和验证；不扩大到后续 chunk 流式、真实碰撞、摇杆、动态图层和内容系统）
+- **下一步**：Human 浏览器验收当前雏形（typecheck + 139 测试 + build + Vite 资源 smoke test）
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -59,7 +59,8 @@ updated: 2026-08-18
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
 | 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
-| AI 任务执行与 Git PR 交付闭环 | 已接受并更新（2026-08-18） | 每次先判任务体量；非简单任务建立并逐步更新 Todo；从最新 `main` 创建独立任务分支；校验、更新文档版本/修订信息后，只 commit 和 push 当前任务分支并创建/交付 PR | 直接在 `main` 开发、commit 或 push；自行合并 PR；空提交、夹带无关改动、force-push、推送失败后误报已完成 | 按 `DEC-AI-EXEC-WORKFLOW-001`、`DEC-GIT-PR-WORKFLOW-001` 和执行层操作手册持续执行 |
+| AI 任务执行与交付闭环 | 已接受（2026-08-17） | 每次先判任务体量；非简单任务建立并逐步更新 Todo；校验后更新文档版本/修订信息；最终回复前提交本轮文件并正常 push | 空提交、夹带无关改动、force-push、推送失败后误报已完成 | 按 `DEC-AI-EXEC-WORKFLOW-001` 和执行层操作手册持续执行 |
+| Git 功能分支与 PR 交付闭环 | 已接受（2026-08-18） | 修改从最新 `main` 创建独立任务分支；只 push 任务分支；通过 Draft PR 检查、处理冲突并等待 Human 确认后合并 | 直接在 `main` 修改、commit、push 或自行合并 PR；force-push 和历史改写 | 按 `DEC-GIT-PR-WORKFLOW-001`、项目 `AGENTS.md` 和执行层操作手册执行 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
 | 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
 | 图层最小视觉补证 | 已授权、证据已验证、Human通过并关闭 | 维护已关闭的5场景证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 已关闭；进入下一工作项选择 |
@@ -72,7 +73,8 @@ updated: 2026-08-18
 | SYS-INPUT CORE 实现授权与执行 | 已验证并关闭（typecheck + 23 项测试通过） | 维护 `src/input/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、rexVirtualJoystick 插件集成、真实键鼠/触摸监听、扩大为通用框架 | 已完成；转 SYS-MOVE |
 | SYS-MOVE CORE 实现授权与执行 | 已验证并关闭（typecheck + 8 项测试通过） | 维护 `src/move/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Arcade 物理引擎集成、分轴碰撞、真实 body 注册、扩大为通用框架 | 已完成；转 SYS-PLAYER |
 | SYS-PLAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 13 项测试通过） | 维护 `src/player/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Phaser Sprite/动画创建、真实贴图加载、被抓/换装/传送完整流程、扩大为通用框架 | 已完成；转 SYS-CAMERA |
-| SYS-CAMERA CORE 实现授权与执行 | 已授权（签字 `继续`，2026-08-16） | 维护 SYS-CAMERA CORE 授权边界，实现 `src/camera/` 纯逻辑与测试 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、真实相机/tween/后处理管线创建、航拍逐帧推进机制、nativeScale 注入来源、扩大为通用框架 | 验证通过后关闭，玩法线 CORE 全齐 |
+| SYS-CAMERA CORE 实现授权与执行 | 已授权（签字 `继续`，2026-08-16） | 维护 SYS-CAMERA CORE 授权边界，实现 `src/camera/` 纯逻辑与测试 | 修改旧 Phaser、接入 Phaser/Vite、网络、缓存、渲染、真实相机/tween/后处理管线创建、航拍逐帧推进机制、nativeScale 注入来源、扩大为通用框架 | 验证通过后关闭，玩法线 CORE 全齐 |
+| 当前最小 Phaser 渲染雏形 | 已接受（`DEC-RENDER-PLAYABLE-001`；本轮修复 `ok`） | 维护当前雏形资源、路径、基础渲染和验证 | 分块流式加载、真实碰撞、摇杆、动态图层、内容系统、修改确定性 CORE | 浏览器验收通过后关闭 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -134,7 +136,7 @@ updated: 2026-08-18
 
 ## 当前工作项
 
-`WI-SYS-CAMERA-CORE-001`（SYS-CAMERA 确定性纯逻辑 CORE）：边界 2240×2240/缩放 1/硬跟随 lerp=1/offset·deadzone(0,0)/roundPixels/物理 30 FPS、开场航拍 6 点序列与总时长约 111s、结束 tween 3s Power2、nativeScale 换算（blur=16×scale、scaleFactor=1/scale、分块=ceil(10×scale)）。授权 `DEC-SYS-CAMERA-CORE-001`（签字 `继续`，2026-08-16）。nativeScale 为运行时注入非写死参数。范围见 SYS-CAMERA 卡 §2/§3；不含 Phaser/Vite、网络、缓存、渲染、真实相机/tween/后处理管线创建、航拍逐帧推进机制、nativeScale 注入来源、旧项目修改。
+`WI-RENDER-PLAYABLE-001`（当前最小 Phaser 渲染雏形）：使用 Vite 7 + 原站 Phaser 3.90.0 vendor 资源，渲染 `final_map.json` 的 layer1–10，提供玩家出生/8方向走路动画/键盘移动、基础相机边界/缩放/硬跟随/roundPixels 和动态 depth。当前修复补充：统一 `/assets/...` 资源路径、提供最小运行资源、清理 Phaser 4 lockfile 残留、加入资源存在性测试和文档对账。授权 `DEC-RENDER-PLAYABLE-001`（签字 `ok，直接开始联网渲染让我看看效果`，2026-08-16；本轮 `ok。开始修复吧那就`，2026-08-18）。不含分块流式加载、Arcade 分轴碰撞/wall 碰撞、移动端摇杆、NPC/交互/粒子/FX、换装/被抓/传送完整流程、roof/bridge 动态效果、旧项目修改和 `src/` 确定性 CORE 改动。
 
 ## 已阻塞或暂停工作项
 
@@ -178,5 +180,5 @@ updated: 2026-08-18
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
-| v1.1.0 | 2026-08-18 | 同步 `DEC-GIT-PR-WORKFLOW-001` 的独立任务分支 + PR 长期约束；不改变既有当前实现工作项。 |
+| v1.1.0 | 2026-08-18 | 登记 `DEC-GIT-PR-WORKFLOW-001`，补充功能分支、Draft PR、冲突处理和 Human 合并门禁。 |
 | v1.0.0 | 2026-08-17 | 同步 `DEC-AI-EXEC-WORKFLOW-001` 的长期执行效力；不改变既有当前实现工作项。 |
