@@ -11,7 +11,7 @@ gate-status: none
 authorization-ref: DEC-RENDER-PLAYABLE-001
 preauthorized-next-work-item: none
 next-phase: implementation
-version: v1.1.0
+version: v1.3.0
 updated: 2026-08-18
 ---
 
@@ -59,7 +59,7 @@ updated: 2026-08-18
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
 | 阶段6C首个系统详细逆向 | 已通过 | 维护已接受的 SYS-CHUNK 详细设计与验证计划 | 写入正式 `src`、修改或迁移现有 Phaser 项目、扩大无关采集、提取通用模块 | 进入 SYS-CHUNK 实现授权审查 |
 | 轻量任务接力制度 | 已通过并完成首次真实试点 | 正常关闭已完成工作项；无预授权下一项时进入选择状态 | 把内部小步骤全部升级为 Gate 或完整 P/A；制造虚假选择工作项 | 按既有权威来源滚动提出下一项候选 |
-| AI 任务执行与 Git PR 交付闭环 | 已接受并更新（2026-08-18） | 每次先判任务体量；非简单任务建立并逐步更新 Todo；从最新 `main` 创建独立任务分支；校验、更新文档版本/修订信息后，只 commit 和 push 当前任务分支并创建/交付 PR | 直接在 `main` 开发、commit 或 push；自行合并 PR；空提交、夹带无关改动、force-push、推送失败后误报已完成 | 按 `DEC-AI-EXEC-WORKFLOW-001`、`DEC-GIT-PR-WORKFLOW-001` 和执行层操作手册持续执行 |
+| AI 任务执行、发布预览与 Git PR 交付闭环 | 已接受并更新（2026-08-18） | 每次先判任务体量；非简单任务建立并逐步更新 Todo；从最新 `main` 使用独立任务分支；完成修改、校验和文档记录后向任务请求者展示最终效果与验证结果，明确认可发布后才暂存、commit、push 当前任务分支并创建/更新 PR；PR 创建或更新后停止 | 未展示或未获认可就暂存/commit/push/更新 PR；批准后实质内容变化却不重新确认；直接操作 `main`；继续处理 PR 后续流程；空提交、夹带无关修改、force-push 或误报状态 | 按 `DEC-AI-EXEC-WORKFLOW-001`、`DEC-GIT-PR-WORKFLOW-001`、`DEC-HUMAN-PREVIEW-GATE-001`、`DEC-PR-DELIVERY-END-001` 和执行层操作手册持续执行 |
 | SYS-CHUNK CORE 实现授权与执行 | 已通过、验证并关闭 | 维护已验证的 CORE 结果和授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 下一项需重新选择和授权 |
 | 世界装配与图层边界调查及设计 | 已通过、验证并关闭 | 维护已接受正式设计和验证基线 | 正式代码、Phaser/Vite集成、旧项目修改和复用提取 | 当前已进入最小视觉补证 |
 | 图层最小视觉补证 | 已授权、证据已验证、Human通过并关闭 | 维护已关闭的5场景证据结论 | 扩大镜像、私有资源、source map、正式代码、旧项目修改 | 已关闭；进入下一工作项选择 |
@@ -179,5 +179,7 @@ updated: 2026-08-18
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
+| v1.3.0 | 2026-08-18 | 同步 `DEC-PR-DELIVERY-END-001`：共享规范不指定参与者身份；验证结果只用于发布前确认，Codex 在创建/更新 PR 后停止；不改变当前实现工作项。 |
+| v1.2.0 | 2026-08-18 | 同步 `DEC-HUMAN-PREVIEW-GATE-001`：经校验的最终效果和验证结果先由任务请求者查看并明确认可，之后才允许 commit、push 和创建/更新 PR；不改变当前实现工作项。 |
 | v1.1.0 | 2026-08-18 | 同步 `DEC-GIT-PR-WORKFLOW-001` 的独立任务分支 + PR 长期约束；不改变既有当前实现工作项。 |
 | v1.0.0 | 2026-08-17 | 同步 `DEC-AI-EXEC-WORKFLOW-001` 的长期执行效力；不改变既有当前实现工作项。 |
