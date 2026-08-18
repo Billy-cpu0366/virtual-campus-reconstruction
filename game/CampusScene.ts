@@ -37,10 +37,13 @@ export class CampusScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.tilemapTiledJSON("map", "/maps/final_map.json");
-    this.load.image("exterior", "/maps/exterior-final.webp");
-    this.load.image("collisions-objects", "/maps/collisions-objects.png");
-    this.load.spritesheet("player", "/sprites/player.webp", {
+    this.load.tilemapTiledJSON("map", "/assets/maps/final_map.json");
+    this.load.image("exterior", "/assets/maps/exterior-final.webp");
+    this.load.image(
+      "collisions-objects",
+      "/assets/maps/collisions-objects.png",
+    );
+    this.load.spritesheet("player", "/assets/sprites/player.webp", {
       frameWidth: 48,
       frameHeight: 48,
     });

@@ -1,6 +1,8 @@
 node_modules/
 dist/
-public/
+public/*
+!public/assets/
+!public/assets/**
 build/
 coverage/
 __pycache__/
