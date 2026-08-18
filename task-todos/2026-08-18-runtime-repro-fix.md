@@ -16,7 +16,8 @@ created: 2026-08-18
 - [x] 更新 `src/README.md` 和当前深度公式文档漂移。
 - [x] 同步 `task_plan.md`、`决策记录.md` 和当前工作项状态。
 - [x] 运行 typecheck、test、build、状态一致性检查和本地 Vite 资源 smoke test。
-- [x] 检查 diff，只提交本轮相关文件；已提交 `c5f1f6e`，待推送当前分支。
+- [x] 检查 diff，只提交本轮相关文件；已提交 `8973de8`。
+- [x] 正常推送当前分支；`origin/main` 已更新至 `8973de8`。
 
 ## 禁止范围
 
