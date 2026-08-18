@@ -1,8 +1,8 @@
 ---
 title: API 细化规范并入双人协作规范
 type: task-todo
-status: in-progress
-version: v1.0.0
+status: completed
+version: v1.1.0
 created: 2026-08-18
 updated: 2026-08-18
 branch: docs/api-collaboration-spec
@@ -34,8 +34,8 @@ branch: docs/api-collaboration-spec
 - [x] 生成融合稿，保留有效协作内容并嵌入接口模板、状态、变更流程和检查清单。
 - [x] 校验项目路径、16 系统清单、接口方向、当前工程状态、Git/PR 规则和 Markdown 结构。
 - [x] 将验证后的融合稿写回用户指定的《双人协作规范.md》，不改源规范。
-- [ ] 完成本 Todo，记录验证与外部交付结果。
-- [ ] 只提交本 Todo，推送当前任务分支并创建 Draft PR；不合并 `main`。
+- [x] 完成本 Todo，记录验证与外部交付结果。
+- [x] 只提交本 Todo，推送当前任务分支并创建 Draft PR；不合并 `main`。
 
 ## 已确认的项目事实
 
@@ -57,8 +57,16 @@ branch: docs/api-collaboration-spec
 - 源规范：《API接口细化规范.md》保持只读，未执行写入。
 - 待清理候选：`D:\虚拟校园文档重构\.codex-staging-双人协作规范.md` 是本轮验证稿；按知识收尾规则暂时保留，等待 Human 看完结果后再决定是否删除。
 
+## Git 与 PR 交付
+
+- 主提交：`f0ba38a`（`docs: record API collaboration spec merge`）。
+- Push 目标：`origin/docs/api-collaboration-spec`。
+- Draft PR：#3，`https://github.com/Billy-cpu0366/virtual-campus-reconstruction/pull/3`。
+- 合并状态：未合并；本轮未直接 commit 或 push `main`。
+
 ## 修订记录
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
+| v1.1.0 | 2026-08-18 | 完成外部文档写回、内容验证、功能分支推送和 Draft PR #3 交付。 |
 | v1.0.0 | 2026-08-18 | 创建整合 Todo，记录附件、项目事实源、已识别冲突和功能分支交付计划。 |
