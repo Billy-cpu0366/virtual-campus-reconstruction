@@ -1,8 +1,8 @@
 ---
 title: 发布前预览确认门禁落盘
 type: task-todo
-status: publishing
-version: v1.2.0
+status: completed
+version: v1.3.0
 created: 2026-08-18
 updated: 2026-08-18
 decision-ref: DEC-HUMAN-PREVIEW-GATE-001
@@ -39,14 +39,16 @@ branch: docs/git-pr-workflow
 - [x] 整理最终 diff、行为效果、验证结果和待发布范围，供本轮发布前预览。
 - [x] 任务请求者已明确回复“可以发布”（2026-08-18）。
 - [x] 获得发布批准后，确认批准后无实质内容漂移，允许 commit 本轮文件。
-- [ ] 获得发布批准后，push `docs/git-pr-workflow` 并更新 Draft PR #2；PR 更新后停止，不处理或规定后续流程。
+- [x] 获得发布批准后，push `docs/git-pr-workflow` 并更新 Draft PR #2；PR 更新后停止，不处理或规定后续流程。
 
 ## 当前证据
 
 - 最新 `origin/main`：`abd465b`；包含其他成员的运行时修复提交。
 - 当前规范分支：`docs/git-pr-workflow`。
-- 本地同步提交：`0156eaa`（合入最新 `main`），尚未 push。
-- 既有远端 PR：Draft PR #2，当前尚未收到本轮门禁修改。
+- 本地同步提交：`0156eaa`（合入最新 `main`）；发布时发现远端存在等价合并提交 `5e5767d`，已在保留预览内容的前提下安全整合。
+- 规则提交：`a589ff7`（`docs: gate PR publishing on preview approval`）。
+- 远端整合提交：`34b8ee0`；合并前后5份本轮文档的实质 diff 为 0。
+- 既有远端 PR：Draft PR #2 已更新：`https://github.com/Billy-cpu0366/virtual-campus-reconstruction/pull/2`。
 - 工作区残留：一个未跟踪 `.lnk` 快捷方式，不属于本任务，保持原样。
 
 ## 验证结果
@@ -56,8 +58,8 @@ branch: docs/git-pr-workflow
 - 规则覆盖：`AGENTS.md`、执行层操作手册、决策记录和 `task_plan.md` 均已写入“先展示并明确认可，后暂存/commit/push/PR”的顺序。
 - 批准有效性：已明确规定实质内容变化、冲突处理改变内容、验证结论变化或范围扩大时必须重新展示和批准。
 - PR 交付边界：验证结果只在发布前展示给任务请求者；明确认可发布后，Codex 完成分支提交、推送和 PR 创建/更新即停止，PR 后续流程不在本任务范围内。
-- Git 暂存区：为空；本轮规则文件尚未 `git add` 或 commit。
-- 远端状态：本地规范分支尚未 push 本轮同步与门禁改动，Draft PR #2 尚未更新。
+- Git 范围：规则提交只包含计划内5个文档；既有未跟踪快捷方式未暂存、未提交。
+- 远端状态：`docs/git-pr-workflow` 已推送至 `origin/docs/git-pr-workflow`；Draft PR #2 的标题和说明已同步本轮最终口径。
 - 变更范围：本轮实质修改只涉及计划内 5 个文档；既有未跟踪快捷方式保持原样。
 - 发布批准：任务请求者已在查看上述效果和验证结果后明确回复“可以发布”；批准范围与当前实质 diff 一致。
 
@@ -65,6 +67,7 @@ branch: docs/git-pr-workflow
 
 | 版本 | 日期 | 修改内容 |
 |---|---|---|
+| v1.3.0 | 2026-08-18 | 记录任务请求者批准、规则提交、远端分支安全整合、push 成功与 Draft PR #2 更新证据；任务交付完成并止于 PR。 |
 | v1.2.0 | 2026-08-18 | 根据 Human 澄清改为共享中性口径：验证只用于发布前确认，Codex 交付止于创建/更新 PR，不指定个人身份；PR 后续流程不在本任务范围内。 |
 | v1.1.0 | 2026-08-18 | 完成规则修改和本地校验，状态转为等待任务请求者发布前预览确认；尚未暂存、commit、push 或更新 PR。 |
 | v1.0.0 | 2026-08-18 | 创建发布前预览确认门禁 Todo，明确预览阶段暂停 commit/push/PR 更新。 |
