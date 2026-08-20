@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level:
-work-item-type:
-work-item-status:
-node-refs:
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref:
+current-work-item: WI-RUNTIME-SAFETY-001
+work-item-level: integration
+work-item-type: integration
+work-item-status: in-progress
+node-refs: SYS-WORLD;SYS-CHUNK;SYS-APP
+current-phase: implementation
+current-gate: implementation
+gate-status: active
+authorization-ref: DEC-RUNTIME-SAFETY-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: verification
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：当前没有 active 工作项；上一项墙体/桥碰撞集成已关闭
-- **到哪了**：玩家 Body、walls/四个 bridge wall 碰撞、`body.blocked` 反馈、桥状态切换和 chunk collider 清理已实现并验证，结果提交 `e3f412a`
-- **卡在哪**：完整 24 层语义、NPC/交互、请求取消和更深的 Phaser 生命周期量化仍未完成；不把本次有界集成冒充完整玩法线
-- **能不能写代码**：❌ 不能；当前回到 `work-item-selection`，下一项需 Human 重新选择和授权
-- **验证入口**：约定默认仍为 `4175`；本次当前提交的干净预览实际使用 `4200`，因为 `4175` 被旧服务占用，不能混用其旧 bundle 证据
-- **下一步**：Human 选择下一项；优先候选仍是运行时安全，或另立完整移动/碰撞扩展，不自动开始
+- **正在做**：`WI-RUNTIME-SAFETY-001`，运行时安全有界修复
+- **到哪了**：只读审计确认三项目标：World 部分写入回滚、生产诊断面板、入口清理；正式代码尚未修改
+- **卡在哪**：不把审计建议扩大为完整 Phaser teardown、完整图层或其他玩法；浏览器验证需区分普通生产 build 与 test-hooks build
+- **能不能写代码**：✅ 仅限本工作项授权范围：`src/world/`、`game/`、`index.html`、必要 `tests/`、`scripts/`、`package.json` 和相关文档
+- **验证入口**：普通 build/Smoke 继续使用显式 `4200`；碰撞回归若需 debug hooks，使用专门 `test-hooks` build，不把 hooks 带入普通 production build
+- **下一步**：实现最小修复，再跑 typecheck、测试、build、普通安全 Smoke、test-hooks 碰撞 Smoke、状态一致性和 diff 检查
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -81,7 +81,8 @@ updated: 2026-08-20
 | 多人协作 PR 规则吸收 | 已接受、已落盘、已验证（结果提交 `9bd475b`） | 将 PR #2 核心理念整合进当前 `AGENTS.md` 和执行层手册，保持 `task_plan.md` 唯一动态状态源 | 原样合并PR #2；复制PR Todo；修改 `src/`/`game/`/`sample/`；自动push/merge | 已关闭；后续正式协作按新规则执行 |
 | API 协作审查流程融合 | 已接受、已落盘、已验证（结果提交 `6da5755`） | 把 PR #3 的外部规范审查方法融入当前工作流，保持项目 API 契约和系统卡为权威 | 把外部收据当作事实；没有源文档就宣称已验证；直接修改 API 契约或代码 | 流程已关闭；实际外部文档仍需单独输入和审查 |
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
-| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
+| 运行时安全有界修复 | 已接受（Human 选择“运行时安全审计（推荐）”） | 处理 World 部分写入回滚、生产诊断面板限制、入口初始化/图标清理；允许 `src/world/`、`game/`、`index.html`、必要测试脚本和文档 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 实现后分别验证普通 production build 与 test-hooks build；再关闭工作项 |
+| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -161,10 +162,10 @@ updated: 2026-08-20
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| `WI-RUNTIME-SAFETY-001` | 审计发现运行时诊断暴露、`src/world/world.ts` 部分写入回滚风险和入口清理缺口 | 动态分块集成中的 World 事务/回滚和生命周期守卫一并处理；诊断与入口清理仍留后续边界 |
+| `WI-RUNTIME-SAFETY-001` | Human 已选择并激活 | 修复 World 同步/异步部分写入回滚；生产关闭诊断面板、开发诊断限量；处理初始化 rejected、调试 hook 清理和 favicon 入口请求；不扩展完整资源 teardown、完整图层、粒子/NPC/交互、验证器或远端 Git |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
-| SYS-MOVE + SYS-LAYER + SYS-WORLD 碰撞集成 | `WI-SYS-MOVE-WORLD-COLLISION-001` 已关闭 | 已实现并验证；结果提交 `e3f412a`，当前回到选择状态；完整系统语义仍不自动扩展 |
+| SYS-MOVE + SYS-LAYER + SYS-WORLD 碰撞集成 | `WI-SYS-MOVE-WORLD-COLLISION-001` 已关闭 | 已实现并验证；结果提交 `e3f412a`，当前转入运行时安全收尾；完整系统语义仍不自动扩展 |
 
 ## 已关闭工作项索引
 
