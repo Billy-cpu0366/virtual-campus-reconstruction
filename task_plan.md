@@ -20,10 +20,10 @@ updated: 2026-08-20
 
 - **正在做**：当前没有 active 工作项；上一项动态分块集成已完成
 - **到哪了**：动态分块运行时已完成有界集成；`exterior=1`、`collisions-objects=69345` 映射和 Tiled 空 GID `0`→Phaser `-1` 已修正；街道、铁轨、道路和水池已恢复，Human 已确认视觉验收通过
-- **卡在哪**：当前工作项的自动验证和 Human 视觉验收均已通过；正在完成最终文档同步与本地提交。完整原站 13 层语义、墙体/桥真实碰撞仍未纳入
+- **卡在哪**：当前工作项的自动验证、Human 视觉验收和本地提交 `b707553` 均已完成；完整原站 13 层语义、墙体/桥真实碰撞仍未纳入
 - **能不能写代码**：❌ 不能（当前回到 work-item-selection；下一项需 Human 重新授权）
 - **验证入口**：Vite dev/preview 与 browser Smoke 默认统一使用 `4175`（`DEC-VERIFY-PORT-001`）。
-- **下一步**：完成本地提交并回写提交号；之后由 Human 重新选择下一工作项，不自动开始墙体/桥碰撞
+- **下一步**：由 Human 重新选择下一工作项；不自动开始墙体/桥碰撞
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -143,7 +143,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 首版视觉未通过（街道缺失、黑块）；已修正 `exterior` firstgid 注册和 Tiled 空 GID `0` 写入兼容，干净预览 `4199` 的 browser Smoke 与跨块 Smoke 已通过，Human 于 2026-08-20 明确“视觉验收通过”；当前待本地提交收口。
+`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 首版视觉未通过（街道缺失、黑块）；已修正 `exterior` firstgid 注册和 Tiled 空 GID `0` 写入兼容，干净预览 `4199` 的 browser Smoke 与跨块 Smoke 已通过，Human 于 2026-08-20 明确“视觉验收通过”；结果提交为 `b707553`，当前已回到无 active 工作项。
 
 ## 已阻塞或暂停工作项
 
@@ -172,7 +172,7 @@ updated: 2026-08-20
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
-| `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | pending | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
+| `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
 | `WI-RENDER-PLAYABLE-001` | completed | SYS-APP; SYS-GAME-UI | `game/` 可玩雏形；编译 preview；browser Smoke；Human视觉验收 | `7c5a738` | `DEC-RENDER-PLAYABLE-001` |
 | `WI-API-COLLABORATION-REVIEW-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；API协作审查边界和状态分层 | `6da5755` | `DEC-API-COLLABORATION-001` |
 | `WI-DOC-COLLABORATION-ADOPT-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；协作决策和状态同步 | `9bd475b` | `DEC-GIT-PR-WORKFLOW-001` |
