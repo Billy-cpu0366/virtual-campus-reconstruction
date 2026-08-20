@@ -4,7 +4,28 @@ const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
 const url = process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
 const screenshotPath = process.env.SMOKE_SCREENSHOT;
 const initialWaitMs = Number(process.env.CHUNK_INITIAL_WAIT_MS ?? 2500);
-const moveWaitMs = Number(process.env.CHUNK_MOVE_WAIT_MS ?? 4500);
+const moveWaitMs = Number(process.env.CHUNK_MOVE_WAIT_MS ?? 3500);
+const settleWaitMs = Number(process.env.CHUNK_SETTLE_WAIT_MS ?? 1000);
+const moveKeys = (process.env.CHUNK_MOVE_SEQUENCE ?? "ArrowRight,ArrowDown,ArrowRight,ArrowDown")
+  .split(",")
+  .map((key) => key.trim())
+  .filter(Boolean);
+const keyInfoFor = (key) => ({
+  ArrowUp: { code: "ArrowUp", windowsVirtualKeyCode: 38 },
+  ArrowDown: { code: "ArrowDown", windowsVirtualKeyCode: 40 },
+  ArrowLeft: { code: "ArrowLeft", windowsVirtualKeyCode: 37 },
+  ArrowRight: { code: "ArrowRight", windowsVirtualKeyCode: 39 },
+}[key]);
+const keyInfos = moveKeys.map((key) => {
+  const info = keyInfoFor(key);
+  if (info === undefined) {
+    throw new Error(`unsupported CHUNK_MOVE_KEY: ${key}`);
+  }
+  return info;
+});
+if (moveKeys.length === 0) {
+  throw new Error("CHUNK_MOVE_SEQUENCE must not be empty");
+}
 
 const targetResponse = await fetch(
   `${base}/json/new?${encodeURIComponent(url)}`,
@@ -92,19 +113,22 @@ const chunkResources = () => `performance.getEntriesByType("resource")
   .filter((name) => name.includes("/maps/chunks/chunk"))`;
 const before = await evaluate(chunkResources());
 
-await command("Input.dispatchKeyEvent", {
-  type: "keyDown",
-  key: "ArrowDown",
-  code: "ArrowDown",
-  windowsVirtualKeyCode: 40,
-});
-await new Promise((resolve) => setTimeout(resolve, moveWaitMs));
-await command("Input.dispatchKeyEvent", {
-  type: "keyUp",
-  key: "ArrowDown",
-  code: "ArrowDown",
-  windowsVirtualKeyCode: 40,
-});
+for (let index = 0; index < moveKeys.length; index += 1) {
+  const moveKey = moveKeys[index];
+  const keyInfo = keyInfos[index];
+  await command("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key: moveKey,
+    ...keyInfo,
+  });
+  await new Promise((resolve) => setTimeout(resolve, moveWaitMs));
+  await command("Input.dispatchKeyEvent", {
+    type: "keyUp",
+    key: moveKey,
+    ...keyInfo,
+  });
+}
+await new Promise((resolve) => setTimeout(resolve, settleWaitMs));
 
 const after = await evaluate(chunkResources());
 const uniqueBefore = [...new Set(before)];
@@ -120,6 +144,7 @@ if (screenshotPath) {
 
 const result = {
   url,
+  moveKeys,
   initialChunks: uniqueBefore,
   afterMoveChunks: uniqueAfter,
   newChunksAfterMove: newRequests,

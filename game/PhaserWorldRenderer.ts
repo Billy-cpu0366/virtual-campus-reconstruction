@@ -4,9 +4,26 @@ import type {
   WorldSpec,
   WorldWriteHooks,
 } from "../src/world/index.js";
-import type { LayerStrategy } from "../src/layer/index.js";
+import {
+  COLLISION_GID_FORCED,
+  NON_COLLISION_GID_FORCED,
+  type LayerStrategy,
+} from "../src/layer/index.js";
 
-interface TilemapLayerLike {
+interface TileLike {
+  readonly index: number;
+  setCollision?(collides: boolean): void;
+}
+
+export interface TilemapLayerLike {
+  forEachTile?(
+    callback: (tile: TileLike) => void,
+    context?: unknown,
+    tileX?: number,
+    tileY?: number,
+    width?: number,
+    height?: number,
+  ): void;
   putTilesAt?(
     tiles: readonly (readonly number[])[],
     tileX: number,
@@ -19,20 +36,48 @@ interface TilemapLayerLike {
     tileY: number,
     recalculateFaces?: boolean,
   ): void;
+  setAlpha?(value: number): void;
+  setCollision?(
+    tiles: number | readonly number[],
+    collides?: boolean,
+    recalculateFaces?: boolean,
+  ): void;
+  setCollisionByProperty?(
+    properties: Record<string, unknown>,
+    collides?: boolean,
+    recalculateFaces?: boolean,
+  ): void;
+  setCollisionByExclusion?(
+    exclusion: readonly number[],
+    collides?: boolean,
+    recalculateFaces?: boolean,
+  ): void;
   setDepth?(depth: number): void;
+  setVisible?(value: boolean): void;
   destroy?(fromScene?: boolean): void;
+}
+
+export interface PhaserWorldRendererOptions {
+  readonly onCollisionLayerCreated?: (
+    name: string,
+    layer: TilemapLayerLike,
+  ) => void;
+  readonly onCollisionLayerDestroyed?: (
+    name: string,
+    layer: TilemapLayerLike,
+  ) => void | Promise<void>;
 }
 
 function coordinateKey(coordinate: ChunkCoordinate): string {
   return `${coordinate.x}_${coordinate.y}`;
 }
 
-function isHiddenRole(role: LayerStrategy["role"]): boolean {
-  return (
-    role === "collision" ||
-    role === "dynamic-collision" ||
-    role === "marker"
-  );
+function isCollisionRole(role: LayerStrategy["role"]): boolean {
+  return role === "collision" || role === "dynamic-collision";
+}
+
+function isMarkerRole(role: LayerStrategy["role"]): boolean {
+  return role === "marker";
 }
 
 function nextAnimationFrame(): Promise<void> {
@@ -51,17 +96,22 @@ export class PhaserWorldRenderer {
   readonly spec: WorldSpec;
   readonly layers = new Map<string, TilemapLayerLike>();
   readonly strategies: readonly LayerStrategy[];
+  readonly #options: PhaserWorldRendererOptions;
+  readonly #collisionEnabled = new Map<string, boolean>();
 
   constructor(
     map: any,
     tilesets: readonly unknown[],
     spec: WorldSpec,
     strategies: readonly LayerStrategy[],
+    options: PhaserWorldRendererOptions = {},
   ) {
     this.map = map;
     this.tilesets = tilesets;
     this.spec = spec;
     this.strategies = strategies;
+    this.#options = options;
+    this.#collisionEnabled.set("walls", true);
   }
 
   hooks(): WorldWriteHooks {
@@ -79,17 +129,92 @@ export class PhaserWorldRenderer {
     };
   }
 
-  private isHiddenLayer(name: string): boolean {
+  private isMarkerLayer(name: string): boolean {
     const strategy = this.strategies.find((item) => item.name === name);
-    return strategy === undefined || isHiddenRole(strategy.role);
+    return strategy === undefined || isMarkerRole(strategy.role);
   }
 
   private strategyFor(name: string): LayerStrategy {
     const strategy = this.strategies.find((item) => item.name === name);
-    if (strategy === undefined || isHiddenRole(strategy.role)) {
-      throw new Error(`不可见图层不可写：${name}`);
+    if (strategy === undefined) {
+      throw new Error(`未知图层不可写：${name}`);
     }
     return strategy;
+  }
+
+  private isCollisionLayer(name: string): boolean {
+    return isCollisionRole(this.strategyFor(name).role);
+  }
+
+  private collisionEnabled(name: string): boolean {
+    return this.#collisionEnabled.get(name) ?? false;
+  }
+
+  private layersFor(name: string): readonly TilemapLayerLike[] {
+    const prefix = `${name}@`;
+    return [...this.layers.entries()]
+      .filter(([id]) => id.startsWith(prefix))
+      .map(([, layer]) => layer);
+  }
+
+  private configureCollisionLayer(
+    name: string,
+    layer: TilemapLayerLike,
+  ): void {
+    if (!this.isCollisionLayer(name)) {
+      return;
+    }
+    const enabled = this.collisionEnabled(name);
+    const strategy = this.strategyFor(name);
+    if (strategy.role === "collision") {
+      layer.setCollisionByProperty?.({ collides: true }, enabled, false);
+      if (layer.forEachTile !== undefined) {
+        layer.forEachTile((tile) => {
+          if (tile.index === COLLISION_GID_FORCED) {
+            tile.setCollision?.(enabled);
+          } else if (tile.index === NON_COLLISION_GID_FORCED) {
+            tile.setCollision?.(false);
+          }
+        });
+      } else {
+        layer.setCollision?.(COLLISION_GID_FORCED, enabled, false);
+        layer.setCollision?.(NON_COLLISION_GID_FORCED, false, false);
+      }
+      layer.setVisible?.(false);
+    } else {
+      if (layer.forEachTile !== undefined) {
+        layer.forEachTile((tile) => {
+          if (tile.index !== -1) {
+            tile.setCollision?.(enabled);
+          }
+        });
+      } else {
+        layer.setCollisionByExclusion?.([-1], enabled, false);
+      }
+      layer.setAlpha?.(0);
+      layer.setVisible?.(enabled);
+    }
+  }
+
+  setCollisionLayerEnabled(name: string, enabled: boolean): void {
+    if (!this.isCollisionLayer(name)) {
+      throw new Error(`非碰撞图层不可切换碰撞：${name}`);
+    }
+    this.#collisionEnabled.set(name, enabled);
+    for (const layer of this.layersFor(name)) {
+      this.configureCollisionLayer(name, layer);
+    }
+  }
+
+  async destroyAsync(): Promise<void> {
+    for (const [id, layer] of [...this.layers]) {
+      const name = id.slice(0, id.indexOf("@"));
+      if (isCollisionRole(this.strategyFor(name).role)) {
+        await this.#options.onCollisionLayerDestroyed?.(name, layer);
+      }
+      layer.destroy?.();
+    }
+    this.layers.clear();
   }
 
   private layerId(
@@ -127,6 +252,7 @@ export class PhaserWorldRenderer {
     if (strategy.depth !== undefined) {
       layer.setDepth?.(strategy.depth);
     }
+    this.configureCollisionLayer(strategy.name, layer);
     if (this.layers.size < 3) {
       console.log(
         "renderer:create",
@@ -143,6 +269,9 @@ export class PhaserWorldRenderer {
       );
     }
     this.layers.set(id, layer);
+    if (isCollisionRole(strategy.role)) {
+      this.#options.onCollisionLayerCreated?.(strategy.name, layer);
+    }
     return layer;
   }
 
@@ -216,18 +345,19 @@ export class PhaserWorldRenderer {
   }
 
   private writeLayer(layer: ChunkLayer, coordinate: ChunkCoordinate): void {
-    if (this.isHiddenLayer(layer.name)) {
+    if (this.isMarkerLayer(layer.name)) {
       return;
     }
     const target = this.targetFor(layer, coordinate);
     this.writeRows(target, this.rowsForLayer(layer), layer.name);
+    this.configureCollisionLayer(layer.name, target);
   }
 
   private async writeLayerAsync(
     layer: ChunkLayer,
     coordinate: ChunkCoordinate,
   ): Promise<void> {
-    if (this.isHiddenLayer(layer.name)) {
+    if (this.isMarkerLayer(layer.name)) {
       return;
     }
     const target = this.targetFor(layer, coordinate);
@@ -243,11 +373,27 @@ export class PhaserWorldRenderer {
         await nextAnimationFrame();
       }
     }
+    this.configureCollisionLayer(layer.name, target);
     await nextAnimationFrame();
   }
 
+  private destroyLayer(id: string, layer: TilemapLayerLike): void {
+    // Remove the Tilemap layer record before destroying the display object.
+    // Phaser updates subsequent layerIndex values in removeLayer; destroying
+    // first can leave a collider pointing at a different dead layer.
+    if (this.map.removeLayer !== undefined) {
+      this.map.removeLayer(layer);
+      layer.destroy?.();
+    } else if (this.map.destroyLayer !== undefined) {
+      this.map.destroyLayer(layer);
+    } else {
+      layer.destroy?.();
+    }
+    this.layers.delete(id);
+  }
+
   private clearLayer(layer: ChunkLayer, coordinate: ChunkCoordinate): void {
-    if (this.isHiddenLayer(layer.name)) {
+    if (this.isMarkerLayer(layer.name)) {
       return;
     }
     const id = this.layerId(layer.name, coordinate);
@@ -255,19 +401,34 @@ export class PhaserWorldRenderer {
     if (target === undefined) {
       return;
     }
-    if (this.map.destroyLayer !== undefined) {
-      this.map.destroyLayer(target);
-    } else {
-      target.destroy?.();
+    if (this.isCollisionLayer(layer.name)) {
+      this.#options.onCollisionLayerDestroyed?.(layer.name, target);
     }
-    this.layers.delete(id);
+    this.destroyLayer(id, target);
   }
 
   private async clearLayerAsync(
     layer: ChunkLayer,
     coordinate: ChunkCoordinate,
   ): Promise<void> {
-    this.clearLayer(layer, coordinate);
-    await nextAnimationFrame();
+    if (this.isMarkerLayer(layer.name)) {
+      return;
+    }
+    const id = this.layerId(layer.name, coordinate);
+    const target = this.layers.get(id);
+    if (target === undefined) {
+      return;
+    }
+    if (this.isCollisionLayer(layer.name)) {
+      await this.#options.onCollisionLayerDestroyed?.(layer.name, target);
+    }
+    // Arcade queues collider removal until its next physics update. Wait for
+    // the current frame to finish before destroying the Tilemap layer it
+    // references.
+    target.setVisible?.(false);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    if (this.layers.get(id) === target) {
+      this.destroyLayer(id, target);
+    }
   }
 }

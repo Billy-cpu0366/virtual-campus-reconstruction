@@ -14,6 +14,11 @@ export {
   ROOF_LAYERS,
 } from "./strategy.js";
 export {
+  isBridge1EntryZone,
+  isBridge1ExitZone,
+  isBridge2Zone,
+} from "./bridge-zones.js";
+export {
   BRIDGE_PLAYER_DEPTH,
   COLLISION_GID_FORCED,
   FOOTSTEP_DEPTH,

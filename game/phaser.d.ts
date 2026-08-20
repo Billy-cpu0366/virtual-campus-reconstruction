@@ -35,9 +35,29 @@ declare namespace Phaser {
 
   namespace Physics {
     namespace Arcade {
+      interface BlockedFlags {
+        up: boolean;
+        down: boolean;
+        left: boolean;
+        right: boolean;
+      }
+
+      class Body {
+        blocked: BlockedFlags;
+        setSize(width: number, height: number): this;
+        setOffset(x: number, y: number): this;
+        setDrag(x: number, y: number): this;
+        setMaxVelocity(x: number, y: number): this;
+      }
+
+      class Collider {
+        destroy(): void;
+      }
+
       class Sprite {
         x: number;
         y: number;
+        body: Body;
         anims: any;
         setDisplaySize(width: number, height: number): this;
         setCollideWorldBounds(value: boolean): this;
