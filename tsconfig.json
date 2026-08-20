@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "types": ["node", "vitest/globals"],
+    "skipLibCheck": true
+  },
+  "files": ["game/phaser.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "game/**/*.ts",
+    "game/**/*.d.ts"
+  ]
+}

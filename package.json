@@ -1,0 +1,28 @@
+{
+  "name": "virtual-campus-reconstruction",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepare:runtime": "node scripts/prepare-runtime-assets.mjs",
+    "check:runtime": "node scripts/check-runtime-assets.mjs",
+    "browser:smoke": "node scripts/browser-smoke.mjs",
+    "browser:chunk-smoke": "node scripts/browser-chunk-smoke.mjs",
+    "predev": "npm run prepare:runtime",
+    "dev": "npm run check:runtime && vite",
+    "prebuild": "npm run prepare:runtime",
+    "build": "npm run check:runtime && vite build",
+    "prepreview": "npm run prepare:runtime",
+    "preview": "npm run check:runtime && vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}

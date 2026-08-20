@@ -1,0 +1,40 @@
+{
+  "chunkWidth": 28,
+  "chunkHeight": 28,
+  "nbChunksHorizontal": 5,
+  "nbChunksVertical": 5,
+  "tilesets": [
+    {
+      "columns": 176,
+      "firstgid": 1,
+      "image": "exterior.png",
+      "imageheight": 6304,
+      "imagewidth": 2816,
+      "margin": 0,
+      "name": "exterior",
+      "spacing": 0,
+      "tilecount": 69344,
+      "tileheight": 16,
+      "tilewidth": 16
+    },
+    {
+      "columns": 10,
+      "firstgid": 69345,
+      "image": "collisions-objects.png",
+      "imageheight": 16,
+      "imagewidth": 160,
+      "margin": 0,
+      "name": "collisions-objects",
+      "spacing": 0,
+      "tilecount": 10,
+      "tileheight": 16,
+      "tilewidth": 16
+    },
+    {
+      "firstgid": 69355,
+      "source": "tileset-particles.tsx"
+    }
+  ],
+  "originalWidth": 140,
+  "originalHeight": 140
+}

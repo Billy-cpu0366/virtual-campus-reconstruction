@@ -1,0 +1,2657 @@
+{
+  "schemaVersion": 1,
+  "source": "https://peteroravec.com",
+  "capturedAt": "2026-08-09T08:42:58.723Z",
+  "files": [
+    {
+      "url": "https://peteroravec.com/assets/maps/final_map.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/final_map.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/final_map.json",
+      "bytes": 1629633,
+      "sha256": "e409862fe9284480a9f5fdd583beeff0c347bb6582275e1e3c16012c8db288ee",
+      "capturedAt": "2026-08-09T07:39:00.197Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/final_map_small.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/final_map_small.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/final_map_small.json",
+      "bytes": 5326941,
+      "sha256": "225b32c1dac091490fd75b630e72d82ff4209fe6aeb1204913a7dccfddab013c",
+      "capturedAt": "2026-08-09T07:39:01.912Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/walls-layer.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/walls-layer.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/walls-layer.json",
+      "bytes": 40231,
+      "sha256": "b3627367441b18177f89032768407d24fc7fe0d016c21a8ca57de5dde2b6c817",
+      "capturedAt": "2026-08-09T07:39:02.325Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/footsteps-layer.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/footsteps-layer.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/footsteps-layer.json",
+      "bytes": 40231,
+      "sha256": "c5cff30fdac55a28237d5ee7aa24c24c825de8e7c06d8b070e93e35847186032",
+      "capturedAt": "2026-08-09T07:39:02.617Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/particle-trajectories.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/particle-trajectories.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/particle-trajectories.json",
+      "bytes": 140067,
+      "sha256": "d5331157c939d8391ef96c20df975ed3d958b454c7f03b88e8a046a60f1a92ae",
+      "capturedAt": "2026-08-09T07:39:02.908Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/master.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/master.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/master.json",
+      "bytes": 813,
+      "sha256": "49598a06a9fa7be87d9fcf1efdc71f96eba0efecb8f8043bc6cc001cde2a2300",
+      "capturedAt": "2026-08-09T07:39:03.211Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/collisions-objects.png",
+      "finalUrl": "https://peteroravec.com/assets/maps/collisions-objects.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/maps/collisions-objects.png",
+      "bytes": 3941,
+      "sha256": "bc1ed5871b5d376b01ac0955c235b81308ae0765e44381452df9e8c9edab7462",
+      "capturedAt": "2026-08-09T07:39:03.894Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/tileset-particles.tsx",
+      "finalUrl": "https://peteroravec.com/assets/maps/tileset-particles.tsx",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "localPath": "mirror/assets/maps/tileset-particles.tsx",
+      "bytes": 244,
+      "sha256": "6258ff502e32ac6c2af0008cc03e32d8adca06d7a1d13bb57fb771877bb22328",
+      "capturedAt": "2026-08-09T07:39:04.525Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small.webp",
+      "bytes": 16852,
+      "sha256": "a890f29e6542127d5fbe58ce98759b992592c1471b0ae268c69320f0cc58c62c",
+      "capturedAt": "2026-08-09T07:39:04.924Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-2.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-2.webp",
+      "bytes": 20374,
+      "sha256": "92ab09a6629077a3895bf7b93e6d0f210afc0bdc1178afa838b7ef6d9f21a293",
+      "capturedAt": "2026-08-09T07:39:05.355Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-3.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-3.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-3.webp",
+      "bytes": 20638,
+      "sha256": "7e19a14c9c88ba54885db6bbd02d3b83eb72e2b326b57bf5e35a465ce72b2a54",
+      "capturedAt": "2026-08-09T07:39:05.677Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-4.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-4.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-4.webp",
+      "bytes": 14948,
+      "sha256": "78042c0360eb8ede08bd4f5dd920a32097356281283cee9f1eeb25d6f57d4545",
+      "capturedAt": "2026-08-09T07:39:06.000Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-5.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-5.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-5.webp",
+      "bytes": 13030,
+      "sha256": "db1571560d79f00cc40c4e4c7cd1cb2e0d6b7f8dc0346de5ded6679280b4d4a3",
+      "capturedAt": "2026-08-09T07:39:06.312Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-6.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-6.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-6.webp",
+      "bytes": 4140,
+      "sha256": "c0f6107c76be7bb3c38acca25f460366a82a1d10178d10c871ba2e1448fc3dd7",
+      "capturedAt": "2026-08-09T07:39:06.619Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-7.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-7.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-7.webp",
+      "bytes": 8074,
+      "sha256": "9821af44dbf7d82c3c776badb33007a8a6a25e00b23a5813819c80dea0edc9f5",
+      "capturedAt": "2026-08-09T07:39:06.911Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-8.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-8.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-8.webp",
+      "bytes": 19670,
+      "sha256": "65b3f4cec92e5bce3c72004063a861d9921c1848c5c1c81ffcfc47f9c7468230",
+      "capturedAt": "2026-08-09T07:39:07.207Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-9.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-9.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-9.webp",
+      "bytes": 12728,
+      "sha256": "b9f23d81bd0c6fcb62c42607b9d9a579501781121bf69a615b49587e4be5c782",
+      "capturedAt": "2026-08-09T07:39:07.524Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-10.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-10.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-10.webp",
+      "bytes": 17714,
+      "sha256": "cbd9e506d8b1f2143e4e43a973597c1817d148990503dd3076f17138433f0651",
+      "capturedAt": "2026-08-09T07:39:07.833Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-11.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-11.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-11.webp",
+      "bytes": 78760,
+      "sha256": "0f899d546bd1741f1b19949893f8fe629a3378e1887d70fe9942e30805afcdfe",
+      "capturedAt": "2026-08-09T07:39:08.149Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-12.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-12.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-12.webp",
+      "bytes": 64024,
+      "sha256": "18966122b5e2afe0ed63c1b8bed3265bb4e5e455b404f9eec9d935ddd23fde20",
+      "capturedAt": "2026-08-09T07:39:08.625Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-13.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-13.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-13.webp",
+      "bytes": 24200,
+      "sha256": "0a85802986137c05a8649d4dbef65dabc3d5dddc7f0864a2fb36360cf93b3345",
+      "capturedAt": "2026-08-09T07:39:09.048Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-14.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-14.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-14.webp",
+      "bytes": 20316,
+      "sha256": "f37667ca220048ea2f037525b17b8a03b11abc2454c84eceeb78a29f9f524bb5",
+      "capturedAt": "2026-08-09T07:39:09.355Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-15.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-15.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-15.webp",
+      "bytes": 30180,
+      "sha256": "202ea26a30fbde49c2e7f95882d5f60ed3401f5d9b99cbfb54be670bf4fb2b8b",
+      "capturedAt": "2026-08-09T07:39:09.661Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-small-16.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-small-16.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-small-16.webp",
+      "bytes": 8486,
+      "sha256": "8ab5ca2675aec23100f42112de291814ba8768a97cd2b7efeede0e30cf765e4d",
+      "capturedAt": "2026-08-09T07:39:09.974Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/tileset-particles.png",
+      "finalUrl": "https://peteroravec.com/assets/maps/tileset-particles.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/maps/tileset-particles.png",
+      "bytes": 3795,
+      "sha256": "c809026a1fd81f441b3336a081b6cb9cedbcd695936af51508954c2d40fb480b",
+      "capturedAt": "2026-08-09T07:39:10.271Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card1_base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card1_base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card1_base.webp",
+      "bytes": 15854,
+      "sha256": "c0c6f191d254af1c2a5ab6453d62f1289640d79ef5964c37286a6febe0f09c9a",
+      "capturedAt": "2026-08-09T07:48:20.851Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card2_base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card2_base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card2_base.webp",
+      "bytes": 29876,
+      "sha256": "90adb21a28b2a2f6a4b132a1b9e66c41c141b5f3281af243260d78130ab30353",
+      "capturedAt": "2026-08-09T07:48:21.325Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card3_base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card3_base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card3_base.webp",
+      "bytes": 18216,
+      "sha256": "8c707941024514946d7eb1ef36328b8b25ff102e2a5c07d045d065f71c9bf657",
+      "capturedAt": "2026-08-09T07:48:21.898Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card4_base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card4_base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card4_base.webp",
+      "bytes": 8688,
+      "sha256": "d334a184ddbe7adebc1d8c9c15a8cdfe346a54de00da01ab2e0e9709a36ed0c8",
+      "capturedAt": "2026-08-09T07:48:22.287Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card5_base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card5_base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card5_base.webp",
+      "bytes": 14592,
+      "sha256": "4e82c2709561ef3dc37c0852098ec6fba134f411c2cd6e7df315e75184f24293",
+      "capturedAt": "2026-08-09T07:48:22.654Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card6_base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card6_base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card6_base.webp",
+      "bytes": 31570,
+      "sha256": "c825e9cf2fe9eece0250853f94c3ed3ead33bbafb40a7666fda65bac372cf38e",
+      "capturedAt": "2026-08-09T07:48:23.050Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-114x114.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-114x114.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-114x114.png",
+      "bytes": 1876,
+      "sha256": "c2f026c7f56e32fa343c51517de40c51c494f2913706d5923a836c4d8f53a511",
+      "capturedAt": "2026-08-09T07:48:23.486Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-120x120.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-120x120.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-120x120.png",
+      "bytes": 1729,
+      "sha256": "fc867524445967e1eb5f3e91ac5b4ba2680dfe8ad8eceb08aa481ac22264bb32",
+      "capturedAt": "2026-08-09T07:48:23.821Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-144x144.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-144x144.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-144x144.png",
+      "bytes": 1893,
+      "sha256": "27b38ead3fe3f6c8a8db1c71d8658e57d53679f945469ed0b70cf06eb87e8776",
+      "capturedAt": "2026-08-09T07:48:24.230Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-152x152.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-152x152.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-152x152.png",
+      "bytes": 1896,
+      "sha256": "86f4b87f5eae4a79ed8719192daf0e94d823cf63035e33014d1dcccc85791b94",
+      "capturedAt": "2026-08-09T07:48:24.582Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-57x57.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-57x57.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-57x57.png",
+      "bytes": 1774,
+      "sha256": "a3c2dd22482e695a7bb30114f1d0c1081d898dd7ebfced74621bf647d0736da5",
+      "capturedAt": "2026-08-09T07:48:24.914Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-60x60.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-60x60.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-60x60.png",
+      "bytes": 1749,
+      "sha256": "7555fa012ed7fcccc52c6b4c0eee21d53a6fe71c717a43f9fb9ebbbc89d8bea1",
+      "capturedAt": "2026-08-09T07:48:25.401Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-72x72.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-72x72.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-72x72.png",
+      "bytes": 1951,
+      "sha256": "5e6c6b700ddc150344c281565c33d6ca165035af88c9b2dc77d93665751fd668",
+      "capturedAt": "2026-08-09T07:48:25.730Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-76x76.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/apple-touch-icon-76x76.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/apple-touch-icon-76x76.png",
+      "bytes": 1979,
+      "sha256": "fb2b714231732021627c18a960cfb3a3a8be5ab4dd1eee0b9efb1d2646f0f948",
+      "capturedAt": "2026-08-09T07:48:26.263Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/favicon-128.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/favicon-128.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/favicon-128.png",
+      "bytes": 1900,
+      "sha256": "f17c9294d98d0beca5e8dcaf3ce14193b9dcf11dca24007e58c04243dfca1cce",
+      "capturedAt": "2026-08-09T07:48:26.606Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/favicon-16x16.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/favicon-16x16.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/favicon-16x16.png",
+      "bytes": 599,
+      "sha256": "424c4c1f0f9b799e8ade793db71cf363cd1a1ce1a7eae0c9d1a8b00f694cc433",
+      "capturedAt": "2026-08-09T07:48:26.947Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/favicon-196x196.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/favicon-196x196.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/favicon-196x196.png",
+      "bytes": 2025,
+      "sha256": "e656978b61528fc4ec36f644855025ac720d443b4f5b838080bb4c92a9ff1042",
+      "capturedAt": "2026-08-09T07:48:27.281Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/favicon-32x32.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/favicon-32x32.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/favicon-32x32.png",
+      "bytes": 1236,
+      "sha256": "d2c452d55fc480e4dea5e5ea23c427d50327463a0680a8caf722882559f65716",
+      "capturedAt": "2026-08-09T07:48:27.638Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/favicon-96x96.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/favicon-96x96.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/favicon-96x96.png",
+      "bytes": 1967,
+      "sha256": "e6e4cb91a7c911504b98708462a85280662baeaffa6ff0995b57f4f502e94efb",
+      "capturedAt": "2026-08-09T07:48:27.972Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/favicon.ico",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/favicon.ico",
+      "status": 200,
+      "contentType": "image/vnd.microsoft.icon",
+      "localPath": "mirror/assets/images/favicon/favicon.ico",
+      "bytes": 34494,
+      "sha256": "95f3e3aab7adc225fc931958acc471e1eab753751aa316125c6724f132c185c1",
+      "capturedAt": "2026-08-09T07:48:28.316Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/mstile-144x144.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/mstile-144x144.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/mstile-144x144.png",
+      "bytes": 1893,
+      "sha256": "27b38ead3fe3f6c8a8db1c71d8658e57d53679f945469ed0b70cf06eb87e8776",
+      "capturedAt": "2026-08-09T07:48:28.681Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/mstile-150x150.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/mstile-150x150.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/mstile-150x150.png",
+      "bytes": 2149,
+      "sha256": "549713024c4a093ecd565261c862554170899a1f46c9846062521a4e65e71527",
+      "capturedAt": "2026-08-09T07:48:28.928Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/mstile-310x150.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/mstile-310x150.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/mstile-310x150.png",
+      "bytes": 1358,
+      "sha256": "03fb896d9ee6b3f318d9dea4bf694beb0b8d45283d7b87e8b1cf18cc49a3a9c5",
+      "capturedAt": "2026-08-09T07:48:29.267Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/mstile-310x310.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/mstile-310x310.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/mstile-310x310.png",
+      "bytes": 3732,
+      "sha256": "dd807bc0b2090cc069cbf66f80eb7c18a4e5110c4397c2f5d40ba036872b5e6f",
+      "capturedAt": "2026-08-09T07:48:29.606Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/favicon/mstile-70x70.png",
+      "finalUrl": "https://peteroravec.com/assets/images/favicon/mstile-70x70.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/favicon/mstile-70x70.png",
+      "bytes": 1900,
+      "sha256": "f17c9294d98d0beca5e8dcaf3ce14193b9dcf11dca24007e58c04243dfca1cce",
+      "capturedAt": "2026-08-09T07:48:29.964Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/cv-bethereum.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/cv-bethereum.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/cv-bethereum.webp",
+      "bytes": 1866,
+      "sha256": "e5fa5c619b9dd91a1e099751b23463dd1e4b84fc5bedf2abc9770866659bb719",
+      "capturedAt": "2026-08-09T07:48:30.206Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/cv-gamo.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/cv-gamo.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/cv-gamo.webp",
+      "bytes": 1088,
+      "sha256": "582d127709685150701b833b15383037df27a1584adf907baff2685a4b28772c",
+      "capturedAt": "2026-08-09T07:48:30.542Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/cv-kremsa.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/cv-kremsa.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/cv-kremsa.webp",
+      "bytes": 3550,
+      "sha256": "c518495c8b3edcc98a2e3c67582ee61fbc3eb50e1a4057985ee3f410dab5d566",
+      "capturedAt": "2026-08-09T07:48:30.873Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/cv-scr.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/cv-scr.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/cv-scr.webp",
+      "bytes": 506,
+      "sha256": "2f2bbeb3031c6e825559fcecd832d5771b8a92668ccfe6aa211f12e1cffd572c",
+      "capturedAt": "2026-08-09T07:48:31.204Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/cv-vub.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/cv-vub.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/cv-vub.webp",
+      "bytes": 1786,
+      "sha256": "3472a584ebd41eea1ee6f9b7608acb707ecabed057ab0804bd36652ce64739f8",
+      "capturedAt": "2026-08-09T07:48:31.543Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-angular.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-angular.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-angular.webp",
+      "bytes": 336,
+      "sha256": "cc0c68acc4ceb9998084fc20bdcdba316b931361a6c02c02e16990a36b5b6723",
+      "capturedAt": "2026-08-09T07:48:31.873Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-expressjs.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-expressjs.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-expressjs.webp",
+      "bytes": 314,
+      "sha256": "98b41f5c9f7b458f4e91a193ffa8256ac67465d5ee2b2f2cc6050e6291070dad",
+      "capturedAt": "2026-08-09T07:48:32.200Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-javascript.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-javascript.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-javascript.webp",
+      "bytes": 248,
+      "sha256": "8f7f96585bc5da1b4cb8310fe48c2090c8b2514ad2174579091d43530bdd8dc7",
+      "capturedAt": "2026-08-09T07:48:32.535Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-nodejs.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-nodejs.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-nodejs.webp",
+      "bytes": 714,
+      "sha256": "36f4ea3d67c8e25c5d9d466b19941684b36f378223354df7ec85eb7273ae94b8",
+      "capturedAt": "2026-08-09T07:48:32.861Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/og-image.png",
+      "finalUrl": "https://peteroravec.com/assets/images/og-image.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/images/og-image.png",
+      "bytes": 345642,
+      "sha256": "63fa1b83068501cac2fb8a95051179251fde4f89e31619ed8c455d9ec5f02168",
+      "capturedAt": "2026-08-09T07:48:33.194Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/peter-oravec.gif",
+      "finalUrl": "https://peteroravec.com/assets/images/peter-oravec.gif",
+      "status": 200,
+      "contentType": "image/gif",
+      "localPath": "mirror/assets/images/peter-oravec.gif",
+      "bytes": 3743,
+      "sha256": "5049d831e1f9a8891cc9c1c2c834dcf51613452e5638bd20daac0468a53d7a63",
+      "capturedAt": "2026-08-09T07:48:34.087Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/peter-oravec.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/peter-oravec.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/peter-oravec.webp",
+      "bytes": 2580,
+      "sha256": "8140c740e53c619f6c2bbf67bc34955dfa4aa5d73e091ecbe020dd03b29c8f36",
+      "capturedAt": "2026-08-09T07:48:34.413Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/peteroravec-logo.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/peteroravec-logo.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/peteroravec-logo.webp",
+      "bytes": 7312,
+      "sha256": "310cf0701cda443129e57c2709931337bf5cb72d8538a1fdf27f0f0fbca7b3c5",
+      "capturedAt": "2026-08-09T07:48:34.743Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/pointer-hand.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/pointer-hand.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/pointer-hand.webp",
+      "bytes": 526,
+      "sha256": "90877518e22316257427cb1494581582166eee2ef351613a712c6a1f4b6ae118",
+      "capturedAt": "2026-08-09T07:48:35.087Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/rotate-device.svg",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/rotate-device.svg",
+      "status": 200,
+      "contentType": "image/svg+xml",
+      "localPath": "mirror/assets/images/ui/rotate-device.svg",
+      "bytes": 6011,
+      "sha256": "42a902d07efddc240b74b8c305401c9b0fb499fe08ae8f91247b72855a1c59b2",
+      "capturedAt": "2026-08-09T07:48:35.442Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/js/phaser.min.js",
+      "finalUrl": "https://peteroravec.com/assets/js/phaser.min.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/assets/js/phaser.min.js",
+      "bytes": 906004,
+      "sha256": "b3b78e314cc2504d4ef43a31326d02e8343756b2c29c22e4d67b54e008890bdf",
+      "capturedAt": "2026-08-09T07:48:35.769Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/big-map.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/big-map.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/big-map.webp",
+      "bytes": 54384,
+      "sha256": "f0e90a994ddb7a16242239f2d7fb94f630c7bbae5eb200b30fce70dda71bba8d",
+      "capturedAt": "2026-08-09T07:48:36.594Z"
+    },
+    {
+      "url": "https://peteroravec.com/chunk-JI7HG47Y.js",
+      "finalUrl": "https://peteroravec.com/chunk-JI7HG47Y.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/chunk-JI7HG47Y.js",
+      "bytes": 973,
+      "sha256": "0825022f2fc4fd381aaca9dd65ab9e0f006a1ae4938e92f2cedcd31323dbc0c7",
+      "capturedAt": "2026-08-09T07:48:37.034Z"
+    },
+    {
+      "url": "https://peteroravec.com/chunk-RA2FASQA.js",
+      "finalUrl": "https://peteroravec.com/chunk-RA2FASQA.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/chunk-RA2FASQA.js",
+      "bytes": 159612,
+      "sha256": "af9a30ced54e71a3ab67f71588e5e8f2a23ef871ce3c606a5bc0e486639bb0af",
+      "capturedAt": "2026-08-09T07:48:37.368Z"
+    },
+    {
+      "url": "https://peteroravec.com/main-RV3Z53H4.js",
+      "finalUrl": "https://peteroravec.com/main-RV3Z53H4.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/main-RV3Z53H4.js",
+      "bytes": 210188,
+      "sha256": "3444bdf01a04328dc62aac9d10ebffc3da9764d5fd9c96686795239a5ea26b38",
+      "capturedAt": "2026-08-09T07:48:37.899Z"
+    },
+    {
+      "url": "https://peteroravec.com/polyfills-A7F7OIKC.js",
+      "finalUrl": "https://peteroravec.com/polyfills-A7F7OIKC.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/polyfills-A7F7OIKC.js",
+      "bytes": 2290,
+      "sha256": "58227644d30367f1bd4569955db1df67b8bfce1cc760e3b53b8e82c89f0fd5be",
+      "capturedAt": "2026-08-09T07:48:38.362Z"
+    },
+    {
+      "url": "https://peteroravec.com/styles-DVTBSD34.css",
+      "finalUrl": "https://peteroravec.com/styles-DVTBSD34.css",
+      "status": 200,
+      "contentType": "text/css; charset=UTF-8",
+      "localPath": "mirror/styles-DVTBSD34.css",
+      "bytes": 81318,
+      "sha256": "3f63fc0b7b15b88fcdee05ba78427cc1c9bbf3d1edbaefe0a71bfe750a24dc13",
+      "capturedAt": "2026-08-09T07:48:38.705Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card1_foil.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card1_foil.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card1_foil.webp",
+      "bytes": 1496,
+      "sha256": "6671148e915f01c2199d8d5bd52a51c3aff4da58ac7bc26473ae3808c9e7fa5c",
+      "capturedAt": "2026-08-09T07:51:28.890Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card1_pattern.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card1_pattern.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card1_pattern.webp",
+      "bytes": 4404,
+      "sha256": "88f366312887da4468d28b22227417be6eed8c22fac4bc427b46c33569fd9701",
+      "capturedAt": "2026-08-09T07:51:29.322Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card4_foil.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card4_foil.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card4_foil.webp",
+      "bytes": 830,
+      "sha256": "f6da51868ae00f70ce4aba936d69f36e02408c8346605767e26425d1c8fa9354",
+      "capturedAt": "2026-08-09T07:51:29.659Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card4_pattern.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card4_pattern.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card4_pattern.webp",
+      "bytes": 270,
+      "sha256": "7626a063c4d5eb74ed4000c61c92d065223983870fe8dc71c3a068e1f39e172b",
+      "capturedAt": "2026-08-09T07:51:30.097Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card5_pattern.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card5_pattern.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card5_pattern.webp",
+      "bytes": 1736,
+      "sha256": "2ffbcf0c5b8847f0a9d6f732d5d8efe41f6a4e6cac098e26be38bcf4e45ebc45",
+      "capturedAt": "2026-08-09T07:51:30.735Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card6_foil.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card6_foil.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card6_foil.webp",
+      "bytes": 3604,
+      "sha256": "7e6cebe94e029f5e85915769aa0d6c96eba107e8aacf6697eba1e2a79ae8db98",
+      "capturedAt": "2026-08-09T07:51:31.087Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card6_pattern.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card6_pattern.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card6_pattern.webp",
+      "bytes": 1078,
+      "sha256": "c96dfb1e82c0a59cbcbe70ee2be634eec8c3f8fe618ab7ccb69e003cb47243b1",
+      "capturedAt": "2026-08-09T07:51:31.434Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/sparkles.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/sparkles.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/sparkles.webp",
+      "bytes": 37140,
+      "sha256": "d1ca429d1b8698cd622d6f28171d729a9563d4e3667e73baabf14eebde54fdb0",
+      "capturedAt": "2026-08-09T07:51:31.769Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/cable-handler.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/cable-handler.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/cable-handler.webp",
+      "bytes": 432,
+      "sha256": "502ef15f0c2399e0f0c8154f5bc4267d7d7568d7e8fda2440f995b1e812840ac",
+      "capturedAt": "2026-08-09T07:51:32.297Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/monitor.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/monitor.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/monitor.webp",
+      "bytes": 7398,
+      "sha256": "19127e2fdd37d7cba131f7baa910d651ccba3596bbcaf34b09719639c2a77296",
+      "capturedAt": "2026-08-09T07:51:32.705Z"
+    },
+    {
+      "url": "https://peteroravec.com/chunk-WMFY56ZM.js",
+      "finalUrl": "https://peteroravec.com/chunk-WMFY56ZM.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/chunk-WMFY56ZM.js",
+      "bytes": 584354,
+      "sha256": "c85817ab7f3422b1688333a26c4e84379cd8ffde9d2773e092859f134d7442cb",
+      "capturedAt": "2026-08-09T07:57:58.219Z"
+    },
+    {
+      "url": "https://peteroravec.com/chunk-VANY4YOC.js",
+      "finalUrl": "https://peteroravec.com/chunk-VANY4YOC.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/chunk-VANY4YOC.js",
+      "bytes": 10647,
+      "sha256": "904f5259e1031cfbfb424d0cc472ebd1be42f3b33a8ca7dba230f0b76982cc5f",
+      "capturedAt": "2026-08-09T07:57:59.913Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/js/hover-tilt.min.js",
+      "finalUrl": "https://peteroravec.com/assets/js/hover-tilt.min.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "localPath": "mirror/assets/js/hover-tilt.min.js",
+      "bytes": 60042,
+      "sha256": "e69df43f7c93ceb81314d3f78dfcc13399a1cb7544e329b54511d150ce81d050",
+      "capturedAt": "2026-08-09T07:58:00.282Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/under-the-hood/debug1.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/under-the-hood/debug1.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/under-the-hood/debug1.webp",
+      "bytes": 327164,
+      "sha256": "baaa4d1aba14ad1df8a2a82ab81b508f7436786cb09ffa7c14b88ba3cc46f252",
+      "capturedAt": "2026-08-09T07:58:00.626Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/under-the-hood/debug2.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/under-the-hood/debug2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/under-the-hood/debug2.webp",
+      "bytes": 210402,
+      "sha256": "87922dd748399958886691c51378a1319e1b874629c2a686d2eb017d45601f62",
+      "capturedAt": "2026-08-09T07:58:01.273Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/under-the-hood/tiled1.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/under-the-hood/tiled1.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/under-the-hood/tiled1.webp",
+      "bytes": 334472,
+      "sha256": "f19591dfd85d82dc559ff092949f768cd6be9614ddfcd7d87ccbf1a49fefc4c1",
+      "capturedAt": "2026-08-09T07:58:01.789Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/under-the-hood/tiled2.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/under-the-hood/tiled2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/under-the-hood/tiled2.webp",
+      "bytes": 276562,
+      "sha256": "15e2ced66789545bb12f50572270c848b272809e9c79224ce33de7ec1018cf09",
+      "capturedAt": "2026-08-09T07:58:02.277Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card2_pattern.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card2_pattern.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card2_pattern.webp",
+      "bytes": 25396,
+      "sha256": "85a554e7c8b69c6a434f37ea6c8f125bfed6270302c47f118156c212ea2538dc",
+      "capturedAt": "2026-08-09T07:58:02.786Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card2_foil.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card2_foil.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card2_foil.webp",
+      "bytes": 28368,
+      "sha256": "12772ebb19c6bbad7ecb948de342de866e7cfe8d3363cf204dd4c6dfb8d4f087",
+      "capturedAt": "2026-08-09T07:58:03.126Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card3_pattern.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card3_pattern.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/cards/card3_pattern.webp",
+      "bytes": 58,
+      "sha256": "9176c010e8dbc17d0e362375d1134c26227dabd40e26e1a2c53a508b1882c17b",
+      "capturedAt": "2026-08-09T07:58:03.471Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/portfolio/portfolio-eutxo.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/portfolio/portfolio-eutxo.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/portfolio/portfolio-eutxo.webp",
+      "bytes": 105112,
+      "sha256": "96b1325b7ad2b6bb5cbbdd83f0b99cf6942ebb07f94d082325bfb6d4110e7f45",
+      "capturedAt": "2026-08-09T07:58:03.800Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/portfolio/portfolio-angularsk.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/portfolio/portfolio-angularsk.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/portfolio/portfolio-angularsk.webp",
+      "bytes": 159760,
+      "sha256": "fd9673327a68613c3a055511c06db5c7bd415e6ff31cedf22b739bc99e39a744",
+      "capturedAt": "2026-08-09T07:58:04.261Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/portfolio/peteroravec-v1.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/portfolio/peteroravec-v1.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/portfolio/peteroravec-v1.webp",
+      "bytes": 589240,
+      "sha256": "cdfaf1d557e25f9997ec9801703866774a489fb92c338a627af674d2e42ba36a",
+      "capturedAt": "2026-08-09T07:58:04.680Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/mini-map.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/mini-map.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/mini-map.webp",
+      "bytes": 10272,
+      "sha256": "2355cde9d660a0d97b74dc6487d8eaa6347f7a96e5c26270b5c91bd8058a7efd",
+      "capturedAt": "2026-08-09T07:58:05.263Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-css.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-css.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-css.webp",
+      "bytes": 518,
+      "sha256": "3341d40ba32ed205ee082a2a53e9d1f358d19d8beaf26a7a3f853fc4518a6e3d",
+      "capturedAt": "2026-08-09T08:03:17.010Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-lotus-notes.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-lotus-notes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-lotus-notes.webp",
+      "bytes": 11936,
+      "sha256": "0f24b63ab5dd11b53965dfc129b8e5320ad85562a1a2657b49ab542183526ff8",
+      "capturedAt": "2026-08-09T08:03:18.068Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-php.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-php.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-php.webp",
+      "bytes": 554,
+      "sha256": "c0c67f7aa30d4dc0127e22e8d75cac3b5f6b7dc78c603e9e87188df141a49e24",
+      "capturedAt": "2026-08-09T08:03:18.273Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/logos/dev-wordpress.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/logos/dev-wordpress.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/logos/dev-wordpress.webp",
+      "bytes": 780,
+      "sha256": "4d16ae26aaf8301c0e1961af151fb82546eaf2a326535c8fe3e983d1f9e68299",
+      "capturedAt": "2026-08-09T08:03:18.441Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/instructions-keyboard.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/instructions-keyboard.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/instructions-keyboard.webp",
+      "bytes": 774,
+      "sha256": "276ede09b0adce60996de202954bd7d88c9d3a27a2578d5bf35f128127a98ed3",
+      "capturedAt": "2026-08-09T08:03:18.610Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/joystick-ball.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/joystick-ball.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/joystick-ball.webp",
+      "bytes": 1144,
+      "sha256": "f0e930c2fa47f09ea7a8aeebf5bd9c92abef175f696a5bc44b29128369bfe21f",
+      "capturedAt": "2026-08-09T08:03:18.780Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/joystick-base.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/joystick-base.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/joystick-base.webp",
+      "bytes": 6652,
+      "sha256": "5b7f452cf8034a299b82525339261513373309792b9a454223af82d0ac1cce5c",
+      "capturedAt": "2026-08-09T08:03:18.952Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/collisions-objects.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/collisions-objects.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/collisions-objects.webp",
+      "bytes": 952,
+      "sha256": "282666a4fc0eb7478420f41f9e096948e82825329124bc74ed3e18445e9d9002",
+      "capturedAt": "2026-08-09T08:03:19.135Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior-final.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior-final.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/exterior-final.webp",
+      "bytes": 517502,
+      "sha256": "677451eff4dd1d78c9d743cba9da0ddfb88849499105a7637e2253900def0303",
+      "capturedAt": "2026-08-09T08:03:19.313Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/full-map.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/full-map.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/full-map.webp",
+      "bytes": 2962,
+      "sha256": "d900959ce6bc98a05e9873ba17d77e4fdf67aa93f7c72c49c8a12d0362fc9e58",
+      "capturedAt": "2026-08-09T08:03:20.405Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/tileset-particles.webp",
+      "finalUrl": "https://peteroravec.com/assets/maps/tileset-particles.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/maps/tileset-particles.webp",
+      "bytes": 1116,
+      "sha256": "7f3e20791f85ffd7ee39ee03fc991490929c076b0679df4d355cd52c5b83fa27",
+      "capturedAt": "2026-08-09T08:03:20.575Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/ai-transparent.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/ai-transparent.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/ai-transparent.webp",
+      "bytes": 874,
+      "sha256": "a70eb72b4214339384b0371670c41923d8d794c8a9420aaa13e8fa3c6e90b060",
+      "capturedAt": "2026-08-09T08:03:20.746Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/ai-transparent2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/ai-transparent2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/ai-transparent2.webp",
+      "bytes": 984,
+      "sha256": "f5005c9d055b0f40b9307cf6a5d3e00e250eb5d2ff61158c8fb26582fb11129e",
+      "capturedAt": "2026-08-09T08:03:20.913Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/bird.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/bird.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/bird.webp",
+      "bytes": 942,
+      "sha256": "4edf56d73cf8b9b81496ae3b83921d809e16fd3e0fdff63c7110830b4964df51",
+      "capturedAt": "2026-08-09T08:03:21.081Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/butterfly.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/butterfly.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/butterfly.webp",
+      "bytes": 454,
+      "sha256": "0900f0edc269c7512bf9c5e7723733148188264f85b73ff87e91a2d32a11652e",
+      "capturedAt": "2026-08-09T08:03:21.249Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/car-holding.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/car-holding.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/car-holding.webp",
+      "bytes": 1180,
+      "sha256": "f7f69b52cd8ef595d9904021091069ed4f870fe13f7ce932f4de537aa9092567",
+      "capturedAt": "2026-08-09T08:03:21.417Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car-police-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car-police-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car-police-brakes-side.webp",
+      "bytes": 82,
+      "sha256": "cec26c32dec0262eea78b02e61db9493afcdde5e20e88891d52795bd2f9bdbeb",
+      "capturedAt": "2026-08-09T08:03:21.584Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car-police-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car-police-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car-police-brakes.webp",
+      "bytes": 212,
+      "sha256": "3e6297e62a3b307231d2e0cb3f6e5451df500d03ef51bf8a0bc0231fdd783aca",
+      "capturedAt": "2026-08-09T08:03:21.752Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car-police-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car-police-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car-police-wheel.webp",
+      "bytes": 158,
+      "sha256": "22dda9e7a6c7cc03e15c391240145ea3e984d846f28ff3fb88453b83a3d6396c",
+      "capturedAt": "2026-08-09T08:03:21.918Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car-police.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car-police.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car-police.webp",
+      "bytes": 6472,
+      "sha256": "9da41be332d3ffd008c82aa44a57a146d831d39048efb90392047bc0a838867a",
+      "capturedAt": "2026-08-09T08:03:22.085Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car1-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car1-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car1-brakes-side.webp",
+      "bytes": 84,
+      "sha256": "1e6b4b105dab2e3e13650186bf1b7729ce2e77e6f664646937a9789ae06cd5d3",
+      "capturedAt": "2026-08-09T08:03:22.253Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car1-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car1-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car1-brakes.webp",
+      "bytes": 212,
+      "sha256": "268e8b1ea57b525d7c63aeb3d46731a49c826917ab388e1d703abb381176f756",
+      "capturedAt": "2026-08-09T08:03:22.420Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car1-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car1-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car1-wheel.webp",
+      "bytes": 356,
+      "sha256": "b5d908a3e6069c91e85466415b2c53b9a1d49a224a9bc6c6177c6215739a6069",
+      "capturedAt": "2026-08-09T08:03:22.586Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car1.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car1.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car1.webp",
+      "bytes": 6960,
+      "sha256": "9bcc9b50289b9851c3048e805e67efc7e3bc21adf9557e8c3fd4966f7c3815e9",
+      "capturedAt": "2026-08-09T08:03:22.753Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car10-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car10-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car10-brakes-side.webp",
+      "bytes": 82,
+      "sha256": "de532489ae69359beef196509fc7aeb34a4e483d12140b61fedf05ab77fb0e39",
+      "capturedAt": "2026-08-09T08:03:22.923Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car10-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car10-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car10-brakes.webp",
+      "bytes": 124,
+      "sha256": "c3bb9cdf6358f3656f161fd658daca57172efe2517ab14cbe8e6e820da28d948",
+      "capturedAt": "2026-08-09T08:03:23.090Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car10-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car10-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car10-wheel.webp",
+      "bytes": 258,
+      "sha256": "0d6ceda7765dc60378bdb772fb03ec327ec40c48d2f52332ebcf9c84b60e43ce",
+      "capturedAt": "2026-08-09T08:03:23.257Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car10.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car10.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car10.webp",
+      "bytes": 9014,
+      "sha256": "6d099c28165050c82873d4756f09663e616bcf0be6a4b15472a49e9333ce8a3b",
+      "capturedAt": "2026-08-09T08:03:23.424Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car11-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car11-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car11-brakes-side.webp",
+      "bytes": 62,
+      "sha256": "737a90f695b06c51545c2147109c5085d965b7f876d49f56d12c565e65b0ec5f",
+      "capturedAt": "2026-08-09T08:03:23.592Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car11-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car11-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car11-brakes.webp",
+      "bytes": 190,
+      "sha256": "f63a554e71ccba770261f1058ca618f5b9662daa487fb6acaa7db68f65a91453",
+      "capturedAt": "2026-08-09T08:03:23.760Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car11-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car11-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car11-wheel.webp",
+      "bytes": 142,
+      "sha256": "e31ca801232447497f6c64e3f37c00460818d76a34831058bba4aa175835d95f",
+      "capturedAt": "2026-08-09T08:03:23.927Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car11.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car11.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car11.webp",
+      "bytes": 10856,
+      "sha256": "e19514914ba342521cbc1016ccb323828eb10e2e518f1640038669baea3c8ea5",
+      "capturedAt": "2026-08-09T08:03:24.096Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car2-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car2-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car2-brakes-side.webp",
+      "bytes": 50,
+      "sha256": "a923bf06ef22f69c1c607ee6958166b464fedc950239a9dff42d3d152fb56edb",
+      "capturedAt": "2026-08-09T08:03:24.264Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car2-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car2-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car2-brakes.webp",
+      "bytes": 94,
+      "sha256": "35a96821bc30f923ffc909f06018310629e512a853f95955619ed2996ec972eb",
+      "capturedAt": "2026-08-09T08:03:24.431Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car2-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car2-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car2-wheel.webp",
+      "bytes": 330,
+      "sha256": "f612f18b0b32030aba3a6b7dfdf40b1880f3568a93289d296b4fe7d49dba7c73",
+      "capturedAt": "2026-08-09T08:03:24.598Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car2.webp",
+      "bytes": 5474,
+      "sha256": "fa5708b7ff14a343c133f60c6f7d6d5a9a2b86a9cff61abf9a609d9fdbe01ad9",
+      "capturedAt": "2026-08-09T08:03:24.769Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car3-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car3-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car3-brakes-side.webp",
+      "bytes": 82,
+      "sha256": "6dc59b2eb68b1939535d8d89a9d30ddf9e20a1f797f2421c1722fb6e0279de65",
+      "capturedAt": "2026-08-09T08:03:24.940Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car3-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car3-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car3-brakes.webp",
+      "bytes": 164,
+      "sha256": "9956de21142b9a3481b47734dfce69e4052642f0532aab85758895ab5ee42af7",
+      "capturedAt": "2026-08-09T08:03:25.107Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car3-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car3-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car3-wheel.webp",
+      "bytes": 182,
+      "sha256": "d4cb872dd672c10b5116431352d2be0798e53a0da8d17c0f23591ec715769c4e",
+      "capturedAt": "2026-08-09T08:03:25.275Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car3.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car3.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car3.webp",
+      "bytes": 9272,
+      "sha256": "ea33821174bdc7bee27859a8f1a281795a8999bcb64263fc39caa0ee5c4942c1",
+      "capturedAt": "2026-08-09T08:03:25.444Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car4-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car4-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car4-brakes.webp",
+      "bytes": 130,
+      "sha256": "778aec92e54bc58da7934ac87afa59cac1b8e330d5177086402563928bc38696",
+      "capturedAt": "2026-08-09T08:03:25.612Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car4-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car4-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car4-wheel.webp",
+      "bytes": 102,
+      "sha256": "863f5ab47a206502619296f95fd35abf00b4a69a41aef27ae99cf5ec08a33b71",
+      "capturedAt": "2026-08-09T08:03:25.780Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car4.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car4.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car4.webp",
+      "bytes": 5922,
+      "sha256": "dd67a455e4f6cf3e0bfdb94578f56652e983c0c6d7c2523ff744a8239e69d378",
+      "capturedAt": "2026-08-09T08:03:25.948Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car5-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car5-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car5-brakes-side.webp",
+      "bytes": 50,
+      "sha256": "d86d2aab8365c825bfc46669307ef1f06a2befdf9ecbdf8e7d5a67043f4efed6",
+      "capturedAt": "2026-08-09T08:03:26.117Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car5-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car5-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car5-brakes.webp",
+      "bytes": 134,
+      "sha256": "1cc9708e1d804eee5e99f34c4a3a39ece7aa2722d8c895895837771ae55ca8e0",
+      "capturedAt": "2026-08-09T08:03:26.285Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car5-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car5-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car5-wheel.webp",
+      "bytes": 118,
+      "sha256": "d8c4086914722527401fe26c99e43f4c7c344567148aaa57a7824e9d4559e7ef",
+      "capturedAt": "2026-08-09T08:03:26.453Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car5.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car5.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car5.webp",
+      "bytes": 5946,
+      "sha256": "acf98e9169cbe19f442836541ec1bd275444ac93c42fc7ca15433055be489d2d",
+      "capturedAt": "2026-08-09T08:03:26.620Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car6-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car6-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car6-brakes-side.webp",
+      "bytes": 80,
+      "sha256": "64daa3091b0e6d71e57da4e59eec5b403677c6f936f6dcab33f7e8cc2b7b5dff",
+      "capturedAt": "2026-08-09T08:03:26.788Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car6-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car6-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car6-brakes.webp",
+      "bytes": 182,
+      "sha256": "0cf4376e6795b3965ea5caab7f92f17945e9db4cb0188a4673f7aa7f62fc6e92",
+      "capturedAt": "2026-08-09T08:03:26.956Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car6-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car6-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car6-wheel.webp",
+      "bytes": 146,
+      "sha256": "7b4ed015ab14afb7161d613cc67871b76b3566bf99409ca01f3cd5184445081b",
+      "capturedAt": "2026-08-09T08:03:27.124Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car6.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car6.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car6.webp",
+      "bytes": 10100,
+      "sha256": "d1708f405b63a45986f01c1661390774c252cc9de1162bd83c1e48f4872e50cb",
+      "capturedAt": "2026-08-09T08:03:27.291Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car7-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car7-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car7-brakes-side.webp",
+      "bytes": 80,
+      "sha256": "54f7f2d223f1e6d2411436040a3047d76196d1003449474c23797d565f6e8b76",
+      "capturedAt": "2026-08-09T08:03:27.461Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car7-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car7-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car7-brakes.webp",
+      "bytes": 94,
+      "sha256": "b1cb49b4d23f8bdef34d1092c886cc1e7b104592c7c81e71746eef263ddd1b9f",
+      "capturedAt": "2026-08-09T08:03:27.629Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car7-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car7-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car7-wheel.webp",
+      "bytes": 116,
+      "sha256": "39bbf650d452a06dd5715f49863c07067a1dbe527c4d72db9f44f616c5503364",
+      "capturedAt": "2026-08-09T08:03:27.798Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car7.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car7.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car7.webp",
+      "bytes": 9080,
+      "sha256": "81de98cc23ab8e5beaa6f6250cd9b5862502583930888d7f38515fd2329e486f",
+      "capturedAt": "2026-08-09T08:03:27.965Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car8-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car8-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car8-brakes-side.webp",
+      "bytes": 84,
+      "sha256": "2f1caa319ec8a1ef741d87ab46406e31202b2d758025e4acfd222b46510f3b6f",
+      "capturedAt": "2026-08-09T08:03:28.133Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car8-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car8-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car8-brakes.webp",
+      "bytes": 136,
+      "sha256": "96e7b3e5ac7fdfc7c864f88debb987ca0dab12f8936be6b0d980ed5c984048aa",
+      "capturedAt": "2026-08-09T08:03:28.300Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car8-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car8-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car8-wheel.webp",
+      "bytes": 202,
+      "sha256": "e9158d0b122dbe1618a658d5bf48d2280e685a395b0cab258e05bc0b1aab05f4",
+      "capturedAt": "2026-08-09T08:03:28.468Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car8.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car8.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car8.webp",
+      "bytes": 7566,
+      "sha256": "5a87cb9bb15f1947a38643f5c84335b7bd9e4dd17b1bb51d435abf022ca2cc34",
+      "capturedAt": "2026-08-09T08:03:28.635Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car9-brakes-side.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car9-brakes-side.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car9-brakes-side.webp",
+      "bytes": 74,
+      "sha256": "17a595af1e1846445cf5b14103dcceb4bca9bac2170b7c9352d67cf2525739fe",
+      "capturedAt": "2026-08-09T08:03:28.802Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car9-brakes.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car9-brakes.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car9-brakes.webp",
+      "bytes": 116,
+      "sha256": "b3398f797f2a2e6a88d602266fbf502ffa1e99ae451cdeb56d12904233df7907",
+      "capturedAt": "2026-08-09T08:03:28.971Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car9-wheel.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car9-wheel.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car9-wheel.webp",
+      "bytes": 124,
+      "sha256": "a83d73c76140e0efb14ca8f0b4bafc6e85435811337c3d22da9c5e649f79fc02",
+      "capturedAt": "2026-08-09T08:03:29.138Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cars/car9.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cars/car9.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cars/car9.webp",
+      "bytes": 9556,
+      "sha256": "168a5b3c9dc6d7ce1172ab7179ae3c75108aa7fd8e13754bcbd0f5873a96ea61",
+      "capturedAt": "2026-08-09T08:03:29.305Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cloud.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cloud.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cloud.webp",
+      "bytes": 45820,
+      "sha256": "f55473e09d96ba5668e501b51ee2436cfc6c57ef27dcbb2100967e4e18f7c2e3",
+      "capturedAt": "2026-08-09T08:03:29.473Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/cloud2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/cloud2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/cloud2.webp",
+      "bytes": 27520,
+      "sha256": "1c5db25b65606e9fc87b2b87290e8d66200b7cec4d97cfdd656499d95d793a31",
+      "capturedAt": "2026-08-09T08:03:29.659Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/duck.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/duck.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/duck.webp",
+      "bytes": 2038,
+      "sha256": "12434494b2849d4cbf9334cc693cca386cc10f69d4d707ab270ea15b40f12b03",
+      "capturedAt": "2026-08-09T08:03:29.830Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/fish.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/fish.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/fish.webp",
+      "bytes": 1328,
+      "sha256": "a83b291e403b90d6984eab7d3164718afa0e6086e4677f0aec76a529b212d1a6",
+      "capturedAt": "2026-08-09T08:03:29.998Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/flares.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/flares.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/flares.webp",
+      "bytes": 4452,
+      "sha256": "185d264c1d62d34508b19384ce0b5db0a4232a2b1696aac7bca8cf8509a5c0c3",
+      "capturedAt": "2026-08-09T08:03:30.166Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/lizard.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/lizard.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/lizard.webp",
+      "bytes": 782,
+      "sha256": "87006aaddc370b43b9d80ab90806186f1172a72efd431bcde2c5c3cf749c3cf8",
+      "capturedAt": "2026-08-09T08:03:30.333Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-bug.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-bug.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-bug.webp",
+      "bytes": 2716,
+      "sha256": "cc1ed660f0ce003e7d3a43bedd00a56837452398f282ba211184855caa0aa36c",
+      "capturedAt": "2026-08-09T08:03:30.501Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-bug2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-bug2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-bug2.webp",
+      "bytes": 7120,
+      "sha256": "d6f3208d93e0fd99b7ed312bf81602a69428cabc72a9ebf1f9088aa99dcadeb8",
+      "capturedAt": "2026-08-09T08:03:30.671Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-cat.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-cat.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-cat.webp",
+      "bytes": 5558,
+      "sha256": "d1d83a123d729972c8b5e80f7a62704e0b3adf5f4e42fd074627ea23d324044e",
+      "capturedAt": "2026-08-09T08:03:30.839Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-cat2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-cat2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-cat2.webp",
+      "bytes": 4966,
+      "sha256": "6cda667c9add130fb2c29d742f510cd8a6e8ef9a7525c2fa04cdfe7fd7e19a31",
+      "capturedAt": "2026-08-09T08:03:31.016Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-dj1.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-dj1.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-dj1.webp",
+      "bytes": 666,
+      "sha256": "7be9260c2903aea1c5666d4e6b256801ffeb793b5878602b27fc67f15517abf1",
+      "capturedAt": "2026-08-09T08:03:31.185Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-dj2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-dj2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-dj2.webp",
+      "bytes": 744,
+      "sha256": "2d95ba36528e6023ab60f58f6fcfc7fb8f92af7f949821d902601d9b6563e5f8",
+      "capturedAt": "2026-08-09T08:03:31.352Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-dog.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-dog.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-dog.webp",
+      "bytes": 11436,
+      "sha256": "50d2a8f7be033d4752f4aeaa23c6405821e652fd79b8baf7edcf421e5b8a2eca",
+      "capturedAt": "2026-08-09T08:03:31.518Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-dog2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-dog2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-dog2.webp",
+      "bytes": 13222,
+      "sha256": "d902089d49a68c708c5c44595cf3850ac7df9a9ee689bbf77553d4c20bc70a99",
+      "capturedAt": "2026-08-09T08:03:31.686Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-ghost.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-ghost.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-ghost.webp",
+      "bytes": 4028,
+      "sha256": "2bf44372d9c0f3b8aa6a1c4488d33f92a74744ea4e739c6aa31e595d4a2f6f89",
+      "capturedAt": "2026-08-09T08:03:31.855Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-hazmat-suit.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-hazmat-suit.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-hazmat-suit.webp",
+      "bytes": 12660,
+      "sha256": "e5138ea631800d2a42c2ed9a664511e0f54d4f45ab32f7f6e7d65de8d04c489d",
+      "capturedAt": "2026-08-09T08:03:32.024Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-helicopter-high-resolution.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-helicopter-high-resolution.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-helicopter-high-resolution.webp",
+      "bytes": 21272,
+      "sha256": "9b90e6ddcdf406de58094e3440e8edcc4b0f88d99327baa653e68222ec543702",
+      "capturedAt": "2026-08-09T08:03:32.195Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-helicopter-rotor-back.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-helicopter-rotor-back.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-helicopter-rotor-back.webp",
+      "bytes": 1200,
+      "sha256": "d477786880b2318c87a05f49efcaedb4cfb41ebf0940903d91a337cbb28a95ff",
+      "capturedAt": "2026-08-09T08:03:32.365Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-helicopter-rotor-main.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-helicopter-rotor-main.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-helicopter-rotor-main.webp",
+      "bytes": 14426,
+      "sha256": "21ece6e71ce583e70e3223cb16ec1db7f3f71b255eb53ff2ade2b1dc53615f35",
+      "capturedAt": "2026-08-09T08:03:32.532Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-helicopter.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-helicopter.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-helicopter.webp",
+      "bytes": 8384,
+      "sha256": "8bad10dff01c2f7d1bbdc00d129694fd7657099ab2415f72b6f6d2e631e238c0",
+      "capturedAt": "2026-08-09T08:03:32.701Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-holding.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-holding.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-holding.webp",
+      "bytes": 440,
+      "sha256": "2691855dd9e178aadf89c1e3e26fcfa287095ac34e16e1345ff7ec57930da619",
+      "capturedAt": "2026-08-09T08:03:32.868Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man-beach.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man-beach.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man-beach.webp",
+      "bytes": 13730,
+      "sha256": "31e58c2b24e274368d544828f259ef0144d744deee925b94afc91265693e117c",
+      "capturedAt": "2026-08-09T08:03:33.035Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man-beach2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man-beach2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man-beach2.webp",
+      "bytes": 11032,
+      "sha256": "59cb7aa596dbaa4f054b728f51d5d9628065cf379538b7504be7e93ef657ba1b",
+      "capturedAt": "2026-08-09T08:03:33.205Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man.webp",
+      "bytes": 12102,
+      "sha256": "3ecdecdd1125b0b3586a384a68bcacd7b687945b6954a2cfff838fc837edbcc0",
+      "capturedAt": "2026-08-09T08:03:33.373Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man10.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man10.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man10.webp",
+      "bytes": 20368,
+      "sha256": "37173176d6b4609ef43feb9388fa39bfaaaad379555825b966fcff4c1898894e",
+      "capturedAt": "2026-08-09T08:03:33.541Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man2.webp",
+      "bytes": 14612,
+      "sha256": "068b9458770c9f723b3ece1fd5afad43a130af1d376425588526ecc1ecd5c68e",
+      "capturedAt": "2026-08-09T08:03:33.711Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man3.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man3.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man3.webp",
+      "bytes": 11940,
+      "sha256": "e2e16fe20b7aae41f71d42e329518a47fe658d1637da37cd7dea3ae0c30c67ab",
+      "capturedAt": "2026-08-09T08:03:33.881Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man4.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man4.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man4.webp",
+      "bytes": 11658,
+      "sha256": "a2bb6584fa1a3eb15b453807902b971aaaf3ebc25d6512c9f7055af03aae992a",
+      "capturedAt": "2026-08-09T08:03:34.050Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man5.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man5.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man5.webp",
+      "bytes": 10562,
+      "sha256": "79d609db3824176d1871fa9a806c4897d3da8e3398b180220361cd85aa5a779e",
+      "capturedAt": "2026-08-09T08:03:34.219Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man6.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man6.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man6.webp",
+      "bytes": 15466,
+      "sha256": "1212927c99e7566d8078d1dc1769f84c92055c2d5dcfe62b48e8ef3e7b0c7aa9",
+      "capturedAt": "2026-08-09T08:03:34.386Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man7.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man7.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man7.webp",
+      "bytes": 12706,
+      "sha256": "d3f0e712382e074e4376915e8650fee93a132109ceaee9915f59ba590e5a2010",
+      "capturedAt": "2026-08-09T08:03:34.555Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man8.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man8.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man8.webp",
+      "bytes": 13558,
+      "sha256": "eef996fd0e6118aeed438a7779c815b13e03a30dc561f844cfbbafe95aeb75ae",
+      "capturedAt": "2026-08-09T08:03:34.723Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-man9.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-man9.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-man9.webp",
+      "bytes": 7546,
+      "sha256": "d82867d4a49314a4a7d59430998985af14ef1c7a0b9666e6ebd9ac3db98b9418",
+      "capturedAt": "2026-08-09T08:03:34.892Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-monk.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-monk.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-monk.webp",
+      "bytes": 11030,
+      "sha256": "70f8703560390b0bb51e8915a55cef9bfc676243c82e6ace8c7fef4a0b9e4c6c",
+      "capturedAt": "2026-08-09T08:03:35.061Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-scientist.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-scientist.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-scientist.webp",
+      "bytes": 9356,
+      "sha256": "047ddde086bd011878c16d1be2d35c9c05722420723ea60e120721b5629c5ec0",
+      "capturedAt": "2026-08-09T08:03:35.228Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-scientist2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-scientist2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-scientist2.webp",
+      "bytes": 12640,
+      "sha256": "b6207829e68eaf02d97dd5b259465707b87a696a0e2565f6e1e49ca84057e3c8",
+      "capturedAt": "2026-08-09T08:03:35.396Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-sprayer-running.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-sprayer-running.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-sprayer-running.webp",
+      "bytes": 8736,
+      "sha256": "892a8ed1862724d1bee3fab0a55136ccf87b6f6b51fe5e94e8cc1f119b6ec098",
+      "capturedAt": "2026-08-09T08:03:35.564Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-sprayer.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-sprayer.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-sprayer.webp",
+      "bytes": 2514,
+      "sha256": "0567f4b208f0eb667731afd4cad4a0748f61037b447e0d63e283951638296200",
+      "capturedAt": "2026-08-09T08:03:35.731Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman-beach.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman-beach.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman-beach.webp",
+      "bytes": 11138,
+      "sha256": "1d2608a79cae97b9259dc09d7e8b9e71f9e5735ac38262fe2edbd8934318f83d",
+      "capturedAt": "2026-08-09T08:03:35.899Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman-beach2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman-beach2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman-beach2.webp",
+      "bytes": 11134,
+      "sha256": "0e5c2ad8e2019616615fbf1eecf010dc4a9e0da6b6846cdb243d2ed38381b388",
+      "capturedAt": "2026-08-09T08:03:36.068Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman.webp",
+      "bytes": 12248,
+      "sha256": "776d6bd736a41d6c4ce7c1c29391490d140cf2ba75546d19a03a3d4c7d1f7dd8",
+      "capturedAt": "2026-08-09T08:03:36.237Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman2.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman2.webp",
+      "bytes": 14764,
+      "sha256": "909c868a606ffbd7e1fe6b0a68dfa3c86e8480b8acb831c62a7c23700d232769",
+      "capturedAt": "2026-08-09T08:03:36.405Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman3.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman3.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman3.webp",
+      "bytes": 12434,
+      "sha256": "bdb66e094f8561b6c79b4d68ec5af33a99c1bb6bfadaa0ab44e1ff960c901e75",
+      "capturedAt": "2026-08-09T08:03:36.574Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman4.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman4.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman4.webp",
+      "bytes": 9836,
+      "sha256": "c75f10bd999307a9c60a7a583c1143ae1a00f377582d39480f7f2a1f2c531437",
+      "capturedAt": "2026-08-09T08:03:36.743Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman5-idle.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman5-idle.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman5-idle.webp",
+      "bytes": 50370,
+      "sha256": "6bb6314824c7cc6bc4f3cd6ded421b5511ea82f8f40f7541684f8c6adf54d182",
+      "capturedAt": "2026-08-09T08:03:36.912Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman5.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman5.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman5.webp",
+      "bytes": 11288,
+      "sha256": "7310839b96a38a0cd4056d050ad6e5627200cd7adec9a6f7111423a39689cc0d",
+      "capturedAt": "2026-08-09T08:03:37.089Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman6.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman6.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman6.webp",
+      "bytes": 15790,
+      "sha256": "91927b444ef24124d2874b812a94f12065915c7674479f6cb79326bd09c42824",
+      "capturedAt": "2026-08-09T08:03:37.257Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman7.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman7.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman7.webp",
+      "bytes": 9046,
+      "sha256": "cf8e89d0fd4465bcac7f0776f2a447564de8afcd78bf83b3d027f7eb8c9e5858",
+      "capturedAt": "2026-08-09T08:03:37.425Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc-woman8.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc-woman8.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc-woman8.webp",
+      "bytes": 11938,
+      "sha256": "82cce3179b6d76223c89daffd4706b6071faca56d7fe48eb22eb51056e9ee9a4",
+      "capturedAt": "2026-08-09T08:03:37.594Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc_footballer_blue.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc_footballer_blue.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc_footballer_blue.webp",
+      "bytes": 8696,
+      "sha256": "60d6d082b85eda6bb1ca01f220849b7fae5866398e9ccd0e617242977ba623e4",
+      "capturedAt": "2026-08-09T08:03:37.763Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc_footballer_red.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc_footballer_red.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc_footballer_red.webp",
+      "bytes": 10658,
+      "sha256": "d13bbc00fd863e7543acd0141a697a93cb833d684debc479d6a5a872e65d3a59",
+      "capturedAt": "2026-08-09T08:03:37.932Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/npc_protester_rising.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/npc_protester_rising.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/npc_protester_rising.webp",
+      "bytes": 38062,
+      "sha256": "a359ef151bf82ec1ada7133436e847da41785f6c4366e6044742b83884b82a3a",
+      "capturedAt": "2026-08-09T08:03:38.100Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-beach.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-beach.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-beach.webp",
+      "bytes": 10628,
+      "sha256": "214ee2868a9cf67dae348210f7c6fbfee2f653ae4378c97b0a96320bdd8e2503",
+      "capturedAt": "2026-08-09T08:03:38.275Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-clothes-off.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-clothes-off.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-clothes-off.webp",
+      "bytes": 5438,
+      "sha256": "4a27943594c74fadd56c9f2af16462b40e13c1a78128e15ceaa3f7ee0ae052b6",
+      "capturedAt": "2026-08-09T08:03:38.444Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-eating.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-eating.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-eating.webp",
+      "bytes": 3464,
+      "sha256": "e82ad750010c8d021556031d874a69d1ef6a5dafbfa9a56cfa69b0745dcdcadf",
+      "capturedAt": "2026-08-09T08:03:38.611Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-holding.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-holding.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-holding.webp",
+      "bytes": 492,
+      "sha256": "4ab444c06b7a118a8f8b95a0708f18ca9f63514864eb9efb30ee4453ceccac19",
+      "capturedAt": "2026-08-09T08:03:38.780Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-scratching.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-scratching.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-scratching.webp",
+      "bytes": 3646,
+      "sha256": "9d30e0ace856af0f57219758bd9fd17217a3cedd6bdafa1d37ddc17d2725ad0e",
+      "capturedAt": "2026-08-09T08:03:38.947Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-sitting.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-sitting.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-sitting.webp",
+      "bytes": 4894,
+      "sha256": "09c2d27854327b292bd4e0b97570cb8aa313029429f3f05ff77cdaf8458b8608",
+      "capturedAt": "2026-08-09T08:03:39.115Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player-tying-shoe.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player-tying-shoe.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player-tying-shoe.webp",
+      "bytes": 4068,
+      "sha256": "a2fe1e5cbef81f8fb23f61b85ac4369b4a81a31669e0b2fc94fe8341d9dd6cb6",
+      "capturedAt": "2026-08-09T08:03:39.282Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/player.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/player.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/player.webp",
+      "bytes": 11252,
+      "sha256": "65a3aac9c71c3ddd79d9306f265c3aa13e9667583964fbd5cd9e7d98045bd5be",
+      "capturedAt": "2026-08-09T08:03:39.449Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/rabbit.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/rabbit.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/rabbit.webp",
+      "bytes": 1608,
+      "sha256": "07119d52de45aa34ce111fed906217e0e69724b4fcd67e7f8840ddeeeb77be70",
+      "capturedAt": "2026-08-09T08:03:39.620Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/rat.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/rat.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/rat.webp",
+      "bytes": 9888,
+      "sha256": "0d7a6921c67dfcc62100aecacc7434664a7d627ae7919cafdfb0557d8784719f",
+      "capturedAt": "2026-08-09T08:03:39.788Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/smoke-blue.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/smoke-blue.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/smoke-blue.webp",
+      "bytes": 96,
+      "sha256": "9b89026893f8f60b40b8ae7d7df00de135db80a0661764270400d29607fd57c2",
+      "capturedAt": "2026-08-09T08:03:39.955Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/smoke-green.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/smoke-green.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/smoke-green.webp",
+      "bytes": 62,
+      "sha256": "418ea19f54b3c948c188e7a7c316d3dd654194d3fcb7d38ea97de55b91f1d50a",
+      "capturedAt": "2026-08-09T08:03:40.122Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/smoke-white.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/smoke-white.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/smoke-white.webp",
+      "bytes": 62,
+      "sha256": "e9415b9d96ce142ac02b1b3afa5182e18df8a2dbe1d2f410810ee10ec2956a27",
+      "capturedAt": "2026-08-09T08:03:40.290Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/snake.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/snake.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/snake.webp",
+      "bytes": 486,
+      "sha256": "b11aeb01040ad4430ddd26279dcb6e26cec5a71aafbd667d74fa18b071c292bc",
+      "capturedAt": "2026-08-09T08:03:40.458Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-cat-licking.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-cat-licking.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-cat-licking.webp",
+      "bytes": 1610,
+      "sha256": "a738237d41b38b64cea9012824c444b5069efae04cb2a69d379df292639e1293",
+      "capturedAt": "2026-08-09T08:03:40.626Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-dancing-down.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-dancing-down.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-dancing-down.webp",
+      "bytes": 3556,
+      "sha256": "ed32fc83f218c6ee1771e4c87373a753f7a66662b2fb8ad1fadfb8eb2b6eb470",
+      "capturedAt": "2026-08-09T08:03:40.798Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-dancing-left.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-dancing-left.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-dancing-left.webp",
+      "bytes": 3424,
+      "sha256": "41574ebbc463ff83b23d562aa0c19eb456b4df893a725e25d2ffd68cf00457bf",
+      "capturedAt": "2026-08-09T08:03:40.967Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-dancing-right.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-dancing-right.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-dancing-right.webp",
+      "bytes": 3394,
+      "sha256": "c8424859a8b9d9de3fe357b718851853e5a2ad35ae87a2fabb39e9683892b793",
+      "capturedAt": "2026-08-09T08:03:41.136Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-dancing-up.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-dancing-up.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-dancing-up.webp",
+      "bytes": 3354,
+      "sha256": "f4535a5e2297e34c2081a15970d3d9b56be7d9a1f57da8f7feafc60be3716033",
+      "capturedAt": "2026-08-09T08:03:41.306Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-special-eating.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-special-eating.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-special-eating.webp",
+      "bytes": 4068,
+      "sha256": "97a2e237613c75c055984ac212fbb39b17f7fa13ba90cae524283636134868a0",
+      "capturedAt": "2026-08-09T08:03:41.475Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/special/npc-special-reading.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/special/npc-special-reading.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/special/npc-special-reading.webp",
+      "bytes": 3430,
+      "sha256": "4e9e26c75815335e45d12899689b0e00cfd43ccc4e7c26abefc680c36fb37f3c",
+      "capturedAt": "2026-08-09T08:03:41.642Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/sunburn.png",
+      "finalUrl": "https://peteroravec.com/assets/sprites/sunburn.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/sprites/sunburn.png",
+      "bytes": 26049,
+      "sha256": "ffa642b1adf749f68ea45440714c05217c601383a6ba8a6f70aac892435840e5",
+      "capturedAt": "2026-08-09T08:03:41.810Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/train.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/train.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/train.webp",
+      "bytes": 23284,
+      "sha256": "0586ccfe3575bdb73171134b7649c16707eff7222d0ee7297c0af23c364c0ca5",
+      "capturedAt": "2026-08-09T08:03:41.982Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/vortex.png",
+      "finalUrl": "https://peteroravec.com/assets/sprites/vortex.png",
+      "status": 200,
+      "contentType": "image/png",
+      "localPath": "mirror/assets/sprites/vortex.png",
+      "bytes": 44915,
+      "sha256": "86b01b5ea944c7b71920f77d82af1c4b451946f186dcbd556ba9b51c2c3d1fc3",
+      "capturedAt": "2026-08-09T08:03:42.154Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/waves.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/waves.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/waves.webp",
+      "bytes": 178,
+      "sha256": "b8276b2303ba51b03e800f8d99fa4d3d531197d7958f7c9941ccdf20e55366ea",
+      "capturedAt": "2026-08-09T08:03:42.331Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/sprites/windturbine.webp",
+      "finalUrl": "https://peteroravec.com/assets/sprites/windturbine.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/sprites/windturbine.webp",
+      "bytes": 4678,
+      "sha256": "2cf49f0e73693e7dcb865879abddbcca2b048f6778c85b47b84c9262f306e94f",
+      "capturedAt": "2026-08-09T08:03:42.500Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/cable-handler2.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/cable-handler2.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/cable-handler2.webp",
+      "bytes": 432,
+      "sha256": "1185c725825721326fb718008880ac92ed4f6ace254891ed2110e70bf77ac808",
+      "capturedAt": "2026-08-09T08:42:49.012Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/map-holder-mini3.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/map-holder-mini3.webp",
+      "status": 200,
+      "contentType": "image/webp",
+      "localPath": "mirror/assets/images/ui/map-holder-mini3.webp",
+      "bytes": 2134,
+      "sha256": "5dedcf1cbf713d52ca4624a2c50813d98119c98bb0f8d215174f9dd9fbd52a07",
+      "capturedAt": "2026-08-09T08:42:50.102Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk0.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk0.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk0.json",
+      "bytes": 219170,
+      "sha256": "3b685fe0bc892f4553aade7bc234eafdbe9e52fd6e738271c80f8a2d87e7b0cc",
+      "capturedAt": "2026-08-09T08:42:50.360Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk1.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk1.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk1.json",
+      "bytes": 219424,
+      "sha256": "da7ef1de099c5dacceafbdaca17a7ea4fdfa757bd626e897a2c1e7a53081a522",
+      "capturedAt": "2026-08-09T08:42:50.608Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk10.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk10.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk10.json",
+      "bytes": 220426,
+      "sha256": "34f979bc299ed3cb4c307dcee02fbf71fbaac1f9d0def2a23af6eca95df9afd3",
+      "capturedAt": "2026-08-09T08:42:51.078Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk11.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk11.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk11.json",
+      "bytes": 218543,
+      "sha256": "7372f7bcfa960f8f272962f9338a46301f21bd4bf26282877d77d91a9ad292f9",
+      "capturedAt": "2026-08-09T08:42:51.381Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk12.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk12.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk12.json",
+      "bytes": 218673,
+      "sha256": "9c702ce2833edac623c36a4c6252a04bf5880c331e51ee2aab5621aa2c8c8157",
+      "capturedAt": "2026-08-09T08:42:51.736Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk13.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk13.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk13.json",
+      "bytes": 220342,
+      "sha256": "7454c02f3f64ea884862d43c9b7c5fd357a9378b856d030e9bff01cb79e42500",
+      "capturedAt": "2026-08-09T08:42:52.219Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk14.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk14.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk14.json",
+      "bytes": 220584,
+      "sha256": "cf3b089e0e57545036a598ca95da979661941eee4db19f4ab94949c4bb8ca297",
+      "capturedAt": "2026-08-09T08:42:52.518Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk15.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk15.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk15.json",
+      "bytes": 218793,
+      "sha256": "a0a408e88f53eb35458d06735b85ac943390e8c792e3f87e5ab1667e975ed91f",
+      "capturedAt": "2026-08-09T08:42:52.816Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk16.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk16.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk16.json",
+      "bytes": 217914,
+      "sha256": "54168da5a4dd45749841693ce1357944ec54bb98406529d08cbc2b2127508946",
+      "capturedAt": "2026-08-09T08:42:53.184Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk17.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk17.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk17.json",
+      "bytes": 218954,
+      "sha256": "48af11cb8b68912f73af78a58079dfcb56b0bfe4fc9102f09a4b490b4689bd43",
+      "capturedAt": "2026-08-09T08:42:53.482Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk18.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk18.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk18.json",
+      "bytes": 218636,
+      "sha256": "ca888735d75ad3489aee49fdb7f4cbf9f436ce74218f73d7d30d6d226dfbdba5",
+      "capturedAt": "2026-08-09T08:42:53.791Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk19.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk19.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk19.json",
+      "bytes": 218798,
+      "sha256": "e05a76ffcc5b5ac3d3b363e275ea2d2e6fcffc8364e3502c12c8ed2b3d02020c",
+      "capturedAt": "2026-08-09T08:42:54.095Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk2.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk2.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk2.json",
+      "bytes": 221137,
+      "sha256": "8397f170b1e2abe18abbec50294093beef7336d96014bbe02c54183d95f9285c",
+      "capturedAt": "2026-08-09T08:42:54.394Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk20.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk20.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk20.json",
+      "bytes": 220572,
+      "sha256": "84d81214793b5d65c67bd7e7034cc2f7d77add3cdc58446b319f7598c03c337d",
+      "capturedAt": "2026-08-09T08:42:54.644Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk21.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk21.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk21.json",
+      "bytes": 218293,
+      "sha256": "ecf533ff9cb5828597e3d13305500c201736701e693ad934938de2e3cc7251a0",
+      "capturedAt": "2026-08-09T08:42:54.894Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk22.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk22.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk22.json",
+      "bytes": 219595,
+      "sha256": "8f1b855b97537018558d54283c332b5d10c8f7ce7b7ea217742ebeaeb95a93ae",
+      "capturedAt": "2026-08-09T08:42:55.361Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk23.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk23.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk23.json",
+      "bytes": 220942,
+      "sha256": "82449391b8008b239caed198febab9154169350b3eec069a054dac43537ecbdb",
+      "capturedAt": "2026-08-09T08:42:55.778Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk24.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk24.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk24.json",
+      "bytes": 217667,
+      "sha256": "7fe5ed34a2715450e094197e593631d67b606fe903aa4ce7b69c8ae67abd8ae2",
+      "capturedAt": "2026-08-09T08:42:56.251Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk3.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk3.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk3.json",
+      "bytes": 221028,
+      "sha256": "b0cb3a76a311aa5a28ff3f450987adfc63d4fd9fa50ffc6163a441bfca153aef",
+      "capturedAt": "2026-08-09T08:42:56.509Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk4.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk4.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk4.json",
+      "bytes": 218750,
+      "sha256": "1692d7b035b1fb6ab54fc126390c59805a1cf9e0919a524c266977f366a992a7",
+      "capturedAt": "2026-08-09T08:42:56.981Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk5.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk5.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk5.json",
+      "bytes": 221701,
+      "sha256": "3af168ea06066f9f4d30e800a2e13334de3035cabd4af3926e75698dd04b3310",
+      "capturedAt": "2026-08-09T08:42:57.289Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk6.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk6.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk6.json",
+      "bytes": 220527,
+      "sha256": "311e8d7a92ebad6cf5d6884add9b34dd2e2da96e8c3b4da02912801d51726ffa",
+      "capturedAt": "2026-08-09T08:42:57.538Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk7.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk7.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk7.json",
+      "bytes": 219846,
+      "sha256": "b40a65ff2f9385712077303de9a2277a327c177948267f294b2bf5cce6052b34",
+      "capturedAt": "2026-08-09T08:42:57.877Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk8.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk8.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk8.json",
+      "bytes": 221002,
+      "sha256": "da94d9e07681fd3052b440311ebcf575ef0eb48d861efe6bb7f38232f2160612",
+      "capturedAt": "2026-08-09T08:42:58.126Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/maps/chunks/chunk9.json",
+      "finalUrl": "https://peteroravec.com/assets/maps/chunks/chunk9.json",
+      "status": 200,
+      "contentType": "application/json",
+      "localPath": "mirror/assets/maps/chunks/chunk9.json",
+      "bytes": 223621,
+      "sha256": "fb27e405a4df6925729abbb809d3ea477ad25e5630658c1349637dd2bc70fe87",
+      "capturedAt": "2026-08-09T08:42:58.369Z"
+    },
+    {
+      "url": "https://peteroravec.com/",
+      "finalUrl": "https://peteroravec.com/",
+      "status": 200,
+      "contentType": "text/html; charset=UTF-8",
+      "localPath": "mirror/index.html",
+      "bytes": 86024,
+      "sha256": "65375062cbac80f1d1d09273a9db210a911176e172ae2dd322d0ea0ba0507855",
+      "capturedAt": "2026-08-09T07:39:10.670Z"
+    }
+  ]
+}

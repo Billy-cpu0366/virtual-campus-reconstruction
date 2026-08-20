@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "resources": [
+    {
+      "url": "https://peteroravec.com/assets/maps/exterior.png",
+      "finalUrl": "https://peteroravec.com/assets/maps/exterior.png",
+      "status": 404,
+      "contentType": "text/html; charset=utf-8",
+      "error": "HTTP 404",
+      "time": "2026-08-09T07:51:27.755Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/cards/card5_foil.webp",
+      "finalUrl": "https://peteroravec.com/assets/images/cards/card5_foil.webp",
+      "status": 404,
+      "contentType": "text/html; charset=utf-8",
+      "error": "HTTP 404",
+      "time": "2026-08-09T07:51:30.491Z"
+    },
+    {
+      "url": "https://peteroravec.com/assets/images/ui/cables3.png",
+      "finalUrl": "https://peteroravec.com/assets/images/ui/cables3.png",
+      "status": 404,
+      "contentType": "text/html; charset=utf-8",
+      "error": "HTTP 404",
+      "time": "2026-08-09T07:51:32.463Z"
+    }
+  ]
+}
