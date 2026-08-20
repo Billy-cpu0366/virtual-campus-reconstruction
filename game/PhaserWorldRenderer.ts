@@ -183,7 +183,12 @@ export class PhaserWorldRenderer {
       if (this.layers.size <= 3) {
         console.log("renderer:write", layerName, rows.length, rows[0]?.length);
       }
-      target.putTilesAt(rows, 0, 0, false);
+      // Tiled 用 GID 0 表示空格；Phaser Tilemap 用 -1 表示空 tile。
+      // 直接传 0 会让 Phaser 按 tiles[0] 查找并在多 tileset 下抛错。
+      const phaserRows = rows.map((row) =>
+        row.map((tile) => (tile === 0 ? -1 : tile)),
+      );
+      target.putTilesAt(phaserRows, 0, 0, false);
       if (this.layers.size <= 3) {
         console.log(
           "renderer:after",

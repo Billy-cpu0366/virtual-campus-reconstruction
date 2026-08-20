@@ -1,8 +1,24 @@
 import { writeFileSync } from "node:fs";
 
 const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
-const url = process.env.SMOKE_URL ?? "http://127.0.0.1:5173/";
+const url = process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
 const screenshotPath = process.env.SMOKE_SCREENSHOT;
+
+if (process.env.SMOKE_CLEANUP_STALE === "true") {
+  const staleTargetsResponse = await fetch(`${base}/json/list`);
+  if (!staleTargetsResponse.ok) {
+    throw new Error(
+      `could not list stale targets: ${staleTargetsResponse.status}`,
+    );
+  }
+  const staleTargets = await staleTargetsResponse.json();
+  await Promise.all(
+    staleTargets
+      .filter(({ type }) => type === "page")
+      .map(({ id }) => fetch(`${base}/json/close/${id}`)),
+  );
+}
+
 const targetResponse = await fetch(
   `${base}/json/new?${encodeURIComponent(url)}`,
   { method: "PUT" },
@@ -140,5 +156,6 @@ const result = {
     unexpectedBadResponses.length === 0,
 };
 console.log(JSON.stringify(result, null, 2));
+await command("Target.closeTarget", { targetId: target.id });
 ws.close();
 if (!result.passed) process.exitCode = 1;

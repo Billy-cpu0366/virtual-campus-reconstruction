@@ -1,28 +1,29 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-SYS-CHUNK-WORLD-INTEGRATION-001
-work-item-level: integration
-work-item-type: integration
-work-item-status: in-progress
-node-refs: SYS-CHUNK;SYS-WORLD;SYS-ASSET;SYS-LAYER
-current-phase: verification
-current-gate: visual
-gate-status: awaiting-human
-authorization-ref: DEC-SYS-CHUNK-WORLD-INTEGRATION-001
+current-work-item: none
+work-item-level:
+work-item-type:
+work-item-status:
+node-refs:
+current-phase: work-item-selection
+current-gate: none
+gate-status: not-applicable
+authorization-ref:
 preauthorized-next-work-item: none
-next-phase: visual-acceptance
-updated: 2026-08-19
+next-phase: work-item-selection
+updated: 2026-08-20
 ---
 
 # 原站逆向重构计划
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-SYS-CHUNK-WORLD-INTEGRATION-001`（修复后等待视觉复验）
-- **到哪了**：已从 master 读取 `exterior=1`、`collisions-objects=69345` 注册 Tilemap；街道、铁轨、道路和水池已恢复
-- **卡在哪**：typecheck、143 项测试、build、资源检查、browser Smoke 和跨块 Smoke 已通过；等待 Human 复验新预览是否无黑块/缺街道
-- **能不能写代码**：❌ 不能（当前重新进入 visual Gate；不自动替Human签署）
-- **下一步**：Human 查看 `http://127.0.0.1:4175/` 和 `C:/tmp/campus-chunk-gid-move.png`
+- **正在做**：当前没有 active 工作项；上一项动态分块集成已完成
+- **到哪了**：动态分块运行时已完成有界集成；`exterior=1`、`collisions-objects=69345` 映射和 Tiled 空 GID `0`→Phaser `-1` 已修正；街道、铁轨、道路和水池已恢复，Human 已确认视觉验收通过
+- **卡在哪**：当前工作项的自动验证和 Human 视觉验收均已通过；正在完成最终文档同步与本地提交。完整原站 13 层语义、墙体/桥真实碰撞仍未纳入
+- **能不能写代码**：❌ 不能（当前回到 work-item-selection；下一项需 Human 重新授权）
+- **验证入口**：Vite dev/preview 与 browser Smoke 默认统一使用 `4175`（`DEC-VERIFY-PORT-001`）。
+- **下一步**：完成本地提交并回写提交号；之后由 Human 重新选择下一工作项，不自动开始墙体/桥碰撞
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -71,7 +72,7 @@ updated: 2026-08-19
 | SYS-MOVE CORE 实现授权与执行 | 已验证并关闭（typecheck + 8 项测试通过） | 维护 `src/move/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Arcade 物理引擎集成、分轴碰撞、真实 body 注册、扩大为通用框架 | 已完成；转 SYS-PLAYER |
 | SYS-PLAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 13 项测试通过） | 维护 `src/player/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Phaser Sprite/动画创建、真实贴图加载、被抓/换装/传送完整流程、扩大为通用框架 | 已完成；转 SYS-CAMERA |
 | SYS-CAMERA CORE 实现授权与执行 | 已验证并关闭（typecheck + 10 项本系统测试通过，结果进入 `4f980c5`） | 维护 `src/camera/` 已验证结果与授权边界 | 修改旧 Phaser、扩大为通用框架 | 已完成；后续渲染授权已消费该结果 |
-| 联网渲染可玩雏形 | 已接受、已落盘、自动验证通过；Human 视觉验收未通过 | 保留 `4f980c5` 中现有雏形，记录视口缩放缺口 | 在验证入口落地前继续局部补丁、扩展功能或宣称视觉一致 | 暂停；验证入口关闭后恢复并修正缩放链 |
+| 联网渲染可玩雏形 | 已接受、已落盘、自动验证和Human视觉验收均通过（结果提交 `7c5a738`） | 保留现有雏形并完成基础浏览器视觉验收 | 在验证入口落地前继续局部补丁、扩展功能或宣称完整原站一致 | 已关闭；后续动态分块另行授权 |
 | 当前工作项关闭验证入口 | 已接受（签字 `ok。开始增加吧`，2026-08-17） | 新增只读验证器、fixture 测试和必要命令入口；同步当前状态 | 修改 `src/game/sample`、自动签署 Human Gate、引入新角色/模板或全项目重审 | 工具自测、项目实测和一致性检查通过后关闭 |
 | 文档总控修复 | 已接受、已落盘、已验证（结果提交 `c40f6df`） | 恢复 `计划表.md` 一页总控、拆清 CORE/完整系统进度、同步公式与状态口径 | 修改 `src/`、`game/`、`public/`、`sample/`；修复运行时；自动关闭后续工作项 | 已关闭；下一项需Human重新选择并授权资源修复 |
 | 资源可复现性调查 | 已接受、已落盘、已验证（结果提交 `f8a9014`） | 盘点入口、地图、tileset和public资源的可复现来源，形成三种方案比较 | 修改 `src/`、`game/`、`public/`、`sample/`；下载新资源；直接修复地图 | 已关闭；方案 A/B/C 需Human选择后再单独授权实现 |
@@ -80,7 +81,7 @@ updated: 2026-08-19
 | 多人协作 PR 规则吸收 | 已接受、已落盘、已验证（结果提交 `9bd475b`） | 将 PR #2 核心理念整合进当前 `AGENTS.md` 和执行层手册，保持 `task_plan.md` 唯一动态状态源 | 原样合并PR #2；复制PR Todo；修改 `src/`/`game/`/`sample/`；自动push/merge | 已关闭；后续正式协作按新规则执行 |
 | API 协作审查流程融合 | 已接受、已落盘、已验证（结果提交 `6da5755`） | 把 PR #3 的外部规范审查方法融入当前工作流，保持项目 API 契约和系统卡为权威 | 把外部收据当作事实；没有源文档就宣称已验证；直接修改 API 契约或代码 | 流程已关闭；实际外部文档仍需单独输入和审查 |
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
-| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 首版视觉未通过；GID修复已验证，当前视觉 Gate 等待Human | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | 根因修复后 typecheck、143项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；等待Human复验新画面 |
+| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交待生成 | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞和完整13层语义不纳入本次 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -142,19 +143,19 @@ updated: 2026-08-19
 
 ## 当前工作项
 
-`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 首版视觉未通过（街道缺失、黑块）；已修正 `exterior` firstgid 注册并完成自动复验，当前重新进入 `visual/awaiting-human`。修复尚未提交，等待本次Human复验。
+`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 首版视觉未通过（街道缺失、黑块）；已修正 `exterior` firstgid 注册和 Tiled 空 GID `0` 写入兼容，干净预览 `4199` 的 browser Smoke 与跨块 Smoke 已通过，Human 于 2026-08-20 明确“视觉验收通过”；当前待本地提交收口。
 
 ## 已阻塞或暂停工作项
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- `WI-SYS-CHUNK-WORLD-INTEGRATION-001`：首版视觉验收未通过；已修复 `game/CampusScene.ts` 的 exterior firstgid 错误并自动验证通过，修复尚未提交，等待Human复验。
+- 当前没有继续阻塞项；`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 已完成，墙体/桥碰撞作为未授权后续候选保留。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- `WI-RENDER-PLAYABLE-001`：仍暂停在浏览器/视觉验收前；当前截图和视口判断尚未通过Human确认。
+- 当前没有继续阻塞项；上一项可玩雏形已于 2026-08-19 完成 Human 视觉验收。
 
 ## 近期候选
 
@@ -163,7 +164,7 @@ updated: 2026-08-19
 | `WI-RUNTIME-SAFETY-001` | 审计发现运行时诊断暴露、`src/world/world.ts` 部分写入回滚风险和入口清理缺口 | 动态分块集成中的 World 事务/回滚和生命周期守卫一并处理；诊断与入口清理仍留后续边界 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
-| SYS-CHUNK Phaser 世界集成 | 已转为当前 `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | 已接受并实施；完成后从候选移入关闭索引 |
+| SYS-CHUNK Phaser 世界集成 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` 已完成 | 已通过自动验证和 Human 视觉 Gate；结果提交后保持当前无 active 工作项，下一项需重新选择 |
 
 ## 已关闭工作项索引
 
@@ -171,7 +172,7 @@ updated: 2026-08-19
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
-| `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | in-progress | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸和验证 | pending | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
+| `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | pending | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
 | `WI-RENDER-PLAYABLE-001` | completed | SYS-APP; SYS-GAME-UI | `game/` 可玩雏形；编译 preview；browser Smoke；Human视觉验收 | `7c5a738` | `DEC-RENDER-PLAYABLE-001` |
 | `WI-API-COLLABORATION-REVIEW-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；API协作审查边界和状态分层 | `6da5755` | `DEC-API-COLLABORATION-001` |
 | `WI-DOC-COLLABORATION-ADOPT-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；协作决策和状态同步 | `9bd475b` | `DEC-GIT-PR-WORKFLOW-001` |
