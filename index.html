@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>虚拟校园 · 可玩雏形</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230f172a'/%3E%3Cpath d='M12 42h40L32 14z' fill='%2338bdf8'/%3E%3C/svg%3E" />
     <style>
       html,
       body,
@@ -19,28 +20,7 @@
   </head>
   <body>
     <div id="app"></div>
-    <div id="diag" style="position:fixed;top:0;left:0;right:0;max-height:40%;overflow:auto;background:#7f1d1d;color:#fff;padding:10px;font:12px/1.5 monospace;z-index:9999;display:none;white-space:pre-wrap;"></div>
-    <script>
-      (function () {
-        var el = document.getElementById("diag");
-        var lines = [];
-        function show(msg) {
-          lines.push(msg);
-          el.textContent = lines.join("\n");
-          el.style.display = "block";
-        }
-        window.addEventListener("error", function (e) {
-          var stack = e.error && e.error.stack ? e.error.stack : "";
-          show("ERROR: " + (e.message || e.error) + "\n  @" + (e.filename || "") + ":" + (e.lineno || "") + "\n" + stack);
-        });
-        window.addEventListener("unhandledrejection", function (e) {
-          show("REJECTION: " + (e.reason && e.reason.stack ? e.reason.stack : e.reason));
-        });
-        var _e = console.error, _w = console.warn;
-        console.error = function () { show("console.error: " + Array.prototype.join.call(arguments, " ")); _e.apply(console, arguments); };
-        console.warn = function () { show("console.warn: " + Array.prototype.join.call(arguments, " ")); _w.apply(console, arguments); };
-      })();
-    </script>
+    <div id="diag" hidden style="position:fixed;top:0;left:0;right:0;max-height:40%;overflow:auto;background:#7f1d1d;color:#fff;padding:10px;font:12px/1.5 monospace;z-index:9999;white-space:pre-wrap;"></div>
     <script src="/vendor/phaser.min.js"></script>
     <script type="module" src="/game/main.ts"></script>
   </body>

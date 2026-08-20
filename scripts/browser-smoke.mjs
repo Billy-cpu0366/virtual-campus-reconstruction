@@ -1,7 +1,8 @@
 import { writeFileSync } from "node:fs";
 
 const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
-const url = process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
+const url =
+  process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
 const screenshotPath = process.env.SMOKE_SCREENSHOT;
 
 if (process.env.SMOKE_CLEANUP_STALE === "true") {

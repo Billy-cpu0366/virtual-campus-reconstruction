@@ -121,8 +121,11 @@ class WorldImpl implements World {
     const written: ChunkLayer[] = [];
     try {
       for (const layer of validated.layers) {
-        this.#writeLayer(layer, validated.coordinate);
+        // Register the attempted layer before invoking the hook. A real
+        // renderer can mutate state and then throw; that layer still needs a
+        // compensating clear during rollback.
         written.push(layer);
+        this.#writeLayer(layer, validated.coordinate);
       }
     } catch (error) {
       for (const layer of written) {
@@ -164,8 +167,10 @@ class WorldImpl implements World {
         if (this.#state !== "ready") {
           throw new Error("世界生命周期已改变，停止异步写入");
         }
-        await this.#writeLayerAsync(layer, validated.coordinate);
+        // Register before await for the same partial-write compensation
+        // guarantee as the synchronous path.
         written.push(layer);
+        await this.#writeLayerAsync(layer, validated.coordinate);
       }
       if (this.#state !== "ready") {
         throw new Error("世界生命周期已改变，停止异步写入");
@@ -208,8 +213,10 @@ class WorldImpl implements World {
     const cleared: ChunkLayer[] = [];
     try {
       for (const layer of rendered.layers) {
-        this.#clearLayer(layer, coordinate);
+        // Clearing can remove a resource before reporting an error. Include
+        // the attempted layer so rollback can restore it as well.
         cleared.push(layer);
+        this.#clearLayer(layer, coordinate);
       }
     } catch (error) {
       for (const layer of cleared) {
@@ -251,8 +258,10 @@ class WorldImpl implements World {
         if (this.#state !== "ready") {
           throw new Error("世界生命周期已改变，停止异步清除");
         }
-        await this.#clearLayerAsync(layer, coordinate);
+        // Register before await so a partially completed async clear is
+        // included in compensation.
         cleared.push(layer);
+        await this.#clearLayerAsync(layer, coordinate);
       }
       if (this.#state !== "ready") {
         throw new Error("世界生命周期已改变，停止异步清除");

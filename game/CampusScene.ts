@@ -95,6 +95,12 @@ export class CampusScene extends Phaser.Scene {
   private playerWasInBridge1ExitZone = false;
   private playerWasInBridge2Zone = false;
   private sceneDestroyed = false;
+  private readonly testHooksEnabled =
+    import.meta.env.DEV || import.meta.env.MODE === "test-hooks";
+  private debugHook: (() => unknown) | undefined;
+  private collisionTestHook:
+    | { setPlayerPosition(x: number, y: number): void }
+    | undefined;
   private readonly collisionColliders = new Map<
     TilemapLayerLike,
     { destroy(): void }
@@ -152,8 +158,11 @@ export class CampusScene extends Phaser.Scene {
       this.sceneDestroyed = true;
       this.stopPlayerMovement();
       this.coordinator?.destroy();
-      void this.renderer?.destroyAsync();
+      void this.renderer?.destroyAsync().catch((error: unknown) => {
+        console.error("动态世界销毁失败", error);
+      });
       this.mutationScheduler.destroy();
+      this.clearRuntimeTestHooks();
       window.removeEventListener("keydown", this.handleKeyDown);
       window.removeEventListener("keyup", this.handleKeyUp);
       window.removeEventListener("blur", this.handleWindowBlur);
@@ -162,7 +171,11 @@ export class CampusScene extends Phaser.Scene {
         this.handleVisibilityChange,
       );
     });
-    void this.initializeDynamicWorld();
+    void this.initializeDynamicWorld().catch((error: unknown) => {
+      if (!this.sceneDestroyed) {
+        console.error("动态世界初始化失败", error);
+      }
+    });
   }
 
   update(): void {
@@ -329,33 +342,39 @@ export class CampusScene extends Phaser.Scene {
     this.coordinator = new ChunkCoordinator(store, worldResult.world, {
       scheduleMutation: this.mutationScheduler.schedule,
     });
-    (window as any).__campusDebug = (): unknown => ({
-      state: this.coordinator?.state,
-      rendererLayers: renderer.layers.size,
-      collisionLayers: this.collisionColliders.size,
-      physicsColliders:
-        (this.physics.world.colliders as any).getActive?.().length ?? null,
-      player: {
-        x: this.player.x,
-        y: this.player.y,
-        depth: (this.player as any).depth,
-      },
-      body: {
-        width: PLAYER_BODY_WIDTH,
-        height: PLAYER_BODY_HEIGHT,
-        offsetX: PLAYER_BODY_OFFSET_X,
-        offsetY: PLAYER_BODY_OFFSET_Y,
-        blocked: this.player.body.blocked,
-      },
-      bridge1DownVisible: this.bridge1DownVisible,
-      bridge2DownVisible: this.bridge2DownVisible,
-    });
-    if (new URLSearchParams(window.location.search).has("collision-test")) {
-      (window as any).__campusCollisionTest = {
-        setPlayerPosition: (x: number, y: number): void => {
-          (this.player as any).setPosition(x, y);
+    if (this.testHooksEnabled) {
+      const debugHook = (): unknown => ({
+        state: this.coordinator?.state,
+        rendererLayers: renderer.layers.size,
+        collisionLayers: this.collisionColliders.size,
+        physicsColliders:
+          (this.physics.world.colliders as any).getActive?.().length ?? null,
+        player: {
+          x: this.player.x,
+          y: this.player.y,
+          depth: (this.player as any).depth,
         },
-      };
+        body: {
+          width: PLAYER_BODY_WIDTH,
+          height: PLAYER_BODY_HEIGHT,
+          offsetX: PLAYER_BODY_OFFSET_X,
+          offsetY: PLAYER_BODY_OFFSET_Y,
+          blocked: this.player.body.blocked,
+        },
+        bridge1DownVisible: this.bridge1DownVisible,
+        bridge2DownVisible: this.bridge2DownVisible,
+      });
+      this.debugHook = debugHook;
+      (window as any).__campusDebug = debugHook;
+      if (new URLSearchParams(window.location.search).has("collision-test")) {
+        const collisionTestHook = {
+          setPlayerPosition: (x: number, y: number): void => {
+            (this.player as any).setPosition(x, y);
+          },
+        };
+        this.collisionTestHook = collisionTestHook;
+        (window as any).__campusCollisionTest = collisionTestHook;
+      }
     }
     this.updateDynamicTargets();
   }
@@ -411,6 +430,24 @@ export class CampusScene extends Phaser.Scene {
     }
     this.collisionColliders.delete(layer);
   };
+
+  private clearRuntimeTestHooks(): void {
+    const runtime = window as any;
+    if (
+      this.debugHook !== undefined &&
+      runtime.__campusDebug === this.debugHook
+    ) {
+      delete runtime.__campusDebug;
+    }
+    if (
+      this.collisionTestHook !== undefined &&
+      runtime.__campusCollisionTest === this.collisionTestHook
+    ) {
+      delete runtime.__campusCollisionTest;
+    }
+    this.debugHook = undefined;
+    this.collisionTestHook = undefined;
+  }
 
   private configureInitialCollisionLayers(): void {
     const renderer = this.renderer;
@@ -489,7 +526,11 @@ export class CampusScene extends Phaser.Scene {
     const coordinator = this.coordinator;
     const geometry = coordinator?.store.geometry;
     const spec = this.worldSpec;
-    if (coordinator === undefined || geometry === undefined || spec === undefined) {
+    if (
+      coordinator === undefined ||
+      geometry === undefined ||
+      spec === undefined
+    ) {
       return;
     }
     if (this.sceneDestroyed) return;

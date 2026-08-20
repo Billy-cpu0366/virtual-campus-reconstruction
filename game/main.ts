@@ -1,6 +1,7 @@
 import Phaser from "./phaser.js";
 
 import { CampusScene } from "./CampusScene.js";
+import { installRuntimeDiagnostics } from "./runtimeDiagnostics.js";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -23,4 +24,5 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [CampusScene],
 };
 
+installRuntimeDiagnostics();
 new Phaser.Game(config);
