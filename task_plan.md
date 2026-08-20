@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-RUNTIME-SAFETY-001
-work-item-level: integration
-work-item-type: integration
-work-item-status: in-progress
-node-refs: SYS-WORLD;SYS-CHUNK;SYS-APP
-current-phase: implementation
-current-gate: implementation
-gate-status: active
-authorization-ref: DEC-RUNTIME-SAFETY-001
+current-work-item: none
+work-item-level:
+work-item-type:
+work-item-status:
+node-refs:
+current-phase: work-item-selection
+current-gate: none
+gate-status: not-applicable
+authorization-ref:
 preauthorized-next-work-item: none
-next-phase: verification
+next-phase: work-item-selection
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-RUNTIME-SAFETY-001`，运行时安全有界修复
-- **到哪了**：只读审计确认三项目标：World 部分写入回滚、生产诊断面板、入口清理；正式代码尚未修改
-- **卡在哪**：不把审计建议扩大为完整 Phaser teardown、完整图层或其他玩法；浏览器验证需区分普通生产 build 与 test-hooks build
-- **能不能写代码**：✅ 仅限本工作项授权范围：`src/world/`、`game/`、`index.html`、必要 `tests/`、`scripts/`、`package.json` 和相关文档
-- **验证入口**：普通 build/Smoke 继续使用显式 `4200`；碰撞回归若需 debug hooks，使用专门 `test-hooks` build，不把 hooks 带入普通 production build
-- **下一步**：实现最小修复，再跑 typecheck、测试、build、普通安全 Smoke、test-hooks 碰撞 Smoke、状态一致性和 diff 检查
+- **正在做**：当前没有 active 工作项；上一项运行时安全收尾已关闭
+- **到哪了**：World 同步/异步部分回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口修复均已验证，结果提交 `632a0c9`
+- **卡在哪**：完整 24 层语义、请求取消、性能量化和完整 Phaser resource teardown 仍未完成；不把本次安全收尾冒充完整系统
+- **能不能写代码**：❌ 不能；当前回到 `work-item-selection`，下一项需 Human 重新选择和授权
+- **验证入口**：普通 production build 在 `4201` 通过安全/普通/跨块 Smoke；碰撞回归在显式 `test-hooks` build 的 `4202` 通过
+- **下一步**：Human 选择下一项；不自动扩展完整图层、玩法或验证器
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -67,7 +67,7 @@ updated: 2026-08-20
 | 执行层16卡与历史归档迁移 | 已接受、验证并关闭 | 维护16卡、总账、操作手册、旧doc归档和当前入口 | 修改`sample/src/tests`、旧Phaser、证据结论、内容TBD | 已完成；当前入口只认`03-执行层/` |
 | SYS-ASSET CORE 实现授权与执行 | 已验证并关闭（typecheck + 37 测试通过） | 维护 `src/asset/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 已完成；转 SYS-LAYER |
 | SYS-LAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 12 项测试通过） | 维护 `src/layer/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Tilemap 写入、扩大为通用框架 | 已完成；转 SYS-WORLD |
-| SYS-WORLD CORE 实现授权与执行 | 已验证并关闭（typecheck + 29 项测试通过） | 维护 `src/world/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Tilemap 真实写入、碰撞重算、扩大为通用框架 | 已完成；地图线纯逻辑全线跑通，转 SYS-INPUT |
+| SYS-WORLD CORE 实现授权与执行 | 已验证并关闭（当前 `tests/world/` 32 项；全库149项通过） | 维护 `src/world/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存、渲染、Tilemap 真实写入、碰撞重算、扩大为通用框架 | 已完成；本次运行时安全补偿回滚已验证，完整世界仍需独立范围 |
 | SYS-INPUT CORE 实现授权与执行 | 已验证并关闭（typecheck + 23 项测试通过） | 维护 `src/input/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、rexVirtualJoystick 插件集成、真实键鼠/触摸监听、扩大为通用框架 | 已完成；转 SYS-MOVE |
 | SYS-MOVE CORE 实现授权与执行 | 已验证并关闭（typecheck + 8 项测试通过） | 维护 `src/move/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Arcade 物理引擎集成、分轴碰撞、真实 body 注册、扩大为通用框架 | 已完成；转 SYS-PLAYER |
 | SYS-PLAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 13 项测试通过） | 维护 `src/player/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Phaser Sprite/动画创建、真实贴图加载、被抓/换装/传送完整流程、扩大为通用框架 | 已完成；转 SYS-CAMERA |
@@ -81,7 +81,7 @@ updated: 2026-08-20
 | 多人协作 PR 规则吸收 | 已接受、已落盘、已验证（结果提交 `9bd475b`） | 将 PR #2 核心理念整合进当前 `AGENTS.md` 和执行层手册，保持 `task_plan.md` 唯一动态状态源 | 原样合并PR #2；复制PR Todo；修改 `src/`/`game/`/`sample/`；自动push/merge | 已关闭；后续正式协作按新规则执行 |
 | API 协作审查流程融合 | 已接受、已落盘、已验证（结果提交 `6da5755`） | 把 PR #3 的外部规范审查方法融入当前工作流，保持项目 API 契约和系统卡为权威 | 把外部收据当作事实；没有源文档就宣称已验证；直接修改 API 契约或代码 | 流程已关闭；实际外部文档仍需单独输入和审查 |
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
-| 运行时安全有界修复 | 已接受（Human 选择“运行时安全审计（推荐）”） | 处理 World 部分写入回滚、生产诊断面板限制、入口初始化/图标清理；允许 `src/world/`、`game/`、`index.html`、必要测试脚本和文档 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 实现后分别验证普通 production build 与 test-hooks build；再关闭工作项 |
+| 运行时安全有界修复 | 已接受、已落盘、已验证；结果提交 `632a0c9` | 处理 World 部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口清理 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 普通 production build、普通/跨块/安全 Smoke 与 test-hooks 碰撞 Smoke均通过；工作项已关闭 |
 | SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
@@ -162,7 +162,7 @@ updated: 2026-08-20
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| `WI-RUNTIME-SAFETY-001` | Human 已选择并激活 | 修复 World 同步/异步部分写入回滚；生产关闭诊断面板、开发诊断限量；处理初始化 rejected、调试 hook 清理和 favicon 入口请求；不扩展完整资源 teardown、完整图层、粒子/NPC/交互、验证器或远端 Git |
+| `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
 | SYS-MOVE + SYS-LAYER + SYS-WORLD 碰撞集成 | `WI-SYS-MOVE-WORLD-COLLISION-001` 已关闭 | 已实现并验证；结果提交 `e3f412a`，当前转入运行时安全收尾；完整系统语义仍不自动扩展 |
@@ -175,6 +175,7 @@ updated: 2026-08-20
 |---|---|---|---|---|---|
 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
 | `WI-SYS-MOVE-WORLD-COLLISION-001` | completed | SYS-MOVE; SYS-LAYER; SYS-WORLD; SYS-CHUNK | 玩家 Arcade Body、walls/bridge 碰撞、桥状态切换、`body.blocked` 反馈、collider 安全清理、碰撞/桥/跨块 Smoke | `e3f412a` | `DEC-SYS-MOVE-WORLD-COLLISION-001` |
+| `WI-RUNTIME-SAFETY-001` | completed | SYS-WORLD; SYS-CHUNK; SYS-APP | World 当前层同步/异步回滚补偿、production diagnostics/hooks 限制、入口 rejected 收敛、favicon 清理、普通安全/普通/跨块/test-hooks 碰撞 Smoke | `632a0c9` | `DEC-RUNTIME-SAFETY-001` |
 | `WI-RENDER-PLAYABLE-001` | completed | SYS-APP; SYS-GAME-UI | `game/` 可玩雏形；编译 preview；browser Smoke；Human视觉验收 | `7c5a738` | `DEC-RENDER-PLAYABLE-001` |
 | `WI-API-COLLABORATION-REVIEW-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；API协作审查边界和状态分层 | `6da5755` | `DEC-API-COLLABORATION-001` |
 | `WI-DOC-COLLABORATION-ADOPT-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；协作决策和状态同步 | `9bd475b` | `DEC-GIT-PR-WORKFLOW-001` |
