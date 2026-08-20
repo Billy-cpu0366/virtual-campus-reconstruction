@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level:
-work-item-type:
-work-item-status:
-node-refs:
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref:
+current-work-item: WI-SYS-MOVE-WORLD-COLLISION-001
+work-item-level: integration
+work-item-type: integration
+work-item-status: in-progress
+node-refs: SYS-MOVE;SYS-LAYER;SYS-WORLD;SYS-CHUNK
+current-phase: investigation
+current-gate: implementation
+gate-status: active
+authorization-ref: DEC-SYS-MOVE-WORLD-COLLISION-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: implementation
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：当前没有 active 工作项；上一项动态分块集成已完成
-- **到哪了**：动态分块运行时已完成有界集成；`exterior=1`、`collisions-objects=69345` 映射和 Tiled 空 GID `0`→Phaser `-1` 已修正；街道、铁轨、道路和水池已恢复，Human 已确认视觉验收通过
-- **卡在哪**：当前工作项的自动验证、Human 视觉验收和本地提交 `b707553` 均已完成；完整原站 13 层语义、墙体/桥真实碰撞仍未纳入
-- **能不能写代码**：❌ 不能（当前回到 work-item-selection；下一项需 Human 重新授权）
+- **正在做**：`WI-SYS-MOVE-WORLD-COLLISION-001`（墙体与桥真实碰撞集成）
+- **到哪了**：上一项动态分块视觉已验收；本项已确认玩家 Body、walls/bridge 层名和 GID 契约，正在调查 Phaser 碰撞接线与桥状态来源
+- **卡在哪**：墙层碰撞接线范围明确；桥上下层状态来源尚未在当前代码中定位，保持 UNKNOWN，不凭猜测实现
+- **能不能写代码**：✅ 仅限本工作项授权范围；不扩展到手机摇杆、NPC、完整13层或其他玩法
 - **验证入口**：Vite dev/preview 与 browser Smoke 默认统一使用 `4175`（`DEC-VERIFY-PORT-001`）。
-- **下一步**：由 Human 重新选择下一工作项；不自动开始墙体/桥碰撞
+- **下一步**：先提交本工作项的授权/状态落盘，再实现玩家 Body、walls 碰撞和可证明的 bridge 接线；桥状态证据不足则停在 UNKNOWN
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -81,7 +81,7 @@ updated: 2026-08-20
 | 多人协作 PR 规则吸收 | 已接受、已落盘、已验证（结果提交 `9bd475b`） | 将 PR #2 核心理念整合进当前 `AGENTS.md` 和执行层手册，保持 `task_plan.md` 唯一动态状态源 | 原样合并PR #2；复制PR Todo；修改 `src/`/`game/`/`sample/`；自动push/merge | 已关闭；后续正式协作按新规则执行 |
 | API 协作审查流程融合 | 已接受、已落盘、已验证（结果提交 `6da5755`） | 把 PR #3 的外部规范审查方法融入当前工作流，保持项目 API 契约和系统卡为权威 | 把外部收据当作事实；没有源文档就宣称已验证；直接修改 API 契约或代码 | 流程已关闭；实际外部文档仍需单独输入和审查 |
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
-| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交待生成 | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞和完整13层语义不纳入本次 |
+| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞和完整13层语义不纳入本次 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -143,13 +143,13 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 首版视觉未通过（街道缺失、黑块）；已修正 `exterior` firstgid 注册和 Tiled 空 GID `0` 写入兼容，干净预览 `4199` 的 browser Smoke 与跨块 Smoke 已通过，Human 于 2026-08-20 明确“视觉验收通过”；结果提交为 `b707553`，当前已回到无 active 工作项。
+`WI-SYS-MOVE-WORLD-COLLISION-001` 已由 Human 以“ok。开始吧”授权；范围是玩家 Arcade Body、walls/bridge 碰撞接线、`body.blocked` 反馈和 chunk 装卸清理。当前先调查桥状态来源，尚未写实现代码。上一项动态分块结果提交为 `b707553`。
 
 ## 已阻塞或暂停工作项
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前没有继续阻塞项；`WI-SYS-CHUNK-WORLD-INTEGRATION-001` 已完成，墙体/桥碰撞作为未授权后续候选保留。
+- `WI-SYS-MOVE-WORLD-COLLISION-001`：当前 investigation；桥状态来源保持 UNKNOWN，未开始猜测性实现。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
@@ -164,7 +164,7 @@ updated: 2026-08-20
 | `WI-RUNTIME-SAFETY-001` | 审计发现运行时诊断暴露、`src/world/world.ts` 部分写入回滚风险和入口清理缺口 | 动态分块集成中的 World 事务/回滚和生命周期守卫一并处理；诊断与入口清理仍留后续边界 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
-| SYS-CHUNK Phaser 世界集成 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` 已完成 | 已通过自动验证和 Human 视觉 Gate；结果提交后保持当前无 active 工作项，下一项需重新选择 |
+| SYS-MOVE + SYS-LAYER + SYS-WORLD 碰撞集成 | 已转为当前 `WI-SYS-MOVE-WORLD-COLLISION-001` | 已接受范围；先调查桥状态来源，再实现并验证墙体/桥碰撞，不扩大其他玩法 |
 
 ## 已关闭工作项索引
 
