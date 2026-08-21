@@ -1,6 +1,6 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-auto-work-packaging
+status: blocked-shared-code-worktree
 work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001

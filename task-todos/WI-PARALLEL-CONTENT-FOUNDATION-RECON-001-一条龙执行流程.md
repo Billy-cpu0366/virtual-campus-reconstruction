@@ -1,7 +1,7 @@
 ---
 workflow: PIPELINE-CONTENT-FOUNDATION-001
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: accepted-persisted-verified-active
+status: accepted-persisted-verified-blocked-p3
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 pipeline-commit: 6fdefb1
 updated: 2026-08-21
@@ -80,6 +80,12 @@ Main-owned 精确范围：
 6. 运行CRLF-aware diff、typecheck、全测试和两种build；通过后记录 shared code baseline commit/tree/clean status，以及runtime/design双输入hash。
 7. A/B实现分支必须从该同一 immutable code baseline创建；C保留no-code。任务包写明runtime/design/code三个hash，不能用浮动branch名。
 8. P7由root权威文档记录所有code commit/tree收据；不为合并文档而绕过guard。
+
+### 当前 P3 阻塞收据
+
+- 尝试从 runtime `798eda6` 创建 `.pi/worktrees/content-foundation-integration` / `integration/content-foundation` 时，WSL guard 返回 `[ACCEPT EDITS] Command is not in the safe allowlist.`。
+- 未创建分支/worktree，未修改runtime代码，未尝试copy/patch/同目录并发等替代绕过。
+- 因 immutable shared code baseline 不存在，A/B实现包不得派发；C继续no-code。
 
 ### 阶段 M：Main integration
 
