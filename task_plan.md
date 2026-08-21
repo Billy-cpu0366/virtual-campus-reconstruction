@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001
-work-item-level: design
-work-item-type: architecture
+current-work-item: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
+work-item-level: implementation
+work-item-type: parallel-integration
 work-item-status: in-progress
-node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER; SYS-CAMERA
-current-phase: interface-and-integration-design
-current-gate: design-review
+node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER
+current-phase: worktree-setup
+current-gate: implementation
 gate-status: active
-authorization-ref: DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001
+authorization-ref: DEC-MAP-RUNTIME-COMPLETION-001; DEC-SYS-PLAYER-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: human-design-review
+next-phase: parallel-implementation
 updated: 2026-08-21
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001`，把 Human 接受的“两波并行 + Main integration”拓扑落成接口、文件所有权、Gate 和实现候选包。
-- **已接受**：准备阶段冻结窄接口；第一波地图与 SYS-PLAYER 并行；Main 第一次整合后过 Human Gate；第二波同一玩法窗口实现 SYS-CAMERA，地图窗口只修接口和复测。
-- **已冻结语义**：玩家位置快照、玩法控制门、相机视口目标更新、地图运行时收敛和唯一世界边界；真实 TypeScript 签名留到实现授权。
+- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 的 worktree setup；Human 已接受 M1 地图、P1 玩家和第二波 SYS-CAMERA 范围。
+- **第一波 active**：M1 `WI-MAP-RUNTIME-COMPLETION-001` 与 P1 `WI-SYS-PLAYER-RUNTIME-001`；两个窗口各自提交，不互相 merge。
+- **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
-- **明确不做**：当前不写正式代码，不创建地图/integration 实现分支，不启动 M1/P1/SYS-CAMERA，不关闭 `Q-LAYER-002/003`。
-- **下一步**：完成设计同步与一致性验证后，向 Human 提交 M1 地图包、P1 玩家包、第二波相机包和完整验证矩阵审查。
+- **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
+- **下一步**：提交三个授权包，创建 `impl/map-runtime-completion` 和 `integration/map-gameplay-p0` worktree，并把 `impl/gameplay-serial` fast-forward 到同一 clean 基线。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -147,17 +147,17 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-`WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` 已由 Human 以“ok。开始并行设计方案吧”接受并激活。当前只冻结跨线语义、文件所有权、两波 Gate 和分支策略；详细设计工作记录见 [地图线与玩法线两波并行设计](task-todos/WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001.md)。M1/P1/SYS-CAMERA 的正式代码仍需 Human 对候选实现包逐项授权。
+`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已由 Human 以“接受接受”激活。两个 active 子包是 [M1 地图运行时收口](task-todos/WI-MAP-RUNTIME-COMPLETION-001.md) 和 [P1 SYS-PLAYER 运行时](task-todos/WI-SYS-PLAYER-RUNTIME-001.md)；[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 已接受但 gated。当前只做 worktree/统一基线准备，准备状态提交完成前执行窗口不得写码。
 
-### 已接受的设计边界
+### 第一波执行边界
 
-| 角色 | 第一波 | 第二波 | 不得修改 |
+| 窗口 | 分支 | active 范围 | 交接 |
 |---|---|---|---|
-| 地图窗口 | M1 地图候选包，通过模块测试后交 Main | 只修相机预载接口并复测性能/生命周期 | `CampusScene`、玩法模块、共享脚本、权威状态 |
-| 玩法窗口 | P1 SYS-PLAYER 候选包 | 第一次 Main 集成与 Human Gate 后才做 SYS-CAMERA | 地图核心、renderer、共享脚本、权威状态 |
-| Main / integration | 冻结接口、整合 M1+P1、共享接线和全量验证 | 整合 SYS-CAMERA、最终性能/生命周期验证 | 不替窗口扩大未授权范围 |
+| 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | 执行报告、检查结果、提交 ID；不改 Main 独占文件 |
+| 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | 执行报告、检查结果、提交 ID；完成后停在第一波 Gate |
+| Main | `integration/map-gameplay-p0` | 接收两个明确提交、修改 `CampusScene`/共享脚本并做全量验证 | Human 预览前不带回主线 |
 
-冻结接口以 `02-接口层/API契约表.md` 为唯一索引；真实签名在实现 Gate 确定。当前不创建 `impl/map-runtime-completion` 或 `integration/map-gameplay-p0`，也不更新已有 gameplay worktree。
+冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；SYS-CAMERA 当前禁止开工。
 
 ## 已阻塞或暂停工作项
 
@@ -181,7 +181,8 @@ updated: 2026-08-21
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | 已完成，结果提交 `d61faa1` | SYS-WORLD/SYS-CHUNK 请求取消、过期结果、异步 mutation、Tilemap/collider teardown 和固定场景边界指标已验证；不代表完整地图系统完成 |
 | `WI-SYS-INPUT-TOUCH-001` | 已完成，结果提交 `66a20f8` | 接入移动端原生 Phaser pointer 摇杆；桌面隐藏、单指、键盘优先级切换、释放恢复和移动端 Smoke 已验证；不代表完整 SYS-INPUT 节点完成 |
 | `WI-PARALLEL-MAP-RECON-001` | 已完成，结果基线 `85af370` | A-D 报告和 D 可复核收据已提交；`Q-LAYER-002/003` 保留；转入两波并行设计 |
-| `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | Human 已接受拓扑，当前设计中 | 冻结接口、文件所有权、两波 Gate 和实现候选包；不写代码、不创建实现分支 |
+| `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | 已完成，结果提交 `a16ae54` | 接口、所有权、两波 Gate 和三个实施包已获 Human 接受 |
+| `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` | Human 已授权，当前 worktree-setup | M1 地图与 P1 玩家并行；SYS-CAMERA accepted-gated |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
@@ -195,6 +196,7 @@ updated: 2026-08-21
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
+| `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER; SYS-CAMERA | 两波拓扑、冻结接口、文件所有权、M1/P1/Camera 候选包和 Gate | `a16ae54` | `DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001` |
 | `WI-PARALLEL-MAP-RECON-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK | A-D 四份 `task-todos/` 报告；D 可复跑探针、27 样本原始收据和确定性校验 | `85af370` | `DEC-PARALLEL-WORKTREE-001` |
 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
 | `WI-SYS-MOVE-WORLD-COLLISION-001` | completed | SYS-MOVE; SYS-LAYER; SYS-WORLD; SYS-CHUNK | 玩家 Arcade Body、walls/bridge 碰撞、桥状态切换、`body.blocked` 反馈、collider 安全清理、碰撞/桥/跨块 Smoke | `e3f412a` | `DEC-SYS-MOVE-WORLD-COLLISION-001` |
