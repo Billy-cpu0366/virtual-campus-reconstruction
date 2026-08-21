@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001
-work-item-level: integration
-work-item-type: implementation
-work-item-status: in-progress
-node-refs: SYS-LAYER
-current-phase: implementation
-current-gate: implementation
-gate-status: active
-authorization-ref: DEC-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001
+current-work-item: none
+work-item-level:
+work-item-type:
+work-item-status:
+node-refs:
+current-phase: work-item-selection
+current-gate: none
+gate-status: not-applicable
+authorization-ref:
 preauthorized-next-work-item: none
-next-phase: verification
+next-phase: work-item-selection
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,11 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001`，按已通过的 P0 SYS-LAYER 设计做有界运行时实现
-- **到哪了**：设计评审已通过；实现范围是 visual/roof/marker/footsteps 的 apply/remove 对称结果、失败诊断和 particles3 未消费保留
-- **卡在哪**：暂无技术阻塞；`Q-LAYER-002`、特殊 13 层生命周期、请求取消、性能和完整 teardown 明确不在本项
-- **能不能写代码**：✅ 可以；Human 已通过本轮设计并授权当前明确的有界实现，不得扩大范围
-- **验证入口**：按 SYS-LAYER §6、World apply/remove 事务、现有桥/walls 清理约定执行 typecheck、测试、build 和必要浏览器 Smoke
-- **下一步**：实现并验证有界图层运行时；完成后回写 SYS-LAYER、总账和关闭索引，不自动推进其他地图/玩法系统
+- **当前状态**：上一项 SYS-LAYER 有界运行时实现已完成并关闭，结果提交 `10c7d88`；当前回到合法的 `none / work-item-selection`。
+- **已落盘**：visual/roof/marker/footsteps 的 chunk 对称 apply/remove、失败诊断、particles3 未消费保留、marker sanitizer 边界和对应测试/Smoke 入口。
+- **已验证**：typecheck、30 files / 157 tests、production/test-hooks build、production 安全/普通 Smoke、test-hooks layer/collision/chunk Smoke、状态一致性和独立复核均通过。
+- **仍未完成**：完整 SYS-LAYER 节点仍为 `designed`；`Q-LAYER-002`/`Q-LAYER-003`、特殊 13 层生命周期、请求取消、性能和完整 teardown 保持 open 或边界外。
+- **下一步**：不自动启动新工作项；回到 P0 候选选择，继续地图线或玩法线必须另行明确授权。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -83,7 +82,7 @@ updated: 2026-08-20
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
 | 运行时安全有界修复 | 已接受、已落盘、已验证；结果提交 `632a0c9` | 处理 World 部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口清理 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 普通 production build、普通/跨块/安全 Smoke 与 test-hooks 碰撞 Smoke均通过；工作项已关闭 |
 | SYS-ZONE 区域触发逆向与设计 | 已接受、已落盘、已验证；结果提交 `05c2274` | 核对公开 marker/区域触发来源、坐标/区域边界、进入/离开和防重复行为；补 `04-内容层/作品集内容.md` 内容索引、SYS-ZONE 七格、接口和未知队列 | 不写 `src/`/`game/` 正式代码；不实现 SYS-INTERACT 弹窗；不猜未证实文案、资源或触发器 | 设计已通过 Human review；工作项关闭，正式实现需另行授权 |
-| SYS-LAYER 图层运行时语义收束 | 设计已通过，已转独立实现工作项 | 证据、`Q-LAYER-002`、24 层策略、apply/remove 边界和 World/Chunk 职责已收敛；结果先记为设计提交，正式实现由下一工作项负责 | 不把设计接受误报为代码完成；不擅自关闭 particles3 或特殊13层 UNKNOWN | 设计结果落盘后转 `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` |
+| SYS-LAYER 图层运行时语义收束 | 设计与有界实现均已完成 | 证据、`Q-LAYER-002`/`003`、24 层策略、apply/remove 边界和 World/Chunk 职责已收敛；设计关闭提交 `c82aa4a`，有界实现提交 `10c7d88`；完整节点仍为 `designed` | 不把有界实现误报为完整系统；不擅自关闭 particles3 或特殊13层 UNKNOWN | 当前回到工作项选择；后续完整语义需另行授权 |
 | SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
@@ -146,7 +145,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` 已由 Human 以“继续”接受本轮设计并授权实现。当前只实现 SYS-LAYER 有界运行时语义：visual/roof/marker/footsteps 的 apply/remove、失败边界和 particles3 未消费诊断；不扩大到动态抗议人群、特殊13层生命周期、请求取消、性能或完整 teardown。
+`WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` 已完成并关闭（结果提交 `10c7d88`）。本项只实现 SYS-LAYER 有界运行时语义：visual/roof/marker/footsteps 的 apply/remove、失败边界和 particles3 未消费诊断；不扩大到动态抗议人群、特殊13层生命周期、请求取消、性能或完整 teardown。完整 SYS-LAYER 节点仍保持 `designed`，不得把本项结果写成完整 `implemented/verified`。当前正式工作项为 `none`，等待下一项选择。
 
 ## 已阻塞或暂停工作项
 
@@ -165,8 +164,8 @@ updated: 2026-08-20
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
 | `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；正式代码和 SYS-INTERACT 仍未授权 |
-| `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 设计已完成，待写入关闭索引 | 证据和有界设计已通过 Human review；设计结果由独立实现工作项继续，不代表代码完成 |
-| `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | Human 已接受，当前 active | 实现有界 visual/roof/marker/footsteps 运行时语义和失败诊断；不扩大到完整地图生命周期 |
+| `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 已完成，结果提交 `c82aa4a` | SYS-LAYER 证据与有界运行时设计已接受、落盘并验证；不代表代码或完整系统完成 |
+| `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
@@ -176,7 +175,7 @@ updated: 2026-08-20
 
 不追溯为历史阶段补建 WI。只为实际建立过的正式工作项保留轻量关闭记录。
 
-> 当前 active 工作项 `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` 尚未关闭；设计工作项的关闭记录将在本次状态提交后补入本表，代码实现完成后再登记实现 `result-commit`。
+> `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` 与 `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` 均已关闭；本表登记设计和有界实现结果，完整 SYS-LAYER 节点仍按系统卡保持 `designed`。
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
@@ -193,6 +192,8 @@ updated: 2026-08-20
 | `WI-DOC-CONTROL-REPAIR-001` | completed | not-applicable | [项目总控台](计划表.md)；[进度总览](01-理解层/00-进度总览.md)；接口、系统卡、总账和状态口径同步 | `c40f6df` | `DEC-DOC-CONTROL-REPAIR-001` |
 | `WI-SYS-CHUNK-CORE-001` | completed | SYS-CHUNK | [当前SYS-CHUNK卡](03-执行层/01-地图线/04-地图分块.md)；`src/chunk/`；`tests/chunk/`；历史授权包在`migration-history/doc-v0.1/` | `f04568f953821e8cc56c33a694171ddab759051f` | `DEC-SYS-CHUNK-CORE-001`；`DEC-WORK-RELAY-002` |
 | `WI-SYS-WORLD-LAYER-DESIGN-001` | completed | SYS-WORLD; SYS-LAYER | [SYS-WORLD卡](03-执行层/01-地图线/02-世界与地图.md)；[SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；历史调查/验证在`migration-history/doc-v0.1/` | `8c7fff7525e8dd77c6367b662f65fec12175d33f` | `DEC-SYS-WORLD-LAYER-DESIGN-001` |
+| `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | completed | SYS-LAYER | SYS-LAYER 运行时证据、Q-LAYER-002 保留、24 层策略和有界 apply/remove 设计 | `c82aa4a` | `DEC-SYS-LAYER-RUNTIME-SEMANTICS-DESIGN-001` |
+| `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | completed | SYS-LAYER; SYS-WORLD; SYS-CHUNK | visual/roof/marker/footsteps 有界运行时、marker 回滚诊断、particles3 未消费保留、sanitizer 边界和浏览器 Smoke | `10c7d88` | `DEC-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` |
 | `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；历史任务卡在`migration-history/doc-v0.1/` | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 | `WI-DOC-EXEC-LAYER-MIGRATION-001` | completed | not-applicable | [当前执行层](03-执行层/README.md)；[16系统总账](03-执行层/00-总账.md)；[历史治理记录](migration-history/执行层迁移任务卡（治理记录）.md) | `293cbeb2d9bcf99f28c2a7cb62de10ee0e08f0c5` | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
