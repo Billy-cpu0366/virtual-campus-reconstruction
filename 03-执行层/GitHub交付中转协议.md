@@ -2,6 +2,7 @@
 tags: [虚拟校园, 执行层, GitHub, 交付]
 type: delivery-protocol
 status: accepted
+persistence: persisted
 maturity: unverified
 updated: 2026-08-21
 ---
@@ -150,6 +151,6 @@ Human 对外部 Pi 只需说：
 ## 9. 当前成熟度
 
 - `accepted`：Human 于 2026-08-21 回复“ok”，接受 Git bundle 双向中转架构、正式 main 保护，以及 WSL 本地预览与 Windows 正式仓库最终预览两层 Gate。
-- `persisted`：本协议、决定记录和工作项状态以同一 Git 提交进入项目仓库后成立。
+- `persisted`：本协议、决定记录和工作项状态已由提交 `0a105dc` 进入项目仓库。
 - `unverified`：尚未完成 Windows 正式仓库审计、首次 reconciliation、bundle 往返和真实远端 push。
 - 只有首次完整交付收据通过后，v1 才能标为 `verified` 并候选安装到 Windows 全局 Pi workflow。

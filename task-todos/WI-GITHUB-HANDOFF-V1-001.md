@@ -4,6 +4,7 @@ status: active-awaiting-external-audit
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-21
+protocol-commit: 0a105dc
 ---
 
 # GitHub 交付中转协议 v1 首次对齐任务

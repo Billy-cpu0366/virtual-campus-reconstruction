@@ -51,7 +51,7 @@ WSL 不直接访问 GitHub；Windows 外部 Pi 是正式仓库和远端操作的
 3. 最终 delivery 必须同时包含实现、Main 接线、权威文档和验证收据，不把代码/文档留在两条未汇总分支。
 4. 外部 Pi 只在仓库外 worktree 验证；正式 `main` 保持 clean 并跟随 `origin/main`。
 5. Human 审查正式仓库实际 diff 后才允许 push delivery 分支；PR/merge 分别授权。
-6. bundle、manifest、SHA-256、commit/tree 和远端核对必须形成收据；未完成首次真实往返前协议状态为 `accepted-unverified`。
+6. bundle、manifest、SHA-256、commit/tree 和远端核对必须形成收据；当前协议为 `accepted-persisted-unverified`，首次真实往返后才能晋升 verified。
 
 ## API 协作规范审查补充（`DEC-API-COLLABORATION-001`）
 
