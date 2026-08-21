@@ -5,12 +5,12 @@ work-item-level: implementation
 work-item-type: parallel-integration
 work-item-status: in-progress
 node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER
-current-phase: wave1-integration-preview
+current-phase: wave1-integration-commit
 current-gate: integration-preview
-gate-status: awaiting-human
+gate-status: accepted-awaiting-commit
 authorization-ref: DEC-MAP-RUNTIME-COMPLETION-001; DEC-SYS-PLAYER-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: integration-commit-and-camera-gate
+next-phase: wave1-close-and-camera-gate
 updated: 2026-08-21
 ---
 
@@ -19,12 +19,12 @@ updated: 2026-08-21
 ## ⏱ 当前状态（一眼看懂）
 
 - **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` integration preview；地图 `5290eca` 与玩家 `482b52f` 已带入 integration，Main 共享接线和全量验证 PASS。
-- **第一波 Gate**：M1/P1 当前为 `integration-ready-for-preview`；Main 接线未 commit、未 merge/push，等待 Human 审查集成截图和验证结果。
+- **第一波 Gate**：Human 已选择“接受并提交”；M1/P1 当前为 `integration-preview-accepted-awaiting-commit`。只允许提交已审查的 6 个 Main 接线/测试/报告文件，不 merge/push。
 - **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
 - **环境状态**：Human 已创建 `impl/map-runtime-completion`、`integration/map-gameplay-p0`，并将 `impl/gameplay-serial` fast-forward；三个 worktree 均在执行包基线 `638d4c6`，`git worktree list` 已验证。
-- **下一步**：Human 审查第一波集成报告与 production 截图；接受后 Main 才创建 integration 本地提交并同步系统卡/总账。完成该 Gate 前 SYS-CAMERA 禁止启动。
+- **下一步**：创建 Main integration 本地提交并回传 ID；随后同步系统卡/总账、关闭第一波，再评估同一玩法窗口进入已授权 SYS-CAMERA 的安全基线。提交完成前 SYS-CAMERA 禁止启动。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。

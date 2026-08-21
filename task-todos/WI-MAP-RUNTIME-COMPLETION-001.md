@@ -1,7 +1,7 @@
 ---
 work-item: WI-MAP-RUNTIME-COMPLETION-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: integration-ready-for-preview
+status: integration-preview-accepted-awaiting-commit
 branch: impl/map-runtime-completion
 authorization: DEC-MAP-RUNTIME-COMPLETION-001
 updated: 2026-08-21
