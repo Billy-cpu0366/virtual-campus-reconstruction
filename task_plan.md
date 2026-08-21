@@ -5,12 +5,12 @@ work-item-level: implementation
 work-item-type: parallel-integration
 work-item-status: in-progress
 node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER
-current-phase: parallel-implementation
-current-gate: implementation
-gate-status: active
+current-phase: wave1-branch-commit
+current-gate: implementation-preview
+gate-status: accepted-awaiting-commits
 authorization-ref: DEC-MAP-RUNTIME-COMPLETION-001; DEC-SYS-PLAYER-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: wave1-preview
+next-phase: main-integration
 updated: 2026-08-21
 ---
 
@@ -18,13 +18,13 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 的 worktree setup；Human 已接受 M1 地图、P1 玩家和第二波 SYS-CAMERA 范围。
-- **第一波 active**：M1 `WI-MAP-RUNTIME-COMPLETION-001` 与 P1 `WI-SYS-PLAYER-RUNTIME-001`；两个窗口先做到 ready-for-preview，不互相 merge，Human 接受实际结果后才各自 commit。
+- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 的地图 M1 和玩家 P1 实际结果均已通过 Main/独立复核并由 Human 接受，等待两个分支按白名单创建本地提交。
+- **第一波 Gate**：M1 `WI-MAP-RUNTIME-COMPLETION-001` 与 P1 `WI-SYS-PLAYER-RUNTIME-001` 均为 `preview-accepted-awaiting-commit`；不得互相 merge 或 push。
 - **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
 - **环境状态**：Human 已创建 `impl/map-runtime-completion`、`integration/map-gameplay-p0`，并将 `impl/gameplay-serial` fast-forward；三个 worktree 均在执行包基线 `638d4c6`，`git worktree list` 已验证。
-- **下一步**：地图和玩法两个窗口同时开工，各自做到 ready-for-preview 后停止并把报告带回 Main；禁止自行 commit/merge/push。
+- **下一步**：地图和玩法窗口分别按明确文件清单 commit 并回传提交 ID；Main 核对后只把两个明确提交带入 integration worktree，再处理共享接线和全量验证。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -148,14 +148,14 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已进入 `parallel-implementation`。两个 active 子包是 [M1 地图运行时收口](task-todos/WI-MAP-RUNTIME-COMPLETION-001.md) 和 [P1 SYS-PLAYER 运行时](task-todos/WI-SYS-PLAYER-RUNTIME-001.md)；[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 已接受但 gated。地图、玩法和 integration worktree 均已在 `638d4c6` 建立/同步；两个执行窗口完成后必须停在 ready-for-preview。
+`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已进入 `wave1-branch-commit`。Human 已分别接受 [M1 地图运行时收口](task-todos/WI-MAP-RUNTIME-COMPLETION-001.md) 和 [P1 SYS-PLAYER 运行时](task-todos/WI-SYS-PLAYER-RUNTIME-001.md) 的 ready-for-preview 结果；两个窗口现在只可创建各自本地提交。[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 继续 gated。
 
 ### 第一波执行边界
 
 | 窗口 | 分支 | active 范围 | 交接 |
 |---|---|---|---|
-| 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | 先回传 diff/检查/风险并停在预览 Gate；Human 接受后才 commit |
-| 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | 先回传 diff/检查/风险并停在预览 Gate；Human 接受后才 commit |
+| 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | preview accepted；按白名单 commit 并回传提交 ID |
+| 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | preview accepted；按白名单 commit 并回传提交 ID |
 | Main | `integration/map-gameplay-p0` | 接收两个明确提交、修改 `CampusScene`/共享脚本并做全量验证 | Human 预览前不带回主线 |
 
 冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；SYS-CAMERA 当前禁止开工。
