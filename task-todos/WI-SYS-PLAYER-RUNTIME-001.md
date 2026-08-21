@@ -1,10 +1,11 @@
 ---
 work-item: WI-SYS-PLAYER-RUNTIME-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: preview-accepted-awaiting-commit
+status: branch-committed-awaiting-integration
 branch: impl/gameplay-serial
 authorization: DEC-SYS-PLAYER-RUNTIME-001
 updated: 2026-08-21
+result-commit: 482b52f
 ---
 
 # P1 SYS-PLAYER 运行时实施包
