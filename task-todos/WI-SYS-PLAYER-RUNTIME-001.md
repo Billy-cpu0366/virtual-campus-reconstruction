@@ -1,7 +1,7 @@
 ---
 work-item: WI-SYS-PLAYER-RUNTIME-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: branch-committed-awaiting-integration
+status: integration-ready-for-preview
 branch: impl/gameplay-serial
 authorization: DEC-SYS-PLAYER-RUNTIME-001
 updated: 2026-08-21

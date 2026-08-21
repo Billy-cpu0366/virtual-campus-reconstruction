@@ -5,12 +5,12 @@ work-item-level: implementation
 work-item-type: parallel-integration
 work-item-status: in-progress
 node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER
-current-phase: main-integration-setup
-current-gate: integration
-gate-status: active
+current-phase: wave1-integration-preview
+current-gate: integration-preview
+gate-status: awaiting-human
 authorization-ref: DEC-MAP-RUNTIME-COMPLETION-001; DEC-SYS-PLAYER-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: main-integration
+next-phase: integration-commit-and-camera-gate
 updated: 2026-08-21
 ---
 
@@ -18,13 +18,13 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` Main integration setup；只接收 Human 已接受的地图 `5290eca` 与玩家 `482b52f`。
-- **第一波分支结果**：M1 `WI-MAP-RUNTIME-COMPLETION-001` 和 P1 `WI-SYS-PLAYER-RUNTIME-001` 均已创建本地提交，等待带入 `integration/map-gameplay-p0`；不得 push。
+- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` integration preview；地图 `5290eca` 与玩家 `482b52f` 已带入 integration，Main 共享接线和全量验证 PASS。
+- **第一波 Gate**：M1/P1 当前为 `integration-ready-for-preview`；Main 接线未 commit、未 merge/push，等待 Human 审查集成截图和验证结果。
 - **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
 - **环境状态**：Human 已创建 `impl/map-runtime-completion`、`integration/map-gameplay-p0`，并将 `impl/gameplay-serial` fast-forward；三个 worktree 均在执行包基线 `638d4c6`，`git worktree list` 已验证。
-- **下一步**：把 `5290eca`、`482b52f` 按顺序带入 integration worktree；Main 处理 `CampusScene`/共享接线并运行全量验证，完成后停在第一波集成 Human Gate。
+- **下一步**：Human 审查第一波集成报告与 production 截图；接受后 Main 才创建 integration 本地提交并同步系统卡/总账。完成该 Gate 前 SYS-CAMERA 禁止启动。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -148,7 +148,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已进入 `main-integration-setup`。Human 已接受的 [M1 地图运行时收口](task-todos/WI-MAP-RUNTIME-COMPLETION-001.md) 提交为 `5290eca`，[P1 SYS-PLAYER 运行时](task-todos/WI-SYS-PLAYER-RUNTIME-001.md) 提交为 `482b52f`；Main 只可将这两个明确提交带入 integration worktree。[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 继续 gated。
+`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已进入 `wave1-integration-preview`。地图 `5290eca` 与玩家 `482b52f` 已分别成为 integration 提交 `ff860cc`、`b5f969b`；Main 完成共享接线和全量自动/浏览器验证，报告位于 integration worktree 的 `task-todos/WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001-集成报告.md`。[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 继续 gated。
 
 ### 第一波执行边界
 
@@ -156,7 +156,7 @@ updated: 2026-08-21
 |---|---|---|---|
 | 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | preview accepted；结果提交 `5290eca` |
 | 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | preview accepted；结果提交 `482b52f` |
-| Main | `integration/map-gameplay-p0` | 接收两个明确提交、修改 `CampusScene`/共享脚本并做全量验证 | Human 预览前不带回主线 |
+| Main | `integration/map-gameplay-p0` | 已接收两个明确提交并完成 `CampusScene`/共享 Smoke 接线 | 基础门禁、production/test-hooks 浏览器门禁和视觉抽查 PASS；awaiting Human |
 
 冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；SYS-CAMERA 当前禁止开工。
 
