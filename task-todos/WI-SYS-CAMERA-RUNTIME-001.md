@@ -1,16 +1,16 @@
 ---
 work-item: WI-SYS-CAMERA-RUNTIME-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: accepted-gated
+status: activation-ready-awaiting-baseline-sync
 branch: impl/gameplay-serial
 authorization: DEC-SYS-CAMERA-RUNTIME-001
-blocked-by: first-wave-main-integration-human-gate
+blocked-by: none
 updated: 2026-08-21
 ---
 
 # 第二波 SYS-CAMERA 运行时实施包
 
-> 范围已由 Human 接受，但当前禁止开工。只有 M1+P1 经 Main 第一次整合、全量回归和 Human Gate 后才能激活。
+> 范围已由 Human 接受；M1+P1 integration `f2fe106`、全量回归和 Human Gate 已满足。当前只允许先把同一 `impl/gameplay-serial` worktree 同步到该已接受基线；同步验证完成前不得写相机代码。
 
 ## 已接受范围
 

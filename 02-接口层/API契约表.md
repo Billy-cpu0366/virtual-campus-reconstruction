@@ -40,12 +40,12 @@ updated: 2026-08-21
 
 | 接口 | 契约状态 | 工程状态 | 当前边界 |
 |---|---|---|---|
-| 玩家位置快照 | Frozen | Core Ready；运行时接线待 P1 | 只读坐标，不转移 Sprite/Body 所有权 |
-| 玩法控制门 | Frozen | Not Started | 禁用必须停速并 reset 输入；相机不能直接管理键盘实现 |
-| 相机视口目标更新 | Frozen | Core Ready；航拍接线未开始 | 目标公式唯一归 SYS-CHUNK，相机只提供 viewport |
-| 地图运行时收敛 | Frozen | Integrated；跨线 Gate 待验证 | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
+| 玩家位置快照 | Frozen | Bounded Integrated + Verified（`f2fe106`） | `PhaserPlayerRuntime.position` 返回冻结坐标，不转移 Sprite/Body 所有权；chunk target 已消费 |
+| 玩法控制门 | Frozen | Bounded Integrated + Verified（`f2fe106`） | disable/blur/shutdown 停速并 reset 键盘/摇杆；SYS-CAMERA 只能调用门，不能直接管理设备 |
+| 相机视口目标更新 | Frozen | Core Ready；正常跟随/chunk 目标已验证，航拍接线待第二波 | 目标公式唯一归 SYS-CHUNK，相机只提供 viewport |
+| 地图运行时收敛 | Frozen | Bounded Integrated + Verified（`f2fe106`） | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
 
-> Frozen 只表示语义边界已由 Human 接受；不表示 M1/P1/SYS-CAMERA 已实现或验证。真实 TypeScript 签名在各实现工作项授权时确定。
+> Frozen 表示语义边界已接受；`f2fe106` 只验证第一波有界接口，不表示完整 M1/P1 系统或 SYS-CAMERA 已完成。
 
 ## 二、数据字典（常量 / 公式，不是接口）
 
