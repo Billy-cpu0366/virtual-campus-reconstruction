@@ -20,7 +20,7 @@ updated: 2026-08-20
 
 - **正在做**：`WI-PARALLEL-MAP-RECON-001`，四个隔离 worktree 已创建，等待调查窗口启动。
 - **已接受**：Human 回复“ok。开始创建worktree吧”，接受 `DEC-PARALLEL-WORKTREE-001` 的并行隔离方案。
-- **当前基线**：四个调查分支从代码基线 `1d0db48` / `master` 创建；主工作树当前提交为 `594855b`，只承载总控和权威状态。
+- **当前基线**：四个调查分支从代码基线 `1d0db48` / `master` 创建；主工作树只承载总控和权威状态，最新提交以 Git 历史为准。
 - **第一批窗口**：A SYS-LAYER 消费者；B SYS-WORLD 特殊13层；C SYS-ASSET 加载；D 多视口/性能基线。
 - **明确不做**：调查窗口不修改 `sample/`、权威文档或正式 `src/`/`game/`；不执行 reset/clean/pull/push；SYS-PLAYER 实现另行授权。
 - **下一步**：Human 在各窗口粘贴对应话术；完成后把报告带回本窗口进入 `report-handoff`。
