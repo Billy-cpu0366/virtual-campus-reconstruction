@@ -42,7 +42,7 @@ updated: 2026-08-21
 |---|---|---|---|
 | 玩家位置快照 | Frozen | Bounded Integrated + Verified（`f2fe106`） | `PhaserPlayerRuntime.position` 返回冻结坐标，不转移 Sprite/Body 所有权；chunk target 已消费 |
 | 玩法控制门 | Frozen | Bounded Integrated + Verified（`f2fe106`） | disable/blur/shutdown 停速并 reset 键盘/摇杆；SYS-CAMERA 只能调用门，不能直接管理设备 |
-| 相机视口目标更新 | Frozen | Main Integrated；camera/chunk/lifecycle/production Gate PASS，awaiting Human preview | 单一 pending viewport 由既有500ms循环消费；目标公式、请求/cache/Tilemap仍唯一归 SYS-CHUNK/WORLD |
+| 相机视口目标更新 | Frozen | Bounded Integrated + Verified（`cd3691a`） | 单一 pending viewport 由既有500ms循环消费；目标公式、请求/cache/Tilemap仍唯一归 SYS-CHUNK/WORLD |
 | 地图运行时收敛 | Frozen | Bounded Integrated + Verified（`f2fe106`） | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
 
 > Frozen 表示语义边界已接受；`f2fe106` 只验证第一波有界接口，不表示完整 M1/P1 系统或 SYS-CAMERA 已完成。

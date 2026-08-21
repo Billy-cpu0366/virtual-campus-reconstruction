@@ -1,16 +1,7 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-SYS-CAMERA-RUNTIME-001
-work-item-level: implementation
-work-item-type: serial-runtime
-work-item-status: in-progress
-node-refs: SYS-CAMERA; SYS-PLAYER; SYS-CHUNK
-current-phase: camera-integration-commit
-current-gate: human-integration-preview
-gate-status: accepted-awaiting-commit
-authorization-ref: DEC-SYS-CAMERA-RUNTIME-001
-preauthorized-next-work-item: none
-next-phase: camera-close
+current-work-item: none
+current-phase: work-item-selection
 updated: 2026-08-21
 ---
 
@@ -18,13 +9,13 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-SYS-CAMERA-RUNTIME-001` integration 本地提交；Human 已选择“接受并提交”，只允许已验证7文件。
-- **第一波已关闭**：M1/P1 分支、Main 接线、35文件/184项、两种 build、全部浏览器门禁和 Human Gate 均 PASS；integration 结果提交 `f2fe106`，两个子包为 bounded-integrated-verified。
-- **第二波分支已接受**：有界结果 `19ac98b`；Main 又完成真实 Phaser tween、控制锁、24→25 chunk20、图层、碰撞、生命周期、移动输入和production安全验证。
+- **当前工作项**：`none`；两波地图/玩法工作已关闭，当前只允许选择下一工作项，不写正式代码。
+- **第一波已关闭**：M1/P1 integration `f2fe106`，35文件/184项、两种build、全部浏览器门禁和 Human Gate PASS。
+- **第二波已关闭**：SYS-CAMERA 分支 `19ac98b`、integration `cd3691a`；36文件/192项、两种build、全部有界浏览器门禁和 Human Gate PASS。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
-- **环境状态**：`impl/gameplay-serial` 基线为双父提交 `36c1cf5`（父 `482b52f`、`f2fe106`）；tree `aa5e4010…` 与 `f2fe106` 完全一致，工作树 clean，独立复核 PASS。
-- **下一步**：创建7文件 integration 本地提交并回传 ID；随后同步最终收据并关闭第二波，不 merge master、不 push。
+- **环境状态**：integration 分支 `cd3691a` 和 gameplay 分支 `19ac98b` 均 clean；未 merge 到 master，GitHub push 按 Human 要求延期到下一次统一交付。
+- **下一步**：从既有候选、P0顺序和未解决差距选择最多三个候选；新正式代码必须重新授权。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -148,7 +139,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-第一波 `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已以 integration `f2fe106` 完成有界验证并获 Human 接受。当前 [SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 已在 `impl/gameplay-serial` / `36c1cf5` 激活；实现窗口不得修改 Main 独占文件，完成后停在 ready-for-preview。
+当前没有 active 正式工作项。第一波以 `f2fe106` 关闭；[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 以 gameplay `19ac98b`、integration `cd3691a` 完成有界验证并关闭。完整系统状态仍按各系统卡保持 `designed`，不因有界实现自动晋升。
 
 ### 第一波执行边界
 
@@ -184,6 +175,7 @@ updated: 2026-08-21
 | `WI-PARALLEL-MAP-RECON-001` | 已完成，结果基线 `85af370` | A-D 报告和 D 可复核收据已提交；`Q-LAYER-002/003` 保留；转入两波并行设计 |
 | `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | 已完成，结果提交 `a16ae54` | 接口、所有权、两波 Gate 和三个实施包已获 Human 接受 |
 | `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` | 已完成，integration 结果 `f2fe106` | M1/P1 bounded integration、全量回归与 Human Gate PASS；不代表完整系统完成 |
+| `WI-SYS-CAMERA-RUNTIME-001` | 已完成，gameplay `19ac98b`、integration `cd3691a` | 航拍/控制门/viewport/返回/降级及 Main 接线通过有界 Gate；完整 SYS-CAMERA 仍为 designed |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
