@@ -8,11 +8,11 @@ parent: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 updated: 2026-08-21
 ---
 
-# 窗口 A：SYS-INTERACT 调查包
+# 窗口 A：SYS-INTERACT 调查与设计包
 
 ## 目标
 
-查清原站从 `menuId` 请求到内容弹窗打开、关闭、离开、重复进入和销毁的状态流程，为 SYS-INTERACT 七格设计提供证据。
+查清原站从 `menuId` 请求到内容弹窗打开、关闭、离开、重复进入和销毁的状态流程，并在同一窗口形成完整 SYS-INTERACT 七格设计候选。
 
 ## 只回答这些问题
 
@@ -48,6 +48,7 @@ updated: 2026-08-21
 - 控制锁/暂停的直接证据或 UNKNOWN；
 - 面向 B 的呈现需求清单；
 - proposed 接口字段，不冻结 TypeScript 签名；
+- 完整七格设计候选：事实/数据/流程/失败清理/接口/验收/代码位置；
 - 失败与清理缺口；
 - FACT/INFERRED/UNKNOWN、证据定位和检查收据。
 

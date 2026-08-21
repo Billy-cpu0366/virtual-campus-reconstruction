@@ -8,11 +8,11 @@ parent: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 updated: 2026-08-21
 ---
 
-# 窗口 B：SYS-GAME-UI 调查包
+# 窗口 B：SYS-GAME-UI 调查与设计包
 
 ## 目标
 
-查清原站游戏 UI 的呈现层：canvas 外/内的 DOM 结构、弹窗容器、按钮、遮罩、层级、响应式和移动端行为，为 SYS-GAME-UI 七格设计提供证据。
+查清原站游戏 UI 的呈现层：canvas 外/内的 DOM 结构、弹窗容器、按钮、遮罩、层级、响应式和移动端行为，并在同一窗口形成完整 SYS-GAME-UI 七格设计候选。
 
 ## 只回答这些问题
 
@@ -48,6 +48,7 @@ updated: 2026-08-21
 - open/close 呈现输入输出；
 - pointer/keyboard/focus/scroll 隔离证据；
 - 面向 A 的 UI capability 清单；
+- 完整七格设计候选：事实/数据/流程/失败清理/接口/验收/代码位置；
 - 失败、resize、销毁和移动端 UNKNOWN；
 - FACT/INFERRED/UNKNOWN、证据定位和检查收据。
 

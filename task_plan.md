@@ -2,7 +2,7 @@
 workflow-ref: 03-执行层/README.md
 current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 work-item-level: investigation
-work-item-type: parallel-recon
+work-item-type: parallel-recon-design
 work-item-status: active
 current-phase: three-window-investigation
 current-gate: parallel-report-handoff
@@ -17,15 +17,16 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-PARALLEL-CONTENT-FOUNDATION-RECON-001`；三个独立窗口并行调查 INTERACT、GAME-UI、ENTITY，只形成报告和设计输入。
+- **当前工作项**：`WI-PARALLEL-CONTENT-FOUNDATION-RECON-001`；三个独立窗口并行完成 INTERACT、GAME-UI、ENTITY 的调查与七格设计候选。
 - **窗口 A**：SYS-INTERACT，负责 menuId→打开/关闭/离开/重复进入/销毁的业务状态。
 - **窗口 B**：SYS-GAME-UI，负责 DOM/Phaser 呈现、层级、响应式、移动端和输入隔离。
 - **窗口 C**：SYS-ENTITY，负责玩家/NPC/车辆创建、更新、所有权与销毁，并审查 `Q-ENTITY-001`。
-- **文件所有权**：每窗只写自己一份报告；Main 独占系统卡、API、总账、状态和最终设计整合。
+- **文件所有权**：每窗只写自己一份调查＋设计报告；Main 独占系统卡、API、总账、状态和最终设计整合。
 - **相机修复已关闭**：integration `798eda6`；typecheck、36文件/192测试、两种build、diff和Human实时预览 PASS，普通入口不再自动航拍。
 - **GitHub handoff**：继续暂停到本轮调查 Gate；旧 `cd3691a` 和旧 wave1 patch 均不得交付。
 - **共同基线**：A/B/C 三个 worktree 已从 clean 提交 `42e445d` 创建，分支分别为 `recon/content-interact`、`recon/game-ui`、`recon/entity-lifecycle`。
-- **下一步**：三窗口同时只读调查并各提交一份报告；Main 收齐后做范围/证据复核，再交 Human Gate 1。
+- **预授权**：Human 已授权三窗口设计完成后无需再次确认；Main 可退回修订、客观审查并直接完成三张权威卡/API/总账合并。
+- **下一步**：三窗口同时调查并各提交一份完整调查＋设计报告；Main 收齐后复核、合并并关闭设计项。功能实现仍需新授权。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -149,7 +150,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-当前 active 为 [内容与实体基础三窗口并行调查](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)。A/B/C 分别只写 INTERACT、GAME-UI、ENTITY 调查报告；Main 统一复核并在 Human Gate 后形成设计候选。本轮不写正式代码，不晋升系统状态。
+当前 active 为 [内容与实体基础三窗口并行调查与设计](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)。A/B/C 分别只写 INTERACT、GAME-UI、ENTITY 的调查＋七格设计报告；Human 已预授权 Main 复核、退回修订并写入权威卡，不再设置中间 Human Gate。本轮不写正式代码。
 
 ### 第一波执行边界
 

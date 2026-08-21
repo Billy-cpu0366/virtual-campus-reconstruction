@@ -8,11 +8,11 @@ parent: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 updated: 2026-08-21
 ---
 
-# 窗口 C：SYS-ENTITY 调查包
+# 窗口 C：SYS-ENTITY 调查与设计包
 
 ## 目标
 
-查清玩家、NPC、车辆等运行对象的创建、注册、更新、停用与销毁边界，回答 `Q-ENTITY-001` 是否存在直接证据支持共享实体生命周期。
+查清玩家、NPC、车辆等运行对象的创建、注册、更新、停用与销毁边界，回答 `Q-ENTITY-001` 是否存在直接证据支持共享实体生命周期，并在同一窗口形成完整 SYS-ENTITY 七格设计候选。
 
 ## 只回答这些问题
 
@@ -48,6 +48,7 @@ updated: 2026-08-21
 - scene/chunk/route/physics 依赖图；
 - `Q-ENTITY-001` 的 FACT 支持、反证或残余 UNKNOWN；
 - 复用观察：稳定部分、变化部分、收益、成本和风险；
+- 完整七格设计候选：事实/数据/流程/失败清理/接口/验收/代码位置；
 - 给 SYS-NPC/SYS-ROUTE 的后续边界，不顺手完成它们；
 - FACT/INFERRED/UNKNOWN、证据定位和检查收据。
 
