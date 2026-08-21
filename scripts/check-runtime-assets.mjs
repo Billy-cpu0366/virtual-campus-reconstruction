@@ -14,6 +14,7 @@ const SOURCE_ROOT = resolve(
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
   ["maps/collisions-objects.png", "maps/collisions-objects.png"],
+  ["maps/tileset-particles.png", "maps/tileset-particles.png"],
   ["sprites/player.webp", "sprites/player.webp"],
   ["js/phaser.min.js", "vendor/phaser.min.js"],
 ];
@@ -22,21 +23,102 @@ const CHUNK_FILES = [
   "maps/chunks/master.json",
   ...Array.from({ length: 25 }, (_, index) => `maps/chunks/chunk${index}.json`),
 ];
+const RAW_PARTICLE_GIDS = new Set([69355, 69356, 69357, 69358, 69359]);
 const MARKER_GIDS = new Map([
   ["cars", new Set([69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352])],
-  ["particles", new Set([69355, 69356, 69357, 69358, 69359])],
-  ["particles2", new Set([69355, 69356, 69357, 69358, 69359])],
   ["particles3", new Set([69361])],
   ["footsteps", new Set([69345])],
 ]);
+const PARTICLE_TILESET = {
+  columns: 7,
+  firstgid: 69355,
+  image: "tileset-particles.png",
+  imageheight: 16,
+  imagewidth: 112,
+  name: "tileset-particles",
+  tilecount: 7,
+  tileheight: 16,
+  tilewidth: 16,
+};
 
-function countRenderableExternalGids(layers) {
-  return (layers ?? []).reduce((count, layer) => {
-    if (MARKER_GIDS.has(layer.name) || !Array.isArray(layer.data)) {
-      return count;
+function pngDimensions(buffer) {
+  if (
+    buffer.length < 24 ||
+    !buffer.subarray(0, 8).equals(
+      Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    )
+  ) {
+    throw new Error("not a PNG");
+  }
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+}
+
+function checkParticleTileset(tilesets, label) {
+  const external = (tilesets ?? []).filter((tileset) => tileset.source);
+  if (external.length > 0) {
+    errors.push(`${label} still contains external tileset references`);
+  }
+  const particleTilesets = (tilesets ?? []).filter(
+    (tileset) => tileset.name === PARTICLE_TILESET.name,
+  );
+  if (particleTilesets.length !== 1) {
+    errors.push(`${label} must contain exactly one inline tileset-particles`);
+    return;
+  }
+  const particleTileset = particleTilesets[0];
+  for (const [key, expected] of Object.entries(PARTICLE_TILESET)) {
+    if (particleTileset[key] !== expected) {
+      errors.push(
+        `${label} particle tileset ${key}=${particleTileset[key]} ` +
+          `expected ${expected}`,
+      );
     }
-    return count + layer.data.filter((gid) => gid >= 69355).length;
-  }, 0);
+  }
+}
+
+function checkRawParticlePresence(layers, label) {
+  for (const layerName of ["particles", "particles2"]) {
+    const layer = (layers ?? []).find((item) => item.name === layerName);
+    if (
+      layer !== undefined &&
+      (!Array.isArray(layer.data) ||
+        !layer.data.some((gid) => RAW_PARTICLE_GIDS.has(gid)))
+    ) {
+      errors.push(`${label} has no retained raw visual ${layerName} GIDs`);
+    }
+  }
+}
+
+function checkLayerContracts(layers, label) {
+  for (const layer of layers ?? []) {
+    if (!Array.isArray(layer.data)) continue;
+    if (layer.name === "particles" || layer.name === "particles2") {
+      const unknown = layer.data.find(
+        (gid) => gid !== 0 && !RAW_PARTICLE_GIDS.has(gid),
+      );
+      if (unknown !== undefined) {
+        errors.push(`${label} has unsupported raw ${layer.name} GID ${unknown}`);
+      }
+      if (layer.data.includes(69360)) {
+        errors.push(`${label} still contains UNKNOWN raw GID 69360`);
+      }
+      continue;
+    }
+    const allowed = MARKER_GIDS.get(layer.name);
+    if (allowed !== undefined) {
+      const unknown = layer.data.find(
+        (gid) => gid !== 0 && !allowed.has(gid),
+      );
+      if (unknown !== undefined) {
+        errors.push(`${label} has unsupported ${layer.name} GID ${unknown}`);
+      }
+      continue;
+    }
+    const highGid = layer.data.find((gid) => gid >= 69355);
+    if (highGid !== undefined) {
+      errors.push(`${label} still contains visual particle GID ${highGid}`);
+    }
+  }
 }
 
 const errors = [];
@@ -55,6 +137,25 @@ for (const [sourceRelative, targetRelative] of FILES) {
   if (statSync(source).size !== statSync(target).size) {
     errors.push(`size mismatch: ${sourceRelative} -> ${targetRelative}`);
   }
+  if (sourceRelative === "maps/tileset-particles.png") {
+    try {
+      const sourceDimensions = pngDimensions(readFileSync(source));
+      const targetDimensions = pngDimensions(readFileSync(target));
+      for (const [label, dimensions] of [
+        ["source", sourceDimensions],
+        ["runtime", targetDimensions],
+      ]) {
+        if (dimensions.width !== 112 || dimensions.height !== 16) {
+          errors.push(
+            `${label} particle image is ${dimensions.width}x${dimensions.height}, ` +
+              "expected 112x16",
+          );
+        }
+      }
+    } catch (error) {
+      errors.push(`invalid particle image: ${error.message}`);
+    }
+  }
 }
 
 const mapPath = resolve(RUNTIME_ROOT, "maps/final_map.json");
@@ -69,16 +170,9 @@ if (!existsSync(mapPath)) {
     if (!Array.isArray(map.layers) || map.layers.length !== 24) {
       errors.push(`unexpected layer count: ${map.layers?.length}`);
     }
-    const external = (map.tilesets ?? []).filter((tileset) => tileset.source);
-    if (external.length > 0) {
-      errors.push("sanitized map still contains external tileset references");
-    }
-    const highGidCount = countRenderableExternalGids(map.layers);
-    if (highGidCount !== 0) {
-      errors.push(
-        `sanitized visual map still contains ${highGidCount} particle GIDs`,
-      );
-    }
+    checkParticleTileset(map.tilesets, "final_map.json");
+    checkRawParticlePresence(map.layers, "final_map.json");
+    checkLayerContracts(map.layers, "final_map.json");
   } catch (error) {
     errors.push(`invalid map JSON: ${error.message}`);
   }
@@ -109,12 +203,8 @@ if (existsSync(masterPath)) {
     ) {
       errors.push("runtime chunk master geometry is invalid");
     }
-    if (
-      !Array.isArray(master.tilesets) ||
-      master.tilesets.some((tileset) => tileset.source)
-    ) {
-      errors.push("runtime chunk master still contains external tileset references");
-    }
+    checkParticleTileset(master.tilesets, "chunks/master.json");
+    checkLayerContracts(master.layers, "chunks/master.json");
   } catch (error) {
     errors.push(`invalid chunk master JSON: ${error.message}`);
   }
@@ -134,20 +224,8 @@ for (const relative of CHUNK_FILES.slice(1)) {
       errors.push(`invalid chunk shape: ${relative}`);
       continue;
     }
-    const highGids = countRenderableExternalGids(chunk.layers);
-    if (highGids !== 0) {
-      errors.push(`${relative} still contains visual particle GIDs`);
-    }
-    for (const layer of chunk.layers) {
-      const allowed = MARKER_GIDS.get(layer.name);
-      if (allowed === undefined || !Array.isArray(layer.data)) continue;
-      const unknown = layer.data.find(
-        (gid) => gid !== 0 && !allowed.has(gid),
-      );
-      if (unknown !== undefined) {
-        errors.push(`${relative} has unsupported ${layer.name} GID ${unknown}`);
-      }
-    }
+    checkParticleTileset(chunk.tilesets, relative);
+    checkLayerContracts(chunk.layers, relative);
   } catch (error) {
     errors.push(`invalid chunk JSON ${relative}: ${error.message}`);
   }

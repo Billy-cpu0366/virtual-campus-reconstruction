@@ -81,9 +81,10 @@ function setTile(
 }
 
 describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
-  it("marker write/clear 按 chunk 对称，并保留 particles3 未消费诊断", () => {
+  it("particles raw visual 按 chunk 对称写入并清除，particles3 保留诊断", () => {
+    const map = new FakeTilemap();
     const renderer = new PhaserWorldRenderer(
-      new FakeTilemap(),
+      map,
       [],
       makeSpec(),
       LAYER_STRATEGIES,
@@ -102,8 +103,9 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       chunk,
     );
 
-    expect(renderer.markers).toHaveLength(2);
-    expect(renderer.markers[0]?.worldTile).toEqual({ x: 30, y: 59 });
+    expect(map.created.get("particles@1_2")?.depth).toBe(0);
+    expect(map.created.get("particles@1_2")?.tiles[3]?.[2]).toBe(69359);
+    expect(renderer.markers).toHaveLength(1);
     expect(renderer.particles3Diagnostics).toHaveLength(1);
     expect(renderer.particles3Diagnostics[0]?.message).toContain(
       "particles3",
@@ -113,6 +115,7 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       particles.layers.find((layer) => layer.name === "particles")!,
       chunk,
     );
+    expect(renderer.layers.has("particles@1_2")).toBe(false);
     expect(renderer.markers).toHaveLength(1);
     hooks.clearLayer!(
       particles3.layers.find((layer) => layer.name === "particles3")!,
@@ -122,9 +125,10 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     expect(renderer.diagnostics).toEqual([]);
   });
 
-  it("marker 未知 GID 失败时可被 World apply 回滚", () => {
+  it("raw visual 未知 GID 失败时可被 World apply 回滚", () => {
+    const map = new FakeTilemap();
     const renderer = new PhaserWorldRenderer(
-      new FakeTilemap(),
+      map,
       [],
       makeSpec(),
       LAYER_STRATEGIES,
@@ -135,7 +139,7 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     const badChunk = {
       coordinate: chunk.coordinate,
       layers: chunk.layers.map((layer) =>
-        layer.name === "particles3"
+        layer.name === "particles"
           ? {
               name: layer.name,
               data: layer.data.map((gid, index) =>
@@ -149,8 +153,13 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     const result = worldResult.world.applyChunk(badChunk);
     expect(result.kind).toBe("failure");
     expect(result.kind === "failure" ? result.reason : "").toContain(
-      "particles3",
+      "未知 raw visual GID：layer=particles",
     );
+    expect(result.kind === "failure" ? result.reason : "").toContain(
+      "69360",
+    );
+    expect(renderer.layers).toEqual(new Map());
+    expect(map.created).toEqual(new Map());
     expect(renderer.markers).toEqual([]);
     expect(renderer.diagnostics).toEqual([]);
   });
@@ -253,9 +262,14 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     );
     const hooks = renderer.hooks();
     const chunk = setTile("particles3", 69361, { x: 0, y: 0 });
+    const rawParticles = setTile("particles", 69355, { x: 1, y: 1 });
     hooks.writeLayer!(
       chunk.layers.find((layer) => layer.name === "particles3")!,
       chunk.coordinate,
+    );
+    hooks.writeLayer!(
+      rawParticles.layers.find((layer) => layer.name === "particles")!,
+      rawParticles.coordinate,
     );
     hooks.writeLayer!(
       makeChunk().layers.find((layer) => layer.name === "roof_concert")!,

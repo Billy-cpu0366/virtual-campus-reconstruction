@@ -8,6 +8,8 @@ import {
   layerStrategy,
   LAYER_STRATEGIES,
   ROOF_LAYERS,
+  isKnownRawVisualGid,
+  rawVisualGids,
 } from "../../src/layer/index.js";
 
 describe("SYS-LAYER 24 层策略表", () => {
@@ -37,6 +39,8 @@ describe("SYS-LAYER 24 层策略表", () => {
     expect(layerRole("cars")).toBe("marker");
     expect(layerRole("roof_concert")).toBe("dynamic-visual");
     expect(layerRole("bridge1_up_wall")).toBe("dynamic-collision");
+    expect(layerRole("particles")).toBe("visual");
+    expect(layerRole("particles2")).toBe("visual");
     expect(layerRole("particles3")).toBe("marker");
     expect(layerRole("footsteps")).toBe("marker");
   });
@@ -51,8 +55,24 @@ describe("SYS-LAYER 24 层策略表", () => {
     expect(layerStrategy("bridge1_up_wall").depth).toBe(3500);
     expect(layerStrategy("roof_concert").depth).toBe(3000);
     expect(layerStrategy("roof_factory2").depth).toBe(3300);
-    expect(layerStrategy("particles").depth).toBeUndefined();
+    expect(layerStrategy("particles").depth).toBe(0);
+    expect(layerStrategy("particles2").depth).toBe(0);
+    expect(layerStrategy("particles").rawGids).toEqual([
+      69355, 69356, 69357, 69358, 69359,
+    ]);
+    expect(layerStrategy("particles3").depth).toBeUndefined();
     expect(layerStrategy("footsteps").depth).toBeUndefined();
+  });
+
+  it("raw particle visual 只允许公开的五个 GID", () => {
+    expect(rawVisualGids("particles")).toEqual([
+      69355, 69356, 69357, 69358, 69359,
+    ]);
+    expect(rawVisualGids("particles2")).toEqual(rawVisualGids("particles"));
+    expect(isKnownRawVisualGid("particles", 69359)).toBe(true);
+    expect(isKnownRawVisualGid("particles2", 69355)).toBe(true);
+    expect(isKnownRawVisualGid("particles", 69360)).toBe(false);
+    expect(isKnownRawVisualGid("particles3", 69361)).toBe(false);
   });
 
   it("未知图层抛错", () => {

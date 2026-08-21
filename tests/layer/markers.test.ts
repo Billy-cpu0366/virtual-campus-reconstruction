@@ -53,9 +53,10 @@ describe("SYS-LAYER marker GID 与坐标", () => {
     expect(markerGids("cars")).toEqual([
       69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352,
     ]);
-    expect(isKnownMarkerGid("particles", 69359)).toBe(true);
-    expect(isKnownMarkerGid("particles2", 69359)).toBe(true);
+    expect(isKnownMarkerGid("particles", 69359)).toBe(false);
+    expect(isKnownMarkerGid("particles2", 69359)).toBe(false);
     expect(isKnownMarkerGid("particles3", 69361)).toBe(true);
+    expect(isKnownMarkerGid("particles3", 69360)).toBe(false);
     expect(isKnownMarkerGid("footsteps", 69345)).toBe(true);
     expect(
       extractMarkerRecords(

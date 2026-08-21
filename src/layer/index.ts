@@ -26,6 +26,8 @@ export {
   layerRole,
   layerStrategy,
   LAYER_STRATEGIES,
+  rawVisualGids,
+  isKnownRawVisualGid,
   ROOF_GROUPS,
   ROOF_LAYERS,
   roofGroupForLayer,
