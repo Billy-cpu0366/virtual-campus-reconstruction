@@ -19,7 +19,7 @@ updated: 2026-08-20
 ## ⏱ 当前状态（一眼看懂）
 
 - **正在做**：`WI-SYS-LAYER-RUNTIME-SEMANTICS-001`，按 P0 地图线收束图层运行时语义
-- **到哪了**：Human 已授权开始；SYS-LAYER 设计卡和 5 场景视觉证据已有，当前重点是 `Q-LAYER-002`、完整图层运行边界和与 SYS-WORLD/SYS-CHUNK 的职责收敛
+- **到哪了**：Human 已授权开始；SYS-LAYER 设计卡和 5 场景视觉证据已有。首轮 Bundle 调查确认 trajectory 独立消费，但未找到 `particles3`/GID 69361 的直接转换链；当前重点是 `Q-LAYER-002`、完整图层运行边界和与 SYS-WORLD/SYS-CHUNK 的职责收敛
 - **卡在哪**：暂无技术阻塞；particles3 直接消费者链仍 UNKNOWN，特殊 13 层卸载边界归 SYS-WORLD，需查证后再决定是否更新设计
 - **能不能写代码**：❌ 不能；本项先做公开证据核对、未知项收敛和验收包，不授权正式 `src/`/`game/` 实现
 - **验证入口**：只读 `sample/` 证据、现有图层卡、总账、代码/测试实际状态；完成后执行结构、链接、状态一致性和独立只读复核
