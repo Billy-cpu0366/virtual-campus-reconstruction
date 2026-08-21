@@ -81,7 +81,12 @@ def main():
     cards = sorted(
         glob.glob(os.path.join(ROOT, "03-执行层", "**", "*.md"), recursive=True)
     )
-    cards = [c for c in cards if os.path.basename(c) not in ("README.md", "00-总账.md")]
+    non_system_docs = {
+        "README.md",
+        "00-总账.md",
+        "GitHub交付中转协议.md",
+    }
+    cards = [c for c in cards if os.path.basename(c) not in non_system_docs]
 
     for card in cards:
         crel = relpath(card)

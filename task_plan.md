@@ -1,7 +1,15 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-current-phase: work-item-selection
+current-work-item: WI-GITHUB-HANDOFF-V1-001
+work-item-level: workflow
+work-item-type: delivery-infrastructure
+work-item-status: blocked
+current-phase: formal-repo-readonly-audit
+current-gate: external-repo-safety
+gate-status: awaiting-external-audit
+authorization-ref: DEC-GITHUB-HANDOFF-V1-001
+preauthorized-next-work-item: none
+next-phase: formal-repo-reconciliation-design
 updated: 2026-08-21
 ---
 
@@ -9,13 +17,13 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`none`；两波地图/玩法工作已关闭，当前只允许选择下一工作项，不写正式代码。
+- **当前工作项**：`WI-GITHUB-HANDOFF-V1-001`；Git bundle 双向中转协议已接受，当前只做 Windows 正式仓库只读审计，不写正式代码。
 - **第一波已关闭**：M1/P1 integration `f2fe106`，35文件/184项、两种build、全部浏览器门禁和 Human Gate PASS。
 - **第二波已关闭**：SYS-CAMERA 分支 `19ac98b`、integration `cd3691a`；36文件/192项、两种build、全部有界浏览器门禁和 Human Gate PASS。
-- **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
-- **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
-- **环境状态**：integration 分支 `cd3691a` 和 gameplay 分支 `19ac98b` 均 clean；未 merge 到 master，GitHub push 按 Human 要求延期到下一次统一交付。
-- **下一步**：从既有候选、P0顺序和未解决差距选择最多三个候选；新正式代码必须重新授权。
+- **协议状态**：`accepted-unverified`；首次真实 reconciliation、bundle 往返和远端收据完成前不能称为 verified，也不安装全局 workflow。
+- **明确不做**：不应用旧 wave1 patch，不处理未知 dirty，不执行 pull/reset/clean/覆盖，不直接推 main，不写 `src/game`。
+- **环境状态**：WSL integration `cd3691a` 与 gameplay `19ac98b` clean；外部 Pi 报告 Windows main 有3个文档修改、未跟踪 `task-todos/`，fetch 前引用为 ahead18/behind4，尚未执行交付。
+- **下一步**：外部 Pi fetch 后返回 HEAD/origin/main/merge-base、dirty、local-only/remote-only、cherry等价和冲突收据；再设计无损 reconciliation。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -139,7 +147,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-当前没有 active 正式工作项。第一波以 `f2fe106` 关闭；[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 以 gameplay `19ac98b`、integration `cd3691a` 完成有界验证并关闭。完整系统状态仍按各系统卡保持 `designed`，不因有界实现自动晋升。
+当前 active 为 [GitHub 中转协议首次对齐](task-todos/WI-GITHUB-HANDOFF-V1-001.md)，只允许外部正式仓库审计和协议文档；正式代码 Gate 关闭。第一波 `f2fe106` 与第二波 gameplay `19ac98b` / integration `cd3691a` 已完成有界验证。
 
 ### 第一波执行边界
 

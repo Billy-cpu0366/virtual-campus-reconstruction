@@ -1,7 +1,7 @@
 ---
 tags: [虚拟校园, 执行层, 操作手册]
 type: manual
-updated: 2026-08-18
+updated: 2026-08-21
 ---
 
 # 执行层（操作手册）
@@ -41,6 +41,17 @@ updated: 2026-08-18
 4. commit、push 或创建 PR 前先展示变更摘要、验证结果和未解决风险；Human 明确接受后才进入对应 Git 步骤。
 5. 创建或更新 PR 后停止 PR 流程；不自动合并，不把 Draft PR 当作已进入 `main`。
 6. `task_plan.md` 仍是动态状态唯一权威；`task-todos/` 只记录有界工作，不覆盖当前状态或决策台账。
+
+## GitHub 离线中转（`DEC-GITHUB-HANDOFF-V1-001`）
+
+WSL 不直接访问 GitHub；Windows 外部 Pi 是正式仓库和远端操作的唯一执行方。完整规则见 [GitHub 交付中转协议 v1](GitHub交付中转协议.md)。
+
+1. 首次先无损审计并对齐 Windows dirty/main 分叉；旧第一波普通补丁停止使用。
+2. 对齐后使用 Git bundle 双向桥：Windows 送 canonical 基线到 WSL，WSL 送统一 delivery 分支到 Windows。
+3. 最终 delivery 必须同时包含实现、Main 接线、权威文档和验证收据，不把代码/文档留在两条未汇总分支。
+4. 外部 Pi 只在仓库外 worktree 验证；正式 `main` 保持 clean 并跟随 `origin/main`。
+5. Human 审查正式仓库实际 diff 后才允许 push delivery 分支；PR/merge 分别授权。
+6. bundle、manifest、SHA-256、commit/tree 和远端核对必须形成收据；未完成首次真实往返前协议状态为 `accepted-unverified`。
 
 ## API 协作规范审查补充（`DEC-API-COLLABORATION-001`）
 
