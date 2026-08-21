@@ -1,15 +1,15 @@
 ---
 workflow-ref: 03-执行层/README.md
 current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-work-item-level: investigation
-work-item-type: parallel-recon-design
+work-item-level: integration
+work-item-type: parallel-design-implementation-pipeline
 work-item-status: active
-current-phase: three-window-investigation
-current-gate: parallel-report-handoff
+current-phase: pipeline-freeze
+current-gate: end-to-end-workflow-review
 gate-status: in_progress
-authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-RECON-001
+authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 preauthorized-next-work-item: none
-next-phase: three-window-investigation
+next-phase: three-window-design
 updated: 2026-08-21
 ---
 
@@ -25,8 +25,9 @@ updated: 2026-08-21
 - **相机修复已关闭**：integration `798eda6`；typecheck、36文件/192测试、两种build、diff和Human实时预览 PASS，普通入口不再自动航拍。
 - **GitHub handoff**：继续暂停到本轮调查 Gate；旧 `cd3691a` 和旧 wave1 patch 均不得交付。
 - **共同基线**：A/B/C 三个 worktree 已从 clean 提交 `42e445d` 创建，分支分别为 `recon/content-interact`、`recon/game-ui`、`recon/entity-lifecycle`。
-- **预授权**：Human 已授权三窗口设计完成后无需再次确认；Main 可退回修订、客观审查并直接完成三张权威卡/API/总账合并。
-- **下一步**：三窗口同时调查并各提交一份完整调查＋设计报告；Main 收齐后复核、合并并关闭设计项。功能实现仍需新授权。
+- **一条龙授权**：Human 已授权 P0流程冻结→P1三窗调查设计→P2 Main设计合并→P3自动派工→P4三窗有界实现→P5 Main接线合并→P6全量验证→P7文档关闭，中间不再等待确认。
+- **实现硬边界**：Main 先冻结接口/文件所有权；窗口不改共享接线文件；C只有证据支持时写码，否则提交no-code；不push/PR/远端同步。
+- **当前下一步**：验证并提交 [`一条龙执行流程`](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md)，然后立即启动三窗口调查＋设计。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -150,7 +151,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-当前 active 为 [内容与实体基础三窗口并行调查与设计](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)。A/B/C 分别只写 INTERACT、GAME-UI、ENTITY 的调查＋七格设计报告；Human 已预授权 Main 复核、退回修订并写入权威卡，不再设置中间 Human Gate。本轮不写正式代码。
+当前 active 为 [内容与实体基础三线一条龙流水线](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)，详细状态机见 [执行流程](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md)。A/B/C 先分别完成调查＋七格设计；Main 自动复核并冻结接口后，再生成三个无共享写冲突的实现包；最后由 Main 统一接线、全量回归和关闭。中间不设置 Human Gate，不push。
 
 ### 第一波执行边界
 

@@ -1,9 +1,10 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-parallel-investigation
-work-item-type: parallel-investigation
+status: active-pipeline-freeze
+work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
-authorization: DEC-PARALLEL-CONTENT-FOUNDATION-RECON-001
+authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
+workflow-ref: task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md
 definition-commit: db1f878
 shared-baseline: 42e445d
 updated: 2026-08-21
@@ -19,7 +20,7 @@ updated: 2026-08-21
 - 窗口 B：`SYS-GAME-UI` 游戏 UI 的呈现与响应式边界；
 - 窗口 C：`SYS-ENTITY` 玩家/NPC/车辆的创建、更新与销毁边界。
 
-本工作项完成调查、详细设计候选与 Main 权威合并，不写正式代码、不预授权后续实现。Human 已预授权 Main 在客观复核通过后直接完成设计落盘，无需在报告和设计之间再次等待确认。
+本工作项按一条龙流程完成调查、详细设计、Main权威合并、自动实现派工、三窗有界实现、Main接线与本地验证。Human 已预授权全过程中间不再等待确认；远端交付和未列范围仍未授权。
 
 ## 2. 为什么开三个窗口
 
@@ -29,7 +30,7 @@ updated: 2026-08-21
 - B 负责“DOM/Phaser 怎么呈现、移动端怎么显示”，不决定业务状态；
 - C 负责“运行对象归谁创建和销毁”，不碰弹窗与 UI。
 
-正式实现不能三线并行：A/B 最终会共同争用 `CampusScene`、控制门和页面 DOM；C 后续会与 NPC/Route 争用实体所有权。因此本轮只并行调查与设计，Main 汇总后确定候选实现顺序，但不会启动实现。
+三个窗口可以并行调查、设计并实现各自无共享写冲突的有界模块，但不能并行修改 `CampusScene`、控制门接线、页面入口或实体消费者。Main 在设计合并后先冻结接口和文件所有权，再自动派工；所有共享接线和最终 merge 由 Main 串行完成。
 
 ## 3. 窗口与 worktree
 
@@ -102,7 +103,7 @@ Human 原文：`等到三个方案设计完了你就不需要我同意自己进�
 
 该预授权允许：三个窗口完成调查＋设计报告；Main 退回修订、技术裁决、写入三张系统卡/API/总账/决策并创建本地设计提交。
 
-该预授权不允许：写功能代码、创建实现分支、merge 运行时代码、恢复航拍入口、push/PR/远端同步，或对无证据产品内容做猜测。
+该预授权允许的实现和本地 merge 仅以 [`一条龙执行流程`](WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md) 为准；仍不允许恢复航拍入口、push/PR/远端同步、Windows正式仓库操作，或对无证据产品内容做猜测。
 
 ### 启动 Gate
 
@@ -120,24 +121,24 @@ Human 原文：`等到三个方案设计完了你就不需要我同意自己进�
 
 ## 9. 本轮不做
 
-- 不实现 Zone/Interact/Game UI/Entity/NPC/Route/FX；
+- 不实现完整 NPC、车辆、Route、FX 或未获证据支持的通用 Entity 框架；
 - 不创建开始页或把航拍重新接回入口；
-- 不恢复 GitHub push、PR 或 merge；
-- 不同时开启三个正式实现窗口；
-- 不把原始调查报告直接当作项目事实源；只有经 Main 证据复核并写入权威卡的结论才成为本轮已授权设计。
+- 不执行 GitHub push、PR、远端 merge 或 Windows 正式仓库操作；
+- 不允许三个实现窗口修改 Main-owned 共享接线文件；
+- 不把原始调查报告直接当作项目事实源；只有经 Main 证据复核并写入权威卡的结论才成为当前设计。
 
-## 10. 调查后的推荐实施顺序（仅候选）
+## 10. 本轮已授权实施顺序
 
 ```text
-内容纵切片：SYS-ZONE runtime
-  → SYS-INTERACT runtime
-  → SYS-GAME-UI
-  → 一个真实作品弹窗闭环
+并行有界实现：
+  A = SYS-ZONE CORE → SYS-INTERACT CORE
+  B = SYS-GAME-UI CORE / 独立 adapter
+  C = evidence-backed SYS-ENTITY CORE，或 no-code
 
-旁支基础：SYS-ENTITY
-  → SYS-NPC
-  → SYS-ROUTE
-  → SYS-FX
+Main 串行 integration：
+  A → B → 一个证据充分的真实内容入口
+  → C（仅有真实消费者时接线）
+  → 全量验证与文档关闭
 ```
 
-最终候选顺序由 Main 依据三份报告完成技术判断并写入关闭报告；真正实现仍需新的明确授权。
+上述有界实现和 Main 本地合并已由 `DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001` 授权；完整 NPC/Route/FX、远端交付和本轮外系统仍需新的明确授权。
