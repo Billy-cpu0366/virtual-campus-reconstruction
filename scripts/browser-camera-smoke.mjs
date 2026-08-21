@@ -1,19 +1,13 @@
-import { writeFileSync } from "node:fs";
-
 const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
 const inputUrl =
-  process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
-const chunkUrl = new URL(inputUrl);
-chunkUrl.searchParams.set("collision-test", "1");
-chunkUrl.searchParams.set("chunk-smoke", String(Date.now()));
-const url = chunkUrl.toString();
-const screenshotPath = process.env.SMOKE_SCREENSHOT;
-const initialWaitMs = Number(process.env.CHUNK_INITIAL_WAIT_MS ?? 2500);
-const targetWaitMs = Number(process.env.CHUNK_TARGET_WAIT_MS ?? 2000);
-const targetPosition = Object.freeze({
-  x: Number(process.env.CHUNK_TARGET_X ?? 224),
-  y: Number(process.env.CHUNK_TARGET_Y ?? 2016),
-});
+  process.argv[2] ??
+  process.env.SMOKE_URL ??
+  "http://127.0.0.1:4175/";
+const cameraUrl = new URL(inputUrl);
+cameraUrl.searchParams.set("camera-smoke", String(Date.now()));
+const url = cameraUrl.toString();
+const timeoutMs = Number(process.env.CAMERA_SMOKE_TIMEOUT_MS ?? 10000);
+const pollMs = Number(process.env.CAMERA_SMOKE_POLL_MS ?? 50);
 
 const targetResponse = await fetch(
   `${base}/json/new?${encodeURIComponent(url)}`,
@@ -98,60 +92,78 @@ async function evaluate(expression) {
   return result.result?.value;
 }
 
+const snapshotExpression = `(() => {
+  const debug = window.__campusDebug?.();
+  const chunks = [...new Set(
+    performance.getEntriesByType("resource")
+      .map((entry) => entry.name)
+      .filter((name) => name.includes("/maps/chunks/chunk")),
+  )];
+  return { debug, chunks };
+})()`;
+
 await command("Runtime.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
-await new Promise((resolve) => setTimeout(resolve, initialWaitMs));
 
-const chunkResources = () => `performance.getEntriesByType("resource")
-  .map((entry) => entry.name)
-  .filter((name) => name.includes("/maps/chunks/chunk"))`;
-const before = await evaluate(chunkResources());
-const targetHookType = await evaluate(
-  "typeof window.__campusCollisionTest",
-);
-if (targetHookType !== "object") {
-  throw new Error("chunk target test hook is unavailable");
+const samples = [];
+let sawRunning = false;
+let sawLockedControls = false;
+let completed;
+const startedAt = Date.now();
+while (Date.now() - startedAt < timeoutMs) {
+  await new Promise((resolve) => setTimeout(resolve, pollMs));
+  const snapshot = await evaluate(snapshotExpression);
+  if (snapshot?.debug === undefined) continue;
+  samples.push(snapshot);
+  const runtime = snapshot.debug.cameraRuntime;
+  if (runtime?.status === "running") sawRunning = true;
+  if (
+    runtime?.status === "running" &&
+    snapshot.debug.playerRuntime?.control?.enabled === false
+  ) {
+    sawLockedControls = true;
+  }
+  if (runtime?.status === "completed" && runtime?.result === "completed") {
+    completed = snapshot;
+    break;
+  }
 }
-await evaluate(
-  `window.__campusCollisionTest.setPlayerPosition(` +
-    `${targetPosition.x}, ${targetPosition.y})`,
-);
-await new Promise((resolve) => setTimeout(resolve, targetWaitMs));
 
-const after = await evaluate(chunkResources());
-const uniqueBefore = [...new Set(before)];
-const uniqueAfter = [...new Set(after)];
-const newRequests = uniqueAfter.filter((name) => !uniqueBefore.includes(name));
-const allChunksPreloaded = uniqueBefore.length === 25;
-const chunk20Requested = uniqueAfter.some((name) =>
-  name.endsWith("/maps/chunks/chunk20.json"),
-);
-
-if (screenshotPath) {
-  const screenshot = await command("Page.captureScreenshot", {
-    format: "png",
-  });
-  writeFileSync(screenshotPath, Buffer.from(screenshot.data, "base64"));
-}
+await new Promise((resolve) => setTimeout(resolve, 600));
+const settled = await evaluate(snapshotExpression);
+const chunkCounts = samples.map((sample) => sample.chunks.length);
+const minChunkCount = chunkCounts.length > 0 ? Math.min(...chunkCounts) : 0;
+const maxChunkCount = chunkCounts.length > 0 ? Math.max(...chunkCounts) : 0;
+const effects = settled?.debug?.cameraRuntime?.effectAvailability;
+const nativeScale = settled?.debug?.cameraRuntime?.nativeScaleSettings;
 
 const result = {
   url,
-  targetPosition,
-  targetHookType,
-  initialChunks: uniqueBefore,
-  afterTargetChunks: uniqueAfter,
-  newChunksAfterTarget: newRequests,
-  allChunksPreloaded,
-  chunk20Requested,
+  sampleCount: samples.length,
+  sawRunning,
+  sawLockedControls,
+  completed,
+  settled,
+  chunkCounts: { min: minChunkCount, max: maxChunkCount },
   events,
-  screenshotPath: screenshotPath ?? null,
   passed:
-    uniqueBefore.length === 24 &&
-    uniqueAfter.length === 25 &&
-    newRequests.length === 1 &&
-    chunk20Requested &&
+    sawRunning &&
+    sawLockedControls &&
+    completed?.debug?.cameraRuntime?.controlDisables === 1 &&
+    settled?.debug?.cameraRuntime?.controlEnables === 1 &&
+    settled?.debug?.cameraRuntime?.viewportUpdates > 6 &&
+    settled?.debug?.cameraRuntime?.pendingViewport === null &&
+    settled?.debug?.playerRuntime?.control?.enabled === true &&
+    settled?.debug?.camera?.zoom === 1 &&
+    settled?.debug?.camera?.roundPixels === true &&
+    nativeScale?.nativeScale > 0 &&
+    nativeScale?.blurStrength === 16 * nativeScale.nativeScale &&
+    effects?.HeatHaze === "unavailable" &&
+    effects?.Fire === "unavailable" &&
+    effects?.Morph === "unavailable" &&
+    maxChunkCount > minChunkCount &&
     events.exceptions.length === 0 &&
     events.failedRequests.length === 0 &&
     events.badResponses.length === 0,

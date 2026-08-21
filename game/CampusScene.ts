@@ -42,9 +42,16 @@ import {
   type PhaserPlayerVisualLike,
 } from "./PhaserPlayerRuntime.js";
 import {
+  PhaserCameraRuntime,
+  type PhaserCameraSceneLike,
+} from "./PhaserCameraRuntime.js";
+import {
   CAMERA_BOUNDS,
+  CAMERA_SEQUENCE,
   CAMERA_ZOOM,
   FOLLOW_LERP,
+  type CameraRunResult,
+  type CameraRuntimeStartOptions,
 } from "../src/camera/index.js";
 import {
   BRIDGE_PLAYER_DEPTH,
@@ -69,6 +76,16 @@ import {
 
 const CHUNK_MASTER_URL = "/maps/chunks/master.json";
 const CHUNK_UPDATE_INTERVAL_MS = 500;
+const CAMERA_TEST_HOOK_START_OPTIONS: CameraRuntimeStartOptions = Object.freeze({
+  sequence: CAMERA_SEQUENCE.map((point) =>
+    Object.freeze({
+      ...point,
+      duration: point.duration === 0 ? 0 : 200,
+      stayDuration: 100,
+    }),
+  ),
+  returnDuration: 200,
+});
 const MOVEMENT_KEY_BY_CODE = new Map<string, keyof KeyState>([
   ["ArrowUp", "up"],
   ["KeyW", "up"],
@@ -95,6 +112,12 @@ async function fetchJson(
 export class CampusScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
   private playerRuntime: PhaserPlayerRuntime | undefined;
+  private cameraRuntime: PhaserCameraRuntime | undefined;
+  private cameraRunResult: CameraRunResult | undefined;
+  private pendingCameraViewport: CameraViewport | undefined;
+  private cameraViewportUpdates = 0;
+  private cameraControlDisables = 0;
+  private cameraControlEnables = 0;
   private joystick!: PhaserVirtualJoystick;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<
@@ -117,6 +140,8 @@ export class CampusScene extends Phaser.Scene {
   private sceneDestroyed = false;
   private readonly testHooksEnabled =
     import.meta.env.DEV || import.meta.env.MODE === "test-hooks";
+  private readonly cameraTestHooksEnabled =
+    import.meta.env.MODE === "test-hooks";
   private debugHook: (() => unknown) | undefined;
   private collisionTestHook:
     | { setPlayerPosition(x: number, y: number): void }
@@ -186,6 +211,9 @@ export class CampusScene extends Phaser.Scene {
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.events.once("shutdown", () => {
       this.sceneDestroyed = true;
+      this.cameraRuntime?.shutdown();
+      this.cameraRuntime = undefined;
+      this.pendingCameraViewport = undefined;
       this.playerRuntime?.shutdown();
       this.joystick?.shutdown();
       this.stopPlayerMovement();
@@ -445,6 +473,23 @@ export class CampusScene extends Phaser.Scene {
           position: this.playerRuntime?.position ?? null,
           control: this.playerRuntime?.control ?? null,
         },
+        cameraRuntime: {
+          status: this.cameraRuntime?.status ?? null,
+          result: this.cameraRunResult?.status ?? null,
+          viewportUpdates: this.cameraViewportUpdates,
+          controlDisables: this.cameraControlDisables,
+          controlEnables: this.cameraControlEnables,
+          pendingViewport: this.pendingCameraViewport ?? null,
+          nativeScaleSettings: this.cameraRuntime?.nativeScaleSettings ?? null,
+          effectAvailability:
+            this.cameraRuntime?.effectAvailability ?? null,
+        },
+        camera: {
+          scrollX: this.cameras.main.scrollX,
+          scrollY: this.cameras.main.scrollY,
+          zoom: this.cameras.main.zoom,
+          roundPixels: this.cameras.main.roundPixels,
+        },
         body: {
           width: PLAYER_BODY_WIDTH,
           height: PLAYER_BODY_HEIGHT,
@@ -486,6 +531,60 @@ export class CampusScene extends Phaser.Scene {
       }
     }
     this.updateDynamicTargets();
+    this.startCameraTour();
+  }
+
+  private startCameraTour(): void {
+    const playerRuntime = this.playerRuntime;
+    if (playerRuntime === undefined || this.sceneDestroyed) return;
+
+    const camera = this.cameras.main;
+    const runtime = new PhaserCameraRuntime(
+      this as unknown as PhaserCameraSceneLike,
+      {
+        controlGate: {
+          disableControls: () => {
+            this.cameraControlDisables += 1;
+            playerRuntime.disableControls(this.time.now);
+          },
+          enableControls: () => {
+            this.cameraControlEnables += 1;
+            playerRuntime.enableControls(this.time.now);
+          },
+        },
+        getPlayerPosition: () => playerRuntime.position,
+        startHardFollow: (settings) => {
+          camera.startFollow(
+            this.player,
+            true,
+            settings.lerpX,
+            settings.lerpY,
+          );
+        },
+        nativeScaleProvider: () => window.devicePixelRatio,
+        onViewport: (viewport) => {
+          this.pendingCameraViewport = viewport;
+          this.cameraViewportUpdates += 1;
+        },
+      },
+    );
+    this.cameraRuntime = runtime;
+    const options = this.cameraTestHooksEnabled
+      ? CAMERA_TEST_HOOK_START_OPTIONS
+      : undefined;
+    const run = options === undefined ? runtime.start() : runtime.start(options);
+    void run
+      .then((result) => {
+        this.cameraRunResult = result;
+        if (result.status === "failed" && !this.sceneDestroyed) {
+          console.error("相机航拍失败", result.error);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!this.sceneDestroyed) {
+          console.error("相机航拍启动失败", error);
+        }
+      });
   }
 
   private async shutdownDynamicWorld(): Promise<void> {
@@ -694,13 +793,15 @@ export class CampusScene extends Phaser.Scene {
     if (this.sceneDestroyed) return;
 
     const camera = this.cameras.main;
-    const viewport: CameraViewport = {
-      scrollX: camera.scrollX,
-      scrollY: camera.scrollY,
-      width: camera.width,
-      height: camera.height,
-      zoom: camera.zoom,
-    };
+    const viewport: CameraViewport =
+      this.pendingCameraViewport ?? {
+        scrollX: camera.scrollX,
+        scrollY: camera.scrollY,
+        width: camera.width,
+        height: camera.height,
+        zoom: camera.zoom,
+      };
+    this.pendingCameraViewport = undefined;
     const playerPosition = this.playerRuntime?.position ?? {
       x: this.player.x,
       y: this.player.y,

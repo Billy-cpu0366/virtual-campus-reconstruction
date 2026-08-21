@@ -66,7 +66,7 @@ export interface TilemapLayerLike {
   ): void;
   setDepth?(depth: number): void;
   setVisible?(value: boolean): void;
-  destroy?(fromScene?: boolean): void;
+  destroy?(removeFromTilemap?: boolean): void;
 }
 
 export interface PhaserWorldRendererOptions {
@@ -584,7 +584,10 @@ export class PhaserWorldRenderer {
     // first can leave a collider pointing at a different dead layer.
     if (this.map.removeLayer !== undefined) {
       this.map.removeLayer(layer);
-      layer.destroy?.();
+      // Phaser TilemapLayer.destroy() defaults to removing itself from the
+      // Tilemap. We already removed it above, so prevent a second removal
+      // from corrupting the remaining LayerData indexes.
+      layer.destroy?.(false);
     } else if (this.map.destroyLayer !== undefined) {
       this.map.destroyLayer(layer);
     } else {

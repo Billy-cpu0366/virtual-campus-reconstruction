@@ -14,6 +14,7 @@ class FakeTilemapLayer {
   depth = 0;
   visible = true;
   destroyed = false;
+  removeFromTilemapOnDestroy: boolean | undefined;
   tiles: readonly (readonly number[])[] = [];
 
   putTilesAt(tiles: readonly (readonly number[])[]): void {
@@ -32,8 +33,9 @@ class FakeTilemapLayer {
     this.visible = value;
   }
 
-  destroy(): void {
+  destroy(removeFromTilemap = true): void {
     this.destroyed = true;
+    this.removeFromTilemapOnDestroy = removeFromTilemap;
   }
 }
 
@@ -103,8 +105,9 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       chunk,
     );
 
-    expect(map.created.get("particles@1_2")?.depth).toBe(0);
-    expect(map.created.get("particles@1_2")?.tiles[3]?.[2]).toBe(69359);
+    const particleLayer = map.created.get("particles@1_2");
+    expect(particleLayer?.depth).toBe(0);
+    expect(particleLayer?.tiles[3]?.[2]).toBe(69359);
     expect(renderer.markers).toHaveLength(1);
     expect(renderer.particles3Diagnostics).toHaveLength(1);
     expect(renderer.particles3Diagnostics[0]?.message).toContain(
@@ -116,6 +119,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       chunk,
     );
     expect(renderer.layers.has("particles@1_2")).toBe(false);
+    expect(particleLayer?.destroyed).toBe(true);
+    expect(particleLayer?.removeFromTilemapOnDestroy).toBe(false);
     expect(renderer.markers).toHaveLength(1);
     hooks.clearLayer!(
       particles3.layers.find((layer) => layer.name === "particles3")!,
