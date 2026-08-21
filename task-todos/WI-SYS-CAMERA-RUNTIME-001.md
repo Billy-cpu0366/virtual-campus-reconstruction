@@ -1,13 +1,14 @@
 ---
 work-item: WI-SYS-CAMERA-RUNTIME-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001
-status: preview-accepted-awaiting-commit
+status: branch-committed-awaiting-main-integration
 branch: impl/gameplay-serial
 authorization: DEC-SYS-CAMERA-RUNTIME-001
 blocked-by: none
 updated: 2026-08-21
 baseline-commit: 36c1cf5
 baseline-tree: aa5e4010f3426f746a41a92d614143e2f11da168
+result-commit: 19ac98b
 ---
 
 # 第二波 SYS-CAMERA 运行时实施包

@@ -5,12 +5,12 @@ work-item-level: implementation
 work-item-type: serial-runtime
 work-item-status: in-progress
 node-refs: SYS-CAMERA; SYS-PLAYER; SYS-CHUNK
-current-phase: camera-runtime-branch-commit
-current-gate: camera-implementation-preview
-gate-status: accepted-awaiting-commit
+current-phase: camera-main-integration
+current-gate: integration
+gate-status: active
 authorization-ref: DEC-SYS-CAMERA-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: camera-main-integration
+next-phase: camera-integration-preview
 updated: 2026-08-21
 ---
 
@@ -18,13 +18,13 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-SYS-CAMERA-RUNTIME-001` 分支提交；8个允许文件已 ready-for-preview 并获 Human“接受并提交”授权。
+- **正在做**：Main 接入 `WI-SYS-CAMERA-RUNTIME-001`；gameplay 分支结果 `19ac98b` 已通过范围、父提交、clean 和 CRLF-aware 独立复核。
 - **第一波已关闭**：M1/P1 分支、Main 接线、35文件/184项、两种 build、全部浏览器门禁和 Human Gate 均 PASS；integration 结果提交 `f2fe106`，两个子包为 bounded-integrated-verified。
 - **第二波预览已接受**：6点111秒、3秒 Power2、控制门、viewport、硬跟随、nativeScale、降级及 shutdown 已审查；36文件/192项、typecheck、diff check PASS。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
 - **环境状态**：`impl/gameplay-serial` 基线为双父提交 `36c1cf5`（父 `482b52f`、`f2fe106`）；tree `aa5e4010…` 与 `f2fe106` 完全一致，工作树 clean，独立复核 PASS。
-- **下一步**：只提交已审查的8个相机文件并回传 ID；随后由 Main 接入 `CampusScene`、补共享 Smoke并跑 production/test-hooks browser Gate。
+- **下一步**：将 `19ac98b` 带入现有 integration 分支，由 Main 接入 `CampusScene`、补共享 Smoke并跑 production/test-hooks browser Gate。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
