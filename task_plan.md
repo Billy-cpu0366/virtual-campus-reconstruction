@@ -4,12 +4,12 @@ current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 work-item-level: integration
 work-item-type: parallel-design-implementation-pipeline
 work-item-status: active
-current-phase: pipeline-freeze
-current-gate: end-to-end-workflow-review
+current-phase: three-window-design
+current-gate: parallel-design-report-handoff
 gate-status: in_progress
 authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 preauthorized-next-work-item: none
-next-phase: three-window-design
+next-phase: main-design-synthesis
 updated: 2026-08-21
 ---
 
@@ -27,7 +27,8 @@ updated: 2026-08-21
 - **共同基线**：A/B/C 三个 worktree 已从 clean 提交 `42e445d` 创建，分支分别为 `recon/content-interact`、`recon/game-ui`、`recon/entity-lifecycle`。
 - **一条龙授权**：Human 已授权 P0流程冻结→P1三窗调查设计→P2 Main设计合并→P3自动派工→P4三窗有界实现→P5 Main接线合并→P6全量验证→P7文档关闭，中间不再等待确认。
 - **实现硬边界**：Main 先冻结接口/文件所有权；窗口不改共享接线文件；C只有证据支持时写码，否则提交no-code；不push/PR/远端同步。
-- **当前下一步**：验证并提交 [`一条龙执行流程`](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md)，然后立即启动三窗口调查＋设计。
+- **P0 已通过**：流程提交 `6fdefb1`；状态一致性、CRLF-aware diff 和独立流程复核 PASS。
+- **当前 P1**：A/B/C 同时完成调查＋七格设计报告并各自提交；Main 收齐后自动进入 P2 设计合并。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。

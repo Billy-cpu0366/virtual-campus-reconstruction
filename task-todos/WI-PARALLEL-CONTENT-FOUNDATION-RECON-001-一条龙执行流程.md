@@ -1,8 +1,9 @@
 ---
 workflow: PIPELINE-CONTENT-FOUNDATION-001
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: accepted-pending-verification
+status: accepted-persisted-verified-active
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
+pipeline-commit: 6fdefb1
 updated: 2026-08-21
 ---
 

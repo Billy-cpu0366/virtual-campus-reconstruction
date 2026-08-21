@@ -1,12 +1,13 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-pipeline-freeze
+status: active-three-window-design
 work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 workflow-ref: task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md
 definition-commit: db1f878
 shared-baseline: 42e445d
+pipeline-commit: 6fdefb1
 updated: 2026-08-21
 ---
 
