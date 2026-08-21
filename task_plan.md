@@ -19,7 +19,7 @@ updated: 2026-08-21
 ## ⏱ 当前状态（一眼看懂）
 
 - **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 的 worktree setup；Human 已接受 M1 地图、P1 玩家和第二波 SYS-CAMERA 范围。
-- **第一波 active**：M1 `WI-MAP-RUNTIME-COMPLETION-001` 与 P1 `WI-SYS-PLAYER-RUNTIME-001`；两个窗口各自提交，不互相 merge。
+- **第一波 active**：M1 `WI-MAP-RUNTIME-COMPLETION-001` 与 P1 `WI-SYS-PLAYER-RUNTIME-001`；两个窗口先做到 ready-for-preview，不互相 merge，Human 接受实际结果后才各自 commit。
 - **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
@@ -154,8 +154,8 @@ updated: 2026-08-21
 
 | 窗口 | 分支 | active 范围 | 交接 |
 |---|---|---|---|
-| 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | 执行报告、检查结果、提交 ID；不改 Main 独占文件 |
-| 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | 执行报告、检查结果、提交 ID；完成后停在第一波 Gate |
+| 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | 先回传 diff/检查/风险并停在预览 Gate；Human 接受后才 commit |
+| 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | 先回传 diff/检查/风险并停在预览 Gate；Human 接受后才 commit |
 | Main | `integration/map-gameplay-p0` | 接收两个明确提交、修改 `CampusScene`/共享脚本并做全量验证 | Human 预览前不带回主线 |
 
 冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；SYS-CAMERA 当前禁止开工。

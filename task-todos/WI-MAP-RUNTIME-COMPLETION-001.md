@@ -72,4 +72,5 @@ npm run check:perf-baseline-evidence
 
 - 允许范围实现完成且检查通过后停止。
 - 若粒子资源/GID 与当前 sanitizer 合同冲突，停止并报告，不扩大资源范围。
-- 返回实际 diff、测试结果、失败/销毁边界、UNKNOWN、提交 ID和执行报告路径。
+- 返回实际 diff、测试结果、失败/销毁边界、UNKNOWN 和执行报告路径，标记 ready-for-preview 后停止。
+- 不自行 commit；Human 接受实际结果后，按 Main 指令使用明确文件路径提交并回传提交 ID。

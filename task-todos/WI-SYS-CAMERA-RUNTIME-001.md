@@ -30,7 +30,7 @@ updated: 2026-08-21
 
 必须同时满足：
 
-- M1 和 P1 各自提交并通过允许范围检查；
+- M1 和 P1 实际 diff/检查结果经 Human 预览接受后各自提交，并通过允许范围检查；
 - Main 在 integration 分支完成 `CampusScene` 接线；
 - 第一波全量测试/build/browser Smoke 通过；
 - Human 明确接受第一波预览结果。

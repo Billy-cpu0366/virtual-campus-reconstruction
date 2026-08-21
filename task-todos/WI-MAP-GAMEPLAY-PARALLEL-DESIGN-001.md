@@ -154,8 +154,8 @@ task_plan.md
 - 单元测试和 typecheck；
 - 失败/销毁边界；
 - 未解决项；
-- 本地提交 ID；
-- 不自行 merge/push。
+- ready-for-preview 状态和执行报告路径；
+- 不自行 commit/merge/push；Human 接受实际 diff 后才按 Main 指令提交。
 
 Main 第一次整合必须通过：
 
@@ -199,8 +199,8 @@ integration/map-gameplay-p0
 ```
 
 1. 三个分支从同一 clean 主线基线开始；已有 gameplay worktree 在开工前 fast-forward 到该基线。
-2. 第一波两个窗口分别提交；Main 把明确提交带入 integration 分支。
-3. Main 处理共享接线并完成第一波 Gate。
+2. 第一波两个窗口先返回实际 diff、检查和风险，停在 Human 预览 Gate；Human 接受后才分别提交。
+3. Main 把明确提交带入 integration 分支，处理共享接线并完成第一波 Gate。
 4. 第一波通过后，玩法 worktree 更新到 integration clean 基线，再开始 SYS-CAMERA。
 5. 最终只把通过验证且经 Human 接受的 integration 结果带回主线；不 push、不自动合并。
 
