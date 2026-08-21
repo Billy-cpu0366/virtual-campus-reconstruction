@@ -71,6 +71,15 @@ try {
     debug.particles3Diagnostics > 0,
     "particles3 unconsumed diagnostics were not retained",
   );
+  assert.equal(
+    debug.particleTextureLoaded,
+    true,
+    "particle tileset texture was not loaded",
+  );
+  assert.ok(
+    debug.rawParticleLayers > 0,
+    "raw particles/particles2 layers were not rendered",
+  );
   assert.deepEqual(debug.roofStates.concert, {
     group: "concert",
     state: "visible",

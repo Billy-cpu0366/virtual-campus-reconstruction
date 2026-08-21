@@ -17,6 +17,7 @@ const SANITIZER = resolve(ROOT, "scripts/sanitize-runtime-maps.mjs");
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
   ["maps/collisions-objects.png", "maps/collisions-objects.png"],
+  ["maps/tileset-particles.png", "maps/tileset-particles.png"],
   ["sprites/player.webp", "sprites/player.webp"],
   ["js/phaser.min.js", "vendor/phaser.min.js"],
   ["maps/chunks/master.json", "maps/chunks/master.json"],

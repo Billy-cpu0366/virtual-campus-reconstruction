@@ -153,6 +153,16 @@ try {
   assert.ok(desktopDebug !== null, "test-hooks debug state is unavailable");
   assert.equal(desktopDebug.joystick.visible, false);
   assert.equal(desktopDebug.joystick.active, false);
+  assert.equal(desktopDebug.playerRuntime.control.enabled, true);
+  assert.equal(desktopDebug.playerRuntime.control.shutdown, false);
+  assert.equal(
+    desktopDebug.playerRuntime.position.x,
+    desktopDebug.player.x,
+  );
+  assert.equal(
+    desktopDebug.playerRuntime.position.y,
+    desktopDebug.player.y,
+  );
   results.desktop = {
     visible: desktopDebug.joystick.visible,
     device: desktopDebug.joystick.device,
@@ -239,6 +249,9 @@ try {
   );
   assert.ok(moved.playerVelocity.x > 0);
   assert.equal(moved.playerVelocity.y, 0);
+  assert.equal(moved.playerRuntime.control.enabled, true);
+  assert.equal(moved.playerRuntime.control.status, "walking");
+  assert.equal(moved.playerRuntime.control.visualLocked, false);
 
   await dispatchTouch(mobile, "touchStart", [
     {
@@ -291,6 +304,7 @@ try {
   const keyboardRestored = await readDebug(mobile);
   assert.equal(keyboardRestored.joystick.active, false);
   assert.ok(keyboardRestored.playerVelocity.x > 0);
+  assert.equal(keyboardRestored.playerRuntime.control.status, "walking");
   await mobile.command("Input.dispatchKeyEvent", {
     type: "keyUp",
     key: "ArrowRight",

@@ -10,10 +10,12 @@ export type LayerRole =
 export interface LayerStrategy {
   readonly name: string;
   readonly role: LayerRole;
-  /** depth 设计默认；particles/footsteps 等 marker 层无 depth 时为 undefined */
+  /** depth 设计默认；无显式层深度时为 undefined */
   readonly depth: number | undefined;
   /** marker 层允许的 GID；非 marker 层不设置 */
   readonly markerGids?: readonly number[];
+  /** raw visual 层允许直接写入 Tilemap 的 GID；其他层不设置 */
+  readonly rawGids?: readonly number[];
 }
 
 export type BridgeState = "up" | "down";

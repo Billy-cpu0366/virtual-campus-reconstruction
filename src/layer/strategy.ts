@@ -9,7 +9,7 @@ import type {
 // 顺序与 chunk JSON 的层顺序一致（FACT：24 个 chunk 层名/顺序完全一致）。
 // role 与 depth 为设计默认；roof 逐层 depth 未逐一定位，按 FACT 范围 3000–3300 顺序取值。
 const CARS_MARKER_GIDS = [69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352];
-const PARTICLE_MARKER_GIDS = [69355, 69356, 69357, 69358, 69359];
+const PARTICLE_RAW_GIDS = [69355, 69356, 69357, 69358, 69359];
 
 export const LAYER_STRATEGIES: readonly LayerStrategy[] = [
   { name: "layer1", role: "visual", depth: 100 },
@@ -34,15 +34,15 @@ export const LAYER_STRATEGIES: readonly LayerStrategy[] = [
   { name: "walls", role: "collision", depth: 550 },
   {
     name: "particles",
-    role: "marker",
-    depth: undefined,
-    markerGids: PARTICLE_MARKER_GIDS,
+    role: "visual",
+    depth: 0,
+    rawGids: PARTICLE_RAW_GIDS,
   },
   {
     name: "particles2",
-    role: "marker",
-    depth: undefined,
-    markerGids: PARTICLE_MARKER_GIDS,
+    role: "visual",
+    depth: 0,
+    rawGids: PARTICLE_RAW_GIDS,
   },
   { name: "particles3", role: "marker", depth: undefined, markerGids: [69361] },
   { name: "footsteps", role: "marker", depth: undefined, markerGids: [69345] },
@@ -66,6 +66,14 @@ export function layerStrategy(name: string): LayerStrategy {
 
 export function layerRole(name: string): LayerRole {
   return layerStrategy(name).role;
+}
+
+export function rawVisualGids(name: string): readonly number[] {
+  return layerStrategy(name).rawGids ?? [];
+}
+
+export function isKnownRawVisualGid(name: string, gid: number): boolean {
+  return layerRole(name) === "visual" && rawVisualGids(name).includes(gid);
 }
 
 // 桥：上下墙层名（FACT，chunk 数据层名）。

@@ -8,6 +8,7 @@ import {
   COLLISION_GID_FORCED,
   diagnosticForMarker,
   extractMarkerRecords,
+  isKnownRawVisualGid,
   NON_COLLISION_GID_FORCED,
   roofAlpha,
   roofGroupForLayer,
@@ -465,6 +466,26 @@ export class PhaserWorldRenderer {
   }
 
   private rowsForLayer(layer: ChunkLayer): number[][] {
+    const strategy = this.strategyFor(layer.name);
+    if (strategy.rawGids !== undefined) {
+      for (let index = 0; index < layer.data.length; index += 1) {
+        const gid = layer.data[index];
+        if (
+          gid === undefined ||
+          gid === 0 ||
+          isKnownRawVisualGid(layer.name, gid)
+        ) {
+          continue;
+        }
+        const localX = index % this.spec.chunkWidthTiles;
+        const localY = Math.floor(index / this.spec.chunkWidthTiles);
+        throw new Error(
+          `未知 raw visual GID：layer=${layer.name}, ` +
+            `local=(${localX},${localY}), gid=${gid}`,
+        );
+      }
+    }
+
     const rows: number[][] = [];
     for (let row = 0; row < this.spec.chunkHeightTiles; row += 1) {
       const start = row * this.spec.chunkWidthTiles;
@@ -526,8 +547,9 @@ export class PhaserWorldRenderer {
       this.writeMarkers(layer, coordinate);
       return;
     }
+    const rows = this.rowsForLayer(layer);
     const target = this.targetFor(layer, coordinate);
-    this.writeRows(target, this.rowsForLayer(layer), layer.name);
+    this.writeRows(target, rows, layer.name);
     this.configureCollisionLayer(layer.name, target);
   }
 
@@ -539,8 +561,8 @@ export class PhaserWorldRenderer {
       this.writeMarkers(layer, coordinate);
       return;
     }
-    const target = this.targetFor(layer, coordinate);
     const rows = this.rowsForLayer(layer);
+    const target = this.targetFor(layer, coordinate);
     const rowsPerFrame = this.spec.chunkHeightTiles;
     for (let start = 0; start < rows.length; start += rowsPerFrame) {
       this.writeRows(
