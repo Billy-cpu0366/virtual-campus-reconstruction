@@ -3,9 +3,12 @@ const inputUrl =
   process.argv[2] ??
   process.env.SMOKE_URL ??
   "http://127.0.0.1:4175/";
+const directEntryUrl = new URL(inputUrl);
+directEntryUrl.searchParams.delete("camera-smoke");
+const url = directEntryUrl.toString();
 const cameraUrl = new URL(inputUrl);
 cameraUrl.searchParams.set("camera-smoke", String(Date.now()));
-const url = cameraUrl.toString();
+const tourUrl = cameraUrl.toString();
 const timeoutMs = Number(process.env.CAMERA_SMOKE_TIMEOUT_MS ?? 10000);
 const pollMs = Number(process.env.CAMERA_SMOKE_POLL_MS ?? 50);
 
@@ -99,13 +102,45 @@ const snapshotExpression = `(() => {
       .map((entry) => entry.name)
       .filter((name) => name.includes("/maps/chunks/chunk")),
   )];
-  return { debug, chunks };
+  return {
+    href: window.location.href,
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    debug,
+    chunks,
+  };
 })()`;
 
 await command("Runtime.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
+
+let directEntry;
+const directStartedAt = Date.now();
+while (Date.now() - directStartedAt < timeoutMs) {
+  await new Promise((resolve) => setTimeout(resolve, pollMs));
+  const snapshot = await evaluate(snapshotExpression);
+  if (snapshot?.href === url && snapshot?.debug !== undefined) {
+    directEntry = snapshot;
+    break;
+  }
+}
+await new Promise((resolve) => setTimeout(resolve, 600));
+const settledDirectEntry = await evaluate(snapshotExpression);
+if (settledDirectEntry?.href !== url || settledDirectEntry?.debug === undefined) {
+  throw new Error("direct-entry page did not settle on the expected URL");
+}
+directEntry = settledDirectEntry;
+const directEvents = {
+  exceptions: [...events.exceptions],
+  failedRequests: [...events.failedRequests],
+  badResponses: [...events.badResponses],
+};
+events.exceptions.length = 0;
+events.failedRequests.length = 0;
+events.badResponses.length = 0;
+
+await command("Page.navigate", { url: tourUrl });
 
 const samples = [];
 let sawRunning = false;
@@ -115,7 +150,7 @@ const startedAt = Date.now();
 while (Date.now() - startedAt < timeoutMs) {
   await new Promise((resolve) => setTimeout(resolve, pollMs));
   const snapshot = await evaluate(snapshotExpression);
-  if (snapshot?.debug === undefined) continue;
+  if (snapshot?.href !== tourUrl || snapshot?.debug === undefined) continue;
   samples.push(snapshot);
   const runtime = snapshot.debug.cameraRuntime;
   if (runtime?.status === "running") sawRunning = true;
@@ -133,14 +168,37 @@ while (Date.now() - startedAt < timeoutMs) {
 
 await new Promise((resolve) => setTimeout(resolve, 600));
 const settled = await evaluate(snapshotExpression);
+if (settled?.href !== tourUrl || settled?.debug === undefined) {
+  throw new Error("camera-tour page did not settle on the expected URL");
+}
 const chunkCounts = samples.map((sample) => sample.chunks.length);
 const minChunkCount = chunkCounts.length > 0 ? Math.min(...chunkCounts) : 0;
 const maxChunkCount = chunkCounts.length > 0 ? Math.max(...chunkCounts) : 0;
 const effects = settled?.debug?.cameraRuntime?.effectAvailability;
 const nativeScale = settled?.debug?.cameraRuntime?.nativeScaleSettings;
+const directPlayer = directEntry?.debug?.player;
+const directCamera = directEntry?.debug?.camera;
+const directZoom = directCamera?.zoom;
+const directPlayerVisible =
+  Number.isFinite(directPlayer?.x) &&
+  Number.isFinite(directPlayer?.y) &&
+  Number.isFinite(directCamera?.scrollX) &&
+  Number.isFinite(directCamera?.scrollY) &&
+  Number.isFinite(directZoom) &&
+  directZoom > 0 &&
+  (directPlayer.x - directCamera.scrollX) * directZoom >= 0 &&
+  (directPlayer.x - directCamera.scrollX) * directZoom <=
+    directEntry?.viewport?.width &&
+  (directPlayer.y - directCamera.scrollY) * directZoom >= 0 &&
+  (directPlayer.y - directCamera.scrollY) * directZoom <=
+    directEntry?.viewport?.height;
 
 const result = {
-  url,
+  directEntryUrl: url,
+  tourUrl,
+  directEntry,
+  directEvents,
+  directPlayerVisible,
   sampleCount: samples.length,
   sawRunning,
   sawLockedControls,
@@ -149,6 +207,15 @@ const result = {
   chunkCounts: { min: minChunkCount, max: maxChunkCount },
   events,
   passed:
+    directEntry?.debug?.cameraRuntime?.status === null &&
+    directEntry?.debug?.cameraRuntime?.result === null &&
+    directEntry?.debug?.cameraRuntime?.controlDisables === 0 &&
+    directEntry?.debug?.cameraRuntime?.controlEnables === 0 &&
+    directEntry?.debug?.playerRuntime?.control?.enabled === true &&
+    directPlayerVisible &&
+    directEvents.exceptions.length === 0 &&
+    directEvents.failedRequests.length === 0 &&
+    directEvents.badResponses.length === 0 &&
     sawRunning &&
     sawLockedControls &&
     completed?.debug?.cameraRuntime?.controlDisables === 1 &&

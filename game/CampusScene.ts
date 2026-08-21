@@ -531,7 +531,14 @@ export class CampusScene extends Phaser.Scene {
       }
     }
     this.updateDynamicTargets();
-    this.startCameraTour();
+    // The playable scene enters on the player. A future pre-game flow must
+    // explicitly own the tour; only test-hooks may trigger it for now.
+    if (
+      this.cameraTestHooksEnabled &&
+      new URLSearchParams(window.location.search).has("camera-smoke")
+    ) {
+      this.startCameraTour();
+    }
   }
 
   private startCameraTour(): void {

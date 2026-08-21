@@ -3,8 +3,9 @@
 - 工作项：`WI-SYS-CAMERA-RUNTIME-001`
 - integration 分支：`integration/map-gameplay-p0`
 - 接入基线：`19ac98b`
-- 当前状态：`integration-ready-for-preview`
-- Git 状态：未提交、未 push
+- 原技术状态：`bounded-integrated-verified`（`cd3691a`）
+- 当前产品状态：`reopened-by-WI-CAMERA-ENTRY-FLOW-FIX-001`
+- Git 状态：入口修复候选未验证、未提交、未 push
 
 ## 1. 实际集成文件
 
@@ -131,4 +132,11 @@ TypeError: Cannot read properties of undefined (reading 'baseTileWidth')
 
 相机有界结果 `19ac98b` 已完成 Main Scene/分块/生命周期接线；集成期间发现的 TilemapLayer 双重注销已用最小修复和回归测试关闭。基础门禁、两种 build、全部 test-hooks 浏览器门禁、production Smoke、安全隔离和截图均通过。
 
-当前为 `integration-ready-for-preview`；等待 Human 接受实际集成 diff 后才允许创建 integration 本地提交。不 merge 到 master，不 push。
+原相机能力已由 `cd3691a` 技术验证，但 2026-08-21 的本地产品验收否决了“进入可玩场景后自动播放约111秒航拍”。该结论被 `WI-CAMERA-ENTRY-FLOW-FIX-001` 重新打开：production 必须默认直接显示并跟随玩家，航拍只能由未来进入游戏前流程显式触发。
+
+## 9. 进入流程修复候选
+
+- `CampusScene` 不再无条件调用 `startCameraTour()`。
+- 只有显式 test-hooks URL 参数 `camera-smoke` 可以启动航拍，用于保留能力回归；production 无法进入该分支。
+- camera Smoke 调整为两阶段：先验证普通入口不运行相机 runtime、控制不锁且玩家在视口内，再显式启动压缩航拍验证原能力。
+- 本候选尚待 typecheck、全测试、两种 build、浏览器回归和 Human 实时预览；完成前不恢复 GitHub delivery，不 merge、不 push。
