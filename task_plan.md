@@ -163,13 +163,13 @@ updated: 2026-08-21
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前没有 active 阻塞项；SYS-ZONE 设计已关闭。完整实现、SYS-INTERACT、完整24层语义、请求取消、性能量化、NPC/交互和完整玩法线均需后续独立工作项。
+- 当前没有 active 技术阻塞；SYS-ZONE 设计已关闭。完整24层动态消费者、SYS-INTERACT、NPC/交互、完整玩法线和最终硬件 FPS/GPU/纹理内存阈值均需后续独立工作项。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- 当前没有技术阻塞；`Q-LAYER-002` particles3 消费链和特殊 13 层卸载边界继续保持 UNKNOWN。请求取消、性能量化、完整 Phaser teardown 和完整玩法线暂不并入本项。
+- 当前没有技术阻塞；`Q-LAYER-002/003` 继续保持 UNKNOWN。请求取消和当前重构 teardown 已有界验证；最终硬件性能阈值、完整动态消费者和完整玩法线不并入本设计项。
 
 ## 近期候选
 

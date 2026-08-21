@@ -56,8 +56,13 @@ src/world/
 src/layer/
 game/PhaserWorldRenderer.ts
 game/PhaserWorldMutationScheduler.ts
+scripts/prepare-runtime-assets.mjs
+scripts/check-runtime-assets.mjs
+scripts/sanitize-runtime-maps.mjs
 tests/ 对应地图目录
 ```
+
+`public/` 仍是构建生成物，不提交；地图窗口只能通过上述白名单脚本从只读 `sample/` 生成并校验粒子运行资源。
 
 不得修改：
 
@@ -125,7 +130,7 @@ task_plan.md
 5. footsteps 保持数据来源，不在地图包创建 footprint Sprite。
 6. particles3 保留 marker/未消费诊断，`Q-LAYER-002` 不关闭。
 7. 当前完整 exterior atlas + sanitized chunk 合同继续作为重构 DECISION；暂不为“打包形式一致”替换成 16 张 exterior-small。粒子公开资源是本次唯一必要新增 tileset。
-8. 补资源失败、apply/remove、shutdown 和 baseline 回归。
+8. 补资源失败、apply/remove、shutdown 和有界 baseline 回归；这里只比较目标集合、生命周期和当前观测是否明显退化，不制定最终 FPS/内存阈值。
 
 明确排除：车辆/NPC、trajectory 动态粒子、脚印 Sprite、抗议者、完整原站 Loader 时序、最终硬件性能阈值。
 
@@ -181,7 +186,7 @@ python3 scripts/check-state-consistency.py
 6. nativeScale 作为运行时设备值；HeatHaze/Fire/Morph 不存在时显式降级，不伪造后处理。
 7. 测试使用显式 test-hooks/可控时钟缩短等待；production 保持原站时长。
 
-地图窗口第二波只允许修复相机预载接口问题并在合并后复测目标集合、生命周期和性能，不新增地图功能。
+地图窗口第二波只允许修复相机预载接口问题并在合并后复测目标集合、生命周期和当前环境 baseline，不新增地图功能；最终硬件 FPS、GPU/纹理内存和长期稳定性阈值仍是独立工作项。
 
 ## 7. 分支与整合策略
 

@@ -3,6 +3,7 @@ dist/
 public/
 build/
 coverage/
+.pi/
 __pycache__/
 *.py[cod]
 *.log
