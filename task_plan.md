@@ -4,12 +4,12 @@ current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 work-item-level: integration
 work-item-type: parallel-design-implementation-pipeline
 work-item-status: active
-current-phase: main-design-synthesis
-current-gate: cross-line-contract-freeze
+current-phase: auto-work-packaging
+current-gate: shared-code-baseline
 gate-status: in_progress
 authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 preauthorized-next-work-item: none
-next-phase: auto-work-packaging
+next-phase: three-window-implementation
 updated: 2026-08-21
 ---
 
@@ -29,8 +29,9 @@ updated: 2026-08-21
 - **实现硬边界**：Main 先冻结接口/文件所有权；窗口不改共享接线文件；C只有证据支持时写码，否则提交no-code；不push/PR/远端同步。
 - **P0 已通过**：流程提交 `6fdefb1`；状态一致性、CRLF-aware diff 和独立流程复核 PASS。
 - **P1 已完成**：A `1b29908`、B `6b5970a`、C `125691d`；三分支clean。C确认统一Entity实现NO-GO。
-- **当前 P2**：Main 已独立复核并修订 visited、single-active、control lease、DOM层级、GameUiPort/backdrop；正在同步三张系统卡、API、总账、决策和进度。
-- **沙箱边界**：Main cherry-pick报告提交被safe allowlist拒绝，未绕过；报告保留在不可变分支commit，权威设计由Main语义合并，P3 baseline只搬运Main P0/P2文档提交。
+- **P2 已通过**：权威设计提交 `1cade08`；状态一致性、CRLF-aware diff、相对链接和独立复核 PASS。C implementation NO-GO。
+- **当前 P3**：采用双 immutable 输入：runtime `798eda6` + design `1cade08`。Main先在独立integration worktree创建共享contract、同步resolver和control lease代码基线，通过验证后再从同一hash派发A/B；C只交no-code收据。
+- **沙箱边界**：Main cherry-pick报告提交被safe allowlist拒绝，未绕过；不再要求原始报告或设计文档进入runtime tree，P7由root权威文档记录code commit/tree收据。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。

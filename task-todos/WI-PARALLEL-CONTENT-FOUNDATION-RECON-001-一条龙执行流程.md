@@ -74,11 +74,12 @@ Main-owned 精确范围：
 
 1. P1原始报告保留在各自不可变分支commit（A `1b29908`、B `6b5970a`、C `125691d`），作为审计来源，不要求进入runtime tree。Main cherry-pick报告曾被WSL safe allowlist拒绝，必须保持未绕过。
 2. Main P2把已复核语义完整写入系统卡/API/总账/决策；记录 P0流程提交和P2权威设计提交的有序清单。P2提交不得包含runtime代码。
-3. 从 runtime `798eda6` 创建本地分支/worktree：`integration/content-foundation` / `.pi/worktrees/content-foundation-integration`。
-4. 在该 worktree按顺序搬运P0/P2 Main权威文档提交；优先使用允许的文档commit操作。若Git操作仍被guard拒绝，停止baseline建立，不用patch/copy等价绕过。
-5. 文档冲突由 Main 依据当前权威结论解决；任何 `src/`、`game/`、`public/`、`tests/` 或 `sample/` 冲突都必须中止baseline并诊断，不允许顺手覆盖runtime。
-6. 运行状态一致性、CRLF-aware diff、typecheck、全测试和两种build；通过后记录 baseline commit/tree/clean status。
-7. A/B实现分支必须从同一 immutable baseline创建；C保留no-code。任务包写明hash，不能用浮动branch名。
+3. 从 runtime `798eda6` 创建本地分支/worktree：`integration/content-foundation` / `.pi/worktrees/content-foundation-integration`；design `1cade08` 作为外部immutable authority，不要求进入runtime tree。
+4. Main在integration worktree实现并测试共享冻结边界：`src/content/contract.ts`、`tests/content/contract.test.ts`、`game/CampusContentResolver.ts`、`game/GameplayControlLeaseRuntime.ts`及其Main-owned测试。代码必须逐项对应design commit，不能修改旧runtime行为入口。
+5. 任何既有 `src/`、`game/`、`public/`、`tests/` 或 `sample/` 非允许变化都必须中止baseline并诊断。
+6. 运行CRLF-aware diff、typecheck、全测试和两种build；通过后记录 shared code baseline commit/tree/clean status，以及runtime/design双输入hash。
+7. A/B实现分支必须从该同一 immutable code baseline创建；C保留no-code。任务包写明runtime/design/code三个hash，不能用浮动branch名。
+8. P7由root权威文档记录所有code commit/tree收据；不为合并文档而绕过guard。
 
 ### 阶段 M：Main integration
 

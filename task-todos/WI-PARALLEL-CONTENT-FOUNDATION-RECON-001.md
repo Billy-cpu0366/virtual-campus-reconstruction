@@ -1,6 +1,6 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-main-design-synthesis
+status: active-auto-work-packaging
 work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
@@ -8,6 +8,7 @@ workflow-ref: task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执�
 definition-commit: db1f878
 shared-baseline: 42e445d
 pipeline-commit: 6fdefb1
+design-commit: 1cade08
 updated: 2026-08-21
 ---
 
