@@ -1,15 +1,15 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-CAMERA-ENTRY-FLOW-FIX-001
-work-item-level: integration
-work-item-type: bugfix
+current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
+work-item-level: investigation
+work-item-type: parallel-recon
 work-item-status: active
-current-phase: implementation
-current-gate: direct-entry-browser-preview
+current-phase: parallel-window-preparation
+current-gate: shared-clean-baseline
 gate-status: authorized
-authorization-ref: DEC-CAMERA-ENTRY-FLOW-FIX-001
+authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-RECON-001
 preauthorized-next-work-item: none
-next-phase: human-live-preview
+next-phase: three-window-investigation
 updated: 2026-08-21
 ---
 
@@ -17,12 +17,14 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-CAMERA-ENTRY-FLOW-FIX-001`；修复进入游戏后强制111秒航拍的产品阻断，Human 已授权“禁用掉现在”。
-- **已确认缺陷**：integration `cd3691a` 在动态世界 ready 后无条件启动航拍，导致玩家不可见、控制锁定；此前技术验证不再代表入口产品验收。
-- **修复边界**：production 默认立即跟随玩家并保持控制；航拍仅保留给显式 test-hooks 验证，未来进入页触发另立工作项。
-- **GitHub handoff**：`WI-GITHUB-HANDOFF-V1-001` 暂停，协议仍为 `accepted-persisted-unverified`；缺陷修复并经 Human 实时预览前不得交付旧结果。
-- **明确不做**：不新增开始页/UI/session状态，不改相机111秒能力本身，不应用旧patch，不 merge/push。
-- **下一步**：修改 integration 入口与camera smoke，完成两种build/浏览器回归后启动本地production预览交 Human。
+- **当前工作项**：`WI-PARALLEL-CONTENT-FOUNDATION-RECON-001`；三个独立窗口并行调查 INTERACT、GAME-UI、ENTITY，只形成报告和设计输入。
+- **窗口 A**：SYS-INTERACT，负责 menuId→打开/关闭/离开/重复进入/销毁的业务状态。
+- **窗口 B**：SYS-GAME-UI，负责 DOM/Phaser 呈现、层级、响应式、移动端和输入隔离。
+- **窗口 C**：SYS-ENTITY，负责玩家/NPC/车辆创建、更新、所有权与销毁，并审查 `Q-ENTITY-001`。
+- **文件所有权**：每窗只写自己一份报告；Main 独占系统卡、API、总账、状态和最终设计整合。
+- **相机修复已关闭**：integration `798eda6`；typecheck、36文件/192测试、两种build、diff和Human实时预览 PASS，普通入口不再自动航拍。
+- **GitHub handoff**：继续暂停到本轮调查 Gate；旧 `cd3691a` 和旧 wave1 patch 均不得交付。
+- **下一步**：提交统一规划基线，创建 A/B/C 三个 clean worktree 并同时启动调查。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -146,7 +148,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-当前 active 为 [相机进入流程阻断修复](task-todos/WI-CAMERA-ENTRY-FLOW-FIX-001.md)。此前 integration `cd3691a` 的航拍能力技术验证有效，但“进入游戏后自动播放”被 Human 明确拒绝；GitHub 中转任务暂停，修复和实时预览完成前禁止交付旧结果。
+当前 active 为 [内容与实体基础三窗口并行调查](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)。A/B/C 分别只写 INTERACT、GAME-UI、ENTITY 调查报告；Main 统一复核并在 Human Gate 后形成设计候选。本轮不写正式代码，不晋升系统状态。
 
 ### 第一波执行边界
 
@@ -196,6 +198,7 @@ updated: 2026-08-21
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
+| `WI-CAMERA-ENTRY-FLOW-FIX-001` | completed | SYS-CAMERA; SYS-APP | 普通入口直接跟随玩家且控制可用；航拍仅保留显式test-hooks验证；两种build、192测试和Human实时预览 | `798eda6` | `DEC-CAMERA-ENTRY-FLOW-FIX-001` |
 | `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER; SYS-CAMERA | 两波拓扑、冻结接口、文件所有权、M1/P1/Camera 候选包和 Gate | `a16ae54` | `DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001` |
 | `WI-PARALLEL-MAP-RECON-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK | A-D 四份 `task-todos/` 报告；D 可复跑探针、27 样本原始收据和确定性校验 | `85af370` | `DEC-PARALLEL-WORKTREE-001` |
 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
