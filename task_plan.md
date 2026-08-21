@@ -5,12 +5,12 @@ work-item-level: implementation
 work-item-type: parallel-integration
 work-item-status: in-progress
 node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER
-current-phase: worktree-setup
+current-phase: parallel-implementation
 current-gate: implementation
 gate-status: active
 authorization-ref: DEC-MAP-RUNTIME-COMPLETION-001; DEC-SYS-PLAYER-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: parallel-implementation
+next-phase: wave1-preview
 updated: 2026-08-21
 ---
 
@@ -23,8 +23,8 @@ updated: 2026-08-21
 - **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
-- **环境状态**：窗口执行包基线为 `638d4c6`（包含 preview Gate 修订）；WSL 沙箱拦截 `git worktree` 命令，地图/integration worktree 尚未创建，gameplay 尚未 fast-forward。
-- **下一步**：Human 在 WSL 终端按命令中转创建两个 worktree并把 `impl/gameplay-serial` fast-forward 到 `638d4c6`；回传 `git worktree list` 后才进入 `parallel-implementation`。
+- **环境状态**：Human 已创建 `impl/map-runtime-completion`、`integration/map-gameplay-p0`，并将 `impl/gameplay-serial` fast-forward；三个 worktree 均在执行包基线 `638d4c6`，`git worktree list` 已验证。
+- **下一步**：地图和玩法两个窗口同时开工，各自做到 ready-for-preview 后停止并把报告带回 Main；禁止自行 commit/merge/push。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -148,7 +148,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已由 Human 以“接受接受”激活。两个 active 子包是 [M1 地图运行时收口](task-todos/WI-MAP-RUNTIME-COMPLETION-001.md) 和 [P1 SYS-PLAYER 运行时](task-todos/WI-SYS-PLAYER-RUNTIME-001.md)；[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 已接受但 gated。当前只做 worktree/统一基线准备，准备状态提交完成前执行窗口不得写码。
+`WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已进入 `parallel-implementation`。两个 active 子包是 [M1 地图运行时收口](task-todos/WI-MAP-RUNTIME-COMPLETION-001.md) 和 [P1 SYS-PLAYER 运行时](task-todos/WI-SYS-PLAYER-RUNTIME-001.md)；[SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 已接受但 gated。地图、玩法和 integration worktree 均已在 `638d4c6` 建立/同步；两个执行窗口完成后必须停在 ready-for-preview。
 
 ### 第一波执行边界
 
