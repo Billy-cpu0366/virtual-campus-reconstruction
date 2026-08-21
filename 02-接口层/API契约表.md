@@ -31,6 +31,8 @@ updated: 2026-08-20
 | 动态深度 | 玩家 → 图层 | 决定谁挡谁：人走到灌木后面就该被挡住，按位置排前后 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md) |
 | `loadChunksForCamera` | 相机 → 分块 | 只加载镜头能看到的地图块；镜头一挪，就喊分块组换块 | [SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 资源加载 | 资源 → 各系统 | 进货：图片 / 地图走 Phaser Loader，切块数据走 HttpClient，两条补给线 | [SYS-ASSET](../03-执行层/01-地图线/01-资源加载.md) |
+| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开行为为 100ms 检查、严格 `<30px` 距离；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
+| 区域内容请求 | SYS-ZONE → SYS-INTERACT | 输出进入/离开、`menuId`、visited/手动关闭状态；弹窗 DOM、暂停恢复和文案归 SYS-INTERACT / SYS-GAME-UI；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
 
 ## 二、数据字典（常量 / 公式，不是接口）
 
@@ -50,8 +52,6 @@ updated: 2026-08-20
 
 | 接口名 | 谁 → 谁 | 待定什么 | 状态 |
 |---|---|---|---|
-| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开证据为 100ms 检查、严格 `<30px` 距离 | Draft；证据已定位，设计待 Human review（`WI-SYS-ZONE-DESIGN-001`） |
-| 区域内容请求 | SYS-ZONE → SYS-INTERACT | 进入/离开状态、`menuId`、visited/手动关闭状态；弹窗 DOM 和暂停恢复归 SYS-INTERACT | Draft；本轮只登记候选，不冻结实现签名 |
 | roof / bridge 区域判定 | 图层 → 区域触发 | roof 区域判定来源、bridge 状态来源（"玩家是否进入区域"的判定） | 【TBD】归 SYS-ZONE（本轮内容 marker 调查未覆盖） |
 
 ---
