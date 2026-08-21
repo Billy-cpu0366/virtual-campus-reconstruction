@@ -295,7 +295,6 @@ export class PhaserPlayerRuntime {
     this.clearAnimationListener();
     this.renderedStatus = undefined;
     this.renderedIdleAnimation = undefined;
-    this.restoreNormalPlayer();
     return shutdown;
   }
 

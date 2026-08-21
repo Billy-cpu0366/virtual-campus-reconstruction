@@ -36,6 +36,12 @@ import {
   walkFrameStart,
 } from "../src/player/index.js";
 import {
+  PhaserPlayerRuntime,
+  preloadPhaserPlayerRuntimeAssets,
+  type PhaserPlayerSceneLike,
+  type PhaserPlayerVisualLike,
+} from "./PhaserPlayerRuntime.js";
+import {
   CAMERA_BOUNDS,
   CAMERA_ZOOM,
   FOLLOW_LERP,
@@ -88,6 +94,7 @@ async function fetchJson(
 
 export class CampusScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
+  private playerRuntime: PhaserPlayerRuntime | undefined;
   private joystick!: PhaserVirtualJoystick;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<
@@ -139,6 +146,10 @@ export class CampusScene extends Phaser.Scene {
   };
 
   private readonly handleWindowBlur = (): void => {
+    if (this.playerRuntime !== undefined) {
+      this.playerRuntime.blur(this.time.now);
+      return;
+    }
     this.heldMovementKeys.clear();
     this.input.keyboard?.resetKeys?.();
     this.joystick?.reset();
@@ -158,10 +169,12 @@ export class CampusScene extends Phaser.Scene {
   preload(): void {
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
+    this.load.image("tileset-particles", "/maps/tileset-particles.png");
     this.load.spritesheet("player", "/sprites/player.webp", {
       frameWidth: 48,
       frameHeight: 48,
     });
+    preloadPhaserPlayerRuntimeAssets(this.load);
   }
 
   create(): void {
@@ -173,6 +186,7 @@ export class CampusScene extends Phaser.Scene {
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.events.once("shutdown", () => {
       this.sceneDestroyed = true;
+      this.playerRuntime?.shutdown();
       this.joystick?.shutdown();
       this.stopPlayerMovement();
       this.mutationScheduler.destroy();
@@ -211,12 +225,20 @@ export class CampusScene extends Phaser.Scene {
     };
 
     const keyboard = keyboardDirection(keys);
-    const direction = resolveMovement(
+    const resolvedDirection = resolveMovement(
       keyboard,
       this.joystick.direction,
       this.joystick.active,
     );
-    if (direction) {
+    const playerUpdate = this.playerRuntime?.update(
+      resolvedDirection,
+      this.time.now,
+    );
+    const direction =
+      playerUpdate === undefined
+        ? resolvedDirection
+        : playerUpdate.movementDirection;
+    if (direction !== null) {
       this.lastDirection = direction;
       const { vx, vy } = velocityForDirection(direction);
       this.player.setVelocity(vx, vy);
@@ -228,8 +250,10 @@ export class CampusScene extends Phaser.Scene {
       }
     } else {
       this.player.setVelocity(0, 0);
-      this.player.anims.stop();
-      this.player.setFrame(walkFrameStart(this.lastDirection));
+      if (playerUpdate?.visualLocked !== true) {
+        this.player.anims.stop();
+        this.player.setFrame(walkFrameStart(this.lastDirection));
+      }
     }
 
     this.updatePlayerDepth();
@@ -287,6 +311,22 @@ export class CampusScene extends Phaser.Scene {
       this as unknown as JoystickSceneLike,
       deviceKindForPhaserScene(this),
     );
+    this.playerRuntime = new PhaserPlayerRuntime(
+      this as unknown as PhaserPlayerSceneLike,
+      this.player as unknown as PhaserPlayerVisualLike,
+      {
+        effects: {
+          resetKeyboard: () => {
+            this.heldMovementKeys.clear();
+            this.input.keyboard?.resetKeys?.();
+          },
+          resetJoystick: () => this.joystick.reset(),
+          stopMovement: () => this.stopPlayerMovement(),
+        },
+      },
+    );
+    this.playerRuntime.createAnimations();
+    this.playerRuntime.enableControls(this.time.now);
   }
 
   private createCamera(bounds: {
@@ -346,10 +386,19 @@ export class CampusScene extends Phaser.Scene {
       0,
       tilesetFirstGid(master, "collisions-objects"),
     );
-    if (!exterior || !collisions) {
+    const particles = map.addTilesetImage(
+      "tileset-particles",
+      "tileset-particles",
+      spec.tileWidthPixels,
+      spec.tileHeightPixels,
+      0,
+      0,
+      tilesetFirstGid(master, "tileset-particles"),
+    );
+    if (!exterior || !collisions || !particles) {
       throw new Error("运行时 tileset 加载失败");
     }
-    const tilesets = [exterior, collisions];
+    const tilesets = [exterior, collisions, particles];
     const renderer = new PhaserWorldRenderer(
       map,
       tilesets,
@@ -376,6 +425,10 @@ export class CampusScene extends Phaser.Scene {
         rendererLayers: renderer.layers.size,
         markerRecords: renderer.markerRecords.length,
         particles3Diagnostics: renderer.particles3Diagnostics.length,
+        rawParticleLayers: [...renderer.layers.keys()].filter(
+          (id) => id.startsWith("particles@") || id.startsWith("particles2@"),
+        ).length,
+        particleTextureLoaded: this.textures.exists("tileset-particles"),
         roofStates: {
           concert: renderer.getRoofState("concert"),
           factory: renderer.getRoofState("factory"),
@@ -387,6 +440,10 @@ export class CampusScene extends Phaser.Scene {
           x: this.player.x,
           y: this.player.y,
           depth: (this.player as any).depth,
+        },
+        playerRuntime: {
+          position: this.playerRuntime?.position ?? null,
+          control: this.playerRuntime?.control ?? null,
         },
         body: {
           width: PLAYER_BODY_WIDTH,
@@ -644,9 +701,13 @@ export class CampusScene extends Phaser.Scene {
       height: camera.height,
       zoom: camera.zoom,
     };
+    const playerPosition = this.playerRuntime?.position ?? {
+      x: this.player.x,
+      y: this.player.y,
+    };
     void coordinator
       .updateTargets(
-        targetChunks(this.player.x, this.player.y, viewport, geometry),
+        targetChunks(playerPosition.x, playerPosition.y, viewport, geometry),
       )
       .catch((error: unknown) => {
         console.error("动态分块更新失败", error);

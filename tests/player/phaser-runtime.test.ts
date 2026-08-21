@@ -287,7 +287,9 @@ describe("Phaser 玩家有界适配器", () => {
     const { adapter, calls, sprite } = makeAdapter();
     adapter.createAnimations();
     adapter.enableControls(0);
+    const visualCallsBeforeShutdown = sprite.calls.length;
     expect(adapter.shutdown()).toBe(true);
+    expect(sprite.calls).toHaveLength(visualCallsBeforeShutdown);
     expect(adapter.shutdown()).toBe(false);
     expect(sprite.listeners.has("animationcomplete")).toBe(false);
     expect(calls).toEqual(["keyboard", "joystick", "movement"]);
