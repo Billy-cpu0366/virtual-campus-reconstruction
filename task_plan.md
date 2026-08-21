@@ -1,15 +1,15 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-GITHUB-HANDOFF-V1-001
-work-item-level: workflow
-work-item-type: delivery-infrastructure
-work-item-status: blocked
-current-phase: formal-repo-readonly-audit
-current-gate: external-repo-safety
-gate-status: awaiting-external-audit
-authorization-ref: DEC-GITHUB-HANDOFF-V1-001
+current-work-item: WI-CAMERA-ENTRY-FLOW-FIX-001
+work-item-level: integration
+work-item-type: bugfix
+work-item-status: active
+current-phase: implementation
+current-gate: direct-entry-browser-preview
+gate-status: authorized
+authorization-ref: DEC-CAMERA-ENTRY-FLOW-FIX-001
 preauthorized-next-work-item: none
-next-phase: formal-repo-reconciliation-design
+next-phase: human-live-preview
 updated: 2026-08-21
 ---
 
@@ -17,13 +17,12 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-GITHUB-HANDOFF-V1-001`；Git bundle 双向中转协议已接受，当前只做 Windows 正式仓库只读审计，不写正式代码。
-- **第一波已关闭**：M1/P1 integration `f2fe106`，35文件/184项、两种build、全部浏览器门禁和 Human Gate PASS。
-- **第二波已关闭**：SYS-CAMERA 分支 `19ac98b`、integration `cd3691a`；36文件/192项、两种build、全部有界浏览器门禁和 Human Gate PASS。
-- **协议状态**：`accepted-persisted-unverified`；定义提交 `0a105dc`，首次真实 reconciliation、bundle 往返和远端收据完成前不能称为 verified，也不安装全局 workflow。
-- **明确不做**：不应用旧 wave1 patch，不处理未知 dirty，不执行 pull/reset/clean/覆盖，不直接推 main，不写 `src/game`。
-- **环境状态**：WSL integration `cd3691a` 与 gameplay `19ac98b` clean；外部 Pi 报告 Windows main 有3个文档修改、未跟踪 `task-todos/`，fetch 前引用为 ahead18/behind4，尚未执行交付。
-- **下一步**：外部 Pi fetch 后返回 HEAD/origin/main/merge-base、dirty、local-only/remote-only、cherry等价和冲突收据；再设计无损 reconciliation。
+- **当前工作项**：`WI-CAMERA-ENTRY-FLOW-FIX-001`；修复进入游戏后强制111秒航拍的产品阻断，Human 已授权“禁用掉现在”。
+- **已确认缺陷**：integration `cd3691a` 在动态世界 ready 后无条件启动航拍，导致玩家不可见、控制锁定；此前技术验证不再代表入口产品验收。
+- **修复边界**：production 默认立即跟随玩家并保持控制；航拍仅保留给显式 test-hooks 验证，未来进入页触发另立工作项。
+- **GitHub handoff**：`WI-GITHUB-HANDOFF-V1-001` 暂停，协议仍为 `accepted-persisted-unverified`；缺陷修复并经 Human 实时预览前不得交付旧结果。
+- **明确不做**：不新增开始页/UI/session状态，不改相机111秒能力本身，不应用旧patch，不 merge/push。
+- **下一步**：修改 integration 入口与camera smoke，完成两种build/浏览器回归后启动本地production预览交 Human。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -147,7 +146,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-当前 active 为 [GitHub 中转协议首次对齐](task-todos/WI-GITHUB-HANDOFF-V1-001.md)，只允许外部正式仓库审计和协议文档；正式代码 Gate 关闭。第一波 `f2fe106` 与第二波 gameplay `19ac98b` / integration `cd3691a` 已完成有界验证。
+当前 active 为 [相机进入流程阻断修复](task-todos/WI-CAMERA-ENTRY-FLOW-FIX-001.md)。此前 integration `cd3691a` 的航拍能力技术验证有效，但“进入游戏后自动播放”被 Human 明确拒绝；GitHub 中转任务暂停，修复和实时预览完成前禁止交付旧结果。
 
 ### 第一波执行边界
 
