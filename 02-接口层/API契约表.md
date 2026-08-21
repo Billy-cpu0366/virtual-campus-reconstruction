@@ -5,7 +5,7 @@ tags:
   - 接口
 type: handoff
 created: 2026-08-14
-updated: 2026-08-16
+updated: 2026-08-20
 ---
 
 # API 契约表（系统之间的接口约定）
@@ -50,7 +50,9 @@ updated: 2026-08-16
 
 | 接口名 | 谁 → 谁 | 待定什么 | 状态 |
 |---|---|---|---|
-| roof / bridge 区域判定 | 图层 → 区域触发 | roof 区域判定来源、bridge 状态来源（"玩家是否进入区域"的判定） | 【TBD】归 SYS-ZONE（未逆向） |
+| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开证据为 100ms 检查、严格 `<30px` 距离 | Draft；证据已定位，设计待 Human review（`WI-SYS-ZONE-DESIGN-001`） |
+| 区域内容请求 | SYS-ZONE → SYS-INTERACT | 进入/离开状态、`menuId`、visited/手动关闭状态；弹窗 DOM 和暂停恢复归 SYS-INTERACT | Draft；本轮只登记候选，不冻结实现签名 |
+| roof / bridge 区域判定 | 图层 → 区域触发 | roof 区域判定来源、bridge 状态来源（"玩家是否进入区域"的判定） | 【TBD】归 SYS-ZONE（本轮内容 marker 调查未覆盖） |
 
 ---
 

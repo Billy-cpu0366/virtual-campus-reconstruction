@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level:
-work-item-type:
-work-item-status:
-node-refs:
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref:
+current-work-item: WI-SYS-ZONE-DESIGN-001
+work-item-level: design
+work-item-type: investigation
+work-item-status: in-progress
+node-refs: SYS-ZONE
+current-phase: evidence-and-design
+current-gate: investigation
+gate-status: active
+authorization-ref: DEC-SYS-ZONE-INVESTIGATION-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: human-design-review
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：当前没有 active 工作项；上一项运行时安全收尾已关闭
-- **到哪了**：World 同步/异步部分回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口修复均已验证，结果提交 `632a0c9`
-- **卡在哪**：完整 24 层语义、请求取消、性能量化和完整 Phaser resource teardown 仍未完成；不把本次安全收尾冒充完整系统
-- **能不能写代码**：❌ 不能；当前回到 `work-item-selection`，下一项需 Human 重新选择和授权
-- **验证入口**：普通 production build 在 `4201` 通过安全/普通/跨块 Smoke；碰撞回归在显式 `test-hooks` build 的 `4202` 通过
-- **下一步**：Human 选择下一项；不自动扩展完整图层、玩法或验证器
+- **正在做**：`WI-SYS-ZONE-DESIGN-001`，内容线第一步：SYS-ZONE 区域触发逆向与设计
+- **到哪了**：已核对 11 个公开 marker、严格 `<30px` 距离、100ms 轮询、离开/手动关闭状态和 `menuId` → modal 桥接；内容索引、SYS-ZONE 调查草案、API Draft 和 Q-ZONE 结论已落盘
+- **卡在哪**：SYS-ZONE 设计草案尚未经过 Human review；SYS-INTERACT、弹窗实现和正式代码不在本工作项
+- **能不能写代码**：❌ 不能；本项仅允许公开证据逆向和文档设计，Human 设计评审通过后才能另行授权实现
+- **验证入口**：证据来源限定为仓库内 `sample/` 公开镜像和已有运行时证据；完成后执行结构/链接/状态一致性与独立只读复核
+- **下一步**：完成 SYS-ZONE 设计候选并提交 Human review；不自动启动 SYS-INTERACT 或弹窗代码
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -82,6 +82,7 @@ updated: 2026-08-20
 | API 协作审查流程融合 | 已接受、已落盘、已验证（结果提交 `6da5755`） | 把 PR #3 的外部规范审查方法融入当前工作流，保持项目 API 契约和系统卡为权威 | 把外部收据当作事实；没有源文档就宣称已验证；直接修改 API 契约或代码 | 流程已关闭；实际外部文档仍需单独输入和审查 |
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
 | 运行时安全有界修复 | 已接受、已落盘、已验证；结果提交 `632a0c9` | 处理 World 部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口清理 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 普通 production build、普通/跨块/安全 Smoke 与 test-hooks 碰撞 Smoke均通过；工作项已关闭 |
+| SYS-ZONE 区域触发逆向与设计 | 已接受、已落盘；当前 evidence-and-design | 核对公开 marker/区域触发来源、坐标/区域边界、进入/离开和防重复行为；补 `04-内容层/作品集内容.md` 内容索引、SYS-ZONE 七格、接口和未知队列 | 不写 `src/`/`game/` 正式代码；不实现 SYS-INTERACT 弹窗；不猜未证实文案、资源或触发器 | 完成证据定位、设计候选、链接/结构/状态检查和独立只读复核后交 Human review |
 | SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
@@ -144,13 +145,13 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-SYS-MOVE-WORLD-COLLISION-001` 已由 Human 以“ok。开始吧”授权并完成；范围内实现了玩家 Arcade Body、walls/bridge 碰撞接线、`body.blocked` 反馈、桥入口/出口状态和 chunk 装卸清理。提交为 `e3f412a`；当前状态已回到 `none / work-item-selection`。上一项动态分块结果提交为 `b707553`。
+`WI-SYS-ZONE-DESIGN-001` 已由 Human 以“ok。开始吧”接受；当前只做内容线第一步 SYS-ZONE 的公开证据逆向与设计，不写正式代码。范围包括 marker/区域触发事实、内容索引、SYS-ZONE 七格、接口和未知队列；SYS-INTERACT 与弹窗实现需后续独立工作项。
 
 ## 已阻塞或暂停工作项
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前没有继续阻塞项；本次有界碰撞集成已验证关闭。完整 24 层语义、请求取消、性能量化、NPC/交互和完整玩法线仍需新工作项。
+- 当前工作项无已知阻塞；SYS-ZONE 的 marker 来源、坐标/区域边界和触发链仍待本轮证据核对。完整24层语义、请求取消、性能量化、NPC/交互和完整玩法线不属于本项。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
@@ -162,6 +163,7 @@ updated: 2026-08-20
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
+| `WI-SYS-ZONE-DESIGN-001` | Human 已接受，当前 active | 只做 SYS-ZONE 公开证据逆向与设计；完成后交 Human review，不自动实现代码或推进 SYS-INTERACT |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
