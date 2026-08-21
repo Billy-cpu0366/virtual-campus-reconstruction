@@ -5,12 +5,12 @@ work-item-level: investigation
 work-item-type: evidence
 work-item-status: in-progress
 node-refs: SYS-LAYER; SYS-WORLD; SYS-ASSET; SYS-CHUNK
-current-phase: parallel-recon
-current-gate: investigation
+current-phase: report-handoff
+current-gate: investigation-review
 gate-status: active
 authorization-ref: DEC-PARALLEL-WORKTREE-001
 preauthorized-next-work-item: none
-next-phase: report-handoff
+next-phase: human-plan-review
 updated: 2026-08-20
 ---
 
@@ -18,13 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-PARALLEL-MAP-RECON-001`，四个隔离 worktree 已创建，等待调查窗口启动。
-- **已接受**：Human 回复“ok。开始创建worktree吧”，接受 `DEC-PARALLEL-WORKTREE-001` 的并行隔离方案。
-- **当前基线**：四个调查分支从代码基线 `1d0db48` / `master` 创建；主工作树只承载总控和权威状态，最新提交以 Git 历史为准。
-- **第一批窗口**：A SYS-LAYER 消费者；B SYS-WORLD 特殊13层；C SYS-ASSET 加载；D 多视口/性能基线。
-- **玩法线编排**：只保留一个专用玩法窗口和一个独立 worktree，按 `SYS-PLAYER → SYS-CAMERA` 串行实现；上一阶段完成验证和 Human Gate 后才能进入下一阶段。
-- **明确不做**：调查窗口不修改 `sample/`、权威文档或正式 `src/`/`game/`；不执行 reset/clean/pull/push；玩法 worktree 已申请但创建命令被 WSL 沙箱拦截，正式实现仍需独立 Gate；SYS-ZONE/SYS-INTERACT 等内容线不自动并入。
-- **下一步**：Human 在各窗口粘贴对应话术；完成后把报告带回本窗口进入 `report-handoff`。
+- **正在做**：`WI-PARALLEL-MAP-RECON-001` 已收到 A-D 四份 `task-todos/` 调查报告，当前由 Main 在 `report-handoff` 阶段统一审查。
+- **已落盘**：B `ad56bca`、C `604391c`、A `52caa84`、D `514b0f8`；四个提交均只新增各自调查报告，没有修改正式代码、`sample/` 或权威系统卡。
+- **Main 初审**：A/B/C 可作为规划输入；A/B 对特殊层和消费者的结论互补、无直接冲突，`Q-LAYER-002/003` 继续保持 UNKNOWN。D 的 27 样本矩阵可作为本机 baseline，但原始 JSON 和探针只在被忽略的 `.pi/`，尚不是干净检出可重复的持久证据。
+- **玩法线编排**：唯一 `gameplay-serial` worktree 已由 Human 创建；仍按 `SYS-PLAYER → SYS-CAMERA` 串行，正式代码需后续独立 Gate。
+- **明确不做**：尚未接受调查报告中的候选 DECISION，尚未冻结地图/玩法接口，也未授权地图或玩法实现。
+- **下一步**：先收口 D 的可复核证据，再由 Main 提交统一地图结论、接口边界和地图/玩法并行实施计划给 Human 审查。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -148,7 +147,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-PARALLEL-MAP-RECON-001` 已由 Human 以“ok。开始创建worktree吧”接受并激活。四个隔离 worktree 已从 `1d0db48` 创建，当前进入 `parallel-recon`；调查窗口分别处理 SYS-LAYER 消费者、SYS-WORLD 特殊13层、SYS-ASSET 加载和多视口/性能基线。所有窗口结果最后回到本窗口统一汇总；SYS-PLAYER 实现窗口延后到独立工作项。
+`WI-PARALLEL-MAP-RECON-001` 已收到 A-D 四份调查报告并进入 `report-handoff`。四份报告只作为工作记录，不是第二套动态状态；A/B/C 已具备进入统一规划的条件，D 的集合结论和本机 baseline 已记录，但探针与原始 JSON 只在 `.pi/`，在持久化或可重复复核前不得晋升为最终性能证据。Main 完成统一审查并经 Human 接受后，才会更新对应系统卡、总账并激活地图/玩法实现工作项。
 
 ### 并行窗口分工与交接
 
@@ -158,7 +157,7 @@ updated: 2026-08-20
 | B 特殊13层 | `.pi/worktrees/special-layers` / `recon/special-layers` | 调查原站为何只卸载11层；确认特殊13层的创建、更新、卸载和 shutdown 关系 | 不把“未找到卸载代码”直接写成“全局持久”；不修改权威状态 | FACT / INFERRED / UNKNOWN、三种解释、职责建议、验收建议 |
 | C 资源加载 | `.pi/worktrees/asset-loading` / `recon/asset-loading` | 调查 Phaser Loader、HttpClient、缓存、纹理释放和失败体验 | 不下载新资源；不修改 `sample/`、正式代码或权威文档 | FACT / INFERRED / UNKNOWN、当前差距、是否值得实现 |
 | D 性能基线 | `.pi/worktrees/perf-baseline` / `recon/perf-baseline` | 验证多视口/缩放下目标集合；记录当前 FPS、内存、请求和渲染层 baseline | 不把 baseline 宣称为最终性能结论；不修改正式代码 | 测试矩阵、命令、原始结果、异常和限制 |
-| 玩法窗口 | 预留 `.pi/worktrees/gameplay-serial` / `impl/gameplay-serial`；创建命令被 WSL 沙箱拦截，尚未创建 | 在一个窗口内先实现 SYS-PLAYER，完成验证后再实现 SYS-CAMERA | 不与 A-D 共改；不并行实现相机；不自动扩展到 SYS-ZONE/SYS-INTERACT；创建不等于代码已授权 | 创建成功后再进入窗口；每阶段返回 diff、测试、浏览器验证、未解决边界，回到本窗口进入下一 Gate |
+| 玩法窗口 | `.pi/worktrees/gameplay-serial` / `impl/gameplay-serial`；已由 Human 创建并经 `git worktree list` 验证 | 在一个窗口内先实现 SYS-PLAYER，完成验证后再实现 SYS-CAMERA | 不与 A-D 共改；不并行实现相机；不自动扩展到 SYS-ZONE/SYS-INTERACT；创建不等于代码已授权 | 进入窗口后仍先等待 `WI-SYS-PLAYER-RUNTIME-001` 激活；每阶段返回 diff、测试、浏览器验证、未解决边界，回到本窗口进入下一 Gate |
 
 所有窗口都必须读取主工作树最新的 `task_plan.md`、`决策记录.md`、总账和对应系统卡；调查只读证据，不能共改主工作树。玩法窗口后续只在独立 worktree 中实现，阶段之间由本窗口统一复核并经 Human 接受后推进。完成后把报告复制回本窗口，Main 统一复核、汇总、提出 DECISION，再经 Human 接受后落盘。
 
@@ -183,7 +182,7 @@ updated: 2026-08-20
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | 已完成，结果提交 `d61faa1` | SYS-WORLD/SYS-CHUNK 请求取消、过期结果、异步 mutation、Tilemap/collider teardown 和固定场景边界指标已验证；不代表完整地图系统完成 |
 | `WI-SYS-INPUT-TOUCH-001` | 已完成，结果提交 `66a20f8` | 接入移动端原生 Phaser pointer 摇杆；桌面隐藏、单指、键盘优先级切换、释放恢复和移动端 Smoke 已验证；不代表完整 SYS-INPUT 节点完成 |
-| `WI-PARALLEL-MAP-RECON-001` | Human 已接受，当前 worktree-setup | 建立 A/B/C/D 四个隔离调查 worktree；调查只读证据，报告回到本窗口统一汇总；不启动 SYS-PLAYER 实现 |
+| `WI-PARALLEL-MAP-RECON-001` | A-D 报告已提交，当前 report-handoff | 四份报告均在 `task-todos/`；A/B/C 可进入统一规划，D 仍需补干净检出可重复证据；尚未接受候选 DECISION 或启动实现 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
