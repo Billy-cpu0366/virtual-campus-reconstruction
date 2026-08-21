@@ -63,6 +63,8 @@ Main 在 P3 可进一步缩小路径，但不得扩大到另一窗口或 Main-ow
 
 Main-owned 精确范围：
 
+- `src/content/contract.ts`、`tests/content/contract.test.ts`；
+- `game/CampusContentResolver.ts`、`game/GameplayControlLeaseRuntime.ts`；
 - `game/CampusScene.ts`、`game/main.ts`、`index.html`、`package.json`、`vite.config.ts`；
 - `scripts/browser-*.mjs`（包括新增 content/game-ui/entity smoke）；
 - `02-接口层/API契约表.md`、`03-执行层/**`、`task_plan.md`、`决策记录.md`、`工作日志.md`；
@@ -70,12 +72,13 @@ Main-owned 精确范围：
 
 ### 统一 implementation baseline
 
-1. Main 在 P2 记录以下**仅文档提交**的有序清单：P0流程提交、A报告、B报告、C报告/no-code、P2设计合并提交。
-2. 从 runtime `798eda6` 创建本地分支/worktree：`integration/content-foundation` / `.pi/worktrees/content-foundation-integration`。
-3. 在该 worktree 按记录顺序 cherry-pick 上述仅文档提交；每次先核对提交只含报告、系统卡/API/总账/状态等 Main-owned 文档。
-4. 文档冲突由 Main 依据当前权威结论解决；任何 `src/`、`game/`、`public/`、`tests/` 或 `sample/` 冲突都必须中止 baseline 合流并诊断，不允许顺手覆盖 runtime。
-5. 运行状态一致性、CRLF-aware diff、typecheck、全测试和两种 build；全部通过后记录 baseline commit/tree 和 clean status。
-6. A/B/C 实现分支必须从这个同一 baseline commit 创建；任务包必须写明该 hash，不能使用浮动 branch 名。
+1. P1原始报告保留在各自不可变分支commit（A `1b29908`、B `6b5970a`、C `125691d`），作为审计来源，不要求进入runtime tree。Main cherry-pick报告曾被WSL safe allowlist拒绝，必须保持未绕过。
+2. Main P2把已复核语义完整写入系统卡/API/总账/决策；记录 P0流程提交和P2权威设计提交的有序清单。P2提交不得包含runtime代码。
+3. 从 runtime `798eda6` 创建本地分支/worktree：`integration/content-foundation` / `.pi/worktrees/content-foundation-integration`。
+4. 在该 worktree按顺序搬运P0/P2 Main权威文档提交；优先使用允许的文档commit操作。若Git操作仍被guard拒绝，停止baseline建立，不用patch/copy等价绕过。
+5. 文档冲突由 Main 依据当前权威结论解决；任何 `src/`、`game/`、`public/`、`tests/` 或 `sample/` 冲突都必须中止baseline并诊断，不允许顺手覆盖runtime。
+6. 运行状态一致性、CRLF-aware diff、typecheck、全测试和两种build；通过后记录 baseline commit/tree/clean status。
+7. A/B实现分支必须从同一 immutable baseline创建；C保留no-code。任务包写明hash，不能用浮动branch名。
 
 ### 阶段 M：Main integration
 
@@ -148,16 +151,20 @@ InteractState
   active menuId
   close reason
 
+ContentResolverPort
+  resolve(menuId) -> resolved(payload) | missing | invalid
+  synchronous; no network/retry
+
 GameUiPort
-  show(content payload)
-  hide(reason)
-  report user-close
+  show(menuId + residenceId + payload + presentation)
+  hide(menuId + residenceId + reason)
+  report user-close(menuId + residenceId + source)
   destroy
 
 GameplayControlLease
-  acquire(reason)
-  release(token)
-  shutdown releases all
+  acquire(reason) -> success token | failure reason
+  caller owns/releases only its opaque token
+  Main shuts provider after consumers; shutdown invalidates all and keeps scene disabled
 
 EntityLifecycle（仅若证据支持）
   create/register/update/disable/destroy ownership

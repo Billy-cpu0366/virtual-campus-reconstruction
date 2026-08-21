@@ -1,6 +1,6 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-three-window-design
+status: active-main-design-synthesis
 work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001

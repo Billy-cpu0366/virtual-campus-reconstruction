@@ -28,13 +28,16 @@ updated: 2026-08-21
 | `createWorld` / `destroyWorld` | 世界 → 所有人 | 进游戏搭起整个"舞台"（地图 + 图层），退游戏 / 切场景时拆掉 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md) |
 | 归一化 | 输入 → 移动/玩家 | 键盘 / WASD / 摇杆三种按法，统一翻译成"往哪个方向走"，移动组不用管用的是哪种 | [SYS-INPUT](../03-执行层/02-玩法线/01-输入.md) |
 | 玩家位置快照 / `startFollow` | 玩家 → 相机 / 分块 | 玩家只读世界坐标供镜头硬跟随和玩家 3×3 分块目标计算；不把可变 Sprite/Body 所有权交出去 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
-| 玩法控制门 | Main / 相机 → 玩家 / 输入 | 航拍或 shutdown 禁用时立即停速、屏蔽并 reset 键盘/摇杆；结束后才恢复设备对应输入 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
+| 玩法控制门 / lease | Main provider ← 相机 / SYS-INTERACT | acquire返回成功token或失败reason；调用方只释放自己的opaque token；首token立即停速/reset，末token释放后恢复；Main在消费者shutdown后再shutdown provider并保持scene禁用 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
 | 动态深度 | 玩家 → 图层 | 决定谁挡谁：人走到灌木后面就该被挡住，按位置排前后 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md) |
 | 相机视口目标更新 / `loadChunksForCamera` | 相机 → 分块 | 航拍和正常跟随都只提交相机视口；分块统一计算“玩家 3×3 ∪ 相机可见 +1”，相机不直接操作 cache/Tilemap | [SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 地图运行时收敛 | Main → 分块 / 世界 | Main 可等待请求和 mutation idle；shutdown 按控制/相机→请求→mutation→collider/layer/Tilemap 收敛 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md)、[SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 资源加载 | 资源 → 各系统 | 进货：图片 / 地图走 Phaser Loader，切块数据走 HttpClient，两条补给线 | [SYS-ASSET](../03-执行层/01-地图线/01-资源加载.md) |
 | 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开行为为 100ms 检查、严格 `<30px` 距离；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
-| 区域内容请求 | SYS-ZONE → SYS-INTERACT | 输出进入/离开、`menuId`、visited/手动关闭状态；弹窗 DOM、暂停恢复和文案归 SYS-INTERACT / SYS-GAME-UI；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
+| 区域驻留事件 | SYS-ZONE → SYS-INTERACT | 只在 outside↔inside 边沿输出 `markerId/menuId/residenceId/enter|leave`；重复100ms检查不重复发 enter，DOM、控制和手动关闭不归 Zone | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
+| 内容访问收据 | SYS-INTERACT → SYS-ZONE | UI 确认 `shown/already-visible` 后回传 marker/residence/menu，Zone 再记 visited；失败不产生虚假访问 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
+| 内容解析 | Main ContentResolver → SYS-INTERACT | 同步按menuId返回evidence-backed payload或missing/invalid；不联网、不retry，Interact/UI不猜正文 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[内容层](../04-内容层/作品集内容.md) |
+| 游戏UI呈现端口 | SYS-INTERACT ↔ SYS-GAME-UI | Interact 调用带`menuId+residenceId`的原子`show/hide/destroy`；UI只原样回报identity和close-button/backdrop动作；programmatic hide不发user-close，stale close被Interact忽略 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[SYS-GAME-UI](../03-执行层/04-独立件/02-游戏UI.md) |
 
 ### 并行实施接口状态（`DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001`）
 
@@ -46,6 +49,19 @@ updated: 2026-08-21
 | 地图运行时收敛 | Frozen | Bounded Integrated + Verified（`f2fe106`） | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
 
 > Frozen 表示语义边界已接受；`f2fe106` 只验证第一波有界接口，不表示完整 M1/P1 系统或 SYS-CAMERA 已完成。
+
+### 内容基础接口状态（`DEC-CONTENT-FOUNDATION-DESIGN-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| 区域驻留事件 | Frozen | Not Started | Zone 生成每次驻留唯一 `residenceId`，只发 enter/leave 边沿；距离与100ms轮询仍归 Zone |
+| 内容访问收据 | Frozen | Not Started | 仅 UI show 成功后记 visited；这是失败安全的重构 DECISION，区别于原站调用show前记录 |
+| 内容解析 | Frozen | Not Started | Main-owned同步resolver；`resolved(payload)|missing|invalid`，来源只读内容层，本轮不引入Promise/网络 |
+| 游戏UI呈现端口 | Frozen | Not Started | identity=`menuId+residenceId`；single-active、原子 replace；standard无global backdrop、memo有；B不拥有业务状态 |
+| 玩法控制 lease | Frozen | Bounded Control Gate Exists；Lease Not Started | acquire显式成功/失败；token归调用方；最后token后恢复；provider由Main在消费者shutdown后关闭 |
+| 通用 Entity 生命周期 | No Contract | No-Code | `Q-ENTITY-001` 保持open；审计清单不进入API，不创建共享runtime/registry |
+
+> 本节由一条龙 P2 设计预授权冻结；P3 必须先创建共享 contract 和 immutable baseline，才能派发 A/B 实现。C 为 no-code。
 
 ## 二、数据字典（常量 / 公式，不是接口）
 
@@ -60,6 +76,8 @@ updated: 2026-08-21
 | 图层 | 24 层（layer1-10 + walls + cars + 4 roof + 4 bridge + 3 particles + footsteps） | ✅ 已确认（特殊 13 层卸载语义见 SYS-WORLD UNKNOWN） |
 | 移动速度 | 单轴 150 / 对角 106 | ✅ 已定死 |
 | 玩家动态深度 | 原站事实：`500 + y*0.1`；当前重构决定：`500 + (y + 24)*0.1`（桥上 1650 等为显式覆盖） | ✅ 已定死（重构实现以 SYS-LAYER 卡和 `DEC-SYS-LAYER-CORE-001` 为准；两者不能混写） |
+| 内容 menuId | `about/cv/projects/contact/tech/memo1..memo6` | ✅ 11个 Zone 内容 ID；big-map/under-hood 不在当前接口 |
+| 内容弹窗策略 | single-active；standard backdrop=`none`，memo backdrop=`global` | ✅ 重构 DECISION；原站多 visible 技术可能不作为产品合同 |
 
 ## 三、待定接口（还没定死）
 

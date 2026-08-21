@@ -4,12 +4,12 @@ current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 work-item-level: integration
 work-item-type: parallel-design-implementation-pipeline
 work-item-status: active
-current-phase: three-window-design
-current-gate: parallel-design-report-handoff
+current-phase: main-design-synthesis
+current-gate: cross-line-contract-freeze
 gate-status: in_progress
 authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 preauthorized-next-work-item: none
-next-phase: main-design-synthesis
+next-phase: auto-work-packaging
 updated: 2026-08-21
 ---
 
@@ -28,7 +28,9 @@ updated: 2026-08-21
 - **一条龙授权**：Human 已授权 P0流程冻结→P1三窗调查设计→P2 Main设计合并→P3自动派工→P4三窗有界实现→P5 Main接线合并→P6全量验证→P7文档关闭，中间不再等待确认。
 - **实现硬边界**：Main 先冻结接口/文件所有权；窗口不改共享接线文件；C只有证据支持时写码，否则提交no-code；不push/PR/远端同步。
 - **P0 已通过**：流程提交 `6fdefb1`；状态一致性、CRLF-aware diff 和独立流程复核 PASS。
-- **当前 P1**：A/B/C 同时完成调查＋七格设计报告并各自提交；Main 收齐后自动进入 P2 设计合并。
+- **P1 已完成**：A `1b29908`、B `6b5970a`、C `125691d`；三分支clean。C确认统一Entity实现NO-GO。
+- **当前 P2**：Main 已独立复核并修订 visited、single-active、control lease、DOM层级、GameUiPort/backdrop；正在同步三张系统卡、API、总账、决策和进度。
+- **沙箱边界**：Main cherry-pick报告提交被safe allowlist拒绝，未绕过；报告保留在不可变分支commit，权威设计由Main语义合并，P3 baseline只搬运Main P0/P2文档提交。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
