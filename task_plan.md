@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level:
-work-item-type:
-work-item-status:
-node-refs:
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref:
+current-work-item: WI-SYS-INPUT-TOUCH-001
+work-item-level: integration
+work-item-type: implementation
+work-item-status: in-progress
+node-refs: SYS-INPUT; SYS-MOVE
+current-phase: implementation
+current-gate: implementation
+gate-status: active
+authorization-ref: DEC-SYS-INPUT-TOUCH-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: verification
 updated: 2026-08-20
 ---
 
@@ -18,11 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前状态**：上一项地图生命周期收口已完成并关闭，结果提交 `d61faa1`；当前回到合法的 `none / work-item-selection`。
-- **已落盘**：可取消 master/chunk 请求、过期结果守卫、异步 destroy/mutation 收敛、collider/Tilemap 显式 teardown、生命周期 Smoke 和对应测试。
-- **已验证**：typecheck、31 files / 164 tests、production/test-hooks build、production 安全/普通 Smoke、test-hooks lifecycle/layer/collision/chunk Smoke、状态一致性和独立复核均通过。
-- **仍未完成**：完整 24 层消费者、原站特殊 13 层事实、多视口严格 FPS/内存性能、NPC/车辆/粒子和玩法线仍需后续工作项。
-- **下一步**：不自动启动新工作项；回到 P0 候选选择。
+- **正在做**：`WI-SYS-INPUT-TOUCH-001`，接入移动端原生 Phaser pointer 摇杆，并验证键盘/摇杆优先级与释放恢复。
+- **已接受**：Human 回复“ok。开始吧”，接受本项范围；正式授权为 `DEC-SYS-INPUT-TOUCH-001`。
+- **已落盘**：当前允许修改 `game/`、必要 `src/input/` 适配契约、`tests/input/`、验证脚本、`package.json` 和对应文档。
+- **本项目标**：移动/平板显示固定摇杆，桌面隐藏；单指锁定；摇杆输入复用 8 方向/150/106 规则；摇杆按下时键盘让位，释放后恢复。
+- **明确不做**：不修改 `sample/`/旧 Phaser；不实现玩家状态、SYS-ZONE/SYS-INTERACT、NPC/车辆/粒子或通用输入框架；不把原生适配器宣称为原站 rexVirtualJoystick 插件本身。
+- **下一步**：完成适配器、单元测试、移动端 CDP Smoke 后回写 SYS-INPUT、总账和关闭记录。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -67,7 +68,7 @@ updated: 2026-08-20
 | SYS-ASSET CORE 实现授权与执行 | 已验证并关闭（typecheck + 37 测试通过） | 维护 `src/asset/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、扩大为通用框架 | 已完成；转 SYS-LAYER |
 | SYS-LAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 12 项测试通过） | 维护 `src/layer/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Tilemap 写入、扩大为通用框架 | 已完成；转 SYS-WORLD |
 | SYS-WORLD CORE 实现授权与执行 | 已验证并关闭（当前 `tests/world/` 32 项；全库149项通过） | 维护 `src/world/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存、渲染、Tilemap 真实写入、碰撞重算、扩大为通用框架 | 已完成；本次运行时安全补偿回滚已验证，完整世界仍需独立范围 |
-| SYS-INPUT CORE 实现授权与执行 | 已验证并关闭（typecheck + 23 项测试通过） | 维护 `src/input/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、rexVirtualJoystick 插件集成、真实键鼠/触摸监听、扩大为通用框架 | 已完成；转 SYS-MOVE |
+| SYS-INPUT CORE 实现授权与执行 | 已验证并关闭（typecheck + 23 项测试通过） | 维护 `src/input/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、rexVirtualJoystick 插件集成、真实键鼠/触摸监听、扩大为通用框架 | 已完成；真实运行时接入由当前独立工作项授权 |
 | SYS-MOVE CORE 实现授权与执行 | 已验证并关闭（typecheck + 8 项测试通过） | 维护 `src/move/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Arcade 物理引擎集成、分轴碰撞、真实 body 注册、扩大为通用框架 | 已完成；转 SYS-PLAYER |
 | SYS-PLAYER CORE 实现授权与执行 | 已验证并关闭（typecheck + 13 项测试通过） | 维护 `src/player/` 已验证结果与授权边界 | 修改旧 Phaser、接入 Phaser/Vite、网络/缓存/渲染、Phaser Sprite/动画创建、真实贴图加载、被抓/换装/传送完整流程、扩大为通用框架 | 已完成；转 SYS-CAMERA |
 | SYS-CAMERA CORE 实现授权与执行 | 已验证并关闭（typecheck + 10 项本系统测试通过，结果进入 `4f980c5`） | 维护 `src/camera/` 已验证结果与授权边界 | 修改旧 Phaser、扩大为通用框架 | 已完成；后续渲染授权已消费该结果 |
@@ -83,7 +84,7 @@ updated: 2026-08-20
 | 运行时安全有界修复 | 已接受、已落盘、已验证；结果提交 `632a0c9` | 处理 World 部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口清理 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 普通 production build、普通/跨块/安全 Smoke 与 test-hooks 碰撞 Smoke均通过；工作项已关闭 |
 | SYS-ZONE 区域触发逆向与设计 | 已接受、已落盘、已验证；结果提交 `05c2274` | 核对公开 marker/区域触发来源、坐标/区域边界、进入/离开和防重复行为；补 `04-内容层/作品集内容.md` 内容索引、SYS-ZONE 七格、接口和未知队列 | 不写 `src/`/`game/` 正式代码；不实现 SYS-INTERACT 弹窗；不猜未证实文案、资源或触发器 | 设计已通过 Human review；工作项关闭，正式实现需另行授权 |
 | SYS-LAYER 图层运行时语义收束 | 设计与有界实现均已完成 | 证据、`Q-LAYER-002`/`003`、24 层策略、apply/remove 边界和 World/Chunk 职责已收敛；设计关闭提交 `c82aa4a`，有界实现提交 `10c7d88`；完整节点仍为 `designed` | 不把有界实现误报为完整系统；不擅自关闭 particles3 或特殊13层 UNKNOWN | 当前回到工作项选择；后续完整语义需另行授权 |
-| SYS-WORLD + SYS-CHUNK 地图生命周期收口 | 已完成，结果提交 `d61faa1` | 可取消请求、过期回写守卫、异步 mutation 等待、Phaser Tilemap/collider 显式 teardown 和固定场景资源边界指标已验证 | 不把固定场景指标写成完整 FPS/内存结论；不实现 NPC/车辆/粒子/完整24层消费者或原站13层事实 | 当前回到工作项选择 |
+| SYS-WORLD + SYS-CHUNK 地图生命周期收口 | 已完成，结果提交 `d61faa1` | 可取消请求、过期回写守卫、异步 mutation 等待、Phaser Tilemap/collider 显式 teardown 和固定场景资源边界指标已验证 | 不把固定场景指标写成完整 FPS/内存结论；不实现 NPC/车辆/粒子/完整24层消费者或原站13层事实 | 当前转入 SYS-INPUT 真实运行时接入 |
 | SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
@@ -146,7 +147,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-SYS-MAP-LIFECYCLE-CLOSURE-001` 已完成并关闭（结果提交 `d61faa1`）。本项收口 SYS-WORLD/SYS-CHUNK 生命周期：可取消 master/chunk 请求、过期结果守卫、销毁时阻止新写入、排队/活动 mutation 收敛、collider/Tilemap 显式 teardown 和固定场景边界指标。完整 24 层消费者、原站特殊 13 层事实、NPC/车辆/粒子、完整 FPS/内存性能仍不在范围。当前正式工作项为 `none`，等待下一项选择。
+`WI-SYS-INPUT-TOUCH-001` 已由 Human 以“ok。开始吧”接受并激活。当前只接入 SYS-INPUT 的真实运行时：原生 Phaser pointer 摇杆、固定移动端位置、单指跟踪、桌面隐藏、8方向/速度复用、摇杆优先键盘和释放恢复。由于仓库没有 rexVirtualJoystick 运行资源/依赖，原生适配器是重构 DECISION，不冒充原站插件实现。玩家状态、区域交互、NPC/车辆/粒子和通用输入框架不在范围。
 
 ## 已阻塞或暂停工作项
 
@@ -168,6 +169,7 @@ updated: 2026-08-20
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 已完成，结果提交 `c82aa4a` | SYS-LAYER 证据与有界运行时设计已接受、落盘并验证；不代表代码或完整系统完成 |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | 已完成，结果提交 `d61faa1` | SYS-WORLD/SYS-CHUNK 请求取消、过期结果、异步 mutation、Tilemap/collider teardown 和固定场景边界指标已验证；不代表完整地图系统完成 |
+| `WI-SYS-INPUT-TOUCH-001` | Human 已接受，implementation active | 接入移动端原生 Phaser pointer 摇杆；验证桌面隐藏、单指、键盘优先级切换和移动端 Smoke；不扩大到玩家状态或内容玩法 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
