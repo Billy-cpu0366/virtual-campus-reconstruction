@@ -1,15 +1,23 @@
 import assert from "node:assert/strict";
 
 const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
+const positionalArgs = process.argv.slice(2).filter(
+  (argument) => !argument.startsWith("--"),
+);
 const baseUrl =
-  process.argv[2] ?? process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:4175";
-const smokeUrl =
-  process.argv[3] ?? process.env.SMOKE_URL ?? `${baseUrl}/`;
+  positionalArgs[0] ??
+  process.env.SMOKE_BASE_URL ??
+  "http://127.0.0.1:4175";
+const rawSmokeUrl =
+  positionalArgs[1] ?? process.env.SMOKE_URL ?? `${baseUrl}/`;
 const waitMs = Number(process.env.SMOKE_WAIT_MS ?? "7000");
 const cleanupStale = process.env.SMOKE_CLEANUP_STALE !== "false";
 const bridgeTest =
   process.argv.includes("--bridge-test") ||
   process.env.SMOKE_BRIDGE_TEST === "true";
+const smokeUrlObject = new URL(rawSmokeUrl);
+smokeUrlObject.searchParams.set("collision-test", "1");
+const smokeUrl = smokeUrlObject.toString();
 const moveKey = process.env.SMOKE_MOVE_KEY ?? "ArrowDown";
 const keyInfo = {
   ArrowUp: { code: "ArrowUp", windowsVirtualKeyCode: 38 },

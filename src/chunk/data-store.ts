@@ -8,7 +8,10 @@ import {
 import { LAYER_STRATEGIES } from "../layer/strategy.js";
 import type { ChunkLayer, ValidatedChunk } from "../world/contract.js";
 
-export type JsonLoader = (url: string) => Promise<unknown>;
+export type JsonLoader = (
+  url: string,
+  signal?: AbortSignal,
+) => Promise<unknown>;
 export type MasterUrl = string | URL;
 
 export class ChunkDataError extends Error {
@@ -16,6 +19,23 @@ export class ChunkDataError extends Error {
     super(message);
     this.name = "ChunkDataError";
   }
+}
+
+export class ChunkRequestAbortedError extends Error {
+  constructor() {
+    super("chunk request aborted");
+    this.name = "AbortError";
+  }
+}
+
+export function isChunkRequestAbortedError(error: unknown): boolean {
+  return (
+    error instanceof ChunkRequestAbortedError ||
+    (typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "AbortError")
+  );
 }
 
 export interface ChunkDataStoreOptions {
@@ -153,6 +173,8 @@ export class ChunkDataStore {
   #cache = new Map<string, ValidatedChunk>();
   #inFlight = new Map<string, Promise<ValidatedChunk>>();
   #failures = new Map<string, ChunkLoadFailure>();
+  #destroyed = false;
+  #abortController = new AbortController();
 
   constructor(
     masterUrl: MasterUrl,
@@ -163,6 +185,10 @@ export class ChunkDataStore {
     this.#loader = loader;
     this.maxAttempts = options.maxAttempts ?? 3;
     assertAttempts(this.maxAttempts);
+  }
+
+  get destroyed(): boolean {
+    return this.#destroyed;
   }
 
   get master(): ChunkMaster | undefined {
@@ -187,6 +213,7 @@ export class ChunkDataStore {
   }
 
   async loadMaster(forceRetry = false): Promise<ChunkMaster> {
+    this.#throwIfDestroyed();
     if (this.#master !== undefined) {
       return this.#master;
     }
@@ -201,14 +228,21 @@ export class ChunkDataStore {
       this.#masterError = undefined;
     }
     const request = Promise.resolve()
-      .then(() => this.#loader(this.masterUrl))
+      .then(() => {
+        this.#throwIfDestroyed();
+        return this.#loader(this.masterUrl, this.#abortController.signal);
+      })
       .then((value) => {
+        this.#throwIfDestroyed();
         const master = parseChunkMaster(value);
         this.#master = master;
         this.#masterError = undefined;
         return master;
       })
       .catch((error: unknown) => {
+        if (this.#destroyed || isChunkRequestAbortedError(error)) {
+          throw new ChunkRequestAbortedError();
+        }
         const normalized = asError(error);
         this.#masterError = normalized;
         throw normalized;
@@ -229,6 +263,20 @@ export class ChunkDataStore {
 
   retryMaster(): Promise<ChunkMaster> {
     return this.loadMaster(true);
+  }
+
+  destroy(): void {
+    if (this.#destroyed) {
+      return;
+    }
+    this.#destroyed = true;
+    this.#abortController.abort();
+    this.#master = undefined;
+    this.#masterError = undefined;
+    this.#masterRequest = undefined;
+    this.#cache.clear();
+    this.#inFlight.clear();
+    this.#failures.clear();
   }
 
   hasCached(coordinate: ChunkCoordinate): boolean {
@@ -263,6 +311,9 @@ export class ChunkDataStore {
     attempts: number,
     allowRetry: boolean,
   ): Promise<ValidatedChunk> {
+    if (this.#destroyed) {
+      return Promise.reject(new ChunkRequestAbortedError());
+    }
     const key = coordinateKey(coordinate);
     const cached = this.#cache.get(key);
     if (cached !== undefined) {
@@ -300,6 +351,7 @@ export class ChunkDataStore {
     forceMasterRetry: boolean,
   ): Promise<ValidatedChunk> {
     assertAttempts(attempts);
+    this.#throwIfDestroyed();
     if (
       !Number.isInteger(coordinate.x) ||
       !Number.isInteger(coordinate.y) ||
@@ -318,6 +370,9 @@ export class ChunkDataStore {
         master = await this.loadMaster(forceMasterRetry || attempt > 1);
         break;
       } catch (error) {
+        if (this.#destroyed || isChunkRequestAbortedError(error)) {
+          throw new ChunkRequestAbortedError();
+        }
         masterError = asError(error);
       }
     }
@@ -348,12 +403,17 @@ export class ChunkDataStore {
     let lastError = new Error("chunk load failed");
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        const raw = await this.#loader(url);
+        const raw = await this.#loader(url, this.#abortController.signal);
+        this.#throwIfDestroyed();
         const chunk = parseChunk(raw, coordinate, master);
+        this.#throwIfDestroyed();
         this.#cache.set(coordinateKey(coordinate), chunk);
         this.#failures.delete(coordinateKey(coordinate));
         return chunk;
       } catch (error) {
+        if (this.#destroyed || isChunkRequestAbortedError(error)) {
+          throw new ChunkRequestAbortedError();
+        }
         lastError = asError(error);
       }
     }
@@ -374,11 +434,20 @@ export class ChunkDataStore {
     attempts: number,
     error: Error,
   ): void {
+    if (this.#destroyed || isChunkRequestAbortedError(error)) {
+      return;
+    }
     this.#failures.set(coordinateKey(coordinate), {
       coordinate: Object.freeze({ x: coordinate.x, y: coordinate.y }),
       attempts,
       url,
       error,
     });
+  }
+
+  #throwIfDestroyed(): void {
+    if (this.#destroyed || this.#abortController.signal.aborted) {
+      throw new ChunkRequestAbortedError();
+    }
   }
 }

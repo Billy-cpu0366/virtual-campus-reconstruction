@@ -180,6 +180,104 @@ describe("ChunkCoordinator", () => {
     expect(coordinator.rendered).toEqual([{ x: 0, y: 0 }]);
   });
 
+  it("活动 apply 完成后若目标过期，会补偿清除过期回写", async () => {
+    const writeStarted = deferred<void>();
+    const releaseWrite = deferred<void>();
+    let firstWrite = true;
+    const world = readyWorld({
+      hooks: {
+        writeLayerAsync: async (layer) => {
+          if (firstWrite && layer.name === "layer1") {
+            firstWrite = false;
+            writeStarted.resolve();
+            await releaseWrite.promise;
+          }
+        },
+      },
+    });
+    const loader = async (url: string) =>
+      url.endsWith("master.json") ? master() : chunk();
+    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const coordinator = new ChunkCoordinator(store, world);
+
+    const loading = coordinator.updateTargets([{ x: 0, y: 0 }]);
+    await writeStarted.promise;
+    await coordinator.updateTargets([]);
+    releaseWrite.resolve();
+    await loading;
+
+    expect(coordinator.targets).toEqual([]);
+    expect(coordinator.rendered).toEqual([]);
+  });
+
+  it("活动 remove 完成后若目标重新加入，会补偿重新写入", async () => {
+    const clearStarted = deferred<void>();
+    const releaseClear = deferred<void>();
+    let firstClear = true;
+    const world = readyWorld({
+      hooks: {
+        clearLayerAsync: async (layer) => {
+          if (firstClear && layer.name === "layer1") {
+            firstClear = false;
+            clearStarted.resolve();
+            await releaseClear.promise;
+          }
+        },
+      },
+    });
+    const loader = async (url: string) =>
+      url.endsWith("master.json") ? master() : chunk();
+    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const coordinator = new ChunkCoordinator(store, world);
+
+    await coordinator.updateTargets([{ x: 0, y: 0 }]);
+    const removing = coordinator.updateTargets([]);
+    await clearStarted.promise;
+    await coordinator.updateTargets([{ x: 0, y: 0 }]);
+    releaseClear.resolve();
+    await removing;
+
+    expect(coordinator.targets).toEqual([{ x: 0, y: 0 }]);
+    expect(coordinator.rendered).toEqual([{ x: 0, y: 0 }]);
+  });
+
+  it("destroyAsync 立即清理 observable 状态并等待活动 mutation", async () => {
+    const writeStarted = deferred<void>();
+    const releaseWrite = deferred<void>();
+    let firstWrite = true;
+    const world = readyWorld({
+      hooks: {
+        writeLayerAsync: async (layer) => {
+          if (firstWrite && layer.name === "layer1") {
+            firstWrite = false;
+            writeStarted.resolve();
+            await releaseWrite.promise;
+          }
+        },
+      },
+    });
+    const loader = async (url: string) =>
+      url.endsWith("master.json") ? master() : chunk();
+    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const coordinator = new ChunkCoordinator(store, world);
+
+    const pending = coordinator.updateTargets([{ x: 0, y: 0 }]);
+    await writeStarted.promise;
+    const destroyed = coordinator.destroyAsync();
+
+    expect(coordinator.state.targets).toEqual([]);
+    expect(coordinator.state.requesting).toEqual([]);
+    expect(coordinator.state.cached).toEqual([]);
+    expect(coordinator.state.rendered).toEqual([]);
+    expect(coordinator.state.failed).toEqual([]);
+    expect(coordinator.destroyed).toBe(true);
+    expect(world.state).toBe("destroyed");
+
+    releaseWrite.resolve();
+    await expect(destroyed).resolves.toBeUndefined();
+    await expect(pending).resolves.toBeUndefined();
+  });
+
   it("destroy 后晚到结果不能写入 World，且幂等", async () => {
     const chunkRequest = deferred<unknown>();
     const loader = (url: string) => {

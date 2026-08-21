@@ -68,8 +68,12 @@ const MOVEMENT_KEY_BY_CODE = new Map<string, keyof KeyState>([
   ["KeyD", "right"],
 ]);
 
-async function fetchJson(url: string): Promise<unknown> {
-  const response = await fetch(url);
+async function fetchJson(
+  url: string,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  const response =
+    signal === undefined ? await fetch(url) : await fetch(url, { signal });
   if (!response.ok) {
     throw new Error(`请求 ${url} 失败：HTTP ${response.status}`);
   }
@@ -86,6 +90,8 @@ export class CampusScene extends Phaser.Scene {
   private lastDirection: Direction = DEFAULT_FACING;
   private coordinator: ChunkCoordinator | undefined;
   private renderer: PhaserWorldRenderer | undefined;
+  private dataStore: ChunkDataStore | undefined;
+  private dynamicWorldShutdown: Promise<void> | undefined;
   private worldSpec: WorldSpec | undefined;
   private chunkUpdateElapsed = CHUNK_UPDATE_INTERVAL_MS;
   private bridgeCheckFrames = 0;
@@ -100,6 +106,9 @@ export class CampusScene extends Phaser.Scene {
   private debugHook: (() => unknown) | undefined;
   private collisionTestHook:
     | { setPlayerPosition(x: number, y: number): void }
+    | undefined;
+  private lifecycleTestHook:
+    | { shutdown(): Promise<void> }
     | undefined;
   private readonly collisionColliders = new Map<
     TilemapLayerLike,
@@ -157,10 +166,6 @@ export class CampusScene extends Phaser.Scene {
     this.events.once("shutdown", () => {
       this.sceneDestroyed = true;
       this.stopPlayerMovement();
-      this.coordinator?.destroy();
-      void this.renderer?.destroyAsync().catch((error: unknown) => {
-        console.error("动态世界销毁失败", error);
-      });
       this.mutationScheduler.destroy();
       this.clearRuntimeTestHooks();
       window.removeEventListener("keydown", this.handleKeyDown);
@@ -170,6 +175,10 @@ export class CampusScene extends Phaser.Scene {
         "visibilitychange",
         this.handleVisibilityChange,
       );
+      this.dynamicWorldShutdown = this.shutdownDynamicWorld();
+      void this.dynamicWorldShutdown.catch((error: unknown) => {
+        console.error("动态世界销毁失败", error);
+      });
     });
     void this.initializeDynamicWorld().catch((error: unknown) => {
       if (!this.sceneDestroyed) {
@@ -282,6 +291,7 @@ export class CampusScene extends Phaser.Scene {
       fetchJson as JsonLoader,
       { maxAttempts: 2 },
     );
+    this.dataStore = store;
     const master = await store.loadMaster();
     if (this.sceneDestroyed) return;
 
@@ -381,8 +391,60 @@ export class CampusScene extends Phaser.Scene {
         this.collisionTestHook = collisionTestHook;
         (window as any).__campusCollisionTest = collisionTestHook;
       }
+      if (new URLSearchParams(window.location.search).has("lifecycle-test")) {
+        const lifecycleHook = {
+          shutdown: async (): Promise<void> => {
+            this.scene.stop();
+            while (!this.sceneDestroyed) {
+              await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            }
+            await this.dynamicWorldShutdown;
+          },
+        };
+        this.lifecycleTestHook = lifecycleHook;
+        (window as any).__campusLifecycleTest = lifecycleHook;
+      }
     }
     this.updateDynamicTargets();
+  }
+
+  private async shutdownDynamicWorld(): Promise<void> {
+    let firstError: unknown;
+    const rememberError = (error: unknown): void => {
+      if (firstError === undefined) {
+        firstError = error;
+      }
+    };
+
+    try {
+      if (this.coordinator !== undefined) {
+        await this.coordinator.destroyAsync();
+      } else {
+        this.dataStore?.destroy();
+      }
+    } catch (error) {
+      rememberError(error);
+    }
+
+    try {
+      await this.mutationScheduler.waitForActiveIdle();
+    } catch (error) {
+      rememberError(error);
+    }
+
+    try {
+      await this.renderer?.destroyAsync();
+    } catch (error) {
+      rememberError(error);
+    }
+
+    this.coordinator = undefined;
+    this.renderer = undefined;
+    this.dataStore = undefined;
+
+    if (firstError !== undefined) {
+      throw firstError;
+    }
   }
 
   private readonly handleCollisionLayerCreated = (
@@ -430,7 +492,7 @@ export class CampusScene extends Phaser.Scene {
     const collider = this.collisionColliders.get(layer);
     if (collider !== undefined) {
       (collider as any).active = false;
-      this.physics.world.removeCollider?.(collider);
+      this.physics?.world?.removeCollider?.(collider);
       collider.destroy();
       await this.waitForColliderRemoval(collider);
     }
@@ -451,8 +513,15 @@ export class CampusScene extends Phaser.Scene {
     ) {
       delete runtime.__campusCollisionTest;
     }
+    if (
+      this.lifecycleTestHook !== undefined &&
+      runtime.__campusLifecycleTest === this.lifecycleTestHook
+    ) {
+      delete runtime.__campusLifecycleTest;
+    }
     this.debugHook = undefined;
     this.collisionTestHook = undefined;
+    this.lifecycleTestHook = undefined;
   }
 
   private configureInitialCollisionLayers(): void {
@@ -523,9 +592,12 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private stopPlayerMovement(): void {
-    this.player?.setVelocity(0, 0);
-    this.player?.anims.stop();
-    this.player?.setFrame(walkFrameStart(this.lastDirection));
+    if (this.player === undefined || this.player.body === undefined) {
+      return;
+    }
+    this.player.setVelocity(0, 0);
+    this.player.anims.stop();
+    this.player.setFrame(walkFrameStart(this.lastDirection));
   }
 
   private updateDynamicTargets(): void {

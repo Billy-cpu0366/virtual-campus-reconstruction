@@ -126,6 +126,52 @@ describe("ChunkDataStore", () => {
     expect(chunkCalls).toBe(3);
   });
 
+  it("destroy 会取消 master 请求且不记录失败", async () => {
+    const masterRequest = deferred<unknown>();
+    let receivedSignal: AbortSignal | undefined;
+    const loader = vi.fn((url: string, signal?: AbortSignal) => {
+      receivedSignal = signal;
+      return masterRequest.promise;
+    });
+    const store = new ChunkDataStore(
+      "https://test.invalid/master.json",
+      loader,
+    );
+
+    const pending = store.loadMaster();
+    await vi.waitFor(() => expect(loader).toHaveBeenCalledTimes(1));
+    store.destroy();
+    masterRequest.resolve(master());
+
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    expect(receivedSignal?.aborted).toBe(true);
+    expect(store.masterFailure).toBeUndefined();
+    expect(store.destroyed).toBe(true);
+  });
+
+  it("destroy 会取消 chunk 请求且不写入 cache 或 failure", async () => {
+    const chunkRequest = deferred<unknown>();
+    const loader = vi.fn((url: string) => {
+      if (url.endsWith("master.json")) return Promise.resolve(master());
+      return chunkRequest.promise;
+    });
+    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+
+    const pending = store.loadChunk({ x: 0, y: 0 });
+    await vi.waitFor(() => expect(loader).toHaveBeenCalledTimes(2));
+    store.destroy();
+    chunkRequest.resolve(chunk());
+
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    expect(store.cachedChunks).toEqual([]);
+    expect(store.getFailure({ x: 0, y: 0 })).toBeUndefined();
+    expect(store.master).toBeUndefined();
+    expect(store.masterFailure).toBeUndefined();
+    await expect(store.loadChunk({ x: 0, y: 0 })).rejects.toMatchObject({
+      name: "AbortError",
+    });
+  });
+
   it("master 失败会阻止隐式重试，显式 retryChunk 可恢复", async () => {
     let masterCalls = 0;
     const loader = vi.fn(async (url: string) => {

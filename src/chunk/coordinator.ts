@@ -53,6 +53,7 @@ export class ChunkCoordinator {
   #mutating = new Map<string, Promise<void>>();
   #worldFailures = new Map<string, ChunkCoordinatorFailure>();
   #destroyed = false;
+  #destroyPromise: Promise<void> | undefined;
   #scheduleMutation: ChunkMutationScheduler;
 
   constructor(
@@ -171,14 +172,29 @@ export class ChunkCoordinator {
   }
 
   destroy(): void {
-    if (this.#destroyed) {
-      return;
+    void this.destroyAsync();
+  }
+
+  async destroyAsync(): Promise<void> {
+    if (this.#destroyPromise !== undefined) {
+      return this.#destroyPromise;
     }
+
     this.#destroyed = true;
     this.#targets.clear();
-    this.#mutating.clear();
     this.#worldFailures.clear();
+    this.store.destroy();
     this.world.destroy();
+
+    const requests = [...this.#requesting.values()];
+    const mutations = [...this.#mutating.values()];
+    this.#requesting.clear();
+    this.#mutating.clear();
+    this.#destroyPromise = Promise.allSettled([
+      ...requests,
+      ...mutations,
+    ]).then(() => undefined);
+    return this.#destroyPromise;
   }
 
   #request(
@@ -230,7 +246,8 @@ export class ChunkCoordinator {
     ) {
       return Promise.resolve();
     }
-    return this.#trackMutation(key, async () => {
+    let mutationCompleted = false;
+    const mutation = this.#trackMutation(key, async () => {
       if (this.#destroyed || !this.#targets.has(key)) {
         return;
       }
@@ -241,9 +258,13 @@ export class ChunkCoordinator {
       if (result.kind === "failure") {
         this.#recordWorldFailure(chunk.coordinate, "apply", result.reason);
       } else {
+        mutationCompleted = true;
         this.#worldFailures.delete(key);
       }
     });
+    return mutation.then(() =>
+      this.#reconcileAfterMutation(chunk.coordinate, mutationCompleted),
+    );
   }
 
   #removeIfCurrent(coordinate: ChunkCoordinate): Promise<void> {
@@ -251,7 +272,8 @@ export class ChunkCoordinator {
     if (this.#destroyed || this.#targets.has(key)) {
       return Promise.resolve();
     }
-    return this.#trackMutation(key, async () => {
+    let mutationCompleted = false;
+    const mutation = this.#trackMutation(key, async () => {
       if (this.#destroyed || this.#targets.has(key)) {
         return;
       }
@@ -262,9 +284,38 @@ export class ChunkCoordinator {
       if (result.kind === "failure") {
         this.#recordWorldFailure(coordinate, "remove", result.reason);
       } else {
+        mutationCompleted = true;
         this.#worldFailures.delete(key);
       }
     });
+    return mutation.then(() =>
+      this.#reconcileAfterMutation(coordinate, mutationCompleted),
+    );
+  }
+
+  #reconcileAfterMutation(
+    coordinate: ChunkCoordinate,
+    mutationCompleted: boolean,
+  ): Promise<void> {
+    if (this.#destroyed || !mutationCompleted) {
+      return Promise.resolve();
+    }
+    const key = coordinateKey(coordinate);
+    const rendered = this.world.renderedChunks.some(
+      (item) => coordinateKey(item) === key,
+    );
+    if (this.#targets.has(key)) {
+      if (rendered) {
+        return Promise.resolve();
+      }
+      const cached = this.store.getCached(coordinate);
+      return cached === undefined
+        ? Promise.resolve()
+        : this.#applyIfCurrent(cached);
+    }
+    return rendered
+      ? this.#removeIfCurrent(coordinate)
+      : Promise.resolve();
   }
 
   #recordWorldFailure(
@@ -272,6 +323,9 @@ export class ChunkCoordinator {
     stage: ChunkCoordinatorFailure["stage"],
     reason: string,
   ): void {
+    if (this.#destroyed) {
+      return;
+    }
     this.#worldFailures.set(coordinateKey(coordinate), {
       coordinate: Object.freeze({ ...coordinate }),
       stage,

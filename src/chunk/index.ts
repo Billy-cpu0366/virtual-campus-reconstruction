@@ -22,6 +22,8 @@ export {
 export {
   ChunkDataError,
   ChunkDataStore,
+  ChunkRequestAbortedError,
+  isChunkRequestAbortedError,
   type ChunkDataStoreOptions,
   type ChunkLoadFailure,
   type JsonLoader,

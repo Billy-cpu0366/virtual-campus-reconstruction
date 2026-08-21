@@ -39,6 +39,8 @@ class FakeTilemapLayer {
 
 class FakeTilemap {
   readonly created = new Map<string, FakeTilemapLayer>();
+  destroyed = false;
+  destroyCalls = 0;
 
   createBlankLayer(id: string): FakeTilemapLayer {
     const layer = new FakeTilemapLayer();
@@ -52,6 +54,11 @@ class FakeTilemap {
         this.created.delete(id);
       }
     }
+  }
+
+  destroy(): void {
+    this.destroyed = true;
+    this.destroyCalls += 1;
   }
 }
 
@@ -236,9 +243,10 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     ]);
   });
 
-  it("destroy 清理 marker、diagnostics、roof layer 状态", async () => {
+  it("destroy 清理 marker、diagnostics、roof layer 和 Tilemap 状态", async () => {
+    const map = new FakeTilemap();
     const renderer = new PhaserWorldRenderer(
-      new FakeTilemap(),
+      map,
       [],
       makeSpec(),
       LAYER_STRATEGIES,
@@ -254,7 +262,9 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       { x: 0, y: 0 },
     );
 
-    await renderer.destroyAsync();
+    await Promise.all([renderer.destroyAsync(), renderer.destroyAsync()]);
+    expect(map.destroyed).toBe(true);
+    expect(map.destroyCalls).toBe(1);
     expect(renderer.markers).toEqual([]);
     expect(renderer.diagnostics).toEqual([]);
     expect(renderer.layers).toEqual(new Map());

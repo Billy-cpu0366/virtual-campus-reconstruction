@@ -13,6 +13,7 @@ interface PendingMutation {
 export class PhaserWorldMutationScheduler {
   #queue: PendingMutation[] = [];
   #frameRequested = false;
+  #active: Promise<void> | undefined;
   #destroyed = false;
 
   readonly schedule: ChunkMutationScheduler = (mutation) => {
@@ -34,6 +35,12 @@ export class PhaserWorldMutationScheduler {
     const pending = this.#queue.splice(0);
     for (const item of pending) {
       item.resolve();
+    }
+  }
+
+  async waitForActiveIdle(): Promise<void> {
+    while (this.#active !== undefined) {
+      await this.#active;
     }
   }
 
@@ -66,7 +73,22 @@ export class PhaserWorldMutationScheduler {
         this.#requestFrame();
         return;
       }
-      Promise.resolve(result).then(item.resolve, item.reject).finally(() => {
+
+      const active = Promise.resolve(result)
+        .then(
+          () => {
+            item.resolve();
+          },
+          (error: unknown) => {
+            item.reject(error);
+          },
+        )
+        .then(() => undefined, () => undefined);
+      this.#active = active;
+      void active.then(() => {
+        if (this.#active === active) {
+          this.#active = undefined;
+        }
         this.#requestFrame();
       });
     });

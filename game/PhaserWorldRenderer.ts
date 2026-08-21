@@ -119,6 +119,7 @@ export class PhaserWorldRenderer {
     ["concert", "visible"],
     ["factory", "visible"],
   ]);
+  #destroyPromise: Promise<void> | undefined;
 
   constructor(
     map: any,
@@ -294,20 +295,54 @@ export class PhaserWorldRenderer {
     }
   }
 
-  async destroyAsync(): Promise<void> {
+  destroyAsync(): Promise<void> {
+    if (this.#destroyPromise !== undefined) {
+      return this.#destroyPromise;
+    }
+    this.#destroyPromise = this.destroyInternal();
+    return this.#destroyPromise;
+  }
+
+  private async destroyInternal(): Promise<void> {
+    let firstError: unknown;
+    const rememberError = (error: unknown): void => {
+      if (firstError === undefined) {
+        firstError = error;
+      }
+    };
+
     try {
       for (const [id, layer] of [...this.layers]) {
         const name = id.slice(0, id.indexOf("@"));
-        if (isCollisionRole(this.strategyFor(name).role)) {
-          await this.#options.onCollisionLayerDestroyed?.(name, layer);
+        try {
+          if (isCollisionRole(this.strategyFor(name).role)) {
+            await this.#options.onCollisionLayerDestroyed?.(name, layer);
+          }
+        } catch (error) {
+          rememberError(error);
         }
-        layer.destroy?.();
+        try {
+          this.destroyLayer(id, layer);
+        } catch (error) {
+          rememberError(error);
+        }
+      }
+
+      try {
+        this.map.destroy?.();
+      } catch (error) {
+        rememberError(error);
       }
     } finally {
       this.layers.clear();
       this.#markers.clear();
       this.#diagnostics.clear();
       this.#roofStates.clear();
+      this.#collisionEnabled.clear();
+    }
+
+    if (firstError !== undefined) {
+      throw firstError;
     }
   }
 

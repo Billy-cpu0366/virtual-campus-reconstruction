@@ -14,6 +14,7 @@
     "browser:smoke": "node scripts/browser-smoke.mjs",
     "browser:chunk-smoke": "node scripts/browser-chunk-smoke.mjs",
     "browser:layer-smoke": "node scripts/browser-layer-smoke.mjs",
+    "browser:lifecycle-smoke": "node scripts/browser-lifecycle-smoke.mjs",
     "browser:collision-smoke": "node scripts/browser-collision-smoke.mjs",
     "browser:runtime-safety-smoke": "node scripts/browser-runtime-safety-smoke.mjs",
     "predev": "npm run prepare:runtime",
