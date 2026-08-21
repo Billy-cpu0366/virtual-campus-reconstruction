@@ -6,8 +6,19 @@ import type {
 } from "../src/world/index.js";
 import {
   COLLISION_GID_FORCED,
+  diagnosticForMarker,
+  extractMarkerRecords,
   NON_COLLISION_GID_FORCED,
+  roofAlpha,
+  roofGroupForLayer,
+  ROOF_FADE_MS,
+  ROOF_GROUPS,
+  type LayerDiagnostic,
+  type LayerMarkerRecord,
   type LayerStrategy,
+  type RoofGroup,
+  type RoofGroupState,
+  type RoofState,
 } from "../src/layer/index.js";
 
 interface TileLike {
@@ -66,6 +77,10 @@ export interface PhaserWorldRendererOptions {
     name: string,
     layer: TilemapLayerLike,
   ) => void | Promise<void>;
+  readonly onRoofStateApplied?: (
+    state: RoofGroupState,
+    layers: readonly TilemapLayerLike[],
+  ) => void;
 }
 
 function coordinateKey(coordinate: ChunkCoordinate): string {
@@ -98,6 +113,12 @@ export class PhaserWorldRenderer {
   readonly strategies: readonly LayerStrategy[];
   readonly #options: PhaserWorldRendererOptions;
   readonly #collisionEnabled = new Map<string, boolean>();
+  readonly #markers = new Map<string, readonly LayerMarkerRecord[]>();
+  readonly #diagnostics = new Map<string, readonly LayerDiagnostic[]>();
+  readonly #roofStates = new Map<RoofGroup, RoofState>([
+    ["concert", "visible"],
+    ["factory", "visible"],
+  ]);
 
   constructor(
     map: any,
@@ -129,9 +150,76 @@ export class PhaserWorldRenderer {
     };
   }
 
+  get markers(): readonly LayerMarkerRecord[] {
+    return [...this.#markers.values()].flatMap((records) => records);
+  }
+
+  get markerRecords(): readonly LayerMarkerRecord[] {
+    return this.markers;
+  }
+
+  get diagnostics(): readonly LayerDiagnostic[] {
+    return [...this.#diagnostics.values()].flatMap((items) => items);
+  }
+
+  get particles3Diagnostics(): readonly LayerDiagnostic[] {
+    return this.diagnostics.filter((item) => item.layerName === "particles3");
+  }
+
+  markersForChunk(
+    coordinate: ChunkCoordinate,
+  ): readonly LayerMarkerRecord[] {
+    return this.markers.filter(
+      (marker) =>
+        marker.chunk.x === coordinate.x && marker.chunk.y === coordinate.y,
+    );
+  }
+
+  diagnosticsForChunk(
+    coordinate: ChunkCoordinate,
+  ): readonly LayerDiagnostic[] {
+    return this.diagnostics.filter(
+      (diagnostic) =>
+        diagnostic.chunk.x === coordinate.x &&
+        diagnostic.chunk.y === coordinate.y,
+    );
+  }
+
+  getRoofState(group: RoofGroup): RoofGroupState {
+    const state = this.#roofStates.get(group) ?? "visible";
+    return {
+      group,
+      state,
+      visible: true,
+      alpha: roofAlpha(state),
+      durationMs: ROOF_FADE_MS,
+    };
+  }
+
+  setRoofState(group: RoofGroup, state: RoofState): RoofGroupState {
+    const changed = this.#roofStates.get(group) !== state;
+    this.#roofStates.set(group, state);
+    const next = this.getRoofState(group);
+    if (!changed) {
+      return next;
+    }
+    const layers = ROOF_GROUPS[group].flatMap((layerName) =>
+      this.layersFor(layerName),
+    );
+    if (this.#options.onRoofStateApplied !== undefined) {
+      this.#options.onRoofStateApplied(next, layers);
+    } else {
+      for (const layerName of ROOF_GROUPS[group]) {
+        for (const layer of this.layersFor(layerName)) {
+          this.applyRoofState(layerName, layer);
+        }
+      }
+    }
+    return next;
+  }
+
   private isMarkerLayer(name: string): boolean {
-    const strategy = this.strategies.find((item) => item.name === name);
-    return strategy === undefined || isMarkerRole(strategy.role);
+    return isMarkerRole(this.strategyFor(name).role);
   }
 
   private strategyFor(name: string): LayerStrategy {
@@ -207,14 +295,20 @@ export class PhaserWorldRenderer {
   }
 
   async destroyAsync(): Promise<void> {
-    for (const [id, layer] of [...this.layers]) {
-      const name = id.slice(0, id.indexOf("@"));
-      if (isCollisionRole(this.strategyFor(name).role)) {
-        await this.#options.onCollisionLayerDestroyed?.(name, layer);
+    try {
+      for (const [id, layer] of [...this.layers]) {
+        const name = id.slice(0, id.indexOf("@"));
+        if (isCollisionRole(this.strategyFor(name).role)) {
+          await this.#options.onCollisionLayerDestroyed?.(name, layer);
+        }
+        layer.destroy?.();
       }
-      layer.destroy?.();
+    } finally {
+      this.layers.clear();
+      this.#markers.clear();
+      this.#diagnostics.clear();
+      this.#roofStates.clear();
     }
-    this.layers.clear();
   }
 
   private layerId(
@@ -222,6 +316,51 @@ export class PhaserWorldRenderer {
     coordinate: ChunkCoordinate,
   ): string {
     return `${layerName}@${coordinateKey(coordinate)}`;
+  }
+
+  private applyRoofState(
+    layerName: string,
+    layer: TilemapLayerLike,
+  ): void {
+    const group = roofGroupForLayer(layerName);
+    if (group === undefined) {
+      throw new Error(`未知 roof 图层：${layerName}`);
+    }
+    const state = this.#roofStates.get(group) ?? "visible";
+    layer.setVisible?.(true);
+    layer.setAlpha?.(roofAlpha(state));
+  }
+
+  private writeMarkers(
+    layer: ChunkLayer,
+    coordinate: ChunkCoordinate,
+  ): void {
+    const records = extractMarkerRecords(
+      layer.name,
+      layer.data,
+      coordinate,
+      this.spec.chunkWidthTiles,
+      this.spec.chunkHeightTiles,
+      this.spec.tileWidthPixels,
+      this.spec.tileHeightPixels,
+    );
+    const diagnostics = records
+      .map((marker) => diagnosticForMarker(marker))
+      .filter((diagnostic): diagnostic is LayerDiagnostic =>
+        diagnostic !== undefined,
+      );
+    const id = this.layerId(layer.name, coordinate);
+    this.#markers.set(id, records);
+    this.#diagnostics.set(id, Object.freeze(diagnostics));
+  }
+
+  private clearMarkers(
+    layer: ChunkLayer,
+    coordinate: ChunkCoordinate,
+  ): void {
+    const id = this.layerId(layer.name, coordinate);
+    this.#markers.delete(id);
+    this.#diagnostics.delete(id);
   }
 
   private createLayer(
@@ -251,6 +390,9 @@ export class PhaserWorldRenderer {
     }
     if (strategy.depth !== undefined) {
       layer.setDepth?.(strategy.depth);
+    }
+    if (strategy.role === "dynamic-visual") {
+      this.applyRoofState(strategy.name, layer);
     }
     this.configureCollisionLayer(strategy.name, layer);
     if (this.layers.size < 3) {
@@ -346,6 +488,7 @@ export class PhaserWorldRenderer {
 
   private writeLayer(layer: ChunkLayer, coordinate: ChunkCoordinate): void {
     if (this.isMarkerLayer(layer.name)) {
+      this.writeMarkers(layer, coordinate);
       return;
     }
     const target = this.targetFor(layer, coordinate);
@@ -358,6 +501,7 @@ export class PhaserWorldRenderer {
     coordinate: ChunkCoordinate,
   ): Promise<void> {
     if (this.isMarkerLayer(layer.name)) {
+      this.writeMarkers(layer, coordinate);
       return;
     }
     const target = this.targetFor(layer, coordinate);
@@ -394,6 +538,7 @@ export class PhaserWorldRenderer {
 
   private clearLayer(layer: ChunkLayer, coordinate: ChunkCoordinate): void {
     if (this.isMarkerLayer(layer.name)) {
+      this.clearMarkers(layer, coordinate);
       return;
     }
     const id = this.layerId(layer.name, coordinate);
@@ -412,6 +557,7 @@ export class PhaserWorldRenderer {
     coordinate: ChunkCoordinate,
   ): Promise<void> {
     if (this.isMarkerLayer(layer.name)) {
+      this.clearMarkers(layer, coordinate);
       return;
     }
     const id = this.layerId(layer.name, coordinate);

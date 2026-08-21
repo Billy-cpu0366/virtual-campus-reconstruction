@@ -346,6 +346,12 @@ export class CampusScene extends Phaser.Scene {
       const debugHook = (): unknown => ({
         state: this.coordinator?.state,
         rendererLayers: renderer.layers.size,
+        markerRecords: renderer.markerRecords.length,
+        particles3Diagnostics: renderer.particles3Diagnostics.length,
+        roofStates: {
+          concert: renderer.getRoofState("concert"),
+          factory: renderer.getRoofState("factory"),
+        },
         collisionLayers: this.collisionColliders.size,
         physicsColliders:
           (this.physics.world.colliders as any).getActive?.().length ?? null,

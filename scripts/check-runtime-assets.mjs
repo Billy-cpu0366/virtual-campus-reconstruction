@@ -22,6 +22,22 @@ const CHUNK_FILES = [
   "maps/chunks/master.json",
   ...Array.from({ length: 25 }, (_, index) => `maps/chunks/chunk${index}.json`),
 ];
+const MARKER_GIDS = new Map([
+  ["cars", new Set([69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352])],
+  ["particles", new Set([69355, 69356, 69357, 69358, 69359])],
+  ["particles2", new Set([69355, 69356, 69357, 69358, 69359])],
+  ["particles3", new Set([69361])],
+  ["footsteps", new Set([69345])],
+]);
+
+function countRenderableExternalGids(layers) {
+  return (layers ?? []).reduce((count, layer) => {
+    if (MARKER_GIDS.has(layer.name) || !Array.isArray(layer.data)) {
+      return count;
+    }
+    return count + layer.data.filter((gid) => gid >= 69355).length;
+  }, 0);
+}
 
 const errors = [];
 
@@ -57,13 +73,11 @@ if (!existsSync(mapPath)) {
     if (external.length > 0) {
       errors.push("sanitized map still contains external tileset references");
     }
-    let highGidCount = 0;
-    for (const layer of map.layers ?? []) {
-      if (!Array.isArray(layer.data)) continue;
-      highGidCount += layer.data.filter((gid) => gid >= 69355).length;
-    }
+    const highGidCount = countRenderableExternalGids(map.layers);
     if (highGidCount !== 0) {
-      errors.push(`sanitized map still contains ${highGidCount} particle GIDs`);
+      errors.push(
+        `sanitized visual map still contains ${highGidCount} particle GIDs`,
+      );
     }
   } catch (error) {
     errors.push(`invalid map JSON: ${error.message}`);
@@ -120,12 +134,19 @@ for (const relative of CHUNK_FILES.slice(1)) {
       errors.push(`invalid chunk shape: ${relative}`);
       continue;
     }
-    const highGids = chunk.layers.reduce((count, layer) => {
-      if (!Array.isArray(layer.data)) return count;
-      return count + layer.data.filter((gid) => gid >= 69355).length;
-    }, 0);
+    const highGids = countRenderableExternalGids(chunk.layers);
     if (highGids !== 0) {
-      errors.push(`${relative} still contains ${highGids} particle GIDs`);
+      errors.push(`${relative} still contains visual particle GIDs`);
+    }
+    for (const layer of chunk.layers) {
+      const allowed = MARKER_GIDS.get(layer.name);
+      if (allowed === undefined || !Array.isArray(layer.data)) continue;
+      const unknown = layer.data.find(
+        (gid) => gid !== 0 && !allowed.has(gid),
+      );
+      if (unknown !== undefined) {
+        errors.push(`${relative} has unsupported ${layer.name} GID ${unknown}`);
+      }
     }
   } catch (error) {
     errors.push(`invalid chunk JSON ${relative}: ${error.message}`);

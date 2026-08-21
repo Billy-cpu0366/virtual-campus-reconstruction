@@ -1,8 +1,16 @@
-import type { BridgeState, LayerRole, LayerStrategy } from "./contract.js";
+import type {
+  BridgeState,
+  LayerRole,
+  LayerStrategy,
+  RoofGroup,
+} from "./contract.js";
 
 // 24 层策略表 = 唯一图层合同（SYS-LAYER 卡 §2）。
 // 顺序与 chunk JSON 的层顺序一致（FACT：24 个 chunk 层名/顺序完全一致）。
 // role 与 depth 为设计默认；roof 逐层 depth 未逐一定位，按 FACT 范围 3000–3300 顺序取值。
+const CARS_MARKER_GIDS = [69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352];
+const PARTICLE_MARKER_GIDS = [69355, 69356, 69357, 69358, 69359];
+
 export const LAYER_STRATEGIES: readonly LayerStrategy[] = [
   { name: "layer1", role: "visual", depth: 100 },
   { name: "layer2", role: "visual", depth: 200 },
@@ -14,7 +22,7 @@ export const LAYER_STRATEGIES: readonly LayerStrategy[] = [
   { name: "layer8", role: "visual", depth: 1700 },
   { name: "layer9", role: "visual", depth: 1800 },
   { name: "layer10", role: "visual", depth: 1900 },
-  { name: "cars", role: "marker", depth: 550 },
+  { name: "cars", role: "marker", depth: 550, markerGids: CARS_MARKER_GIDS },
   { name: "roof_concert", role: "dynamic-visual", depth: 3000 },
   { name: "roof_concert2", role: "dynamic-visual", depth: 3100 },
   { name: "roof_factory", role: "dynamic-visual", depth: 3200 },
@@ -24,10 +32,20 @@ export const LAYER_STRATEGIES: readonly LayerStrategy[] = [
   { name: "bridge2_up_wall", role: "dynamic-collision", depth: 3500 },
   { name: "bridge2_down_wall", role: "dynamic-collision", depth: 3500 },
   { name: "walls", role: "collision", depth: 550 },
-  { name: "particles", role: "marker", depth: undefined },
-  { name: "particles2", role: "marker", depth: undefined },
-  { name: "particles3", role: "marker", depth: undefined },
-  { name: "footsteps", role: "marker", depth: undefined },
+  {
+    name: "particles",
+    role: "marker",
+    depth: undefined,
+    markerGids: PARTICLE_MARKER_GIDS,
+  },
+  {
+    name: "particles2",
+    role: "marker",
+    depth: undefined,
+    markerGids: PARTICLE_MARKER_GIDS,
+  },
+  { name: "particles3", role: "marker", depth: undefined, markerGids: [69361] },
+  { name: "footsteps", role: "marker", depth: undefined, markerGids: [69345] },
 ];
 
 const BY_NAME = new Map<string, LayerStrategy>(
@@ -70,3 +88,17 @@ export const ROOF_LAYERS: readonly string[] = [
   "roof_factory",
   "roof_factory2",
 ];
+
+export const ROOF_GROUPS: Readonly<Record<RoofGroup, readonly string[]>> = {
+  concert: ["roof_concert", "roof_concert2"],
+  factory: ["roof_factory", "roof_factory2"],
+};
+
+export function roofGroupForLayer(name: string): RoofGroup | undefined {
+  for (const [group, layers] of Object.entries(ROOF_GROUPS)) {
+    if (layers.includes(name)) {
+      return group as RoofGroup;
+    }
+  }
+  return undefined;
+}
