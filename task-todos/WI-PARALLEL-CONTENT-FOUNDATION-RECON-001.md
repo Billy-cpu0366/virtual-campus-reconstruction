@@ -1,10 +1,11 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-window-preparation
+status: active-parallel-investigation
 work-item-type: parallel-investigation
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-RECON-001
 definition-commit: db1f878
+shared-baseline: 42e445d
 updated: 2026-08-21
 ---
 

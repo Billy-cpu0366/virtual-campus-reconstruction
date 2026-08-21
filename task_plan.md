@@ -4,9 +4,9 @@ current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 work-item-level: investigation
 work-item-type: parallel-recon
 work-item-status: active
-current-phase: parallel-window-preparation
-current-gate: shared-clean-baseline
-gate-status: authorized
+current-phase: three-window-investigation
+current-gate: parallel-report-handoff
+gate-status: in_progress
 authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-RECON-001
 preauthorized-next-work-item: none
 next-phase: three-window-investigation
@@ -24,7 +24,8 @@ updated: 2026-08-21
 - **文件所有权**：每窗只写自己一份报告；Main 独占系统卡、API、总账、状态和最终设计整合。
 - **相机修复已关闭**：integration `798eda6`；typecheck、36文件/192测试、两种build、diff和Human实时预览 PASS，普通入口不再自动航拍。
 - **GitHub handoff**：继续暂停到本轮调查 Gate；旧 `cd3691a` 和旧 wave1 patch 均不得交付。
-- **下一步**：提交统一规划基线，创建 A/B/C 三个 clean worktree 并同时启动调查。
+- **共同基线**：A/B/C 三个 worktree 已从 clean 提交 `42e445d` 创建，分支分别为 `recon/content-interact`、`recon/game-ui`、`recon/entity-lifecycle`。
+- **下一步**：三窗口同时只读调查并各提交一份报告；Main 收齐后做范围/证据复核，再交 Human Gate 1。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
