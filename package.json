@@ -17,6 +17,7 @@
     "browser:lifecycle-smoke": "node scripts/browser-lifecycle-smoke.mjs",
     "browser:collision-smoke": "node scripts/browser-collision-smoke.mjs",
     "browser:runtime-safety-smoke": "node scripts/browser-runtime-safety-smoke.mjs",
+    "browser:mobile-input-smoke": "node scripts/browser-mobile-input-smoke.mjs",
     "predev": "npm run prepare:runtime",
     "dev": "npm run check:runtime && vite",
     "prebuild": "npm run prepare:runtime",

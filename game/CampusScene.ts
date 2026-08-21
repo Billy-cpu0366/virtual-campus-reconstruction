@@ -11,6 +11,7 @@ import {
 import {
   DIRECTIONS,
   keyboardDirection,
+  resolveMovement,
   type Direction,
   type KeyState,
 } from "../src/input/index.js";
@@ -54,6 +55,11 @@ import {
   PhaserWorldRenderer,
   type TilemapLayerLike,
 } from "./PhaserWorldRenderer.js";
+import {
+  deviceKindForPhaserScene,
+  PhaserVirtualJoystick,
+  type JoystickSceneLike,
+} from "./PhaserVirtualJoystick.js";
 
 const CHUNK_MASTER_URL = "/maps/chunks/master.json";
 const CHUNK_UPDATE_INTERVAL_MS = 500;
@@ -82,6 +88,7 @@ async function fetchJson(
 
 export class CampusScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
+  private joystick!: PhaserVirtualJoystick;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<
     "up" | "down" | "left" | "right",
@@ -134,6 +141,7 @@ export class CampusScene extends Phaser.Scene {
   private readonly handleWindowBlur = (): void => {
     this.heldMovementKeys.clear();
     this.input.keyboard?.resetKeys?.();
+    this.joystick?.reset();
     this.stopPlayerMovement();
   };
 
@@ -165,6 +173,7 @@ export class CampusScene extends Phaser.Scene {
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.events.once("shutdown", () => {
       this.sceneDestroyed = true;
+      this.joystick?.shutdown();
       this.stopPlayerMovement();
       this.mutationScheduler.destroy();
       this.clearRuntimeTestHooks();
@@ -201,7 +210,12 @@ export class CampusScene extends Phaser.Scene {
       right: this.heldMovementKeys.has("right"),
     };
 
-    const direction = keyboardDirection(keys);
+    const keyboard = keyboardDirection(keys);
+    const direction = resolveMovement(
+      keyboard,
+      this.joystick.direction,
+      this.joystick.active,
+    );
     if (direction) {
       this.lastDirection = direction;
       const { vx, vy } = velocityForDirection(direction);
@@ -269,6 +283,10 @@ export class CampusScene extends Phaser.Scene {
       left: wasdKeys.A,
       right: wasdKeys.D,
     };
+    this.joystick = new PhaserVirtualJoystick(
+      this as unknown as JoystickSceneLike,
+      deviceKindForPhaserScene(this),
+    );
   }
 
   private createCamera(bounds: {
@@ -377,8 +395,13 @@ export class CampusScene extends Phaser.Scene {
           offsetY: PLAYER_BODY_OFFSET_Y,
           blocked: this.player.body.blocked,
         },
+        playerVelocity: {
+          x: this.player.body.velocity.x,
+          y: this.player.body.velocity.y,
+        },
         bridge1DownVisible: this.bridge1DownVisible,
         bridge2DownVisible: this.bridge2DownVisible,
+        joystick: this.joystick.debugState(),
       });
       this.debugHook = debugHook;
       (window as any).__campusDebug = debugHook;

@@ -44,6 +44,7 @@ declare namespace Phaser {
 
       class Body {
         blocked: BlockedFlags;
+        velocity: { x: number; y: number };
         setSize(width: number, height: number): this;
         setOffset(x: number, y: number): this;
         setDrag(x: number, y: number): this;
@@ -72,6 +73,8 @@ declare namespace Phaser {
     protected constructor(key?: string);
     load: any;
     make: any;
+    add: any;
+    scale: any;
     physics: any;
     anims: any;
     input: any;
