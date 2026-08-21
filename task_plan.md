@@ -22,7 +22,8 @@ updated: 2026-08-20
 - **已接受**：Human 回复“ok。开始创建worktree吧”，接受 `DEC-PARALLEL-WORKTREE-001` 的并行隔离方案。
 - **当前基线**：四个调查分支从代码基线 `1d0db48` / `master` 创建；主工作树只承载总控和权威状态，最新提交以 Git 历史为准。
 - **第一批窗口**：A SYS-LAYER 消费者；B SYS-WORLD 特殊13层；C SYS-ASSET 加载；D 多视口/性能基线。
-- **明确不做**：调查窗口不修改 `sample/`、权威文档或正式 `src/`/`game/`；不执行 reset/clean/pull/push；SYS-PLAYER 实现另行授权。
+- **玩法线编排**：只保留一个专用玩法窗口和一个独立 worktree，按 `SYS-PLAYER → SYS-CAMERA` 串行实现；上一阶段完成验证和 Human Gate 后才能进入下一阶段。
+- **明确不做**：调查窗口不修改 `sample/`、权威文档或正式 `src/`/`game/`；不执行 reset/clean/pull/push；玩法 worktree 当前只规划、不创建、不启动代码；SYS-ZONE/SYS-INTERACT 等内容线不自动并入。
 - **下一步**：Human 在各窗口粘贴对应话术；完成后把报告带回本窗口进入 `report-handoff`。
 
 ## 目标
@@ -157,8 +158,9 @@ updated: 2026-08-20
 | B 特殊13层 | `.pi/worktrees/special-layers` / `recon/special-layers` | 调查原站为何只卸载11层；确认特殊13层的创建、更新、卸载和 shutdown 关系 | 不把“未找到卸载代码”直接写成“全局持久”；不修改权威状态 | FACT / INFERRED / UNKNOWN、三种解释、职责建议、验收建议 |
 | C 资源加载 | `.pi/worktrees/asset-loading` / `recon/asset-loading` | 调查 Phaser Loader、HttpClient、缓存、纹理释放和失败体验 | 不下载新资源；不修改 `sample/`、正式代码或权威文档 | FACT / INFERRED / UNKNOWN、当前差距、是否值得实现 |
 | D 性能基线 | `.pi/worktrees/perf-baseline` / `recon/perf-baseline` | 验证多视口/缩放下目标集合；记录当前 FPS、内存、请求和渲染层 baseline | 不把 baseline 宣称为最终性能结论；不修改正式代码 | 测试矩阵、命令、原始结果、异常和限制 |
+| 玩法窗口（预留） | 规划为 `.pi/worktrees/gameplay-serial` / `impl/gameplay-serial`，尚未创建 | 在一个窗口内先实现 SYS-PLAYER，完成验证后再实现 SYS-CAMERA | 不与 A-D 共改；不并行实现相机；不自动扩展到 SYS-ZONE/SYS-INTERACT | 每阶段返回 diff、测试、浏览器验证、未解决边界，回到本窗口进入下一 Gate |
 
-所有窗口都必须读取主工作树最新的 `task_plan.md`、`决策记录.md`、总账和对应系统卡；调查只读证据，不能共改主工作树。完成后把报告复制回本窗口，Main 统一复核、汇总、提出 DECISION，再经 Human 接受后落盘。
+所有窗口都必须读取主工作树最新的 `task_plan.md`、`决策记录.md`、总账和对应系统卡；调查只读证据，不能共改主工作树。玩法窗口后续只在独立 worktree 中实现，阶段之间由本窗口统一复核并经 Human 接受后推进。完成后把报告复制回本窗口，Main 统一复核、汇总、提出 DECISION，再经 Human 接受后落盘。
 
 ## 已阻塞或暂停工作项
 
