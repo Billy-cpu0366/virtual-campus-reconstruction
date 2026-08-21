@@ -87,15 +87,19 @@ npm run dev -- --port 4200 > .pi/dev-4200.log 2>&1 &
 
 ### 3.2 多视口、zoom、边界和性能采样
 
-探针只放在 `.pi/`，不属于正式代码或权威文档；通过已有 `npm run browser:smoke` 入口加载。
+Main 审查后已把探针持久化为 `scripts/browser-perf-baseline.mjs`。启动本地开发服务器和 Chromium CDP 后，可从干净检出复跑：
 
 ```bash
-NODE_OPTIONS=--import=./.pi/perf-bootstrap.mjs \
 CDP_URL=http://127.0.0.1:9223 \
 SMOKE_BASE_URL=http://127.0.0.1:4200 \
-SMOKE_URL=http://127.0.0.1:4200/ \
 PERF_SETTLE_TIMEOUT_MS=30000 \
-npm run browser:smoke
+npm run browser:perf-baseline
+```
+
+复跑结果默认写入被忽略的 `.pi/window-d-perf-baseline-results.json`，不会覆盖已提交的原始收据。已提交收据可独立做结构和行为断言：
+
+```bash
+npm run check:perf-baseline-evidence
 ```
 
 探针参数：
@@ -125,9 +129,11 @@ npm run browser:chunk-smoke
 
 ## 4. 原始结果位置
 
-完整原始 JSON：
+完整原始 JSON 已由 Main 持久化：
 
-`.pi/window-d-perf-baseline-results.json`
+`task-todos/evidence/WI-PARALLEL-MAP-RECON-001/window-d-perf-baseline-results.json`
+
+本地复跑默认输出仍为 `.pi/window-d-perf-baseline-results.json`。
 
 生成时间：`2026-08-21T09:01:07.363Z`
 
@@ -162,6 +168,6 @@ geometry: 5×5 chunks, 28×28 tiles/chunk, 16×16 px/tile
 
 - `git status --short -- src game sample 03-执行层` 无输出；本窗口没有修改正式代码、sample 或执行层文档。
 - 本报告位于 `task-todos/`，按要求作为窗口交接记录，不是权威状态源。
-- 原始探针和 JSON 仅位于 `.pi/`，未写入权威文档。
-- baseline 状态：**已验证、已记录；未接受为最终性能标准，未落盘为权威性能结论。**
+- 探针已持久化为 `scripts/browser-perf-baseline.mjs`，原始 JSON 收据已进入 `task-todos/evidence/`；二者是可复核运行证据，不是权威系统结论。
+- baseline 状态：**已持久化、可做确定性收据校验；仍未接受为最终性能标准，未落盘为权威性能结论。**
 - 当前仍未解决：长期稳定性、真实硬件 GPU、完整内存占用、网络受限条件和完整系统性能阈值。
