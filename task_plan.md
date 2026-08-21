@@ -5,12 +5,12 @@ work-item-level: investigation
 work-item-type: evidence
 work-item-status: in-progress
 node-refs: SYS-LAYER; SYS-WORLD; SYS-ASSET; SYS-CHUNK
-current-phase: worktree-setup
+current-phase: parallel-recon
 current-gate: investigation
 gate-status: active
 authorization-ref: DEC-PARALLEL-WORKTREE-001
 preauthorized-next-work-item: none
-next-phase: parallel-recon
+next-phase: report-handoff
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-PARALLEL-MAP-RECON-001`，为四个调查窗口创建隔离 worktree；调查尚未开始。
+- **正在做**：`WI-PARALLEL-MAP-RECON-001`，四个隔离 worktree 已创建，等待调查窗口启动。
 - **已接受**：Human 回复“ok。开始创建worktree吧”，接受 `DEC-PARALLEL-WORKTREE-001` 的并行隔离方案。
-- **当前基线**：从 `1d0db48` / `master` 创建本地分支；主工作树不直接承载调查窗口修改。
+- **当前基线**：四个分支均从 `1d0db48` / `master` 创建；主工作树当前提交为 `ef0b7c6`，只承载总控和权威状态。
 - **第一批窗口**：A SYS-LAYER 消费者；B SYS-WORLD 特殊13层；C SYS-ASSET 加载；D 多视口/性能基线。
 - **明确不做**：调查窗口不修改 `sample/`、权威文档或正式 `src/`/`game/`；不执行 reset/clean/pull/push；SYS-PLAYER 实现另行授权。
-- **下一步**：创建并验证四个 worktree，随后把实际路径和对应窗口话术交给 Human。
+- **下一步**：Human 在各窗口粘贴对应话术；完成后把报告带回本窗口进入 `report-handoff`。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -147,7 +147,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-PARALLEL-MAP-RECON-001` 已由 Human 以“ok。开始创建worktree吧”接受并激活。当前阶段只建立第一批隔离 worktree，不开始调查或实现；四个调查窗口分别处理 SYS-LAYER 消费者、SYS-WORLD 特殊13层、SYS-ASSET 加载和多视口/性能基线。所有窗口结果最后回到本窗口统一汇总；SYS-PLAYER 实现窗口延后到独立工作项。
+`WI-PARALLEL-MAP-RECON-001` 已由 Human 以“ok。开始创建worktree吧”接受并激活。四个隔离 worktree 已从 `1d0db48` 创建，当前进入 `parallel-recon`；调查窗口分别处理 SYS-LAYER 消费者、SYS-WORLD 特殊13层、SYS-ASSET 加载和多视口/性能基线。所有窗口结果最后回到本窗口统一汇总；SYS-PLAYER 实现窗口延后到独立工作项。
 
 ## 已阻塞或暂停工作项
 
