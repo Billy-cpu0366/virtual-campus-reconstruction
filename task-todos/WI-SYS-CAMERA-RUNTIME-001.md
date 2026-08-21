@@ -1,7 +1,7 @@
 ---
 work-item: WI-SYS-CAMERA-RUNTIME-001
-parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: active
+parent: WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001
+status: preview-accepted-awaiting-commit
 branch: impl/gameplay-serial
 authorization: DEC-SYS-CAMERA-RUNTIME-001
 blocked-by: none
