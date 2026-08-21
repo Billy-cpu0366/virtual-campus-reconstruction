@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level:
-work-item-type:
-work-item-status:
-node-refs:
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref:
+current-work-item: WI-PARALLEL-MAP-RECON-001
+work-item-level: investigation
+work-item-type: evidence
+work-item-status: in-progress
+node-refs: SYS-LAYER; SYS-WORLD; SYS-ASSET; SYS-CHUNK
+current-phase: worktree-setup
+current-gate: investigation
+gate-status: active
+authorization-ref: DEC-PARALLEL-WORKTREE-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: parallel-recon
 updated: 2026-08-20
 ---
 
@@ -18,11 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前状态**：SYS-INPUT 真实运行时有界接入已完成并关闭，结果提交 `66a20f8`；当前回到合法的 `none / work-item-selection`。
-- **已落盘**：原生 Phaser pointer 摇杆适配器、桌面隐藏/移动显示、单指锁定、死区、键盘优先级、释放恢复、单元测试和移动端 Smoke。
-- **已验证**：32 个测试文件 / 168 项测试、typecheck、production/test-hooks build、移动输入 Smoke、普通/安全/地图/碰撞/生命周期 Smoke 和状态一致性均通过。
-- **仍未完成**：完整 SYS-INPUT 节点仍为 `designed`；原站阈值单位和长按时序保持 UNKNOWN；玩家状态、内容玩法、NPC/车辆/粒子仍需后续工作项。
-- **下一步**：不自动启动新工作项；回到 P0 候选选择。
+- **正在做**：`WI-PARALLEL-MAP-RECON-001`，为四个调查窗口创建隔离 worktree；调查尚未开始。
+- **已接受**：Human 回复“ok。开始创建worktree吧”，接受 `DEC-PARALLEL-WORKTREE-001` 的并行隔离方案。
+- **当前基线**：从 `1d0db48` / `master` 创建本地分支；主工作树不直接承载调查窗口修改。
+- **第一批窗口**：A SYS-LAYER 消费者；B SYS-WORLD 特殊13层；C SYS-ASSET 加载；D 多视口/性能基线。
+- **明确不做**：调查窗口不修改 `sample/`、权威文档或正式 `src/`/`game/`；不执行 reset/clean/pull/push；SYS-PLAYER 实现另行授权。
+- **下一步**：创建并验证四个 worktree，随后把实际路径和对应窗口话术交给 Human。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -146,7 +147,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-SYS-INPUT-TOUCH-001` 已完成并关闭（结果提交 `66a20f8`）。本项只接入 SYS-INPUT 的真实运行时：原生 Phaser pointer 摇杆、固定移动端位置、单指跟踪、桌面隐藏、8方向/速度复用、摇杆优先键盘和释放恢复。由于仓库没有 rexVirtualJoystick 运行资源/依赖，原生适配器是重构 DECISION，不冒充原站插件实现。玩家状态、区域交互、NPC/车辆/粒子和通用输入框架不在范围。当前正式工作项为 `none`，等待下一项选择。
+`WI-PARALLEL-MAP-RECON-001` 已由 Human 以“ok。开始创建worktree吧”接受并激活。当前阶段只建立第一批隔离 worktree，不开始调查或实现；四个调查窗口分别处理 SYS-LAYER 消费者、SYS-WORLD 特殊13层、SYS-ASSET 加载和多视口/性能基线。所有窗口结果最后回到本窗口统一汇总；SYS-PLAYER 实现窗口延后到独立工作项。
 
 ## 已阻塞或暂停工作项
 
@@ -169,6 +170,7 @@ updated: 2026-08-20
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | 已完成，结果提交 `d61faa1` | SYS-WORLD/SYS-CHUNK 请求取消、过期结果、异步 mutation、Tilemap/collider teardown 和固定场景边界指标已验证；不代表完整地图系统完成 |
 | `WI-SYS-INPUT-TOUCH-001` | 已完成，结果提交 `66a20f8` | 接入移动端原生 Phaser pointer 摇杆；桌面隐藏、单指、键盘优先级切换、释放恢复和移动端 Smoke 已验证；不代表完整 SYS-INPUT 节点完成 |
+| `WI-PARALLEL-MAP-RECON-001` | Human 已接受，当前 worktree-setup | 建立 A/B/C/D 四个隔离调查 worktree；调查只读证据，报告回到本窗口统一汇总；不启动 SYS-PLAYER 实现 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
