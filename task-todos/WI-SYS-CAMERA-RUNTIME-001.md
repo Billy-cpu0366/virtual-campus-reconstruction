@@ -24,9 +24,39 @@ baseline-tree: aa5e4010f3426f746a41a92d614143e2f11da168
 6. HeatHaze/Fire/Morph 不可用时显式降级，不伪造后处理。
 7. test-hooks/可控时钟可以缩短自动化等待；production 时长不得因此改变。
 
-## 排除
+## 实现合同
 
-传送相机、怪物抓人相机、SYS-ZONE、内容弹窗、完整灯光/FX、地图新功能和最终硬件性能阈值。
+- 纯状态/时序逻辑放入 `src/camera/`，Phaser 边界放入新增 `game/PhaserCamera*.ts`；不得把完整状态机堆进 `CampusScene`。
+- 只消费 `PlayerPositionSnapshot` 和玩法控制门回调；不得持有或输出 Sprite/Body、键盘、摇杆实例。
+- viewport 更新只输出 `CameraViewport` 给 Main；不得直接调用 `ChunkCoordinator`、cache、renderer 或 Tilemap。
+- production 必须使用卡中 6 点和约111秒；测试缩时必须通过显式配置/可控时钟，默认值不得被测试参数污染。
+- shutdown/重复开始/中途失败必须清 timer/tween，保持控制门和跟随状态可恢复；后处理不可用只报告降级，不阻断主流程。
+
+## 允许文件
+
+```text
+src/camera/
+新增 game/PhaserCamera*.ts
+tests/camera/
+task-todos/WI-SYS-CAMERA-RUNTIME-001-执行报告.md
+```
+
+## 禁止与排除
+
+- 不修改 `game/CampusScene.ts`、`game/PhaserPlayerRuntime.ts`、地图/renderer、`package.json`、共享 browser Smoke 或权威状态文档。
+- 不修改 `sample/`、旧 Phaser 或远端 Git。
+- 不实现传送相机、怪物抓人相机、SYS-ZONE、内容弹窗、完整灯光/FX、地图新功能和最终硬件性能阈值。
+- 不自行 commit、merge 或 push；完成后停在 ready-for-preview。
+
+## 客观检查
+
+```text
+npm run typecheck
+npm test -- --run
+git -c core.whitespace=cr-at-eol diff --check
+```
+
+必须新增：6点/production总时长、控制锁、viewport 输出、3秒 Power2 回玩家、硬跟随恢复、nativeScale、后处理降级、重复开始、shutdown/失败恢复和测试缩时不污染默认值的自动测试。真实 `CampusScene` 接线、build 和浏览器 Smoke 由 Main 完成。
 
 ## 激活 Gate
 
@@ -36,3 +66,11 @@ baseline-tree: aa5e4010f3426f746a41a92d614143e2f11da168
 - Main 在 integration 分支完成 `CampusScene` 接线；
 - 第一波全量测试/build/browser Smoke 通过；
 - Human 明确接受第一波预览结果。
+
+以上 Gate 已由 `f2fe106`、Human“接受并提交”和 clean/tree 等价基线 `36c1cf5` 满足。
+
+## 停止条件与交接
+
+- 允许范围实现和客观检查完成后，创建 `task-todos/WI-SYS-CAMERA-RUNTIME-001-执行报告.md`。
+- 报告必须列出实际 diff、production/test 参数、状态/失败/shutdown 边界、测试结果、Main 接线说明和未解决风险。
+- 标记 ready-for-preview 后停止；不自行修改 Main 文件或进入 commit。
