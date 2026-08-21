@@ -23,7 +23,8 @@ updated: 2026-08-21
 - **第二波 gated**：`WI-SYS-CAMERA-RUNTIME-001` 范围已接受，但必须等 M1+P1 Main integration、全量回归和第一波 Human Gate 后才可启动。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
-- **下一步**：提交三个授权包，创建 `impl/map-runtime-completion` 和 `integration/map-gameplay-p0` worktree，并把 `impl/gameplay-serial` fast-forward 到同一 clean 基线。
+- **环境状态**：统一授权基线为 `d8c67ab`；WSL 沙箱拦截 `git worktree` 命令，地图/integration worktree 尚未创建，gameplay 尚未 fast-forward。
+- **下一步**：Human 在 WSL 终端按命令中转创建两个 worktree并把 `impl/gameplay-serial` fast-forward 到 `d8c67ab`；回传 `git worktree list` 后才进入 `parallel-implementation`。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
