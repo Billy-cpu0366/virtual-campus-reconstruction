@@ -1,29 +1,29 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-PARALLEL-MAP-RECON-001
-work-item-level: investigation
-work-item-type: evidence
+current-work-item: WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001
+work-item-level: design
+work-item-type: architecture
 work-item-status: in-progress
-node-refs: SYS-LAYER; SYS-WORLD; SYS-ASSET; SYS-CHUNK
-current-phase: report-handoff
-current-gate: investigation-review
+node-refs: SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER; SYS-CAMERA
+current-phase: interface-and-integration-design
+current-gate: design-review
 gate-status: active
-authorization-ref: DEC-PARALLEL-WORKTREE-001
+authorization-ref: DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001
 preauthorized-next-work-item: none
-next-phase: human-plan-review
-updated: 2026-08-20
+next-phase: human-design-review
+updated: 2026-08-21
 ---
 
 # 原站逆向重构计划
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-PARALLEL-MAP-RECON-001` 已收到 A-D 四份 `task-todos/` 调查报告，当前由 Main 在 `report-handoff` 阶段统一审查。
-- **已落盘**：B `ad56bca`、C `604391c`、A `52caa84`、D `514b0f8`；四个提交均只新增各自调查报告，没有修改正式代码、`sample/` 或权威系统卡。
-- **Main 初审**：A/B/C 可作为规划输入；A/B 对特殊层和消费者的结论互补、无直接冲突，`Q-LAYER-002/003` 继续保持 UNKNOWN。D 的探针和原始 27 样本收据已持久化，确定性收据校验通过；FPS/heap 仍只是当前软件 WebGL 环境 baseline，不是最终性能标准。
-- **玩法线编排**：唯一 `gameplay-serial` worktree 已由 Human 创建；仍按 `SYS-PLAYER → SYS-CAMERA` 串行，正式代码需后续独立 Gate。
-- **明确不做**：尚未接受调查报告中的候选 DECISION，尚未冻结地图/玩法接口，也未授权地图或玩法实现。
-- **下一步**：Main 提交统一地图结论、接口边界和地图/玩法并行实施计划给 Human 审查；Human 接受前不激活实现。
+- **正在做**：`WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001`，把 Human 接受的“两波并行 + Main integration”拓扑落成接口、文件所有权、Gate 和实现候选包。
+- **已接受**：准备阶段冻结窄接口；第一波地图与 SYS-PLAYER 并行；Main 第一次整合后过 Human Gate；第二波同一玩法窗口实现 SYS-CAMERA，地图窗口只修接口和复测。
+- **已冻结语义**：玩家位置快照、玩法控制门、相机视口目标更新、地图运行时收敛和唯一世界边界；真实 TypeScript 签名留到实现授权。
+- **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
+- **明确不做**：当前不写正式代码，不创建地图/integration 实现分支，不启动 M1/P1/SYS-CAMERA，不关闭 `Q-LAYER-002/003`。
+- **下一步**：完成设计同步与一致性验证后，向 Human 提交 M1 地图包、P1 玩家包、第二波相机包和完整验证矩阵审查。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -147,19 +147,17 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-`WI-PARALLEL-MAP-RECON-001` 已收到 A-D 四份调查报告并进入 `report-handoff`。四份报告只作为工作记录，不是第二套动态状态；A/B/C 已具备进入统一规划的条件。D 的探针已进入 `scripts/browser-perf-baseline.mjs`，原始收据已进入 `task-todos/evidence/`，9 组/27 样本确定性校验通过；这仍不等于最终性能标准。Main 完成统一审查并经 Human 接受后，才会更新对应系统卡、总账并激活地图/玩法实现工作项。
+`WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` 已由 Human 以“ok。开始并行设计方案吧”接受并激活。当前只冻结跨线语义、文件所有权、两波 Gate 和分支策略；详细设计工作记录见 [地图线与玩法线两波并行设计](task-todos/WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001.md)。M1/P1/SYS-CAMERA 的正式代码仍需 Human 对候选实现包逐项授权。
 
-### 并行窗口分工与交接
+### 已接受的设计边界
 
-| 窗口 | worktree / 分支 | 必须完成 | 明确禁止 | 交接结果 |
-|---|---|---|---|---|
-| A 图层消费者 | `.pi/worktrees/layer-consumers` / `recon/layer-consumers` | 调查 cars、particles、particles2、particles3、footsteps 的真实消费者；核对 `Q-LAYER-002/003` | 不修改 `sample/`、正式代码或权威文档；不关闭 UNKNOWN | FACT / INFERRED / UNKNOWN、证据位置、职责影响、建议工作项 |
-| B 特殊13层 | `.pi/worktrees/special-layers` / `recon/special-layers` | 调查原站为何只卸载11层；确认特殊13层的创建、更新、卸载和 shutdown 关系 | 不把“未找到卸载代码”直接写成“全局持久”；不修改权威状态 | FACT / INFERRED / UNKNOWN、三种解释、职责建议、验收建议 |
-| C 资源加载 | `.pi/worktrees/asset-loading` / `recon/asset-loading` | 调查 Phaser Loader、HttpClient、缓存、纹理释放和失败体验 | 不下载新资源；不修改 `sample/`、正式代码或权威文档 | FACT / INFERRED / UNKNOWN、当前差距、是否值得实现 |
-| D 性能基线 | `.pi/worktrees/perf-baseline` / `recon/perf-baseline` | 验证多视口/缩放下目标集合；记录当前 FPS、内存、请求和渲染层 baseline | 不把 baseline 宣称为最终性能结论；不修改正式代码 | 测试矩阵、命令、原始结果、异常和限制 |
-| 玩法窗口 | `.pi/worktrees/gameplay-serial` / `impl/gameplay-serial`；已由 Human 创建并经 `git worktree list` 验证 | 在一个窗口内先实现 SYS-PLAYER，完成验证后再实现 SYS-CAMERA | 不与 A-D 共改；不并行实现相机；不自动扩展到 SYS-ZONE/SYS-INTERACT；创建不等于代码已授权 | 进入窗口后仍先等待 `WI-SYS-PLAYER-RUNTIME-001` 激活；每阶段返回 diff、测试、浏览器验证、未解决边界，回到本窗口进入下一 Gate |
+| 角色 | 第一波 | 第二波 | 不得修改 |
+|---|---|---|---|
+| 地图窗口 | M1 地图候选包，通过模块测试后交 Main | 只修相机预载接口并复测性能/生命周期 | `CampusScene`、玩法模块、共享脚本、权威状态 |
+| 玩法窗口 | P1 SYS-PLAYER 候选包 | 第一次 Main 集成与 Human Gate 后才做 SYS-CAMERA | 地图核心、renderer、共享脚本、权威状态 |
+| Main / integration | 冻结接口、整合 M1+P1、共享接线和全量验证 | 整合 SYS-CAMERA、最终性能/生命周期验证 | 不替窗口扩大未授权范围 |
 
-所有窗口都必须读取主工作树最新的 `task_plan.md`、`决策记录.md`、总账和对应系统卡；调查只读证据，不能共改主工作树。玩法窗口后续只在独立 worktree 中实现，阶段之间由本窗口统一复核并经 Human 接受后推进。完成后把报告复制回本窗口，Main 统一复核、汇总、提出 DECISION，再经 Human 接受后落盘。
+冻结接口以 `02-接口层/API契约表.md` 为唯一索引；真实签名在实现 Gate 确定。当前不创建 `impl/map-runtime-completion` 或 `integration/map-gameplay-p0`，也不更新已有 gameplay worktree。
 
 ## 已阻塞或暂停工作项
 
@@ -182,7 +180,8 @@ updated: 2026-08-20
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | 已完成，结果提交 `d61faa1` | SYS-WORLD/SYS-CHUNK 请求取消、过期结果、异步 mutation、Tilemap/collider teardown 和固定场景边界指标已验证；不代表完整地图系统完成 |
 | `WI-SYS-INPUT-TOUCH-001` | 已完成，结果提交 `66a20f8` | 接入移动端原生 Phaser pointer 摇杆；桌面隐藏、单指、键盘优先级切换、释放恢复和移动端 Smoke 已验证；不代表完整 SYS-INPUT 节点完成 |
-| `WI-PARALLEL-MAP-RECON-001` | A-D 报告和 D 可复核收据已提交，当前 report-handoff | 四份报告均在 `task-todos/`；D 的 9 组/27 样本收据校验通过但仍非最终性能标准；尚未接受候选 DECISION 或启动实现 |
+| `WI-PARALLEL-MAP-RECON-001` | 已完成，结果基线 `85af370` | A-D 报告和 D 可复核收据已提交；`Q-LAYER-002/003` 保留；转入两波并行设计 |
+| `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | Human 已接受拓扑，当前设计中 | 冻结接口、文件所有权、两波 Gate 和实现候选包；不写代码、不创建实现分支 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
@@ -196,6 +195,7 @@ updated: 2026-08-20
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
+| `WI-PARALLEL-MAP-RECON-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK | A-D 四份 `task-todos/` 报告；D 可复跑探针、27 样本原始收据和确定性校验 | `85af370` | `DEC-PARALLEL-WORKTREE-001` |
 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
 | `WI-SYS-MOVE-WORLD-COLLISION-001` | completed | SYS-MOVE; SYS-LAYER; SYS-WORLD; SYS-CHUNK | 玩家 Arcade Body、walls/bridge 碰撞、桥状态切换、`body.blocked` 反馈、collider 安全清理、碰撞/桥/跨块 Smoke | `e3f412a` | `DEC-SYS-MOVE-WORLD-COLLISION-001` |
 | `WI-RUNTIME-SAFETY-001` | completed | SYS-WORLD; SYS-CHUNK; SYS-APP | World 当前层同步/异步回滚补偿、production diagnostics/hooks 限制、入口 rejected 收敛、favicon 清理、普通安全/普通/跨块/test-hooks 碰撞 Smoke | `632a0c9` | `DEC-RUNTIME-SAFETY-001` |

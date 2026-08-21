@@ -5,7 +5,7 @@ tags:
   - 接口
 type: handoff
 created: 2026-08-14
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # API 契约表（系统之间的接口约定）
@@ -27,12 +27,25 @@ updated: 2026-08-20
 | `applyChunk` / `removeChunk` | 分块 → 世界 | 地图切成 25 块，搬来一块就"放上地图"，走远就"撤掉"（像只摆眼前这几块布景） | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md) |
 | `createWorld` / `destroyWorld` | 世界 → 所有人 | 进游戏搭起整个"舞台"（地图 + 图层），退游戏 / 切场景时拆掉 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md) |
 | 归一化 | 输入 → 移动/玩家 | 键盘 / WASD / 摇杆三种按法，统一翻译成"往哪个方向走"，移动组不用管用的是哪种 | [SYS-INPUT](../03-执行层/02-玩法线/01-输入.md) |
-| `startFollow` | 玩家 → 相机 | 镜头贴着玩家走，不落后、不平滑（硬跟随） | [SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
+| 玩家位置快照 / `startFollow` | 玩家 → 相机 / 分块 | 玩家只读世界坐标供镜头硬跟随和玩家 3×3 分块目标计算；不把可变 Sprite/Body 所有权交出去 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
+| 玩法控制门 | Main / 相机 → 玩家 / 输入 | 航拍或 shutdown 禁用时立即停速、屏蔽并 reset 键盘/摇杆；结束后才恢复设备对应输入 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
 | 动态深度 | 玩家 → 图层 | 决定谁挡谁：人走到灌木后面就该被挡住，按位置排前后 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md) |
-| `loadChunksForCamera` | 相机 → 分块 | 只加载镜头能看到的地图块；镜头一挪，就喊分块组换块 | [SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
+| 相机视口目标更新 / `loadChunksForCamera` | 相机 → 分块 | 航拍和正常跟随都只提交相机视口；分块统一计算“玩家 3×3 ∪ 相机可见 +1”，相机不直接操作 cache/Tilemap | [SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
+| 地图运行时收敛 | Main → 分块 / 世界 | Main 可等待请求和 mutation idle；shutdown 按控制/相机→请求→mutation→collider/layer/Tilemap 收敛 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md)、[SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 资源加载 | 资源 → 各系统 | 进货：图片 / 地图走 Phaser Loader，切块数据走 HttpClient，两条补给线 | [SYS-ASSET](../03-执行层/01-地图线/01-资源加载.md) |
 | 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开行为为 100ms 检查、严格 `<30px` 距离；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
 | 区域内容请求 | SYS-ZONE → SYS-INTERACT | 输出进入/离开、`menuId`、visited/手动关闭状态；弹窗 DOM、暂停恢复和文案归 SYS-INTERACT / SYS-GAME-UI；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
+
+### 并行实施接口状态（`DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| 玩家位置快照 | Frozen | Core Ready；运行时接线待 P1 | 只读坐标，不转移 Sprite/Body 所有权 |
+| 玩法控制门 | Frozen | Not Started | 禁用必须停速并 reset 输入；相机不能直接管理键盘实现 |
+| 相机视口目标更新 | Frozen | Core Ready；航拍接线未开始 | 目标公式唯一归 SYS-CHUNK，相机只提供 viewport |
+| 地图运行时收敛 | Frozen | Integrated；跨线 Gate 待验证 | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
+
+> Frozen 只表示语义边界已由 Human 接受；不表示 M1/P1/SYS-CAMERA 已实现或验证。真实 TypeScript 签名在各实现工作项授权时确定。
 
 ## 二、数据字典（常量 / 公式，不是接口）
 
