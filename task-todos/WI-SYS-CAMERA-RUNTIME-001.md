@@ -1,16 +1,18 @@
 ---
 work-item: WI-SYS-CAMERA-RUNTIME-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: activation-ready-awaiting-baseline-sync
+status: active
 branch: impl/gameplay-serial
 authorization: DEC-SYS-CAMERA-RUNTIME-001
 blocked-by: none
 updated: 2026-08-21
+baseline-commit: 36c1cf5
+baseline-tree: aa5e4010f3426f746a41a92d614143e2f11da168
 ---
 
 # 第二波 SYS-CAMERA 运行时实施包
 
-> 范围已由 Human 接受；M1+P1 integration `f2fe106`、全量回归和 Human Gate 已满足。当前只允许先把同一 `impl/gameplay-serial` worktree 同步到该已接受基线；同步验证完成前不得写相机代码。
+> 范围已由 Human 接受；M1+P1 integration `f2fe106`、全量回归、Human Gate 和同一 gameplay worktree 基线同步均已验证。当前可按本卡实现，完成后必须停在 ready-for-preview。
 
 ## 已接受范围
 

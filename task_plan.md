@@ -5,12 +5,12 @@ work-item-level: implementation
 work-item-type: serial-runtime
 work-item-status: in-progress
 node-refs: SYS-CAMERA; SYS-PLAYER; SYS-CHUNK
-current-phase: baseline-sync
+current-phase: camera-runtime-implementation
 current-gate: implementation
 gate-status: active
 authorization-ref: DEC-SYS-CAMERA-RUNTIME-001
 preauthorized-next-work-item: none
-next-phase: camera-runtime-implementation
+next-phase: camera-runtime-preview
 updated: 2026-08-21
 ---
 
@@ -18,13 +18,13 @@ updated: 2026-08-21
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：`WI-SYS-CAMERA-RUNTIME-001` 的安全基线同步；先让唯一 `impl/gameplay-serial` worktree 的 tree 与已接受 integration `f2fe106` 完全一致。
+- **正在做**：`WI-SYS-CAMERA-RUNTIME-001` 有界实现；唯一 gameplay worktree 已在验证基线 `36c1cf5` 上 active。
 - **第一波已关闭**：M1/P1 分支、Main 接线、35文件/184项、两种 build、全部浏览器门禁和 Human Gate 均 PASS；integration 结果提交 `f2fe106`，两个子包为 bounded-integrated-verified。
-- **第二波 activation-ready**：SYS-CAMERA 范围已接受且第一波 Gate 已满足；基线同步并验证 clean 前禁止写相机代码。
+- **第二波 active**：SYS-CAMERA 范围已接受；第一波 Gate、clean 基线和 tree 等价检查均 PASS，可按任务卡实现，完成后必须停在 ready-for-preview。
 - **文件所有权**：Main 独占 `CampusScene`、共享 browser Smoke、`package.json` 和权威状态；地图与玩法窗口不得共改。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/trajectory/footprint/内容线，不自动 merge/push。
-- **环境状态**：`integration/map-gameplay-p0` 为 `f2fe106`；`impl/gameplay-serial` 仍为 P1 提交 `482b52f`，两者历史分叉但 P1 patch 等价，需用可验证 merge 基线同步，不 reset/clean。
-- **下一步**：在 gameplay worktree 创建内容 tree 等于 `f2fe106` 的本地双父 merge 基线并验证 clean；回传 ID 后才进入 camera runtime implementation。
+- **环境状态**：`impl/gameplay-serial` 基线为双父提交 `36c1cf5`（父 `482b52f`、`f2fe106`）；tree `aa5e4010…` 与 `f2fe106` 完全一致，工作树 clean，独立复核 PASS。
+- **下一步**：同一玩法窗口执行 `WI-SYS-CAMERA-RUNTIME-001`，只改任务卡白名单；不得修改 Main 独占 `CampusScene`/共享 Smoke，做到 ready-for-preview 后停止。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -148,7 +148,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-第一波 `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已以 integration `f2fe106` 完成有界验证并获 Human 接受；地图 `5290eca`、玩家 `482b52f` 和 Main 接线均可追溯。当前工作项切换为 [SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md)，阶段仅为 `baseline-sync`，尚未开始相机代码。
+第一波 `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` 已以 integration `f2fe106` 完成有界验证并获 Human 接受。当前 [SYS-CAMERA 第二波包](task-todos/WI-SYS-CAMERA-RUNTIME-001.md) 已在 `impl/gameplay-serial` / `36c1cf5` 激活；实现窗口不得修改 Main 独占文件，完成后停在 ready-for-preview。
 
 ### 第一波执行边界
 
@@ -158,7 +158,7 @@ updated: 2026-08-21
 | 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | preview accepted；结果提交 `482b52f` |
 | Main | `integration/map-gameplay-p0` | 已接收两个明确提交并完成 `CampusScene`/共享 Smoke 接线 | Human accepted；integration 结果 `f2fe106`，第一波 bounded closed |
 
-冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；gameplay 基线同步完成前 SYS-CAMERA 禁止写码。
+冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；SYS-CAMERA 只消费玩家只读快照/控制门并提交 viewport，不直接管理输入设备、chunk cache 或 Tilemap。
 
 ## 已阻塞或暂停工作项
 
