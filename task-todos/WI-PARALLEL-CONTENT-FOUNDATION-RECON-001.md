@@ -4,6 +4,7 @@ status: active-window-preparation
 work-item-type: parallel-investigation
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-RECON-001
+definition-commit: db1f878
 updated: 2026-08-21
 ---
 
