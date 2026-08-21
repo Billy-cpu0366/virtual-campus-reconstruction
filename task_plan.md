@@ -1,16 +1,16 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level:
-work-item-type:
-work-item-status:
-node-refs:
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref:
+current-work-item: WI-SYS-LAYER-RUNTIME-SEMANTICS-001
+work-item-level: design
+work-item-type: investigation
+work-item-status: in-progress
+node-refs: SYS-LAYER
+current-phase: evidence-and-design
+current-gate: investigation
+gate-status: active
+authorization-ref: DEC-SYS-LAYER-RUNTIME-SEMANTICS-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: human-design-review
 updated: 2026-08-20
 ---
 
@@ -18,12 +18,12 @@ updated: 2026-08-20
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：当前没有 active 工作项；上一项 SYS-ZONE 设计已关闭
-- **到哪了**：SYS-ZONE 设计已通过 Human review，结果提交 `05c2274`；11 个 marker、距离轮询、内容桥接和接口语义已落盘
-- **卡在哪**：当前没有本工作项阻塞；SYS-ZONE 正式代码、SYS-INTERACT 弹窗和完整双语内容仍需后续独立范围
-- **能不能写代码**：❌ 不能；已回到 `work-item-selection`，下一项需 Human 重新选择和授权
-- **验证入口**：本项通过公开证据定位、结构/链接/状态一致性和独立只读复核；没有声称运行时实现已完成
-- **下一步**：Human 选择下一项；不自动启动 SYS-INTERACT、地图线或玩法线实现
+- **正在做**：`WI-SYS-LAYER-RUNTIME-SEMANTICS-001`，按 P0 地图线收束图层运行时语义
+- **到哪了**：Human 已授权开始；SYS-LAYER 设计卡和 5 场景视觉证据已有，当前重点是 `Q-LAYER-002`、完整图层运行边界和与 SYS-WORLD/SYS-CHUNK 的职责收敛
+- **卡在哪**：暂无技术阻塞；particles3 直接消费者链仍 UNKNOWN，特殊 13 层卸载边界归 SYS-WORLD，需查证后再决定是否更新设计
+- **能不能写代码**：❌ 不能；本项先做公开证据核对、未知项收敛和验收包，不授权正式 `src/`/`game/` 实现
+- **验证入口**：只读 `sample/` 证据、现有图层卡、总账、代码/测试实际状态；完成后执行结构、链接、状态一致性和独立只读复核
+- **下一步**：形成 SYS-LAYER 运行时语义设计包并交 Human review；不自动进入代码实现或 SYS-WORLD/CHUNK 生命周期扩展
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -83,6 +83,7 @@ updated: 2026-08-20
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
 | 运行时安全有界修复 | 已接受、已落盘、已验证；结果提交 `632a0c9` | 处理 World 部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口清理 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 普通 production build、普通/跨块/安全 Smoke 与 test-hooks 碰撞 Smoke均通过；工作项已关闭 |
 | SYS-ZONE 区域触发逆向与设计 | 已接受、已落盘、已验证；结果提交 `05c2274` | 核对公开 marker/区域触发来源、坐标/区域边界、进入/离开和防重复行为；补 `04-内容层/作品集内容.md` 内容索引、SYS-ZONE 七格、接口和未知队列 | 不写 `src/`/`game/` 正式代码；不实现 SYS-INTERACT 弹窗；不猜未证实文案、资源或触发器 | 设计已通过 Human review；工作项关闭，正式实现需另行授权 |
+| SYS-LAYER 图层运行时语义收束 | Human 已接受，当前 active | 核对 `Q-LAYER-002`、24 层运行策略、apply/remove 对称边界、roof/footsteps/particles3 和 SYS-WORLD/SYS-CHUNK 接口；形成下一步可验收范围 | 不写正式 `src/`/`game/` 代码；不扩大公开采集；不擅自关闭 particles3 或特殊13层 UNKNOWN；不推进完整生命周期 | 完成证据与设计收敛后交 Human review，再决定实现授权 |
 | SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
@@ -145,7 +146,7 @@ updated: 2026-08-20
 
 ## 当前工作项
 
-当前没有 active 工作项。`WI-SYS-ZONE-DESIGN-001` 已由 Human 以“通过”接受设计并关闭；结果提交 `05c2274`。SYS-ZONE 设计已落盘，正式实现、SYS-INTERACT 弹窗和完整双语内容需后续独立工作项。
+`WI-SYS-LAYER-RUNTIME-SEMANTICS-001` 已由 Human 以“继续收束地图线吧”接受并激活。当前只做 P0 地图线 SYS-LAYER 的公开证据核对、`Q-LAYER-002` 和运行时职责/验收范围收敛；不写正式代码、不扩大到完整 SYS-WORLD/CHUNK 生命周期。
 
 ## 已阻塞或暂停工作项
 
@@ -157,13 +158,14 @@ updated: 2026-08-20
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- 当前没有继续阻塞项；上一项可玩雏形已于 2026-08-19 完成 Human 视觉验收。
+- 当前没有技术阻塞；本项的主要未知是 `Q-LAYER-002` particles3 消费链，以及特殊 13 层卸载边界。请求取消、性能量化、完整 Phaser teardown 和完整玩法线暂不并入本项。
 
 ## 近期候选
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
 | `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；正式代码和 SYS-INTERACT 仍未授权 |
+| `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | Human 已接受，当前 active | P0 地图线第一步：收敛完整图层运行时语义、Q-LAYER-002 和与 World/Chunk 的边界；不自动写代码 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口均已验证；完整资源 teardown、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
@@ -172,6 +174,8 @@ updated: 2026-08-20
 ## 已关闭工作项索引
 
 不追溯为历史阶段补建 WI。只为实际建立过的正式工作项保留轻量关闭记录。
+
+> 当前 active 工作项 `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` 尚未关闭，不进入本表；完成并验证后再登记 `result-commit`。
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
