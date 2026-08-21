@@ -149,6 +149,17 @@ updated: 2026-08-20
 
 `WI-PARALLEL-MAP-RECON-001` 已由 Human 以“ok。开始创建worktree吧”接受并激活。四个隔离 worktree 已从 `1d0db48` 创建，当前进入 `parallel-recon`；调查窗口分别处理 SYS-LAYER 消费者、SYS-WORLD 特殊13层、SYS-ASSET 加载和多视口/性能基线。所有窗口结果最后回到本窗口统一汇总；SYS-PLAYER 实现窗口延后到独立工作项。
 
+### 并行窗口分工与交接
+
+| 窗口 | worktree / 分支 | 必须完成 | 明确禁止 | 交接结果 |
+|---|---|---|---|---|
+| A 图层消费者 | `.pi/worktrees/layer-consumers` / `recon/layer-consumers` | 调查 cars、particles、particles2、particles3、footsteps 的真实消费者；核对 `Q-LAYER-002/003` | 不修改 `sample/`、正式代码或权威文档；不关闭 UNKNOWN | FACT / INFERRED / UNKNOWN、证据位置、职责影响、建议工作项 |
+| B 特殊13层 | `.pi/worktrees/special-layers` / `recon/special-layers` | 调查原站为何只卸载11层；确认特殊13层的创建、更新、卸载和 shutdown 关系 | 不把“未找到卸载代码”直接写成“全局持久”；不修改权威状态 | FACT / INFERRED / UNKNOWN、三种解释、职责建议、验收建议 |
+| C 资源加载 | `.pi/worktrees/asset-loading` / `recon/asset-loading` | 调查 Phaser Loader、HttpClient、缓存、纹理释放和失败体验 | 不下载新资源；不修改 `sample/`、正式代码或权威文档 | FACT / INFERRED / UNKNOWN、当前差距、是否值得实现 |
+| D 性能基线 | `.pi/worktrees/perf-baseline` / `recon/perf-baseline` | 验证多视口/缩放下目标集合；记录当前 FPS、内存、请求和渲染层 baseline | 不把 baseline 宣称为最终性能结论；不修改正式代码 | 测试矩阵、命令、原始结果、异常和限制 |
+
+所有窗口都必须读取主工作树最新的 `task_plan.md`、`决策记录.md`、总账和对应系统卡；调查只读证据，不能共改主工作树。完成后把报告复制回本窗口，Main 统一复核、汇总、提出 DECISION，再经 Human 接受后落盘。
+
 ## 已阻塞或暂停工作项
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
