@@ -119,9 +119,8 @@ export class InteractRuntime {
   private readonly suppressedResidences = new Set<string>();
   private readonly committedResidences = new Set<string>();
   private readonly pendingReleaseTokens = new Set<GameplayControlLeaseToken>();
-  private activeState:
-    | (InteractActiveResidence & { readonly token: GameplayControlLeaseToken })
-    | undefined;
+  private activeState: InteractActiveResidence | undefined;
+  private activeToken: GameplayControlLeaseToken | undefined;
   private unsubscribeUserClose: (() => void) | undefined;
   private destroyed = false;
 
@@ -187,7 +186,7 @@ export class InteractRuntime {
       return "invalid";
     }
 
-    let token: GameplayControlLeaseToken | undefined;
+    let token: GameplayControlLeaseToken;
     if (this.activeState === undefined) {
       let acquired;
       try {
@@ -198,7 +197,8 @@ export class InteractRuntime {
       if (!acquired.ok) return "lease-failed";
       token = acquired.token;
     } else {
-      token = this.activeState.token;
+      if (this.activeToken === undefined) return "lease-failed";
+      token = this.activeToken;
     }
 
     let showResult: ReturnType<GameUiPort["show"]>;
@@ -214,7 +214,7 @@ export class InteractRuntime {
     }
 
     if (showResult.status !== "shown" && showResult.status !== "already-visible") {
-      if (this.activeState === undefined && token !== undefined) {
+      if (this.activeState === undefined) {
         this.retainIfReleaseFailed(token);
       }
       return "show-failed";
@@ -226,8 +226,8 @@ export class InteractRuntime {
       markerId: event.markerId,
       menuId: event.menuId,
       residenceId: event.residenceId,
-      token,
     };
+    this.activeToken = token;
     this.committedResidences.add(identity);
     this.emitVisitReceipt(event);
     return showResult.status;
@@ -242,19 +242,24 @@ export class InteractRuntime {
     const active = this.activeState;
     if (active === undefined || !sameIdentity(active, event)) return;
 
-    this.suppressedResidences.add(identityKey(event));
-    this.activeState = undefined;
+    let hideResult;
     try {
-      this.ui.hide({
+      hideResult = this.ui.hide({
         menuId: event.menuId,
         residenceId: event.residenceId,
         reason: "user-close",
       });
     } catch {
-      // Business state and lease cleanup must not depend on UI cleanup.
-    } finally {
-      this.retainIfReleaseFailed(active.token);
+      return;
     }
+    if (hideResult.status !== "hidden" && hideResult.status !== "already-hidden") {
+      return;
+    }
+    const token = this.activeToken;
+    this.suppressedResidences.add(identityKey(event));
+    this.activeState = undefined;
+    this.activeToken = undefined;
+    if (token !== undefined) this.retainIfReleaseFailed(token);
   }
 
   onUserClose(event: UserCloseEvent): void {
@@ -288,9 +293,7 @@ export class InteractRuntime {
     if (this.destroyed) return;
     this.destroyed = true;
     const active = this.activeState;
-    this.activeState = undefined;
-    this.suppressedResidences.clear();
-    this.committedResidences.clear();
+    const activeToken = this.activeToken;
     try {
       this.unsubscribeUserClose?.();
     } catch {
@@ -315,10 +318,15 @@ export class InteractRuntime {
     } catch {
       // Adapter teardown failure must not prevent lease cleanup.
     } finally {
-      if (active !== undefined) this.retainIfReleaseFailed(active.token);
-      for (const token of [...this.pendingReleaseTokens]) {
+      const tokens = new Set(this.pendingReleaseTokens);
+      if (activeToken !== undefined) tokens.add(activeToken);
+      for (const token of tokens) {
         this.retainIfReleaseFailed(token);
       }
+      this.activeState = undefined;
+      this.activeToken = undefined;
+      this.suppressedResidences.clear();
+      this.committedResidences.clear();
     }
   }
 
@@ -327,18 +335,23 @@ export class InteractRuntime {
     this.suppressedResidences.delete(identity);
     const active = this.activeState;
     if (active === undefined || !sameIdentity(active, event)) return;
-    this.activeState = undefined;
+    let hideResult;
     try {
-      this.ui.hide({
+      hideResult = this.ui.hide({
         menuId: event.menuId,
         residenceId: event.residenceId,
         reason: "leave",
       });
     } catch {
-      // Always release the lease below.
-    } finally {
-      this.retainIfReleaseFailed(active.token);
+      return;
     }
+    if (hideResult.status !== "hidden" && hideResult.status !== "already-hidden") {
+      return;
+    }
+    const token = this.activeToken;
+    this.activeState = undefined;
+    this.activeToken = undefined;
+    if (token !== undefined) this.retainIfReleaseFailed(token);
   }
 
   private retainIfReleaseFailed(token: GameplayControlLeaseToken): void {

@@ -8,6 +8,7 @@ import type {
   GameUiPort,
   GameUiHideRequest,
   GameUiShowRequest,
+  HideResult,
   GameplayControlLeasePort,
   GameplayControlLeaseReleaseResult,
   GameplayControlLeaseShutdownResult,
@@ -38,26 +39,46 @@ class FakeUi implements GameUiPort {
   readonly calls: string[] = [];
   private closeHandler: ((event: UserCloseEvent) => void) | undefined;
   readonly showResults: ShowResult[] = [];
+  readonly hideResults: HideResult[] = [];
+  currentContent: GameUiShowRequest | undefined;
+  hideThrows = false;
+  private readonly trace: string[];
+
+  constructor(trace: string[] = []) {
+    this.trace = trace;
+  }
 
   show(request: GameUiShowRequest): ShowResult {
     this.shows.push(request);
-    return this.showResults.shift() ?? { status: "shown" };
+    const result = this.showResults.shift() ?? { status: "shown" };
+    if (result.status === "shown" || result.status === "already-visible") {
+      this.currentContent = request;
+    }
+    return result;
   }
 
-  hide(request: GameUiHideRequest) {
+  hide(request: GameUiHideRequest): HideResult {
     this.hides.push(request);
     this.calls.push(`hide:${request.reason}`);
-    return { status: "hidden" } as const;
+    this.trace.push(`hide:${request.reason}`);
+    if (this.hideThrows) throw new Error("hide failed");
+    const result = this.hideResults.shift() ?? { status: "hidden" };
+    if (result.status === "hidden" || result.status === "already-hidden") {
+      this.currentContent = undefined;
+    }
+    return result;
   }
 
   destroy(): void {
     this.calls.push("destroy");
+    this.trace.push("destroy");
   }
 
   subscribeUserClose(handler: (event: UserCloseEvent) => void): () => void {
     this.closeHandler = handler;
     return () => {
       this.calls.push("unsubscribe");
+      this.trace.push("unsubscribe");
       this.closeHandler = undefined;
     };
   }
@@ -69,18 +90,28 @@ class FakeUi implements GameUiPort {
 
 class RecordingLease implements GameplayControlLeasePort {
   readonly calls: string[] = [];
-  private readonly token = Object.freeze({}) as unknown as GameplayControlLeaseToken;
-  private acquired = false;
+  readonly acquiredTokens: GameplayControlLeaseToken[] = [];
+  readonly releasedTokens: GameplayControlLeaseToken[] = [];
+  private readonly activeTokens = new Set<GameplayControlLeaseToken>();
+  private readonly trace: string[];
+
+  constructor(trace: string[] = []) {
+    this.trace = trace;
+  }
 
   acquire() {
     this.calls.push("acquire");
-    this.acquired = true;
-    return { ok: true as const, token: this.token };
+    const token = Object.freeze({}) as unknown as GameplayControlLeaseToken;
+    this.acquiredTokens.push(token);
+    this.activeTokens.add(token);
+    return { ok: true as const, token };
   }
 
-  release(_token: GameplayControlLeaseToken): GameplayControlLeaseReleaseResult {
+  release(token: GameplayControlLeaseToken): GameplayControlLeaseReleaseResult {
     this.calls.push("release");
-    this.acquired = false;
+    this.trace.push("release");
+    this.releasedTokens.push(token);
+    this.activeTokens.delete(token);
     return { ok: true };
   }
 
@@ -90,7 +121,7 @@ class RecordingLease implements GameplayControlLeasePort {
   }
 
   get isAcquired(): boolean {
-    return this.acquired;
+    return this.activeTokens.size > 0;
   }
 }
 
@@ -189,6 +220,11 @@ describe("InteractRuntime", () => {
       menuId: "cv",
       residenceId: "new",
     });
+    expect(ui.currentContent).toMatchObject({
+      menuId: "cv",
+      residenceId: "new",
+      payload: { menuId: "cv", title: "cv" },
+    });
     expect(lease.calls).toEqual(["acquire"]);
     expect(receipts).toHaveLength(2);
 
@@ -214,12 +250,22 @@ describe("InteractRuntime", () => {
     });
 
     expect(interact.handleResidenceEvent(event("about", "old"))).toBe("shown");
+    expect(ui.currentContent).toMatchObject({
+      menuId: "about",
+      residenceId: "old",
+      payload: { menuId: "about", title: "about" },
+    });
     ui.showResults.push({ status: "missing-target" });
     expect(interact.handleResidenceEvent(event("cv", "new"))).toBe("show-failed");
     expect(interact.active).toEqual({
       markerId: "about-marker",
       menuId: "about",
       residenceId: "old",
+    });
+    expect(ui.currentContent).toMatchObject({
+      menuId: "about",
+      residenceId: "old",
+      payload: { menuId: "about", title: "about" },
     });
     expect(lease.calls).toEqual(["acquire"]);
 
@@ -274,6 +320,95 @@ describe("InteractRuntime", () => {
     interact.handleResidenceEvent(event("about", "r1", "leave"));
     expect(ui.hides).toHaveLength(1);
     expect(interact.active?.residenceId).toBe("r2");
+  });
+
+  it("keeps active state recoverable for every user-close hide failure", () => {
+    const failures: HideResult[] = [
+      { status: "target-mismatch" },
+      { status: "destroyed" },
+    ];
+
+    for (const failure of failures) {
+      const ui = new FakeUi();
+      ui.hideResults.push(failure);
+      const lease = new RecordingLease();
+      const interact = runtime(ui, lease);
+      interact.handleResidenceEvent(event("about", "r1"));
+
+      ui.emitClose({
+        menuId: "about",
+        residenceId: "r1",
+        source: "close-button",
+      });
+
+      expect(interact.active?.residenceId).toBe("r1");
+      expect(interact.suppressedResidenceIds).toEqual([]);
+      expect(lease.calls).toEqual(["acquire"]);
+    }
+
+    const throwingUi = new FakeUi();
+    throwingUi.hideThrows = true;
+    const throwingLease = new RecordingLease();
+    const throwing = runtime(throwingUi, throwingLease);
+    throwing.handleResidenceEvent(event("about", "r2"));
+    throwing.onUserClose({
+      menuId: "about",
+      residenceId: "r2",
+      source: "backdrop",
+    });
+    expect(throwing.active?.residenceId).toBe("r2");
+    expect(throwing.suppressedResidenceIds).toEqual([]);
+    expect(throwingLease.calls).toEqual(["acquire"]);
+  });
+
+  it("accepts already-hidden user close before suppression and release", () => {
+    const ui = new FakeUi();
+    ui.hideResults.push({ status: "already-hidden" });
+    const lease = new RecordingLease();
+    const interact = runtime(ui, lease);
+    interact.handleResidenceEvent(event("about", "r1"));
+
+    ui.emitClose({
+      menuId: "about",
+      residenceId: "r1",
+      source: "close-button",
+    });
+
+    expect(interact.active).toBeUndefined();
+    expect(interact.suppressedResidenceIds).toEqual(["r1"]);
+    expect(lease.calls).toEqual(["acquire", "release"]);
+  });
+
+  it("shared leases release each caller's own token", () => {
+    const lease = new RecordingLease();
+    const firstUi = new FakeUi();
+    const secondUi = new FakeUi();
+    const resolver: ContentResolverPort = {
+      resolve(menuId) {
+        return {
+          status: "resolved",
+          payload: { menuId, title: menuId, body: ["content"] },
+        };
+      },
+    };
+    const first = runtime(firstUi, lease, resolver);
+    const second = runtime(secondUi, lease, resolver);
+
+    first.handleResidenceEvent(event("about", "r1"));
+    second.handleResidenceEvent(event("cv", "r2"));
+    firstUi.emitClose({
+      menuId: "about",
+      residenceId: "r1",
+      source: "backdrop",
+    });
+    secondUi.emitClose({
+      menuId: "cv",
+      residenceId: "r2",
+      source: "backdrop",
+    });
+
+    expect(lease.acquiredTokens).toHaveLength(2);
+    expect(lease.releasedTokens).toEqual(lease.acquiredTokens);
   });
 
   it("commits already-visible and never shows when acquire fails", () => {
@@ -333,9 +468,56 @@ describe("InteractRuntime", () => {
     expect(lease.activeLeaseCount).toBe(0);
   });
 
-  it("destroy unsubscribes, hides, destroys, releases, and never shuts down provider", () => {
+  it("retries a leave release after enable-failed", () => {
+    let enableAttempts = 0;
+    const lease = new GameplayControlLeaseRuntime({
+      disableControls: () => undefined,
+      enableControls: () => {
+        enableAttempts += 1;
+        return enableAttempts > 1;
+      },
+    });
     const ui = new FakeUi();
-    const lease = new RecordingLease();
+    const interact = runtime(ui, lease);
+
+    interact.handleResidenceEvent(event("about", "r1"));
+    interact.handleResidenceEvent(event("about", "r1", "leave"));
+
+    expect(interact.active).toBeUndefined();
+    expect(interact.pendingReleaseCount).toBe(1);
+    expect(lease.activeLeaseCount).toBe(1);
+    expect(interact.retryPendingReleases()).toBe(true);
+    expect(interact.pendingReleaseCount).toBe(0);
+    expect(lease.activeLeaseCount).toBe(0);
+  });
+
+  it("retries a destroy release after enable-failed", () => {
+    let enableAttempts = 0;
+    const lease = new GameplayControlLeaseRuntime({
+      disableControls: () => undefined,
+      enableControls: () => {
+        enableAttempts += 1;
+        return enableAttempts > 1;
+      },
+    });
+    const ui = new FakeUi();
+    const interact = runtime(ui, lease);
+
+    interact.handleResidenceEvent(event("about", "r1"));
+    interact.destroy();
+
+    expect(interact.active).toBeUndefined();
+    expect(interact.pendingReleaseCount).toBe(1);
+    expect(lease.activeLeaseCount).toBe(1);
+    expect(interact.retryPendingReleases()).toBe(true);
+    expect(interact.pendingReleaseCount).toBe(0);
+    expect(lease.activeLeaseCount).toBe(0);
+  });
+
+  it("destroy unsubscribes, hides, destroys, releases, and never shuts down provider", () => {
+    const trace: string[] = [];
+    const ui = new FakeUi(trace);
+    const lease = new RecordingLease(trace);
     const interact = runtime(ui, lease);
     interact.handleResidenceEvent(event("about", "r1"));
 
@@ -344,6 +526,12 @@ describe("InteractRuntime", () => {
     ui.emitClose({ menuId: "about", residenceId: "r1", source: "backdrop" });
 
     expect(ui.calls).toEqual(["unsubscribe", "hide:shutdown", "destroy"]);
+    expect(trace).toEqual([
+      "unsubscribe",
+      "hide:shutdown",
+      "destroy",
+      "release",
+    ]);
     expect(lease.calls).toEqual(["acquire", "release"]);
     expect(lease.calls).not.toContain("shutdown");
     expect(interact.isDestroyed).toBe(true);

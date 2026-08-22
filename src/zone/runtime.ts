@@ -207,6 +207,7 @@ export class ZoneRuntime {
     this.latestSnapshot = undefined;
     this.residences.clear();
     this.visitedMarkers.clear();
+    this.nextResidenceNumber = 1;
   }
 
   private checkNow(): void {
