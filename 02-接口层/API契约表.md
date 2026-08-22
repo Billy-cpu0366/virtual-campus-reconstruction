@@ -5,7 +5,7 @@ tags:
   - 接口
 type: handoff
 created: 2026-08-14
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # API 契约表（系统之间的接口约定）
@@ -28,24 +28,73 @@ updated: 2026-08-21
 | `createWorld` / `destroyWorld` | 世界 → 所有人 | 进游戏搭起整个"舞台"（地图 + 图层），退游戏 / 切场景时拆掉 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md) |
 | 归一化 | 输入 → 移动/玩家 | 键盘 / WASD / 摇杆三种按法，统一翻译成"往哪个方向走"，移动组不用管用的是哪种 | [SYS-INPUT](../03-执行层/02-玩法线/01-输入.md) |
 | 玩家位置快照 / `startFollow` | 玩家 → 相机 / 分块 | 玩家只读世界坐标供镜头硬跟随和玩家 3×3 分块目标计算；不把可变 Sprite/Body 所有权交出去 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
-| 玩法控制门 | Main / 相机 → 玩家 / 输入 | 航拍或 shutdown 禁用时立即停速、屏蔽并 reset 键盘/摇杆；结束后才恢复设备对应输入 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md) |
+| 玩法控制门 / lease | Main provider ← 相机 / SYS-INTERACT | acquire返回成功token或失败reason；调用方只释放自己的opaque token；首token立即停速/reset，末token释放后恢复；Main在消费者shutdown后再shutdown provider并保持scene禁用 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
 | 动态深度 | 玩家 → 图层 | 决定谁挡谁：人走到灌木后面就该被挡住，按位置排前后 | [SYS-PLAYER](../03-执行层/02-玩法线/03-玩家.md) |
 | 相机视口目标更新 / `loadChunksForCamera` | 相机 → 分块 | 航拍和正常跟随都只提交相机视口；分块统一计算“玩家 3×3 ∪ 相机可见 +1”，相机不直接操作 cache/Tilemap | [SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 地图运行时收敛 | Main → 分块 / 世界 | Main 可等待请求和 mutation idle；shutdown 按控制/相机→请求→mutation→collider/layer/Tilemap 收敛 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md)、[SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 资源加载 | 资源 → 各系统 | 进货：图片 / 地图走 Phaser Loader，切块数据走 HttpClient，两条补给线 | [SYS-ASSET](../03-执行层/01-地图线/01-资源加载.md) |
-| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开行为为 100ms 检查、严格 `<30px` 距离；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
-| 区域内容请求 | SYS-ZONE → SYS-INTERACT | 输出进入/离开、`menuId`、visited/手动关闭状态；弹窗 DOM、暂停恢复和文案归 SYS-INTERACT / SYS-GAME-UI；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
+| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以当前Sprite世界坐标和camera scroll/zoom计算；100ms检查、视口外扩100px、严格`<30px`；有界接线已在`8ae7692b`验证 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
+| 区域驻留事件 | SYS-ZONE → SYS-INTERACT | 只在 outside↔inside 边沿输出 `markerId/menuId/residenceId/enter|leave`；重复100ms检查不重复发 enter，DOM、控制和手动关闭不归 Zone | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
+| 内容访问收据 | SYS-INTERACT → SYS-ZONE | UI 确认 `shown/already-visible` 后回传 marker/residence/menu，Zone 再记 visited；失败不产生虚假访问 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
+| 内容解析 | 03 registry → Main ContentResolver → SYS-INTERACT | 同步按menuId返回evidence-backed payload或missing/invalid；必需`body`作纯文本fallback，optional结构化`sections`只含heading/paragraphs/local image/external links/tags；Main校验并深冻结，不联网、不retry | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[内容层](../04-内容层/作品集内容.md) |
+| 游戏UI呈现端口 | SYS-INTERACT ↔ SYS-GAME-UI | Interact 调用带`menuId+residenceId`的原子`show/hide/destroy`；UI只原样回报identity和close-button/backdrop动作；programmatic hide不发user-close，stale close被Interact忽略 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[SYS-GAME-UI](../03-执行层/04-独立件/02-游戏UI.md) |
+| App状态与generation | SYS-APP → Main / SYS-GAME-UI | 输出BOOT/LOADING/READY/ENTERING_GAME/PLAYING/MODAL_OPEN/ERROR/RETRYING/SHUTDOWN、真实progress和generation；Play/Retry只发意图，不持有Scene/相机/火车 | [SYS-APP](../03-执行层/04-独立件/01-应用启动与页面.md) |
+| 入口完成收据 | Main ← SYS-CAMERA / SYS-ROUTE | Main同时启动3秒相机和5秒火车；只在当前generation火车arrived且相机已稳定后进入PLAYING并释放entry control lease；stale/重复收据忽略 | [SYS-APP](../03-执行层/04-独立件/01-应用启动与页面.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md)、[SYS-ROUTE](../03-执行层/05-旁支/02-车辆与路线.md) |
+| 首内容引导 | Main → SYS-ZONE / SYS-INTERACT | playable后只发布Memo 6方向目标；不传送、不自动打开、不回visited；真实`<30px` enter和UI shown receipt仍由既有内容链完成 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
+| 旁支生命周期端口 | Main ↔ SYS-NPC / SYS-ROUTE / SYS-FX | Main只给worldReady/playable/viewport/playerSnapshot/start/shutdown；各owner回visible/state/failure/destroy receipt，不转移Sprite/emitter/tween/collider所有权 | [SYS-NPC](../03-执行层/05-旁支/01-NPC.md)、[SYS-ROUTE](../03-执行层/05-旁支/02-车辆与路线.md)、[SYS-FX](../03-执行层/05-旁支/03-动效与粒子.md) |
 
 ### 并行实施接口状态（`DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001`）
 
 | 接口 | 契约状态 | 工程状态 | 当前边界 |
 |---|---|---|---|
-| 玩家位置快照 | Frozen | Core Ready；运行时接线待 P1 | 只读坐标，不转移 Sprite/Body 所有权 |
-| 玩法控制门 | Frozen | Not Started | 禁用必须停速并 reset 输入；相机不能直接管理键盘实现 |
-| 相机视口目标更新 | Frozen | Core Ready；航拍接线未开始 | 目标公式唯一归 SYS-CHUNK，相机只提供 viewport |
-| 地图运行时收敛 | Frozen | Integrated；跨线 Gate 待验证 | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
+| 玩家位置快照 | Frozen | Bounded Integrated + Verified（`f2fe106`） | `PhaserPlayerRuntime.position` 返回冻结坐标，不转移 Sprite/Body 所有权；chunk target 已消费 |
+| 玩法控制门 | Frozen | Bounded Integrated + Verified（`f2fe106`） | disable/blur/shutdown 停速并 reset 键盘/摇杆；SYS-CAMERA 只能调用门，不能直接管理设备 |
+| 相机视口目标更新 | Frozen | Bounded Integrated + Verified（`cd3691a`） | 单一 pending viewport 由既有500ms循环消费；目标公式、请求/cache/Tilemap仍唯一归 SYS-CHUNK/WORLD |
+| 地图运行时收敛 | Frozen | Bounded Integrated + Verified（`f2fe106`） | 复用现有请求取消、mutation idle 与 `destroyAsync`，不新建第二套生命周期 |
 
-> Frozen 只表示语义边界已由 Human 接受；不表示 M1/P1/SYS-CAMERA 已实现或验证。真实 TypeScript 签名在各实现工作项授权时确定。
+> Frozen 表示语义边界已接受；`f2fe106` 只验证第一波有界接口，不表示完整 M1/P1 系统或 SYS-CAMERA 已完成。
+
+### 内容基础接口状态（`DEC-CONTENT-FOUNDATION-DESIGN-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| 区域驻留事件 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | Zone每次驻留唯一`residenceId`，只发enter/leave边沿；100ms、viewport+100和`<30`已测试/浏览器验证 |
+| 内容访问收据 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | 仅UI show成功后记visited；失败无虚假访问；about/re-enter真实Smoke PASS |
+| 内容解析 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | Main同步resolver；仅11项已核对标题/名称，不联网、不补长文/图片/Slovak |
+| 游戏UI呈现端口 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | identity=`menuId+residenceId`；原子replace；standard无backdrop、memo有；desktop/mobile真实DOM PASS |
+| 玩法控制 lease | Frozen | Bounded Integrated + Verified（`8ae7692b`） | modal和camera共用provider；首token禁用、末token恢复；消费者后provider shutdown |
+| 通用 Entity 生命周期 | No Contract | Verified No-Code | `Q-ENTITY-001`保持open；`8ae7692b`审计无shared runtime/registry/entity paths |
+
+> 本节只证明内容基础有界CORE和当前Main integration，不晋升完整系统；完整内容、accessibility和Entity消费者仍按系统卡保持UNKNOWN。
+
+### 可见成果波P2接口状态（`DEC-VISIBLE-WAVE-P2-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| App状态与generation | Frozen | Not Started | 独立件输出状态/progress/generation；Main持Scene，Retry先shutdown旧generation |
+| 入口完成收据 | Frozen | Not Started | 3秒相机与5秒火车分开回收据；5秒前不开放控制；111秒序列禁止production调用 |
+| 首内容引导 | Frozen | Not Started | 只引导Memo 6，不能传送/自动打开/伪造visited |
+| 旁支生命周期端口 | Frozen | Not Started | sprayer/train/smoke各自owner；Main只接共享时机和收据 |
+| 通用Entity生命周期 | No Contract | Verified No-Code | 第二个真实消费者实现并对比前继续NO-GO |
+
+### P2.1共享内容桥（`DEC-VISIBLE-CONTENT-BRIDGE-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| 富内容payload | Frozen | Shared Core Verified（`f243764f`） | `body`向后兼容；`sections`无任意HTML；03数据、Main校验/冻结、04安全渲染 |
+| Main默认resolver接线 | Frozen | Shared Validation Verified / Registry Not Integrated | `f243764f`先不导入03 registry；最终integration只接registry，不复制数据 |
+| 04 DOM renderer | Frozen | Bounded Verified（`c1156cd8`） | sections/body fallback/图片与链接安全已验证，待Main真实接线 |
+
+### P4最终集成接口（`DEC-VISIBLE-WAVE-P4-INTEGRATION-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| App generation effects | Frozen | Integrated + Auto Verified（`0fadf309`） | Main创建/销毁每个Phaser generation；Retry cleanup后重建，旧回调无效，Human视觉待验 |
+| 默认内容source | Frozen | Integrated + Auto Verified（`0fadf309`） | 03 registry覆盖8项真实内容；其余3项保留最小fallback；Main resolver不复制正文 |
+| 内容runtime assets | Frozen | Integrated + Auto Verified（`0fadf309`） | 10项sample镜像离线复制并验SHA-256；不联网；失败保正文 |
+| 真实train到站收据 | Frozen | Integrated + Auto Verified（`0fadf309`） | production真实route进入holding才resolve；实测5035ms，无独立5秒真值timer |
+| train玩家collider | Frozen | Integrated + Auto Verified（`0fadf309`） | Main窄connector；route完成/Retry/shutdown后collider=0 |
+| side运行时生命周期 | Frozen | Integrated + Auto Verified（`0fadf309`） | sprayer/smoke/train真实browser gates与teardown通过，Human视觉待验 |
 
 ## 二、数据字典（常量 / 公式，不是接口）
 
@@ -60,6 +109,11 @@ updated: 2026-08-21
 | 图层 | 24 层（layer1-10 + walls + cars + 4 roof + 4 bridge + 3 particles + footsteps） | ✅ 已确认（特殊 13 层卸载语义见 SYS-WORLD UNKNOWN） |
 | 移动速度 | 单轴 150 / 对角 106 | ✅ 已定死 |
 | 玩家动态深度 | 原站事实：`500 + y*0.1`；当前重构决定：`500 + (y + 24)*0.1`（桥上 1650 等为显式覆盖） | ✅ 已定死（重构实现以 SYS-LAYER 卡和 `DEC-SYS-LAYER-CORE-001` 为准；两者不能混写） |
+| 内容 menuId | `about/cv/projects/contact/tech/memo1..memo6` | ✅ 11个 Zone 内容 ID；big-map/under-hood 不在当前接口 |
+| 内容弹窗策略 | single-active；standard backdrop=`none`，memo backdrop=`global` | ✅ 重构 DECISION；原站多 visible 技术可能不作为产品合同 |
+| 桌面逻辑世界视口 | 480×270，CSS缩放到可用区域；zoom=1 | ✅ P2 Human选择；浏览器变大不扩大世界视野 |
+| 产品入口时序 | 相机3000ms Power2；火车5000ms到达后放控制；约3000ms后火车9000ms离场 | ✅ P2冻结；111秒序列不属于正常入口 |
+| 首内容目标 | Memo 6；静态路线候选左36格、上7格；触发严格`<30px` | ✅ P2冻结；路线须真人行为复核 |
 
 ## 三、待定接口（还没定死）
 

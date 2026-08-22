@@ -1,10 +1,12 @@
 ---
 work-item: WI-MAP-RUNTIME-COMPLETION-001
 parent: WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001
-status: authorized-awaiting-worktree
+status: bounded-integrated-verified
 branch: impl/map-runtime-completion
 authorization: DEC-MAP-RUNTIME-COMPLETION-001
 updated: 2026-08-21
+result-commit: 5290eca
+integration-commit: f2fe106
 ---
 
 # M1 地图运行时收口实施包

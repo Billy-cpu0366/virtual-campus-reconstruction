@@ -1,9 +1,9 @@
 ---
 work-item: WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001
-status: active
+status: completed
 phase: interface-and-integration-design
 authorization: DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # 地图线与玩法线两波并行设计
@@ -176,7 +176,9 @@ python3 scripts/check-state-consistency.py
 
 之后进入 Human Gate；未通过不得开始 SYS-CAMERA。
 
-## 6. 第二波 SYS-CAMERA 候选包（待第一波 Gate）
+## 6. 第二波 SYS-CAMERA 历史候选包（入口解释已被取代）
+
+> 本节记录当时能力实现候选。`DEC-CAMERA-ENTRY-FLOW-FIX-001`和`DEC-THREE-BOARD-VISIBLE-WAVE-001`已明确：六点序列不属于当前正常入口合同，真实触发保持UNKNOWN，正常入口禁止使用111秒序列。
 
 1. 6 点航拍序列与约 111 秒真实时间线。
 2. 航拍期间通过玩法控制门锁定玩家和摇杆。
@@ -184,7 +186,7 @@ python3 scripts/check-state-consistency.py
 4. 结束后 3 秒 Power2 回到玩家，再恢复硬跟随和控制。
 5. 正常阶段 zoom=1、lerp=1、offset=0、deadzone=0、roundPixels=true。
 6. nativeScale 作为运行时设备值；HeatHaze/Fire/Morph 不存在时显式降级，不伪造后处理。
-7. 测试使用显式 test-hooks/可控时钟缩短等待；production 保持原站时长。
+7. 序列能力只由显式test-hooks验证；production正常入口不触发，短入场另行调查设计。
 
 地图窗口第二波只允许修复相机预载接口问题并在合并后复测目标集合、生命周期和当前环境 baseline，不新增地图功能；最终硬件 FPS、GPU/纹理内存和长期稳定性阈值仍是独立工作项。
 
