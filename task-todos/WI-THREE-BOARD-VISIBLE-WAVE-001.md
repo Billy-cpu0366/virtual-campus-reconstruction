@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p2.1-shared-implementation
-phase: p2.1-shared-content-bridge
+status: active-p3-parallel-implementation
+phase: p3-parallel-implementation
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537

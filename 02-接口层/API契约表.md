@@ -81,9 +81,9 @@ updated: 2026-08-22
 
 | 接口 | 契约状态 | 工程状态 | 当前边界 |
 |---|---|---|---|
-| 富内容payload | Accepted / Awaiting Shared Commit | Blocked Before Implementation | `body`向后兼容；`sections`无任意HTML；03数据、Main校验/冻结、04安全渲染 |
-| Main默认resolver接线 | Accepted / Awaiting Shared Commit | Not Started | shared commit先不导入03 registry；最终integration只接registry，不复制数据 |
-| 04 DOM renderer | Accepted / Awaiting Shared Commit | Dirty Preserved / Paused | 现有App/UI修改不得覆盖；contract同步后再实现sections/fallback |
+| 富内容payload | Frozen | Shared Core Verified（`f243764f`） | `body`向后兼容；`sections`无任意HTML；03数据、Main校验/冻结、04安全渲染 |
+| Main默认resolver接线 | Frozen | Shared Validation Verified / Registry Not Integrated | `f243764f`先不导入03 registry；最终integration只接registry，不复制数据 |
+| 04 DOM renderer | Frozen | Foundation Verified / Rich Renderer In Progress | `db0fd9d1`保留App/UI成果；shared已同步，继续sections/fallback |
 
 ## 二、数据字典（常量 / 公式，不是接口）
 

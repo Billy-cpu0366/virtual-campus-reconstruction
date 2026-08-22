@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-CONTENT-BRIDGE-001
 parent: WI-THREE-BOARD-VISIBLE-WAVE-001
-status: ready-to-sync-03-and-04
+status: completed-shared-baseline-synced
 phase: P2.1-shared-content-bridge
 authorization: DEC-VISIBLE-CONTENT-BRIDGE-001
 authority-commit: 0a5253933c94938917221721c9cfdafeee6c7dcf
@@ -10,6 +10,10 @@ main-shared-commit: f243764f2523f1c833c598630df71b61e4f41625
 main-shared-tree: a17b94d9c1255f39f12eeff20496f04e006bb403
 independent-foundation-commit: db0fd9d1a83cd233db152ea49c0657cb2eb65a12
 independent-foundation-tree: 2a6782f7c0c04f58d2035e0e1a0e207221ae8156
+content-sync-commit: c2567b5ddd3e3d4a73d8533f089f127bf79562b2
+content-sync-tree: 7601b385ab9d7467a32487a204f9ce2f09e27fcb
+independent-sync-commit: 4309399b68e8f18d8a3cea28d8323f1e388eff5a
+independent-sync-tree: 0086356ad247cfe4e4e7dc0bdc421136aec86d98
 main-branch: integration/visible-product-wave
 content-blocked-commit: 4b36ad40ede8f0cff8428bb6ae7877a572a3db4f
 updated: 2026-08-22
@@ -56,5 +60,5 @@ updated: 2026-08-22
 ## 5. Gate
 
 - **Human选择**：共享契约桥（推荐方案），2026-08-22。
-- **当前状态**：Main shared与04 foundation已clean交付；等待`f243764f`同步03/04并验证。
+- **当前状态**：shared已同步03/04，typecheck、全测试、build与clean验证PASS；P2.1完成，四路恢复P3。
 - **完成证据**：Main共享commit/tree/clean + 03/04 cherry-pick收据 + 三侧定向测试、typecheck、全测试和build。

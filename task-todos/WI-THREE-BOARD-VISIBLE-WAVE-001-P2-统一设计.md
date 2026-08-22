@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: P2
-status: accepted-persisted-p2.1-correction-active
+status: accepted-persisted-implementation-authorized
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 p2-design-tree: ec2884530db465a57b5dd20cd7811fc215e7df52
 authorization: DEC-VISIBLE-WAVE-P2-001
