@@ -4,12 +4,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-loading-startup-performance-diagnosis
-current-gate: corrective-design-human-gate
-gate-status: human-visual-failed-diagnosis-only
+current-phase: p5.1-wip-snapshot-sync
+current-gate: wip-delivery-bundle-preparation
+gate-status: human-authorized-wip-branch-push
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p5.2-bounded-correction
+next-phase: p5.1-loading-startup-performance-diagnosis
 updated: 2026-08-22
 ---
 
@@ -18,9 +18,9 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：P5.1 Loading/启动装配/卡顿整体诊断；candidate=`0fadf309`自动门禁通过但Human视觉FAIL。
-- **Human失败事实**：Loading明显不似原站且过程混乱；实际移动/画面明显卡顿；初始地图分块装配对用户可见，严重影响观感。
-- **当前授权**：只读对照原站Loading证据、当前启动时序和移动frame pacing；形成整体修正设计并交Human确认前，不写功能代码。
+- **当前阶段**：先把P5.1前的当前进度形成统一WIP snapshot并同步远端分支；随后恢复Loading/启动装配/卡顿诊断。
+- **同步内容**：功能candidate=`0fadf309` + 最新Human FAIL/诊断状态；该快照不是完成版，也不改变P5失败结论。
+- **当前授权**：生成Git bundle并由Windows外部Pi推唯一WIP分支；不允许PR、merge、修改`main`。首次正式仓库路径/remote/dirty/fetch审计仍必须执行。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
@@ -171,7 +171,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前产品阻塞：Human视觉FAIL。已确认原站Loading含白底/GIF/百分比/网格揭示；当前自动性能门禁未覆盖移动帧间隔与位置跳步。修正方案尚未接受、尚未写代码。
+- 当前产品阻塞仍为Human视觉FAIL；本次远端同步仅备份当前WIP进度，不代表视觉通过。外部Pi若发现正式仓库dirty、remote不匹配、未知分叉、bundle/hash不符或测试失败必须停止。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。

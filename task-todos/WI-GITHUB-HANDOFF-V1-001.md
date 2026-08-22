@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-HANDOFF-V1-001
-status: paused-awaiting-local-visible-wave
+status: active-wip-snapshot-preparation
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-21
@@ -17,7 +17,9 @@ protocol-commit: 0a105dc
 
 ## 当前阶段
 
-`formal-repo-readonly-audit`
+`wip-snapshot-bundle-preparation`
+
+Human要求立即同步当前进度。当前交付只允许推远端WIP分支：统一`0fadf309`功能代码与最新Human视觉FAIL状态；不代表产品通过，不允许PR、merge或修改`main`。外部Pi仍须先完成下述正式仓库只读审计。
 
 外部 Pi 已报告：
 
