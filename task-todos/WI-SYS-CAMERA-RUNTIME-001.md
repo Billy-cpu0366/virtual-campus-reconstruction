@@ -5,7 +5,7 @@ status: bounded-integrated-verified
 branch: impl/gameplay-serial
 authorization: DEC-SYS-CAMERA-RUNTIME-001
 blocked-by: none
-updated: 2026-08-21
+updated: 2026-08-22
 baseline-commit: 36c1cf5
 baseline-tree: aa5e4010f3426f746a41a92d614143e2f11da168
 result-commit: 19ac98b
@@ -14,24 +14,24 @@ integration-commit: cd3691a
 
 # 第二波 SYS-CAMERA 运行时实施包
 
-> 范围已由 Human 接受；M1+P1 integration `f2fe106`、全量回归、Human Gate 和同一 gameplay worktree 基线同步均已验证。当前可按本卡实现，完成后必须停在 ready-for-preview。
+> 历史有界能力包已完成。`DEC-CAMERA-ENTRY-FLOW-FIX-001`与`DEC-THREE-BOARD-VISIBLE-WAVE-001`已取代本卡关于产品入口的旧解释：六点序列只保留显式test-hooks能力，正常入口触发为UNKNOWN且禁止接入111秒序列。
 
 ## 已接受范围
 
-1. 6 点航拍序列，production 使用原站约 111 秒时长。
+1. 当时实现六点默认序列能力（数据总时长约111秒）；这不再作为正常入口要求。
 2. 航拍期间通过统一玩法控制门锁定玩家和摇杆。
 3. tween/update 只提交相机 viewport，由 SYS-CHUNK 计算目标；相机不操作 cache/Tilemap。
 4. 航拍结束后 3 秒 Power2 回到玩家，再恢复 zoom=1、lerp=1、offset=0、deadzone=0 和控制。
 5. `roundPixels=true`；nativeScale 使用运行时设备值。
 6. HeatHaze/Fire/Morph 不可用时显式降级，不伪造后处理。
-7. test-hooks/可控时钟可以缩短自动化等待；production 时长不得因此改变。
+7. test-hooks/可控时钟验证序列能力；正常production入口不得自动触发该序列。
 
 ## 实现合同
 
 - 纯状态/时序逻辑放入 `src/camera/`，Phaser 边界放入新增 `game/PhaserCamera*.ts`；不得把完整状态机堆进 `CampusScene`。
 - 只消费 `PlayerPositionSnapshot` 和玩法控制门回调；不得持有或输出 Sprite/Body、键盘、摇杆实例。
 - viewport 更新只输出 `CameraViewport` 给 Main；不得直接调用 `ChunkCoordinator`、cache、renderer 或 Tilemap。
-- production 必须使用卡中 6 点和约111秒；测试缩时必须通过显式配置/可控时钟，默认值不得被测试参数污染。
+- 序列能力被显式调用时使用卡中六点默认数据；正常入口禁止调用，Loading/Play真实短过渡由新工作项调查。
 - shutdown/重复开始/中途失败必须清 timer/tween，保持控制门和跟随状态可恢复；后处理不可用只报告降级，不阻断主流程。
 
 ## 允许文件
@@ -58,7 +58,7 @@ npm test -- --run
 git -c core.whitespace=cr-at-eol diff --check
 ```
 
-必须新增：6点/production总时长、控制锁、viewport 输出、3秒 Power2 回玩家、硬跟随恢复、nativeScale、后处理降级、重复开始、shutdown/失败恢复和测试缩时不污染默认值的自动测试。真实 `CampusScene` 接线、build 和浏览器 Smoke 由 Main 完成。
+历史能力测试覆盖六点默认总时长、控制锁、viewport输出、3秒回玩家、硬跟随恢复、nativeScale、降级、重复开始和shutdown；当前production正常入口不调用该序列。真实短入口由新工作项调查。
 
 ## 激活 Gate
 

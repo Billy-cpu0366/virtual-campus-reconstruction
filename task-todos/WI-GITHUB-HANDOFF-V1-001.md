@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-HANDOFF-V1-001
-status: active-awaiting-external-audit
+status: paused-awaiting-local-visible-wave
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-21

@@ -1,15 +1,15 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-level: none
-work-item-type: selection
-work-item-status: idle
-current-phase: work-item-selection
-current-gate: none
-gate-status: not-applicable
-authorization-ref: none
+current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
+work-item-level: program
+work-item-type: parallel-visible-product-wave
+work-item-status: active-p0
+current-phase: p0-plan-and-worktree-creation
+current-gate: four-worktree-baseline
+gate-status: awaiting-human-creation
+authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: work-item-selection
+next-phase: p1-parallel-recon
 updated: 2026-08-22
 ---
 
@@ -17,13 +17,13 @@ updated: 2026-08-22
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`none`；内容与实体基础一条龙已在本地验证关闭，回到合法工作项选择状态。
-- **设计与共享基线**：P0流程 `6fdefb1`；P1报告 A `1b29908` / B `6b5970a` / C `125691d`；P2权威设计 `1cade08`；P3 shared code `d2e73b50`。
-- **并行实现结果**：A Zone+Interact tip `8c2920c4`；B Game UI tip `9a865587`；C no-code PASS，`Q-ENTITY-001`继续open。
-- **Main integration**：A/B merge `7f8792c` / `ddec24d`；最终代码提交 `8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`，worktree clean。
-- **验证**：typecheck、42文件/245测试、production/test-hooks build、production runtime-safety，以及普通/chunk/layer/collision/lifecycle/mobile-input/camera/content浏览器门禁和独立终审全部PASS。
-- **有界结论**：11个公开marker、Zone/Interact CORE、generic DOM modal、共享camera/modal control lease已集成验证；完整文案/图片/Slovak、Escape/focus、NPC/Route/FX和通用Entity仍未完成。
-- **远端边界**：未push/PR/Windows同步；GitHub handoff工作项仍暂停，恢复交付需按中转协议和Human Gate另行执行。
+- **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
+- **当前阶段**：P0计划落盘与四worktree创建；共同代码基线=`8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`。
+- **四线任务**：内容查实际正文/图片/引导；独立件查Loading/Play/Retry与正式UI；旁支查可实现NPC/路线/FX；Main查真实入口和秒级相机过渡。
+- **当前授权**：只允许创建clean worktree和P1调查设计；P2统一设计及Human视觉目标Gate通过前不写正式功能代码。
+- **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
+- **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
+- **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -54,6 +54,7 @@ updated: 2026-08-22
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
+| 三板块可见成果并行波 | 已接受，正在落盘P0 | 从`8ae7692b`创建四个clean worktree；P1并行调查设计 | P2视觉目标Gate前写功能代码；111秒序列接正常入口；no-code冒充可见交付；push/PR/Windows同步 | 四worktree收据齐全后进入P1并行调查 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -85,7 +86,7 @@ updated: 2026-08-22
 | SYS-ZONE 区域触发逆向与设计 | 已接受、已落盘、已验证；结果提交 `05c2274` | 核对公开 marker/区域触发来源、坐标/区域边界、进入/离开和防重复行为；补 `04-内容层/作品集内容.md` 内容索引、SYS-ZONE 七格、接口和未知队列 | 不写 `src/`/`game/` 正式代码；不实现 SYS-INTERACT 弹窗；不猜未证实文案、资源或触发器 | 设计已通过 Human review；工作项关闭，正式实现需另行授权 |
 | SYS-LAYER 图层运行时语义收束 | 设计与有界实现均已完成 | 证据、`Q-LAYER-002`/`003`、24 层策略、apply/remove 边界和 World/Chunk 职责已收敛；设计关闭提交 `c82aa4a`，有界实现提交 `10c7d88`；完整节点仍为 `designed` | 不把有界实现误报为完整系统；不擅自关闭 particles3 或特殊13层 UNKNOWN | 当前回到工作项选择；后续完整语义需另行授权 |
 | SYS-WORLD + SYS-CHUNK 地图生命周期收口 | 已完成，结果提交 `d61faa1` | 可取消请求、过期回写守卫、异步 mutation 等待、Phaser Tilemap/collider 显式 teardown 和固定场景资源边界指标已验证 | 不把固定场景指标写成完整 FPS/内存结论；不实现 NPC/车辆/粒子/完整24层消费者或原站13层事实 | 当前转入 SYS-INPUT 真实运行时接入 |
-| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
+| SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现master/chunk动态目标、请求缓存/去重、World原子apply/remove/回滚、销毁守卫和Phaser适配；已修正tileset firstgid与空GID映射 | 修改`sample/`、旧Phaser；纳入粒子/NPC/完整交互；绕过SYS-LAYER；自动替Human签署视觉Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
 ## 已完成任务：阶段6A——现有复刻代码全局盘点
 
@@ -147,7 +148,14 @@ updated: 2026-08-22
 
 ## 当前工作项
 
-当前没有 active 工作项，处于合法选择状态。刚关闭的内容基础流水线见 [总任务卡](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)、[执行流程](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md) 和 [关闭报告](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-关闭报告.md)。新的正式代码或远端交付仍需由现有候选/协议重新激活。
+当前 active 为 [三板块可见成果并行波](task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001.md)。P0创建四个共同基线worktree；随后进入P1并行调查设计：
+
+- [03内容线任务](task-todos/WI-VISIBLE-CONTENT-WAVE-001.md)
+- [04独立件任务](task-todos/WI-VISIBLE-INDEPENDENT-WAVE-001.md)
+- [05旁支任务](task-todos/WI-VISIBLE-SIDE-WAVE-001.md)
+- [Main产品入口与集成](task-todos/WI-VISIBLE-PRODUCT-INTEGRATION-001.md)
+
+P1只读证据并交报告；P2由Main冻结共享接口、文件所有权和视觉目标，Human确认后才进入实现。
 
 ### 第一波执行边界
 
@@ -163,7 +171,7 @@ updated: 2026-08-22
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前没有 active 技术阻塞。Zone/Interact/Game UI有界纵切片已集成；完整24层动态消费者、完整文案/图片/双语、NPC/Route/FX、完整玩法线和最终硬件 FPS/GPU/纹理内存阈值仍需后续独立工作项。
+- 当前无技术阻塞，等待Human创建四个worktree。SYS-APP、NPC、Route、FX及真实入口相机仍需P1调查；Zone/Interact/Game UI既有CORE只作基线，不冒充本轮可见成果。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
