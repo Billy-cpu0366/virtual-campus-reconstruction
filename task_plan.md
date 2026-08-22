@@ -3,13 +3,13 @@ workflow-ref: 03-执行层/README.md
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
-work-item-status: active-p0
-current-phase: p0-plan-and-worktree-creation
-current-gate: four-worktree-baseline
-gate-status: awaiting-human-creation
+work-item-status: active-p1
+current-phase: p1-parallel-recon
+current-gate: four-recon-reports
+gate-status: in_progress
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p1-parallel-recon
+next-phase: p2-main-design-and-visual-target-gate
 updated: 2026-08-22
 ---
 
@@ -18,9 +18,9 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：P0计划落盘与四worktree创建；共同代码基线=`8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`。
+- **当前阶段**：P1四路并行调查设计；P0计划提交=`3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e`，四worktree均clean@`8ae7692b`/tree`c825bb6a`。
 - **四线任务**：内容查实际正文/图片/引导；独立件查Loading/Play/Retry与正式UI；旁支查可实现NPC/路线/FX；Main查真实入口和秒级相机过渡。
-- **当前授权**：只允许创建clean worktree和P1调查设计；P2统一设计及Human视觉目标Gate通过前不写正式功能代码。
+- **当前授权**：四路只读证据并各提交一份调查设计报告；P2统一设计及Human视觉目标Gate通过前不写正式功能代码。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
@@ -171,7 +171,7 @@ P1只读证据并交报告；P2由Main冻结共享接口、文件所有权和视
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前无技术阻塞，等待Human创建四个worktree。SYS-APP、NPC、Route、FX及真实入口相机仍需P1调查；Zone/Interact/Game UI既有CORE只作基线，不冒充本轮可见成果。
+- 当前无技术阻塞；四worktree已创建并进入P1。SYS-APP、NPC、Route、FX及真实入口相机正在调查；Zone/Interact/Game UI既有CORE只作基线，不冒充本轮可见成果。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。

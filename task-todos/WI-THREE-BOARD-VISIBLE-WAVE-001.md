@@ -1,11 +1,14 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: accepted-persisting-p0
-phase: p0-plan-and-worktree-creation
+status: active-p1-parallel-recon
+phase: p1-parallel-recon
 authorization: DEC-THREE-BOARD-VISIBLE-WAVE-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
+p0-plan-commit: 3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e
+p0-plan-tree: 9c2e8b0b854a09d068c6de8e91ef9178f484c4f8
+worktree-baseline-status: verified-clean
 human-visual-gate-required: true
 documentation-close-status: blocked-by-visual-gate
 updated: 2026-08-22
@@ -36,6 +39,12 @@ updated: 2026-08-22
 | 04独立件 | `feature/04-independent-visible-wave` | `.pi/worktrees/04-independent-visible` | Loading/Play/Retry、正式Game UI、Entity真实复用审计 |
 | 05旁支 | `feature/05-side-visible-wave` | `.pi/worktrees/05-side-visible` | 选择有公开证据的NPC、路线和FX最小可见纵切片 |
 | Main入口集成 | `integration/visible-product-wave` | `.pi/worktrees/visible-product-integration` | 原站入口触发链、短相机过渡、正常构图和最终共享接线 |
+
+## P0创建收据
+
+- 计划提交：`3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e`，tree=`9c2e8b0b854a09d068c6de8e91ef9178f484c4f8`，root clean。
+- 03内容、04独立件、05旁支、Main integration四个worktree均为`8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`，状态clean。
+- P0 Gate PASS，当前进入P1四路并行调查。
 
 ## 阶段
 
