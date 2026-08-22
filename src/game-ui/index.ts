@@ -1,6 +1,7 @@
 export { DomAppUi, createDomAppUi } from "./app-shell.js";
 export {
   DomModalGameUi,
+  createDomModalContentPort,
   createDomModalGameUi,
   createDomModalGameUiFromOptions,
 } from "./dom-modal.js";
@@ -18,6 +19,10 @@ export type {
 } from "./app-shell.js";
 export type {
   DomModalAccessibility,
+  DomModalContentDocument,
+  DomModalContentElement,
+  DomModalContentNode,
+  DomModalContentPort,
   DomModalElements,
   DomModalGameUiOptions,
   DomModalKeyboard,

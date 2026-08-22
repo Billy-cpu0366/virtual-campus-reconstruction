@@ -1,5 +1,8 @@
 import {
   CONTENT_MENU_IDS,
+  type GameUiContentImage,
+  type GameUiContentLink,
+  type GameUiContentSection,
   type GameUiHideRequest,
   type GameUiPort,
   type GameUiShowRequest,
@@ -14,6 +17,7 @@ export interface DomModalStyle {
   pointerEvents: string;
   zIndex: string;
   outline?: string;
+  visibility?: string;
 }
 
 export interface DomModalTarget {
@@ -27,6 +31,38 @@ export interface DomModalTarget {
     listener: (event: unknown) => void,
   ): void;
   focus?(): void;
+}
+
+export type DomModalContentElement =
+  | "section"
+  | "h3"
+  | "p"
+  | "figure"
+  | "img"
+  | "span"
+  | "a"
+  | "ul"
+  | "li";
+
+export interface DomModalContentNode extends DomModalTarget {
+  appendChild(child: DomModalContentNode): void;
+  setAttribute(name: string, value: string): void;
+}
+
+export interface DomModalContentPort {
+  createElement(kind: DomModalContentElement): DomModalContentNode;
+  appendChildren(
+    parent: DomModalContentNode,
+    children: readonly DomModalContentNode[],
+  ): void;
+  replaceChildren(
+    parent: DomModalTarget,
+    children: readonly DomModalContentNode[],
+  ): void;
+}
+
+export interface DomModalContentDocument {
+  createElement(kind: DomModalContentElement): DomModalContentNode;
 }
 
 export interface DomModalElements {
@@ -74,6 +110,7 @@ export interface DomModalGameUiOptions {
   readonly elements: Partial<DomModalElements>;
   readonly viewport: DomModalViewport;
   readonly accessibility?: DomModalAccessibility;
+  readonly content?: DomModalContentPort;
 }
 
 type PreparedView = {
@@ -81,7 +118,20 @@ type PreparedView = {
   readonly residenceId: string;
   readonly title: string;
   readonly body: string;
+  readonly sections?: readonly GameUiContentSection[];
   readonly backdrop: GameUiShowRequest["presentation"]["backdrop"];
+};
+
+type PreparedRichImage = {
+  readonly image: DomModalContentNode;
+  readonly fallback: DomModalContentNode;
+  readonly menuId: PreparedView["menuId"];
+  readonly residenceId: string;
+};
+
+type PreparedRichContent = {
+  readonly nodes: readonly DomModalContentNode[];
+  readonly images: readonly PreparedRichImage[];
 };
 
 type ActiveView = PreparedView;
@@ -105,6 +155,15 @@ type DomModalSnapshot = {
 const DESKTOP_MAX_HEIGHT_RATIO = 0.9;
 const MOBILE_MAX_HEIGHT_RATIO = 0.7;
 const MOBILE_WIDTH = 767;
+const RICH_CONTENT_KEYS = [
+  "heading",
+  "paragraphs",
+  "image",
+  "links",
+  "tags",
+] as const;
+const IMAGE_KEYS = ["src", "alt", "fallbackText"] as const;
+const LINK_KEYS = ["label", "href"] as const;
 
 function isMenuId(value: unknown): value is GameUiShowRequest["menuId"] {
   return (
@@ -123,6 +182,128 @@ function hasText(value: unknown): value is string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function hasOnlyKeys(
+  value: Record<string, unknown>,
+  allowedKeys: readonly string[],
+): boolean {
+  return Object.keys(value).every((key) => allowedKeys.includes(key));
+}
+
+function isTextArray(value: unknown): value is readonly string[] {
+  return Array.isArray(value) && value.length > 0 && value.every(hasText);
+}
+
+function isLocalImageSource(value: unknown): value is string {
+  if (!hasText(value) || value !== value.trim() || value.includes("\\")) {
+    return false;
+  }
+  return !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(value);
+}
+
+function isExternalHttpLink(value: unknown): value is string {
+  if (!hasText(value) || value !== value.trim()) return false;
+  try {
+    const parsed = new URL(value);
+    return (
+      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
+      parsed.hostname !== ""
+    );
+  } catch {
+    return false;
+  }
+}
+
+function prepareContentSection(
+  value: unknown,
+): GameUiContentSection | undefined {
+  try {
+    if (!isRecord(value)) return undefined;
+    if (
+      Object.keys(value).length === 0 ||
+      !hasOnlyKeys(value, RICH_CONTENT_KEYS)
+    ) {
+      return undefined;
+    }
+
+    const section: {
+      heading?: string;
+      paragraphs?: readonly string[];
+      image?: GameUiContentImage;
+      links?: readonly GameUiContentLink[];
+      tags?: readonly string[];
+    } = {};
+
+    if ("heading" in value) {
+      if (!hasText(value.heading)) return undefined;
+      section.heading = value.heading;
+    }
+    if ("paragraphs" in value) {
+      if (!isTextArray(value.paragraphs)) return undefined;
+      section.paragraphs = [...value.paragraphs];
+    }
+    if ("image" in value) {
+      const image = value.image;
+      if (
+        !isRecord(image) ||
+        !hasOnlyKeys(image, IMAGE_KEYS) ||
+        !isLocalImageSource(image.src) ||
+        !hasText(image.alt) ||
+        !hasText(image.fallbackText)
+      ) {
+        return undefined;
+      }
+      section.image = {
+        src: image.src,
+        alt: image.alt,
+        fallbackText: image.fallbackText,
+      };
+    }
+    if ("links" in value) {
+      if (!Array.isArray(value.links) || value.links.length === 0) {
+        return undefined;
+      }
+      const links: GameUiContentLink[] = [];
+      for (const link of value.links) {
+        if (
+          !isRecord(link) ||
+          !hasOnlyKeys(link, LINK_KEYS) ||
+          !hasText(link.label) ||
+          !isExternalHttpLink(link.href)
+        ) {
+          return undefined;
+        }
+        links.push({ label: link.label, href: link.href });
+      }
+      section.links = links;
+    }
+    if ("tags" in value) {
+      if (!isTextArray(value.tags)) return undefined;
+      section.tags = [...value.tags];
+    }
+
+    return section;
+  } catch {
+    return undefined;
+  }
+}
+
+function prepareContentSections(
+  value: unknown,
+): readonly GameUiContentSection[] | undefined {
+  try {
+    if (!Array.isArray(value) || value.length === 0) return undefined;
+    const sections: GameUiContentSection[] = [];
+    for (const section of value) {
+      const prepared = prepareContentSection(section);
+      if (prepared === undefined) return undefined;
+      sections.push(prepared);
+    }
+    return sections;
+  } catch {
+    return undefined;
+  }
 }
 
 function hasTarget(value: DomModalTarget | undefined): value is DomModalTarget {
@@ -178,11 +359,18 @@ function validateAndBuild(request: unknown): PreparedView | undefined {
       return undefined;
     }
 
+    let sections: readonly GameUiContentSection[] | undefined;
+    if ("sections" in payload) {
+      sections = prepareContentSections(payload.sections);
+      if (sections === undefined) return undefined;
+    }
+
     return {
       menuId: request.menuId,
       residenceId: request.residenceId,
       title: payload.title,
       body: payload.body.join("\n\n"),
+      ...(sections === undefined ? {} : { sections }),
       backdrop: request.presentation.backdrop,
     };
   } catch {
@@ -193,7 +381,12 @@ function validateAndBuild(request: unknown): PreparedView | undefined {
 export class DomModalGameUi implements GameUiPort {
   private readonly elements: Partial<DomModalElements>;
   private readonly viewport: DomModalViewport;
+  private readonly content: DomModalContentPort | undefined;
   private readonly subscribers = new Set<(event: UserCloseEvent) => void>();
+  private readonly richImageListeners: Array<{
+    readonly image: DomModalContentNode;
+    readonly listener: (event: unknown) => void;
+  }> = [];
   private active: ActiveView | undefined;
   private unsubscribeResize: (() => void) | undefined;
   private unsubscribeKeyboard: (() => void) | undefined;
@@ -225,10 +418,12 @@ export class DomModalGameUi implements GameUiPort {
     elements: Partial<DomModalElements>,
     viewport: DomModalViewport,
     accessibility?: DomModalAccessibility,
+    content?: DomModalContentPort,
   ) {
     this.elements = elements;
     this.viewport = viewport;
     this.accessibility = accessibility;
+    this.content = content ?? createDefaultDomModalContentPort(elements.body);
     this.bindListeners();
   }
 
@@ -246,11 +441,14 @@ export class DomModalGameUi implements GameUiPort {
 
       const wasEmpty = this.active === undefined;
       if (wasEmpty) this.captureFocus();
-      if (!this.replaceDom(prepared)) {
+      const renderedContent = this.replaceDom(prepared);
+      if (renderedContent === null) {
         if (wasEmpty) this.previousFocus = undefined;
         return { status: "invalid-payload" };
       }
+      this.clearRichImageListeners();
       this.active = prepared;
+      this.bindRichImageListeners(renderedContent);
       this.focusInitialTarget();
       return { status: "shown" };
     } catch {
@@ -271,6 +469,7 @@ export class DomModalGameUi implements GameUiPort {
       }
 
       this.hideDom();
+      this.clearRichImageListeners();
       this.active = undefined;
       this.restoreFocus();
       return { status: "hidden" } as const;
@@ -283,6 +482,7 @@ export class DomModalGameUi implements GameUiPort {
     if (this.destroyed) return;
     this.destroyed = true;
     this.removeListeners();
+    this.clearRichImageListeners();
     try {
       this.hideDom();
     } catch {
@@ -390,7 +590,9 @@ export class DomModalGameUi implements GameUiPort {
     }
   }
 
-  private replaceDom(prepared: PreparedView): boolean {
+  private replaceDom(
+    prepared: PreparedView,
+  ): PreparedRichContent | undefined | null {
     try {
       const { root, backdrop, modal, title, body } = this.elements;
       if (
@@ -400,11 +602,12 @@ export class DomModalGameUi implements GameUiPort {
         !hasTarget(title) ||
         !hasTarget(body)
       ) {
-        return false;
+        return null;
       }
 
       // Resolve every throwable build input before the first DOM mutation.
       const maxHeight = this.getMaxHeight();
+      const richContent = this.prepareRichContent(prepared);
       const previous: DomModalSnapshot = {
         rootHidden: root.hidden,
         rootPointerEvents: root.style.pointerEvents,
@@ -423,7 +626,10 @@ export class DomModalGameUi implements GameUiPort {
 
       try {
         title.textContent = prepared.title;
-        body.textContent = prepared.body;
+        if (this.content !== undefined) {
+          this.content.replaceChildren(body, richContent?.nodes ?? []);
+        }
+        if (richContent === undefined) body.textContent = prepared.body;
         root.hidden = false;
         root.style.pointerEvents = "auto";
         backdrop.hidden = prepared.backdrop !== "global";
@@ -436,13 +642,146 @@ export class DomModalGameUi implements GameUiPort {
         modal.style.overflowY = "auto";
         if (maxHeight !== undefined) modal.style.maxHeight = maxHeight;
         modal.scrollTop = 0;
-        return true;
+        return richContent;
       } catch {
         this.restoreDom(root, backdrop, modal, title, body, previous);
-        return false;
+        return null;
       }
     } catch {
-      return false;
+      return null;
+    }
+  }
+
+  private prepareRichContent(
+    prepared: PreparedView,
+  ): PreparedRichContent | undefined {
+    const sections = prepared.sections;
+    const content = this.content;
+    if (sections === undefined || content === undefined) return undefined;
+
+    try {
+      const nodes: DomModalContentNode[] = [];
+      const images: PreparedRichImage[] = [];
+
+      for (const section of sections) {
+        const sectionNode = content.createElement("section");
+        const sectionChildren: DomModalContentNode[] = [];
+
+        if (section.heading !== undefined) {
+          const heading = content.createElement("h3");
+          heading.textContent = section.heading;
+          sectionChildren.push(heading);
+        }
+        if (section.paragraphs !== undefined) {
+          for (const paragraphText of section.paragraphs) {
+            const paragraph = content.createElement("p");
+            paragraph.textContent = paragraphText;
+            sectionChildren.push(paragraph);
+          }
+        }
+        if (section.image !== undefined) {
+          const figure = content.createElement("figure");
+          const image = content.createElement("img");
+          const fallback = content.createElement("span");
+          image.setAttribute("src", section.image.src);
+          image.setAttribute("alt", section.image.alt);
+          image.hidden = false;
+          image.style.visibility = "visible";
+          fallback.textContent = section.image.fallbackText;
+          fallback.hidden = true;
+          fallback.style.visibility = "visible";
+          content.appendChildren(figure, [image, fallback]);
+          sectionChildren.push(figure);
+          images.push({
+            image,
+            fallback,
+            menuId: prepared.menuId,
+            residenceId: prepared.residenceId,
+          });
+        }
+        if (section.links !== undefined) {
+          const links = content.createElement("ul");
+          const linkNodes: DomModalContentNode[] = [];
+          for (const link of section.links) {
+            const item = content.createElement("li");
+            const anchor = content.createElement("a");
+            anchor.textContent = link.label;
+            anchor.setAttribute("href", link.href);
+            anchor.setAttribute("target", "_blank");
+            anchor.setAttribute("rel", "noopener noreferrer");
+            content.appendChildren(item, [anchor]);
+            linkNodes.push(item);
+          }
+          content.appendChildren(links, linkNodes);
+          sectionChildren.push(links);
+        }
+        if (section.tags !== undefined) {
+          const tags = content.createElement("ul");
+          const tagNodes: DomModalContentNode[] = [];
+          for (const tag of section.tags) {
+            const item = content.createElement("li");
+            item.textContent = tag;
+            tagNodes.push(item);
+          }
+          content.appendChildren(tags, tagNodes);
+          sectionChildren.push(tags);
+        }
+
+        content.appendChildren(sectionNode, sectionChildren);
+        nodes.push(sectionNode);
+      }
+
+      return { nodes, images };
+    } catch {
+      // If an injected DOM adapter cannot stage rich nodes, use body fallback.
+      return undefined;
+    }
+  }
+
+  private bindRichImageListeners(
+    content: PreparedRichContent | undefined,
+  ): void {
+    if (content === undefined) return;
+    for (const image of content.images) {
+      const listener = (): void => {
+        this.handleRichImageError(image);
+      };
+      try {
+        image.image.addEventListener("error", listener);
+        this.richImageListeners.push({ image: image.image, listener });
+      } catch {
+        // A single optional image listener cannot block the modal.
+      }
+    }
+  }
+
+  private handleRichImageError(image: PreparedRichImage): void {
+    const active = this.active;
+    if (
+      this.destroyed ||
+      active === undefined ||
+      active.menuId !== image.menuId ||
+      active.residenceId !== image.residenceId
+    ) {
+      return;
+    }
+    try {
+      image.image.hidden = false;
+      image.image.style.visibility = "hidden";
+      image.fallback.hidden = false;
+      image.fallback.style.visibility = "visible";
+    } catch {
+      // Image failure remains optional and cannot close or replace the modal.
+    }
+  }
+
+  private clearRichImageListeners(): void {
+    for (const { image, listener } of this.richImageListeners.splice(0)) {
+      try {
+        image.removeEventListener("error", listener);
+      } catch {
+        // Best effort cleanup for detached optional image nodes.
+      }
     }
   }
 
@@ -701,12 +1040,53 @@ export class DomModalGameUi implements GameUiPort {
   }
 }
 
+function createDefaultDomModalContentPort(
+  body: DomModalTarget | undefined,
+): DomModalContentPort | undefined {
+  if (typeof document === "undefined") return undefined;
+  const target = body as
+    | (DomModalTarget & {
+        replaceChildren?: (...children: DomModalContentNode[]) => void;
+      })
+    | undefined;
+  if (typeof target?.replaceChildren !== "function") return undefined;
+  try {
+    return createDomModalContentPort({
+      createElement: (kind) =>
+        document.createElement(kind) as unknown as DomModalContentNode,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+export function createDomModalContentPort(
+  document: DomModalContentDocument,
+): DomModalContentPort {
+  return {
+    createElement: (kind) => document.createElement(kind),
+    appendChildren: (parent, children) => {
+      for (const child of children) parent.appendChild(child);
+    },
+    replaceChildren: (parent, children) => {
+      const target = parent as DomModalTarget & {
+        replaceChildren?: (...children: DomModalContentNode[]) => void;
+      };
+      if (typeof target.replaceChildren !== "function") {
+        throw new TypeError("content target cannot replace children");
+      }
+      target.replaceChildren(...children);
+    },
+  };
+}
+
 export function createDomModalGameUi(
   elements: Partial<DomModalElements>,
   viewport: DomModalViewport,
   accessibility?: DomModalAccessibility,
+  content?: DomModalContentPort,
 ): GameUiPort {
-  return new DomModalGameUi(elements, viewport, accessibility);
+  return new DomModalGameUi(elements, viewport, accessibility, content);
 }
 
 export function createDomModalGameUiFromOptions(
@@ -716,6 +1096,7 @@ export function createDomModalGameUiFromOptions(
     options.elements,
     options.viewport,
     options.accessibility,
+    options.content,
   );
 }
 
