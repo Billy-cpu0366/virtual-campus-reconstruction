@@ -7,6 +7,7 @@ import {
   type GameUiPresentation,
   type GameUiShowRequest,
   type GameplayControlLeaseAcquireResult,
+  type GameplayControlLeaseReason,
   type GameplayControlLeaseReleaseResult,
   type GameplayControlLeaseShutdownResult,
   type InteractionVisitReceipt,
@@ -87,6 +88,10 @@ describe("内容共享 contract", () => {
     const invalid: ContentResolveResult = { status: "invalid" };
     const shown: ShowResult = { status: "shown" };
     const hidden: ShowResult = { status: "already-visible" };
+    const leaseReasons: readonly GameplayControlLeaseReason[] = [
+      "modal-open",
+      "camera-tour",
+    ];
     const acquired: GameplayControlLeaseAcquireResult = {
       ok: false,
       reason: "disable-failed",
@@ -105,6 +110,7 @@ describe("内容共享 contract", () => {
       invalid.status,
       shown.status,
       hidden.status,
+      leaseReasons.join(","),
       acquired.reason,
       released.reason,
       shutdown.reason,
@@ -114,6 +120,7 @@ describe("内容共享 contract", () => {
       "invalid",
       "shown",
       "already-visible",
+      "modal-open,camera-tour",
       "disable-failed",
       "stale-token",
       "disable-failed",

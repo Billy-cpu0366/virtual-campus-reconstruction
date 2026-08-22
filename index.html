@@ -16,11 +16,90 @@
         overflow: hidden;
         background: #0f172a;
       }
+
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      #content-ui-root {
+        position: fixed;
+        inset: 0;
+        pointer-events: none !important;
+        font-family: ui-monospace, "Cascadia Mono", monospace;
+      }
+
+      #content-backdrop {
+        position: fixed;
+        inset: 0;
+        border: 0;
+        padding: 0;
+        background: rgb(15 23 42 / 68%);
+      }
+
+      #content-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: min(80vw, 896px);
+        box-sizing: border-box;
+        transform: translate(-50%, -50%);
+        border: 4px solid #0f172a;
+        border-radius: 4px;
+        padding: 28px 24px 24px;
+        color: #0f172a;
+        background: #f8fafc;
+        box-shadow: 8px 8px 0 rgb(15 23 42 / 55%);
+        overscroll-behavior: contain;
+      }
+
+      #content-close {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        border: 2px solid #0f172a;
+        padding: 2px 8px;
+        color: #0f172a;
+        background: #e2e8f0;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      #content-title {
+        margin: 0 44px 20px 0;
+        font-size: clamp(22px, 5vw, 34px);
+      }
+
+      #content-body {
+        margin: 0;
+        white-space: pre-wrap;
+        font-size: clamp(14px, 3vw, 18px);
+        line-height: 1.65;
+      }
+
+      @media (max-width: 767px) {
+        #content-modal {
+          width: min(92vw, 896px);
+          padding: 24px 16px 18px;
+        }
+      }
     </style>
   </head>
   <body>
     <div id="app"></div>
-    <div id="diag" hidden style="position:fixed;top:0;left:0;right:0;max-height:40%;overflow:auto;background:#7f1d1d;color:#fff;padding:10px;font:12px/1.5 monospace;z-index:9999;white-space:pre-wrap;"></div>
+    <div id="content-ui-root" hidden aria-live="polite">
+      <button id="content-backdrop" hidden aria-label="Close content"></button>
+      <section id="content-modal" hidden role="dialog" aria-modal="true" aria-labelledby="content-title">
+        <button id="content-close" type="button" aria-label="Close content">×</button>
+        <h1 id="content-title"></h1>
+        <p id="content-body"></p>
+      </section>
+    </div>
+    <div id="diag" hidden style="position:fixed;top:0;left:0;right:0;max-height:40%;overflow:auto;background:#7f1d1d;color:#fff;padding:10px;font:12px/1.5 monospace;z-index:10001;white-space:pre-wrap;"></div>
     <script src="/vendor/phaser.min.js"></script>
     <script type="module" src="/game/main.ts"></script>
   </body>

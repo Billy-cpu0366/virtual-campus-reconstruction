@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CAMPUS_CONTENT_PAYLOADS,
   CampusContentResolver,
+  createCampusContentResolver,
   type CampusContentPayloadSource,
 } from "../../game/CampusContentResolver.js";
-import type { GameUiContentPayload } from "../../src/content/contract.js";
+import {
+  CONTENT_MENU_IDS,
+  type GameUiContentPayload,
+} from "../../src/content/contract.js";
 
 const about: GameUiContentPayload = {
   menuId: "about",
@@ -19,6 +24,23 @@ function resolverWith(
 }
 
 describe("CampusContentResolver", () => {
+  it("只提供内容层已确认的 11 个入口和最小标签", () => {
+    const resolver = createCampusContentResolver();
+    expect(Object.keys(CAMPUS_CONTENT_PAYLOADS)).toEqual(CONTENT_MENU_IDS);
+    for (const menuId of CONTENT_MENU_IDS) {
+      const result = resolver.resolve(menuId);
+      expect(result.status).toBe("resolved");
+      if (result.status !== "resolved") continue;
+      expect(result.payload.menuId).toBe(menuId);
+      expect(result.payload.title.trim()).not.toBe("");
+      expect(result.payload.body.length).toBeGreaterThan(0);
+      expect(result.payload.body.every((line) => line.trim() !== "")).toBe(true);
+    }
+    expect(CAMPUS_CONTENT_PAYLOADS.tech.body).toContain("Angular");
+    expect(CAMPUS_CONTENT_PAYLOADS.projects.body).toContain("eUTxO.org");
+    expect(CAMPUS_CONTENT_PAYLOADS.cv.body).toContain("VUB Bank");
+  });
+
   it("同步解析 readonly record 中的 payload", () => {
     const result = resolverWith({ about }).resolve("about");
     expect(result).toEqual({ status: "resolved", payload: about });

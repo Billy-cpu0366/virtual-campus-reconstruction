@@ -23,7 +23,7 @@ describe("GameplayControlLeaseRuntime", () => {
     });
 
     const first = runtime.acquire("modal-open");
-    const second = runtime.acquire("modal-open");
+    const second = runtime.acquire("camera-tour");
     expect(first.ok).toBe(true);
     expect(second.ok).toBe(true);
     expect(calls).toEqual(["disable"]);

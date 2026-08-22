@@ -13,6 +13,58 @@ export type CampusContentPayloadSource =
   | ReadonlyMap<string, unknown>
   | ReadonlyMap<ContentMenuId, unknown>;
 
+/**
+ * Only labels and item names already confirmed in 04-内容层 are included.
+ * Unknown long-form copy, images and Slovak translations stay absent.
+ */
+export const CAMPUS_CONTENT_PAYLOADS: Readonly<
+  Record<ContentMenuId, ContentPayload>
+> = Object.freeze({
+  about: Object.freeze({
+    menuId: "about",
+    title: "About Me",
+    body: Object.freeze(["Photo", "Name", "Position", "LinkedIn", "Introduction"]),
+  }),
+  cv: Object.freeze({
+    menuId: "cv",
+    title: "CV",
+    body: Object.freeze([
+      "GAMO",
+      "SCR",
+      "Kremsa Digital",
+      "Bethereum",
+      "VUB Bank",
+    ]),
+  }),
+  projects: Object.freeze({
+    menuId: "projects",
+    title: "Projects",
+    body: Object.freeze(["eUTxO.org", "Angular.sk", "Previous portfolio"]),
+  }),
+  contact: Object.freeze({
+    menuId: "contact",
+    title: "Contact",
+    body: Object.freeze(["LinkedIn", "Email"]),
+  }),
+  tech: Object.freeze({
+    menuId: "tech",
+    title: "Technologies",
+    body: Object.freeze([
+      "Angular",
+      "Node.js",
+      "Express.js",
+      "JavaScript",
+      "Other technologies",
+    ]),
+  }),
+  memo1: Object.freeze({ menuId: "memo1", title: "Memo #1", body: Object.freeze(["Memo #1"]) }),
+  memo2: Object.freeze({ menuId: "memo2", title: "Memo #2", body: Object.freeze(["Memo #2"]) }),
+  memo3: Object.freeze({ menuId: "memo3", title: "Memo #3", body: Object.freeze(["Memo #3"]) }),
+  memo4: Object.freeze({ menuId: "memo4", title: "Memo #4", body: Object.freeze(["Memo #4"]) }),
+  memo5: Object.freeze({ menuId: "memo5", title: "Memo #5", body: Object.freeze(["Memo #5"]) }),
+  memo6: Object.freeze({ menuId: "memo6", title: "Memo #6", body: Object.freeze(["Memo #6"]) }),
+});
+
 function isContentMenuId(value: unknown): value is ContentMenuId {
   return (
     typeof value === "string" &&
@@ -112,4 +164,8 @@ export class CampusContentResolver implements ContentResolverPort {
     if (!validatePayload(menuId, value)) return { status: "invalid" };
     return { status: "resolved", payload: immutablePayload(value) };
   }
+}
+
+export function createCampusContentResolver(): CampusContentResolver {
+  return new CampusContentResolver(CAMPUS_CONTENT_PAYLOADS);
 }

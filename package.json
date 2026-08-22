@@ -19,6 +19,7 @@
     "browser:runtime-safety-smoke": "node scripts/browser-runtime-safety-smoke.mjs",
     "browser:mobile-input-smoke": "node scripts/browser-mobile-input-smoke.mjs",
     "browser:camera-smoke": "node scripts/browser-camera-smoke.mjs",
+    "browser:content-smoke": "node scripts/browser-content-smoke.mjs",
     "browser:perf-baseline": "node scripts/browser-perf-baseline.mjs",
     "check:perf-baseline-evidence": "node scripts/check-perf-baseline-evidence.mjs",
     "predev": "npm run prepare:runtime",

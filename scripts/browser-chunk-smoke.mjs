@@ -108,6 +108,9 @@ const chunkResources = () => `performance.getEntriesByType("resource")
   .map((entry) => entry.name)
   .filter((name) => name.includes("/maps/chunks/chunk"))`;
 const before = await evaluate(chunkResources());
+const beforeDebug = await evaluate(
+  "window.__campusDebug ? window.__campusDebug() : null",
+);
 const targetHookType = await evaluate(
   "typeof window.__campusCollisionTest",
 );
@@ -121,6 +124,9 @@ await evaluate(
 await new Promise((resolve) => setTimeout(resolve, targetWaitMs));
 
 const after = await evaluate(chunkResources());
+const afterDebug = await evaluate(
+  "window.__campusDebug ? window.__campusDebug() : null",
+);
 const uniqueBefore = [...new Set(before)];
 const uniqueAfter = [...new Set(after)];
 const newRequests = uniqueAfter.filter((name) => !uniqueBefore.includes(name));
@@ -128,6 +134,32 @@ const allChunksPreloaded = uniqueBefore.length === 25;
 const chunk20Requested = uniqueAfter.some((name) =>
   name.endsWith("/maps/chunks/chunk20.json"),
 );
+
+const masterResponse = await fetch(new URL("/maps/chunks/master.json", url));
+if (!masterResponse.ok) {
+  throw new Error(`could not load chunk master: ${masterResponse.status}`);
+}
+const master = await masterResponse.json();
+const chunksHorizontal = master.nbChunksHorizontal;
+if (!Number.isInteger(chunksHorizontal) || chunksHorizontal <= 0) {
+  throw new Error("chunk master has invalid nbChunksHorizontal");
+}
+const chunkFile = ({ x, y }) => `chunk${y * chunksHorizontal + x}.json`;
+const expectedBefore = (beforeDebug?.state?.targets ?? []).map(chunkFile);
+const expectedAfterTargets = (afterDebug?.state?.targets ?? []).map(chunkFile);
+const expectedAfter = [...new Set([...expectedBefore, ...expectedAfterTargets])];
+const expectedNew = expectedAfter.filter(
+  (name) => !expectedBefore.includes(name),
+);
+const actualFiles = (resources) => resources.map((resource) =>
+  new URL(resource).pathname.split("/").at(-1),
+);
+const sameFiles = (left, right) =>
+  left.length === right.length &&
+  [...left].sort().every((name, index) => name === [...right].sort()[index]);
+const actualBefore = actualFiles(uniqueBefore);
+const actualAfter = actualFiles(uniqueAfter);
+const actualNew = actualFiles(newRequests);
 
 if (screenshotPath) {
   const screenshot = await command("Page.captureScreenshot", {
@@ -143,15 +175,27 @@ const result = {
   initialChunks: uniqueBefore,
   afterTargetChunks: uniqueAfter,
   newChunksAfterTarget: newRequests,
+  expected: {
+    before: expectedBefore,
+    after: expectedAfter,
+    newAfterTarget: expectedNew,
+  },
+  coordinator: {
+    before: beforeDebug?.state ?? null,
+    after: afterDebug?.state ?? null,
+  },
   allChunksPreloaded,
   chunk20Requested,
   events,
   screenshotPath: screenshotPath ?? null,
   passed:
-    uniqueBefore.length === 24 &&
-    uniqueAfter.length === 25 &&
-    newRequests.length === 1 &&
+    expectedNew.length > 0 &&
+    sameFiles(actualBefore, expectedBefore) &&
+    sameFiles(actualAfter, expectedAfter) &&
+    sameFiles(actualNew, expectedNew) &&
     chunk20Requested &&
+    (beforeDebug?.state?.failed?.length ?? -1) === 0 &&
+    (afterDebug?.state?.failed?.length ?? -1) === 0 &&
     events.exceptions.length === 0 &&
     events.failedRequests.length === 0 &&
     events.badResponses.length === 0,
