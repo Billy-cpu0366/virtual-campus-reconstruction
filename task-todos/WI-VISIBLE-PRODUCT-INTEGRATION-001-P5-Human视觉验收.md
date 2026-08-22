@@ -1,11 +1,11 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P5-human-visual-gate
-status: pending-human
+status: failed-human-visual
 candidate-commit: 0fadf309963ba5d23c092ec049654791901f806e
 candidate-tree: 86c8f85f1f59106399d1a2f2040851b100eb2f5a
 automated-gate: passed
-human-gate: pending
+human-gate: failed
 updated: 2026-08-22
 ---
 
@@ -34,6 +34,18 @@ updated: 2026-08-22
 2. Loading/Play/Error壳不被裁切；点击Play后构图仍为480×270逻辑世界的适配显示。
 3. 摇杆可见、可操作，不遮挡引导或modal；键盘/触摸不会同时失控。
 4. Memo modal可滚动、关闭按钮可见，图片/链接/正文不溢出；关闭后焦点/控制恢复。
+
+## Human实际结果（FAIL）
+
+Human在production candidate实际观看后指出：
+
+1. Loading与原站明显不同；原站有清楚的1→100%过程动画，当前Loading视觉混乱且没有对应动画。
+2. 实际运行明显卡顿、帧率/帧节奏不对；现有自动性能PASS不能代表肉眼手感。
+3. 初始地图分块应在1→100% Loading阶段完成；当前进入时能看到分块装配，严重影响观感。
+
+对照确认：原站公开HTML/CSS确有白色全屏`#init-load`、`peter-oravec.gif`、进度条/整数百分比；loader 100%后另有网格揭示，再显示Play。当前实现为深色半透明壳且无该GIF/揭示。现有27-case测试主要静止采样rAF，没有覆盖真实移动frame pacing、位置跳步和long frame，因此P5不能通过。
+
+本轮只进入P5.1整体诊断；未接受修正设计前不写功能代码，不用局部CSS遮掩启动时序问题。
 
 ## 通过条件
 

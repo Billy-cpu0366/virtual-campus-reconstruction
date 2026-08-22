@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: main-integration
-status: ready-for-human-visual-gate
+status: human-visual-failed-diagnosis-only
 branch: integration/visible-product-wave
 worktree-path: .pi/worktrees/visible-product-integration
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: preview-and-human-visual-only
+current-authorization: read-only-corrective-diagnosis
 worktree-receipt: integration-0fadf309-clean
 human-visual-gate-required: true
 updated: 2026-08-22

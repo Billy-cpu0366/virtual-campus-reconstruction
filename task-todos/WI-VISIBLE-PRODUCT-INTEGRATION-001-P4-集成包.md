@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P4-branch-review-and-main-integration
-status: automated-verified-awaiting-human-visual
+status: automated-verified-human-visual-failed
 authority-commit: 9d430d026365f9a73e1d356190b3774b1bb50ce0
 authority-tree: 70316c30c49f2cea7ab4d9e160e1c288d6e70d34
 assembled-commit: 532d8095e4adcae79e5b46cfa766a661c42c1909
