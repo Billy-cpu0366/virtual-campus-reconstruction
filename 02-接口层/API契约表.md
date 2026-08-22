@@ -38,6 +38,10 @@ updated: 2026-08-22
 | 内容访问收据 | SYS-INTERACT → SYS-ZONE | UI 确认 `shown/already-visible` 后回传 marker/residence/menu，Zone 再记 visited；失败不产生虚假访问 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
 | 内容解析 | Main ContentResolver → SYS-INTERACT | 同步按menuId返回evidence-backed payload或missing/invalid；不联网、不retry，Interact/UI不猜正文 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[内容层](../04-内容层/作品集内容.md) |
 | 游戏UI呈现端口 | SYS-INTERACT ↔ SYS-GAME-UI | Interact 调用带`menuId+residenceId`的原子`show/hide/destroy`；UI只原样回报identity和close-button/backdrop动作；programmatic hide不发user-close，stale close被Interact忽略 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[SYS-GAME-UI](../03-执行层/04-独立件/02-游戏UI.md) |
+| App状态与generation | SYS-APP → Main / SYS-GAME-UI | 输出BOOT/LOADING/READY/ENTERING_GAME/PLAYING/MODAL_OPEN/ERROR/RETRYING/SHUTDOWN、真实progress和generation；Play/Retry只发意图，不持有Scene/相机/火车 | [SYS-APP](../03-执行层/04-独立件/01-应用启动与页面.md) |
+| 入口完成收据 | Main ← SYS-CAMERA / SYS-ROUTE | Main同时启动3秒相机和5秒火车；只在当前generation火车arrived且相机已稳定后进入PLAYING并释放entry control lease；stale/重复收据忽略 | [SYS-APP](../03-执行层/04-独立件/01-应用启动与页面.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md)、[SYS-ROUTE](../03-执行层/05-旁支/02-车辆与路线.md) |
+| 首内容引导 | Main → SYS-ZONE / SYS-INTERACT | playable后只发布Memo 6方向目标；不传送、不自动打开、不回visited；真实`<30px` enter和UI shown receipt仍由既有内容链完成 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
+| 旁支生命周期端口 | Main ↔ SYS-NPC / SYS-ROUTE / SYS-FX | Main只给worldReady/playable/viewport/playerSnapshot/start/shutdown；各owner回visible/state/failure/destroy receipt，不转移Sprite/emitter/tween/collider所有权 | [SYS-NPC](../03-执行层/05-旁支/01-NPC.md)、[SYS-ROUTE](../03-执行层/05-旁支/02-车辆与路线.md)、[SYS-FX](../03-执行层/05-旁支/03-动效与粒子.md) |
 
 ### 并行实施接口状态（`DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001`）
 
@@ -63,6 +67,16 @@ updated: 2026-08-22
 
 > 本节只证明内容基础有界CORE和当前Main integration，不晋升完整系统；完整内容、accessibility和Entity消费者仍按系统卡保持UNKNOWN。
 
+### 可见成果波P2接口状态（`DEC-VISIBLE-WAVE-P2-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| App状态与generation | Frozen | Not Started | 独立件输出状态/progress/generation；Main持Scene，Retry先shutdown旧generation |
+| 入口完成收据 | Frozen | Not Started | 3秒相机与5秒火车分开回收据；5秒前不开放控制；111秒序列禁止production调用 |
+| 首内容引导 | Frozen | Not Started | 只引导Memo 6，不能传送/自动打开/伪造visited |
+| 旁支生命周期端口 | Frozen | Not Started | sprayer/train/smoke各自owner；Main只接共享时机和收据 |
+| 通用Entity生命周期 | No Contract | Verified No-Code | 第二个真实消费者实现并对比前继续NO-GO |
+
 ## 二、数据字典（常量 / 公式，不是接口）
 
 > 这些是"一个值 / 一个公式"，没有"谁调谁"，不是接口；但它们是接口里的精确参数。**冲突时以 `../03-执行层/` 对应系统卡为准。**
@@ -78,6 +92,9 @@ updated: 2026-08-22
 | 玩家动态深度 | 原站事实：`500 + y*0.1`；当前重构决定：`500 + (y + 24)*0.1`（桥上 1650 等为显式覆盖） | ✅ 已定死（重构实现以 SYS-LAYER 卡和 `DEC-SYS-LAYER-CORE-001` 为准；两者不能混写） |
 | 内容 menuId | `about/cv/projects/contact/tech/memo1..memo6` | ✅ 11个 Zone 内容 ID；big-map/under-hood 不在当前接口 |
 | 内容弹窗策略 | single-active；standard backdrop=`none`，memo backdrop=`global` | ✅ 重构 DECISION；原站多 visible 技术可能不作为产品合同 |
+| 桌面逻辑世界视口 | 480×270，CSS缩放到可用区域；zoom=1 | ✅ P2 Human选择；浏览器变大不扩大世界视野 |
+| 产品入口时序 | 相机3000ms Power2；火车5000ms到达后放控制；约3000ms后火车9000ms离场 | ✅ P2冻结；111秒序列不属于正常入口 |
+| 首内容目标 | Memo 6；静态路线候选左36格、上7格；触发严格`<30px` | ✅ P2冻结；路线须真人行为复核 |
 
 ## 三、待定接口（还没定死）
 

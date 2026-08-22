@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-SIDE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 05-side
-status: active-p1-recon
+status: p1-complete-p2-authorized-after-design-commit
 branch: feature/05-side-visible-wave
 worktree-path: .pi/worktrees/05-side-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: recon-design-only
+current-authorization: p2-implementation-after-clean-design-baseline
 worktree-receipt: verified-clean-at-baseline
 updated: 2026-08-22
 ---
@@ -24,6 +24,10 @@ updated: 2026-08-22
 ## P1交付
 
 只提交一份调查设计报告；必须提出有证据的可见实现候选。证据不足时标记阻塞并更换候选，不能以no-code报告冒充板块完成。
+
+## P1/P2交接
+
+P1报告`035017ae`已并入root`d7238e3`。P2实现sprayer、crowdTrain和factory smoke，见[实现包](WI-VISIBLE-SIDE-WAVE-001-P2-实现包.md)。设计clean提交前不得写代码。
 
 ## 后续候选边界
 

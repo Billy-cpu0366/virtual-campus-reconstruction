@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-INDEPENDENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 04-independent
-status: active-p1-recon
+status: p1-complete-p2-authorized-after-design-commit
 branch: feature/04-independent-visible-wave
 worktree-path: .pi/worktrees/04-independent-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: recon-design-only
+current-authorization: p2-implementation-after-clean-design-baseline
 worktree-receipt: verified-clean-at-baseline
 updated: 2026-08-22
 ---
@@ -24,6 +24,10 @@ updated: 2026-08-22
 ## P1交付
 
 只提交一份调查设计报告；明确Loading状态、UI边界、失败/清理、实现候选和UNKNOWN。不得写正式功能代码。
+
+## P1/P2交接
+
+P1报告`d4d84837`已并入root`15e434c`。Human已接受真实Loading/Play及重构ERROR/Retry；P2范围见[实现包](WI-VISIBLE-INDEPENDENT-WAVE-001-P2-实现包.md)。设计clean提交前不得写代码。
 
 ## 后续候选边界
 

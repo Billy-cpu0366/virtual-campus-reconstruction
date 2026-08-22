@@ -1,9 +1,9 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p1-parallel-recon
-phase: p1-parallel-recon
-authorization: DEC-THREE-BOARD-VISIBLE-WAVE-001
+status: active-p2-design-persisting
+phase: p2-unified-design
+authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
 p0-plan-commit: 3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e
@@ -25,7 +25,7 @@ updated: 2026-08-22
 - 六点约111秒camera sequence不能作为正常入口；其原站真实触发保持UNKNOWN。
 - `sample/`只读；不猜未公开内容或资源。
 - 四个worktree从同一immutable代码基线创建。
-- P1只调查设计；P2由Main冻结接口、文件所有权和视觉目标。P2 Human Gate通过前不写正式功能代码。
+- P1报告已完成；P2统一设计和Human视觉目标已接受。只有P2权威进入clean提交后才授权四路写功能代码。
 - A/B/C不修改`game/CampusScene.ts`、`game/main.ts`、`index.html`、`package.json`或共享browser smoke；这些归Main integration。
 - no-code/调查报告不能冒充板块可见交付。
 - 自动检查不能替代Human视觉Gate；Human通过前不得关闭文档。
@@ -44,7 +44,14 @@ updated: 2026-08-22
 
 - 计划提交：`3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e`，tree=`9c2e8b0b854a09d068c6de8e91ef9178f484c4f8`，root clean。
 - 03内容、04独立件、05旁支、Main integration四个worktree均为`8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`，状态clean。
-- P0 Gate PASS，当前进入P1四路并行调查。
+- P0 Gate PASS。
+
+## P1/P2收据
+
+- P1分支报告：内容`0a5091db`、独立件`d4d84837`、旁支`035017ae`、产品入口`b5708b42`；均单文件、clean、共同parent=`8ae7692b`。
+- root报告集成：`fbec3e2`→`15e434c`→`d7238e3`→`1b4bc03`，状态一致性PASS。
+- Human P2选择：`3秒镜头+5秒火车`、`480×270逻辑画面`、`Memo 6首个引导`。
+- 主定义：[P2统一设计](WI-THREE-BOARD-VISIBLE-WAVE-001-P2-统一设计.md)。当前等待该设计clean提交；提交前不写代码。
 
 ## 阶段
 
