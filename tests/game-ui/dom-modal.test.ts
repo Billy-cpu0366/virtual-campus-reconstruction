@@ -16,7 +16,7 @@ class FakeTarget implements DomModalTarget {
   hidden = true;
   textContent: string | null = null;
   scrollTop = 0;
-  style = {
+  style: DomModalTarget["style"] = {
     maxHeight: "",
     overflowY: "",
     pointerEvents: "none",

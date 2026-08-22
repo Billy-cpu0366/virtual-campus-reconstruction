@@ -13,6 +13,7 @@ export interface DomModalStyle {
   overflowY: string;
   pointerEvents: string;
   zIndex: string;
+  outline?: string;
 }
 
 export interface DomModalTarget {
@@ -25,6 +26,7 @@ export interface DomModalTarget {
     type: string,
     listener: (event: unknown) => void,
   ): void;
+  focus?(): void;
 }
 
 export interface DomModalElements {
@@ -46,9 +48,32 @@ export interface DomModalViewport {
   subscribeResize(listener: () => void): () => void;
 }
 
+export interface DomModalKeyboardEvent {
+  readonly key: string;
+  readonly shiftKey?: boolean;
+  preventDefault(): void;
+}
+
+export interface DomModalKeyboard {
+  subscribe(listener: (event: DomModalKeyboardEvent) => void): () => void;
+}
+
+export interface DomModalFocusPort {
+  getActiveElement(): DomModalTarget | undefined;
+  focus(target: DomModalTarget): void;
+  getFocusableElements?(modal: DomModalTarget): readonly DomModalTarget[];
+}
+
+export interface DomModalAccessibility {
+  readonly keyboard?: DomModalKeyboard;
+  readonly focus?: DomModalFocusPort;
+  readonly focusRing?: string;
+}
+
 export interface DomModalGameUiOptions {
   readonly elements: Partial<DomModalElements>;
   readonly viewport: DomModalViewport;
+  readonly accessibility?: DomModalAccessibility;
 }
 
 type PreparedView = {
@@ -171,6 +196,9 @@ export class DomModalGameUi implements GameUiPort {
   private readonly subscribers = new Set<(event: UserCloseEvent) => void>();
   private active: ActiveView | undefined;
   private unsubscribeResize: (() => void) | undefined;
+  private unsubscribeKeyboard: (() => void) | undefined;
+  private readonly accessibility: DomModalAccessibility | undefined;
+  private previousFocus: DomModalTarget | undefined;
   private closeListenerBound = false;
   private backdropListenerBound = false;
   private listenersBound = false;
@@ -193,9 +221,14 @@ export class DomModalGameUi implements GameUiPort {
     }
   };
 
-  constructor(elements: Partial<DomModalElements>, viewport: DomModalViewport) {
+  constructor(
+    elements: Partial<DomModalElements>,
+    viewport: DomModalViewport,
+    accessibility?: DomModalAccessibility,
+  ) {
     this.elements = elements;
     this.viewport = viewport;
+    this.accessibility = accessibility;
     this.bindListeners();
   }
 
@@ -211,8 +244,14 @@ export class DomModalGameUi implements GameUiPort {
         return { status: "already-visible" };
       }
 
-      if (!this.replaceDom(prepared)) return { status: "invalid-payload" };
+      const wasEmpty = this.active === undefined;
+      if (wasEmpty) this.captureFocus();
+      if (!this.replaceDom(prepared)) {
+        if (wasEmpty) this.previousFocus = undefined;
+        return { status: "invalid-payload" };
+      }
       this.active = prepared;
+      this.focusInitialTarget();
       return { status: "shown" };
     } catch {
       return { status: "invalid-payload" };
@@ -233,6 +272,7 @@ export class DomModalGameUi implements GameUiPort {
 
       this.hideDom();
       this.active = undefined;
+      this.restoreFocus();
       return { status: "hidden" } as const;
     } catch {
       return { status: "target-mismatch" } as const;
@@ -249,6 +289,7 @@ export class DomModalGameUi implements GameUiPort {
       // Destroy remains best effort even if an injected DOM setter fails.
     }
     this.active = undefined;
+    this.restoreFocus();
     this.subscribers.clear();
   }
 
@@ -291,6 +332,14 @@ export class DomModalGameUi implements GameUiPort {
         throw new TypeError("resize subscription did not return cleanup");
       }
       this.unsubscribeResize = unsubscribeResize;
+      const keyboard = this.accessibility?.keyboard;
+      if (keyboard !== undefined) {
+        const unsubscribeKeyboard = keyboard.subscribe(this.keyboardListener);
+        if (typeof unsubscribeKeyboard !== "function") {
+          throw new TypeError("keyboard subscription did not return cleanup");
+        }
+        this.unsubscribeKeyboard = unsubscribeKeyboard;
+      }
       this.listenersBound = true;
     } catch (error) {
       this.removeListeners();
@@ -328,6 +377,14 @@ export class DomModalGameUi implements GameUiPort {
     this.unsubscribeResize = undefined;
     try {
       unsubscribeResize?.();
+    } catch {
+      // Destroy is intentionally best effort and remains idempotent.
+    }
+
+    const unsubscribeKeyboard = this.unsubscribeKeyboard;
+    this.unsubscribeKeyboard = undefined;
+    try {
+      unsubscribeKeyboard?.();
     } catch {
       // Destroy is intentionally best effort and remains idempotent.
     }
@@ -531,6 +588,100 @@ export class DomModalGameUi implements GameUiPort {
     });
   }
 
+  private readonly keyboardListener = (event: DomModalKeyboardEvent): void => {
+    if (this.destroyed || this.active === undefined) return;
+    if (event.key === "Escape") {
+      try {
+        event.preventDefault();
+      } catch {
+        // Continue to the same user-close contract even if prevention fails.
+      }
+      this.emitUserClose("close-button");
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focus = this.accessibility?.focus;
+    const modal = this.elements.modal;
+    if (focus === undefined || !hasTarget(modal) || focus.getFocusableElements === undefined) {
+      return;
+    }
+    let targets: readonly DomModalTarget[];
+    try {
+      targets = focus.getFocusableElements(modal).filter(hasTarget);
+    } catch {
+      return;
+    }
+    if (targets.length === 0) return;
+
+    let activeIndex = -1;
+    try {
+      const current = focus.getActiveElement();
+      activeIndex = current === undefined ? -1 : targets.indexOf(current);
+    } catch {
+      activeIndex = -1;
+    }
+    const backwards = event.shiftKey === true;
+    const nextIndex =
+      activeIndex < 0
+        ? backwards
+          ? targets.length - 1
+          : 0
+        : (activeIndex + (backwards ? -1 : 1) + targets.length) %
+          targets.length;
+    const nextTarget = targets[nextIndex];
+    if (nextTarget === undefined) return;
+    try {
+      event.preventDefault();
+      focus.focus(nextTarget);
+    } catch {
+      // Focus remains best effort at the DOM boundary.
+    }
+  };
+
+  private captureFocus(): void {
+    const focus = this.accessibility?.focus;
+    if (focus === undefined) return;
+    try {
+      this.previousFocus = focus.getActiveElement();
+    } catch {
+      this.previousFocus = undefined;
+    }
+  }
+
+  private focusInitialTarget(): void {
+    const target = this.elements.closeButton;
+    if (!hasTarget(target)) return;
+    try {
+      target.style.outline = this.accessibility?.focusRing ?? "3px solid #0b57d0";
+    } catch {
+      // Continue to focus even if the injected style setter fails.
+    }
+    try {
+      if (this.accessibility?.focus !== undefined) {
+        this.accessibility.focus.focus(target);
+      } else {
+        target.focus?.();
+      }
+    } catch {
+      // Focus is best effort; the modal remains visible and keyboard reachable.
+    }
+  }
+
+  private restoreFocus(): void {
+    const previous = this.previousFocus;
+    this.previousFocus = undefined;
+    if (previous === undefined) return;
+    try {
+      if (this.accessibility?.focus !== undefined) {
+        this.accessibility.focus.focus(previous);
+      } else {
+        previous.focus?.();
+      }
+    } catch {
+      // Focus return must not block modal cleanup.
+    }
+  }
+
   private emitUserClose(source: UserCloseSource): void {
     const active = this.active;
     if (
@@ -553,14 +704,19 @@ export class DomModalGameUi implements GameUiPort {
 export function createDomModalGameUi(
   elements: Partial<DomModalElements>,
   viewport: DomModalViewport,
+  accessibility?: DomModalAccessibility,
 ): GameUiPort {
-  return new DomModalGameUi(elements, viewport);
+  return new DomModalGameUi(elements, viewport, accessibility);
 }
 
 export function createDomModalGameUiFromOptions(
   options: DomModalGameUiOptions,
 ): GameUiPort {
-  return new DomModalGameUi(options.elements, options.viewport);
+  return new DomModalGameUi(
+    options.elements,
+    options.viewport,
+    options.accessibility,
+  );
 }
 
 export type { GameUiPort };
