@@ -6,10 +6,10 @@ work-item-type: parallel-design-implementation-pipeline
 work-item-status: active
 current-phase: auto-work-packaging
 current-gate: shared-code-baseline
-gate-status: blocked
+gate-status: in_progress
 authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 preauthorized-next-work-item: none
-next-phase: blocked-until-isolated-runtime-worktree-available
+next-phase: three-window-implementation
 updated: 2026-08-21
 ---
 
@@ -30,9 +30,9 @@ updated: 2026-08-21
 - **P0 已通过**：流程提交 `6fdefb1`；状态一致性、CRLF-aware diff 和独立流程复核 PASS。
 - **P1 已完成**：A `1b29908`、B `6b5970a`、C `125691d`；三分支clean。C确认统一Entity实现NO-GO。
 - **P2 已通过**：权威设计提交 `1cade08`；状态一致性、CRLF-aware diff、相对链接和独立复核 PASS。C implementation NO-GO。
-- **当前 P3 阻塞**：runtime `798eda6` + design `1cade08` 已固定，但创建 `integration/content-foundation` worktree 被沙箱拒绝：`[ACCEPT EDITS] Command is not in the safe allowlist.`
-- **停止原因**：不能用copy/patch、复用同一dirty工作树、让A/B在同目录并发或其他等价方式绕过；否则无法证明同一immutable baseline、文件隔离和Main merge。
-- **实际状态**：A/B设计完成但未派工、未写代码；C按设计no-code。P2全部落盘，P3保持blocked，未push/merge。
+- **P3 已解除阻塞**：Human在WSL终端创建 `integration/content-foundation` worktree，HEAD=`798eda67aca9f7e7e1a4fb7f2c76290c83483dcd`，状态clean。
+- **当前执行**：Main在该worktree只实现shared contract、同步resolver、control lease及测试；通过typecheck、全测试、两build和diff后记录immutable code baseline。
+- **随后派工**：A/B从同一code baseline创建隔离实现worktree；C保持no-code。未push/远端操作。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。

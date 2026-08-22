@@ -1,7 +1,7 @@
 ---
 workflow: PIPELINE-CONTENT-FOUNDATION-001
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: accepted-persisted-verified-blocked-p3
+status: accepted-persisted-verified-active-p3
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 pipeline-commit: 6fdefb1
 updated: 2026-08-21
@@ -86,6 +86,12 @@ Main-owned 精确范围：
 - 尝试从 runtime `798eda6` 创建 `.pi/worktrees/content-foundation-integration` / `integration/content-foundation` 时，WSL guard 返回 `[ACCEPT EDITS] Command is not in the safe allowlist.`。
 - 未创建分支/worktree，未修改runtime代码，未尝试copy/patch/同目录并发等替代绕过。
 - 因 immutable shared code baseline 不存在，A/B实现包不得派发；C继续no-code。
+
+### P3 阻塞解除收据
+
+- Human 在WSL终端成功创建 `.pi/worktrees/content-foundation-integration`，分支 `integration/content-foundation`。
+- `rev-parse HEAD`=`798eda67aca9f7e7e1a4fb7f2c76290c83483dcd`；`status --short --branch`仅显示分支行，工作树clean。
+- 流程恢复P3 shared code baseline，不追溯执行被guard拒绝的命令。
 
 ### 阶段 M：Main integration
 
