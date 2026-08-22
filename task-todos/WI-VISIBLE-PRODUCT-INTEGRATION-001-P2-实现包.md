@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P3-main-implementation-and-integration
-status: active-p2.1-shared-contract-only
+status: shared-contract-complete-awaiting-sync
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: integration/visible-product-wave
