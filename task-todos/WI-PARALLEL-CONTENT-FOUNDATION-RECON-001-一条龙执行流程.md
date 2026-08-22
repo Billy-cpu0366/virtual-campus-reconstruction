@@ -1,7 +1,7 @@
 ---
 workflow: PIPELINE-CONTENT-FOUNDATION-001
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: accepted-persisted-verified-active-p4
+status: completed-local-verified
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 pipeline-commit: 6fdefb1
 updated: 2026-08-21
@@ -98,6 +98,16 @@ Main-owned 精确范围：
 - commit=`d2e73b50c6cdb68096c188b585822def853e8722`；parent=`798eda67`；tree=`8ee9b2e68cb7e1c9af271c94b96830bcd8981288`。
 - 仅6个Main-owned contract/resolver/lease及测试文件；39文件/208测试、typecheck、production/test-hooks build、CRLF diff和独立复核PASS。
 - Human创建A/B worktree，均在该commit且clean；P4任务包：`WI-CONTENT-FOUNDATION-IMPL-A-001`、`B-001`、`C-001-NO-CODE`。
+
+### P4–P7 完成收据
+
+- A：初版 `d012fba3` 经独立审查退回，修订tip=`8c2920c43140dc7a0e6af36118c202ab676ea3f8`，41文件/229测试和两build PASS。
+- B：初版 `c0cb2f03` 经独立审查退回，修订tip=`9a86558737abb6437532b92dc82dd4ee1a64df58`，40文件/223测试和两build PASS。
+- C：NO-GO/no-code核验PASS；无 `src/entity/**`、registry、基类或schema，`Q-ENTITY-001`继续open。
+- Main merge：A=`7f8792c`，B=`ddec24d`；Main接线提交=`8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`，clean。
+- P6：typecheck、42文件/245测试、production/test-hooks build、production runtime-safety、普通/chunk/layer/collision/lifecycle/mobile-input/camera/content Smoke和独立终审PASS。
+- chunk Smoke 不再写死单一视口的24→25；现在逐项校验实际资源集合等于 coordinator 前后targets推导集合，仍要求新请求、chunk20、零failed/网络异常。
+- 本地关闭不包含push/PR/Windows正式仓库同步。
 
 ### 阶段 M：Main integration
 

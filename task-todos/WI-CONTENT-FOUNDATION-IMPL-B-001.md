@@ -2,12 +2,15 @@
 task-id: WI-CONTENT-FOUNDATION-IMPL-B-001
 pipeline: PIPELINE-CONTENT-FOUNDATION-001
 line: B-SYS-GAME-UI
-status: ready
+status: completed-verified
 runtime-base: 798eda67aca9f7e7e1a4fb7f2c76290c83483dcd
 design-base: 1cade08
 code-base: d2e73b50c6cdb68096c188b585822def853e8722
 branch: impl/content-game-ui
 worktree: .pi/worktrees/content-game-ui-impl
+result-tip: 9a86558737abb6437532b92dc82dd4ee1a64df58
+merged-by: ddec24d
+integration: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 updated: 2026-08-22
 ---
 

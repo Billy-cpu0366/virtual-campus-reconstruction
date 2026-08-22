@@ -1,6 +1,6 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-three-window-implementation
+status: completed-local-verified
 work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
@@ -10,7 +10,9 @@ shared-baseline: 42e445d
 pipeline-commit: 6fdefb1
 design-commit: 1cade08
 shared-code-commit: d2e73b50c6cdb68096c188b585822def853e8722
-updated: 2026-08-21
+result-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
+result-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
+updated: 2026-08-22
 ---
 
 # 内容与实体基础三窗口并行调查与设计计划

@@ -1,39 +1,29 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-work-item-level: integration
-work-item-type: parallel-design-implementation-pipeline
-work-item-status: active
-current-phase: three-window-implementation
-current-gate: parallel-bounded-implementation
-gate-status: in_progress
-authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
+current-work-item: none
+work-item-level: none
+work-item-type: selection
+work-item-status: idle
+current-phase: work-item-selection
+current-gate: none
+gate-status: not-applicable
+authorization-ref: none
 preauthorized-next-work-item: none
-next-phase: main-integration
-updated: 2026-08-21
+next-phase: work-item-selection
+updated: 2026-08-22
 ---
 
 # 原站逆向重构计划
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-PARALLEL-CONTENT-FOUNDATION-RECON-001`；三个独立窗口并行完成 INTERACT、GAME-UI、ENTITY 的调查与七格设计候选。
-- **窗口 A**：SYS-INTERACT，负责 menuId→打开/关闭/离开/重复进入/销毁的业务状态。
-- **窗口 B**：SYS-GAME-UI，负责 DOM/Phaser 呈现、层级、响应式、移动端和输入隔离。
-- **窗口 C**：SYS-ENTITY，负责玩家/NPC/车辆创建、更新、所有权与销毁，并审查 `Q-ENTITY-001`。
-- **文件所有权**：每窗只写自己一份调查＋设计报告；Main 独占系统卡、API、总账、状态和最终设计整合。
-- **相机修复已关闭**：integration `798eda6`；typecheck、36文件/192测试、两种build、diff和Human实时预览 PASS，普通入口不再自动航拍。
-- **GitHub handoff**：继续暂停到本轮调查 Gate；旧 `cd3691a` 和旧 wave1 patch 均不得交付。
-- **共同基线**：A/B/C 三个 worktree 已从 clean 提交 `42e445d` 创建，分支分别为 `recon/content-interact`、`recon/game-ui`、`recon/entity-lifecycle`。
-- **一条龙授权**：Human 已授权 P0流程冻结→P1三窗调查设计→P2 Main设计合并→P3自动派工→P4三窗有界实现→P5 Main接线合并→P6全量验证→P7文档关闭，中间不再等待确认。
-- **实现硬边界**：Main 先冻结接口/文件所有权；窗口不改共享接线文件；C只有证据支持时写码，否则提交no-code；不push/PR/远端同步。
-- **P0 已通过**：流程提交 `6fdefb1`；状态一致性、CRLF-aware diff 和独立流程复核 PASS。
-- **P1 已完成**：A `1b29908`、B `6b5970a`、C `125691d`；三分支clean。C确认统一Entity实现NO-GO。
-- **P2 已通过**：权威设计提交 `1cade08`；状态一致性、CRLF-aware diff、相对链接和独立复核 PASS。C implementation NO-GO。
-- **P3 已解除阻塞**：Human在WSL终端创建 `integration/content-foundation` worktree，HEAD=`798eda67aca9f7e7e1a4fb7f2c76290c83483dcd`，状态clean。
-- **P3 已通过**：shared code baseline `d2e73b50c6cdb68096c188b585822def853e8722`，parent=`798eda67`；仅6个允许文件；typecheck、39文件/208测试、两build、diff和独立复核PASS。
-- **当前 P4**：A worktree `impl/content-interact`、B worktree `impl/content-game-ui` 均由Human创建在 `d2e73b50` 且clean；任务包已绑定runtime/design/code三个hash，A/B并行实现，C并行no-code核验。
-- **下一步**：收齐A/B commit和C收据后，Main只在integration worktree串行审查与接线。未push/远端操作。
+- **当前工作项**：`none`；内容与实体基础一条龙已在本地验证关闭，回到合法工作项选择状态。
+- **设计与共享基线**：P0流程 `6fdefb1`；P1报告 A `1b29908` / B `6b5970a` / C `125691d`；P2权威设计 `1cade08`；P3 shared code `d2e73b50`。
+- **并行实现结果**：A Zone+Interact tip `8c2920c4`；B Game UI tip `9a865587`；C no-code PASS，`Q-ENTITY-001`继续open。
+- **Main integration**：A/B merge `7f8792c` / `ddec24d`；最终代码提交 `8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`，worktree clean。
+- **验证**：typecheck、42文件/245测试、production/test-hooks build、production runtime-safety，以及普通/chunk/layer/collision/lifecycle/mobile-input/camera/content浏览器门禁和独立终审全部PASS。
+- **有界结论**：11个公开marker、Zone/Interact CORE、generic DOM modal、共享camera/modal control lease已集成验证；完整文案/图片/Slovak、Escape/focus、NPC/Route/FX和通用Entity仍未完成。
+- **远端边界**：未push/PR/Windows同步；GitHub handoff工作项仍暂停，恢复交付需按中转协议和Human Gate另行执行。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -157,7 +147,7 @@ updated: 2026-08-21
 
 ## 当前工作项
 
-当前 active 为 [内容与实体基础三线一条龙流水线](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)，详细状态机见 [执行流程](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md)。A/B/C 先分别完成调查＋七格设计；Main 自动复核并冻结接口后，再生成三个无共享写冲突的实现包；最后由 Main 统一接线、全量回归和关闭。中间不设置 Human Gate，不push。
+当前没有 active 工作项，处于合法选择状态。刚关闭的内容基础流水线见 [总任务卡](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001.md)、[执行流程](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-一条龙执行流程.md) 和 [关闭报告](task-todos/WI-PARALLEL-CONTENT-FOUNDATION-RECON-001-关闭报告.md)。新的正式代码或远端交付仍需由现有候选/协议重新激活。
 
 ### 第一波执行边界
 
@@ -173,7 +163,7 @@ updated: 2026-08-21
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前没有 active 技术阻塞；SYS-ZONE 设计已关闭。完整24层动态消费者、SYS-INTERACT、NPC/交互、完整玩法线和最终硬件 FPS/GPU/纹理内存阈值均需后续独立工作项。
+- 当前没有 active 技术阻塞。Zone/Interact/Game UI有界纵切片已集成；完整24层动态消费者、完整文案/图片/双语、NPC/Route/FX、完整玩法线和最终硬件 FPS/GPU/纹理内存阈值仍需后续独立工作项。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
@@ -185,7 +175,7 @@ updated: 2026-08-21
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；正式代码和 SYS-INTERACT 仍未授权 |
+| `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；后续有界实现已进入 `8ae7692b` |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 已完成，结果提交 `c82aa4a` | SYS-LAYER 证据与有界运行时设计已接受、落盘并验证；不代表代码或完整系统完成 |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | 已完成，结果提交 `d61faa1` | SYS-WORLD/SYS-CHUNK 请求取消、过期结果、异步 mutation、Tilemap/collider teardown 和固定场景边界指标已验证；不代表完整地图系统完成 |
@@ -207,6 +197,7 @@ updated: 2026-08-21
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
+| `WI-PARALLEL-CONTENT-FOUNDATION-RECON-001` | completed-local | SYS-ZONE; SYS-INTERACT; SYS-GAME-UI; SYS-ENTITY | 三窗调查设计、共享contract/resolver/lease、Zone+Interact、generic DOM modal、11 marker Main接线、内容/全量browser Smoke；ENTITY no-code | `8ae7692b`（tree `c825bb6a`） | `DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001`; `DEC-CONTENT-FOUNDATION-DESIGN-001` |
 | `WI-CAMERA-ENTRY-FLOW-FIX-001` | completed | SYS-CAMERA; SYS-APP | 普通入口直接跟随玩家且控制可用；航拍仅保留显式test-hooks验证；两种build、192测试和Human实时预览 | `798eda6` | `DEC-CAMERA-ENTRY-FLOW-FIX-001` |
 | `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER; SYS-CAMERA | 两波拓扑、冻结接口、文件所有权、M1/P1/Camera 候选包和 Gate | `a16ae54` | `DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001` |
 | `WI-PARALLEL-MAP-RECON-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK | A-D 四份 `task-todos/` 报告；D 可复跑探针、27 样本原始收据和确定性校验 | `85af370` | `DEC-PARALLEL-WORKTREE-001` |

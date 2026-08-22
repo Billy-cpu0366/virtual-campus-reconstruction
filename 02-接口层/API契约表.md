@@ -5,7 +5,7 @@ tags:
   - 接口
 type: handoff
 created: 2026-08-14
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # API 契约表（系统之间的接口约定）
@@ -33,7 +33,7 @@ updated: 2026-08-21
 | 相机视口目标更新 / `loadChunksForCamera` | 相机 → 分块 | 航拍和正常跟随都只提交相机视口；分块统一计算“玩家 3×3 ∪ 相机可见 +1”，相机不直接操作 cache/Tilemap | [SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 地图运行时收敛 | Main → 分块 / 世界 | Main 可等待请求和 mutation idle；shutdown 按控制/相机→请求→mutation→collider/layer/Tilemap 收敛 | [SYS-WORLD](../03-执行层/01-地图线/02-世界与地图.md)、[SYS-CHUNK](../03-执行层/01-地图线/04-地图分块.md) |
 | 资源加载 | 资源 → 各系统 | 进货：图片 / 地图走 Phaser Loader，切块数据走 HttpClient，两条补给线 | [SYS-ASSET](../03-执行层/01-地图线/01-资源加载.md) |
-| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以 marker 中心与玩家位置计算进入/离开；公开行为为 100ms 检查、严格 `<30px` 距离；语义已冻结，真实签名待实现授权 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
+| 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以当前Sprite世界坐标和camera scroll/zoom计算；100ms检查、视口外扩100px、严格`<30px`；有界接线已在`8ae7692b`验证 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
 | 区域驻留事件 | SYS-ZONE → SYS-INTERACT | 只在 outside↔inside 边沿输出 `markerId/menuId/residenceId/enter|leave`；重复100ms检查不重复发 enter，DOM、控制和手动关闭不归 Zone | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
 | 内容访问收据 | SYS-INTERACT → SYS-ZONE | UI 确认 `shown/already-visible` 后回传 marker/residence/menu，Zone 再记 visited；失败不产生虚假访问 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
 | 内容解析 | Main ContentResolver → SYS-INTERACT | 同步按menuId返回evidence-backed payload或missing/invalid；不联网、不retry，Interact/UI不猜正文 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[内容层](../04-内容层/作品集内容.md) |
@@ -54,14 +54,14 @@ updated: 2026-08-21
 
 | 接口 | 契约状态 | 工程状态 | 当前边界 |
 |---|---|---|---|
-| 区域驻留事件 | Frozen | Not Started | Zone 生成每次驻留唯一 `residenceId`，只发 enter/leave 边沿；距离与100ms轮询仍归 Zone |
-| 内容访问收据 | Frozen | Not Started | 仅 UI show 成功后记 visited；这是失败安全的重构 DECISION，区别于原站调用show前记录 |
-| 内容解析 | Frozen | Not Started | Main-owned同步resolver；`resolved(payload)|missing|invalid`，来源只读内容层，本轮不引入Promise/网络 |
-| 游戏UI呈现端口 | Frozen | Not Started | identity=`menuId+residenceId`；single-active、原子 replace；standard无global backdrop、memo有；B不拥有业务状态 |
-| 玩法控制 lease | Frozen | Bounded Control Gate Exists；Lease Not Started | acquire显式成功/失败；token归调用方；最后token后恢复；provider由Main在消费者shutdown后关闭 |
-| 通用 Entity 生命周期 | No Contract | No-Code | `Q-ENTITY-001` 保持open；审计清单不进入API，不创建共享runtime/registry |
+| 区域驻留事件 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | Zone每次驻留唯一`residenceId`，只发enter/leave边沿；100ms、viewport+100和`<30`已测试/浏览器验证 |
+| 内容访问收据 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | 仅UI show成功后记visited；失败无虚假访问；about/re-enter真实Smoke PASS |
+| 内容解析 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | Main同步resolver；仅11项已核对标题/名称，不联网、不补长文/图片/Slovak |
+| 游戏UI呈现端口 | Frozen | Bounded Integrated + Verified（`8ae7692b`） | identity=`menuId+residenceId`；原子replace；standard无backdrop、memo有；desktop/mobile真实DOM PASS |
+| 玩法控制 lease | Frozen | Bounded Integrated + Verified（`8ae7692b`） | modal和camera共用provider；首token禁用、末token恢复；消费者后provider shutdown |
+| 通用 Entity 生命周期 | No Contract | Verified No-Code | `Q-ENTITY-001`保持open；`8ae7692b`审计无shared runtime/registry/entity paths |
 
-> 本节由一条龙 P2 设计预授权冻结；P3 必须先创建共享 contract 和 immutable baseline，才能派发 A/B 实现。C 为 no-code。
+> 本节只证明内容基础有界CORE和当前Main integration，不晋升完整系统；完整内容、accessibility和Entity消费者仍按系统卡保持UNKNOWN。
 
 ## 二、数据字典（常量 / 公式，不是接口）
 
