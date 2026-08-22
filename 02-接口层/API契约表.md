@@ -89,12 +89,12 @@ updated: 2026-08-22
 
 | 接口 | 契约状态 | 工程状态 | 当前边界 |
 |---|---|---|---|
-| App generation effects | Frozen | Owners Ready / Not Integrated | Main创建/销毁每个Phaser generation；04 AppRuntime只协调状态；Retry先cleanup成功再重建 |
-| 默认内容source | Frozen | Registry/Renderer Ready / Not Integrated | 03 registry覆盖8项真实内容；其余3项保留最小fallback；Main resolver不复制正文 |
-| 内容runtime assets | Frozen | Receipts Ready / Not Integrated | Main从10项已确认sample镜像复制并验hash；不联网；失败保正文 |
-| 真实train到站收据 | Frozen | Route Ready / Not Integrated | production包装`PhaserTrainRuntime`，snapshot进入holding才resolve；禁止独立5秒真值timer |
-| train玩家collider | Frozen | Shape Ready / Connector Missing | Main注入collider connector/cleanup；teardown先collider后shape，不建第二套碰撞系统 |
-| side运行时生命周期 | Frozen | Owners Ready / Not Integrated | Main preload/start并提供player snapshot/viewport；Retry/shutdown先side后Scene/World |
+| App generation effects | Frozen | Integrated + Auto Verified（`0fadf309`） | Main创建/销毁每个Phaser generation；Retry cleanup后重建，旧回调无效，Human视觉待验 |
+| 默认内容source | Frozen | Integrated + Auto Verified（`0fadf309`） | 03 registry覆盖8项真实内容；其余3项保留最小fallback；Main resolver不复制正文 |
+| 内容runtime assets | Frozen | Integrated + Auto Verified（`0fadf309`） | 10项sample镜像离线复制并验SHA-256；不联网；失败保正文 |
+| 真实train到站收据 | Frozen | Integrated + Auto Verified（`0fadf309`） | production真实route进入holding才resolve；实测5035ms，无独立5秒真值timer |
+| train玩家collider | Frozen | Integrated + Auto Verified（`0fadf309`） | Main窄connector；route完成/Retry/shutdown后collider=0 |
+| side运行时生命周期 | Frozen | Integrated + Auto Verified（`0fadf309`） | sprayer/smoke/train真实browser gates与teardown通过，Human视觉待验 |
 
 ## 二、数据字典（常量 / 公式，不是接口）
 

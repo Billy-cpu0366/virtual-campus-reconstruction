@@ -9,9 +9,9 @@ updated: 2026-08-22
 
 ## 👀 先看这里（人话总结，给 Human）
 
-本轮先做出生点附近四个正在喷洒的NPC。玩家靠近后，最近的人先跑，其他人每隔300毫秒依次逃跑；跑完必须销毁。当前只是设计完成，代码尚未实现。
+出生点附近四个sprayer已在`0fadf309`接入：玩家真人靠近后按距离每约300毫秒级联逃跑，完成和shutdown销毁。自动browser gate已通过，等待Human视觉确认。
 
-**P4集成决定（accepted）**：05 sprayer `0c049130`已ready；Main只提供玩家只读位置和world-ready/start/shutdown时机，不复制NPC状态机。浏览器必须验证短路径触发与销毁。
+**P4集成结果（auto verified）**：Main只提供玩家只读位置和生命周期；真实键盘可走路径触发sprayer，shutdown sprite/listener=0。完整跨chunk/intro语义仍UNKNOWN。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 

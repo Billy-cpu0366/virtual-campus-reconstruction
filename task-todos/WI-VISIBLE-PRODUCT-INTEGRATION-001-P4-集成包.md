@@ -1,11 +1,13 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P4-branch-review-and-main-integration
-status: active-main-final-integration
+status: automated-verified-awaiting-human-visual
 authority-commit: 9d430d026365f9a73e1d356190b3774b1bb50ce0
 authority-tree: 70316c30c49f2cea7ab4d9e160e1c288d6e70d34
 assembled-commit: 532d8095e4adcae79e5b46cfa766a661c42c1909
 assembled-tree: d466828f2b1635edbb86f6c1a2f0d6b71601c9bb
+integration-commit: 0fadf309963ba5d23c092ec049654791901f806e
+integration-tree: 86c8f85f1f59106399d1a2f2040851b100eb2f5a
 authorization: DEC-VISIBLE-WAVE-P4-INTEGRATION-001
 integration-branch: integration/visible-product-wave
 integration-base: 3513ccacf4595fb4742f15116aaf43facdbcffd2

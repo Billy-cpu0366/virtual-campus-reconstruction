@@ -2,7 +2,7 @@
 work-item: WI-VISIBLE-SIDE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 05-side
-status: accepted-into-p4-assembled-baseline
+status: integrated-auto-verified-human-pending
 branch: feature/05-side-visible-wave
 worktree-path: .pi/worktrees/05-side-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0

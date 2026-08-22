@@ -2,13 +2,13 @@
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: main-integration
-status: active-p4-main-final-integration
+status: ready-for-human-visual-gate
 branch: integration/visible-product-wave
 worktree-path: .pi/worktrees/visible-product-integration
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: p4-main-final-integration
-worktree-receipt: assembled-532d8095-clean
+current-authorization: preview-and-human-visual-only
+worktree-receipt: integration-0fadf309-clean
 human-visual-gate-required: true
 updated: 2026-08-22
 ---
