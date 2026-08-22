@@ -20,7 +20,8 @@ updated: 2026-08-22
 - candidate tree：`86c8f85f1f59106399d1a2f2040851b100eb2f5a`
 - 最新状态基线：根`master`上的WIP同步授权提交（生成bundle前记录精确commit/tree）
 - 已知有效自动收据：53 files / 298 tests；typecheck；production/test-hooks build；既有browser gates
-- Human结果：Loading不似原站、实际卡顿、初始chunk装配可见，视觉Gate FAIL
+- Human结果（bundle冻结时）：Loading不似原站、实际卡顿、初始chunk装配可见，视觉Gate FAIL
+- bundle冻结后的本地补充反馈：火车/NPC不可见、factory roof未淡隐、细节动画与其他视觉效果缺失；不改写不可变outbox，后续P5.1诊断必须覆盖
 
 ## 输出
 

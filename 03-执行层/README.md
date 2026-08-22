@@ -17,6 +17,16 @@ updated: 2026-08-22
 5. **签字才写码**，签字写清"这次只授权哪块"
 6. **sample 只读不抓**；遇异步/监听器/计时器必须写超时+清理
 
+## 修正任务前置分流（`DEC-AI-CORRECTION-ROUTING-001`）
+
+Human提出不满意、修改、Bug或验收失败时，先执行[修正任务分流协议](修正任务分流协议.md)，再进入下面的系统卡循环：
+
+1. AI必须先在`task_plan.md`登记`issue-class / active-route / correction-phase / classification-trigger`。
+2. 普通调整、单一Bug和系统性问题使用不同证据、任务粒度和Human Gate；不得统一套重流程。
+3. 自动门禁与Human冲突、范围未知、连续多遗漏或同类两轮无进展时，必须升级为`systemic-failure`并停止零散修补。
+4. 分类规则、升级条件和状态机唯一权威在协议文件；本手册只维护入口，不复制第二套定义。
+5. `scripts/check-state-consistency.py`同时校验分类、路线、阶段和决定引用。
+
 ## 最小 6 步循环（每张卡一个循环）
 
 ```text

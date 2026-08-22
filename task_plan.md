@@ -1,5 +1,11 @@
 ---
 workflow-ref: 03-执行层/README.md
+correction-ref: 03-执行层/修正任务分流协议.md
+issue-class: systemic-failure
+active-route: systemic-flow
+correction-phase: frozen-awaiting-wip-sync
+classification-trigger: human-auto-conflict-and-multiple-related-omissions
+classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
@@ -9,7 +15,7 @@ current-gate: wip-delivery-bundle-preparation
 gate-status: human-authorized-wip-branch-push
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p5.1-loading-startup-performance-diagnosis
+next-phase: p5.1-full-visual-parity-diagnosis
 updated: 2026-08-22
 ---
 
@@ -18,8 +24,8 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：先把P5.1前的当前进度形成统一WIP snapshot并同步远端分支；随后恢复Loading/启动装配/卡顿诊断。
-- **同步内容**：功能candidate=`0fadf309` + 最新Human FAIL/诊断状态；该快照不是完成版，也不改变P5失败结论。
+- **当前阶段**：先把P5.1前的当前进度形成统一WIP snapshot并同步远端分支；随后恢复完整视觉与动态一致性诊断。
+- **同步内容**：已冻结delivery `0d552684`包含功能candidate=`0fadf309`及生成当时三项Human FAIL；随后新增的火车/NPC/roof/FX反馈只在本地后续提交记录，不改写不可变outbox，也不影响该代码WIP快照继续交付。
 - **当前授权**：生成Git bundle并由Windows外部Pi推唯一WIP分支；不允许PR、merge、修改`main`。首次正式仓库路径/remote/dirty/fetch审计仍必须执行。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
@@ -54,7 +60,7 @@ updated: 2026-08-22
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `0fadf309`自动全绿但Human视觉FAIL | 只读诊断原站Loading、首屏装配屏障、移动帧节奏与渲染层成本 | 用CSS局部遮掩；拿静态rAF冒充手感；未确认就改30FPS事实；push/PR/Windows同步 | 给Human审查整体修正设计；接受后才进P5.2 |
+| 三板块可见成果并行波 | `systemic-failure`；`0fadf309`自动全绿但Human视觉FAIL | WIP同步后按统一差异表一次审计Loading/性能/chunk/火车/NPC/roof/FX，再按根因聚类 | 逐点开调查；用状态计数代签视觉；未确认就改30FPS事实；push/PR/Windows同步 | Human只审一次整体修正包；接受后成批实现并跑完整路径回归 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |

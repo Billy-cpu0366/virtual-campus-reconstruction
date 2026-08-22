@@ -25,6 +25,16 @@ migration-history/doc-v0.1/  旧精确文档历史，只读可查
 5. 有当前工作项时，只读取其任务卡、对应的 `03-执行层/`系统卡、验收标准和必要`sample/`证据；没有当前工作项时，只读取总账与`task_plan.md`列出的候选来源。
 6. 讨论未收敛或 Human 未确认前，不修改设计、代码或项目协议。
 
+### 2.1 修正任务强制分流
+
+Human提出不满意、修改、Bug或验收失败时，AI在写代码前必须完整读取[`03-执行层/修正任务分流协议.md`](03-执行层/修正任务分流协议.md)，并核对`task_plan.md`的`issue-class / active-route / correction-phase`。
+
+- `adjustment`：新偏好或普通调整；走目标确认→影响检查→修改→针对验证。
+- `defect`：违反明确expected且范围有界；走复现→根因→失败证据→最小修复→回归。
+- `systemic-failure`：自动/Human冲突、范围未知、连续多遗漏或两轮修复无进展；立即停止零散补丁，走一次审计→根因聚类→一次Human方案Gate→成批修复→完整回归→Human整体验收。
+
+分类、升级和任务粒度只以该协议为权威；本文件不复制完整规则。AI不得让Human负责找全遗漏，也不得为系统性问题的每个表面现象重复建立调查任务。
+
 禁止为了“了解项目”递归读取整个项目或猜测未公开资源。
 
 ## 3. 权威位置
@@ -36,6 +46,7 @@ migration-history/doc-v0.1/  旧精确文档历史，只读可查
 | Human 决定、签字历史和明确未授权边界 | 根`决策记录.md`；旧机器合同只在`migration-history/doc-v0.1/`追溯 |
 | 当前工作项（允许为 `none`）、可执行阶段和当前 Human Gate | `task_plan.md` |
 | 稳定工作循环、代码签字和落地规则 | `03-执行层/README.md` |
+| 修正任务分类、升级与三条执行路线 | `03-执行层/修正任务分流协议.md` |
 | 原站公开文件 | `sample/original-public-build/mirror/` |
 | 镜像状态和哈希 | `sample/original-public-build/manifest.json` |
 | 请求与不可用资源 | `sample/original-public-build/network/` |
@@ -136,3 +147,4 @@ API 协作审查固定按以下顺序进行：
 6. 是否检查并更新了复用观察，而不是凭设想提前抽象？
 7. 是否按`03-执行层/README.md`完成Human签字、验证、Git提交和总账回写，并停在Human要求的验收节点？
 8. 状态变化后是否运行 `python scripts/check-state-consistency.py` 并 PASS？（防止 task_plan 顶部状态块 / frontmatter / 理解层进度漂移）
+9. 本次若为修正任务，是否已分类为`adjustment / defect / systemic-failure`，并按对应route留下规定证据？

@@ -9,7 +9,7 @@ updated: 2026-08-22
 
 ## 👀 先看这里（人话总结，给 Human）
 
-出生点附近四个sprayer已在`0fadf309`接入：玩家真人靠近后按距离每约300毫秒级联逃跑，完成和shutdown销毁。自动browser gate已通过，等待Human视觉确认。
+**P5 Human FAIL**：Human在实际入口没有看到NPC。`0fadf309`的sprayer计数、触发状态和teardown自动收据不能证明入口可见；P5.1必须核对坐标、视口、depth、纹理、启动时序，并区分四个sprayer实现故障与其余原站NPC尚未纳入范围。
 
 **P4集成结果（auto verified）**：Main只提供玩家只读位置和生命周期；真实键盘可走路径触发sprayer，shutdown sprite/listener=0。完整跨chunk/intro语义仍UNKNOWN。
 
