@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p3-parallel-implementation
-phase: p3-parallel-implementation
+status: active-p2.1-content-bridge
+phase: p2.1-shared-content-bridge
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
@@ -32,6 +32,10 @@ updated: 2026-08-22
 - no-code/调查报告不能冒充板块可见交付。
 - 自动检查不能替代Human视觉Gate；Human通过前不得关闭文档。
 - 不push、不PR、不操作Windows正式仓库。
+
+## P2.1内容桥修正
+
+03内容线在正式代码前发现：真实payload的默认resolver归Main，富内容呈现归04，而共享契约只有纯文本。Human接受[共享内容桥修正](WI-VISIBLE-CONTENT-BRIDGE-001.md)：Main先做兼容shared contract/resolver提交，再同步03与04；不扩大03权限、不丢弃04现有修改。05继续P3。
 
 ## 四个worktree
 

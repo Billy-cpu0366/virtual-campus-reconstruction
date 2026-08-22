@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: main-integration
-status: active-p3-implementation
+status: paused-clean-p2.1-contract-owner
 branch: integration/visible-product-wave
 worktree-path: .pi/worktrees/visible-product-integration
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: p3-main-bounded-implementation
+current-authorization: p2.1-shared-contract-after-authority-commit
 worktree-receipt: verified-clean-at-baseline
 human-visual-gate-required: true
 updated: 2026-08-22
@@ -29,6 +29,10 @@ updated: 2026-08-22
 ## P1/P2交接
 
 P1报告`b5708b42`已并入root`1b4bc03`。Human已接受3秒相机+5秒火车、480×270逻辑画面、Memo 6引导；P2范围见[实现包](WI-VISIBLE-PRODUCT-INTEGRATION-001-P2-实现包.md)。设计clean提交前不得写代码。
+
+## P2.1共享owner
+
+Main当前clean、未写P3代码。authority提交后先产出单独shared contract/resolver提交；不得混入入口、真实正文或04 DOM实现。该commit同步到03/04后，Main再恢复自身P3入口。
 
 ## 后续Main所有权
 

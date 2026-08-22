@@ -36,7 +36,7 @@ updated: 2026-08-22
 | 玩家位置 → 区域判定 | 玩家 → SYS-ZONE | 以当前Sprite世界坐标和camera scroll/zoom计算；100ms检查、视口外扩100px、严格`<30px`；有界接线已在`8ae7692b`验证 | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md) |
 | 区域驻留事件 | SYS-ZONE → SYS-INTERACT | 只在 outside↔inside 边沿输出 `markerId/menuId/residenceId/enter|leave`；重复100ms检查不重复发 enter，DOM、控制和手动关闭不归 Zone | [SYS-ZONE](../03-执行层/03-内容线/01-区域触发.md)、[SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
 | 内容访问收据 | SYS-INTERACT → SYS-ZONE | UI 确认 `shown/already-visible` 后回传 marker/residence/menu，Zone 再记 visited；失败不产生虚假访问 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md) |
-| 内容解析 | Main ContentResolver → SYS-INTERACT | 同步按menuId返回evidence-backed payload或missing/invalid；不联网、不retry，Interact/UI不猜正文 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[内容层](../04-内容层/作品集内容.md) |
+| 内容解析 | 03 registry → Main ContentResolver → SYS-INTERACT | 同步按menuId返回evidence-backed payload或missing/invalid；必需`body`作纯文本fallback，optional结构化`sections`只含heading/paragraphs/local image/external links/tags；Main校验并深冻结，不联网、不retry | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[内容层](../04-内容层/作品集内容.md) |
 | 游戏UI呈现端口 | SYS-INTERACT ↔ SYS-GAME-UI | Interact 调用带`menuId+residenceId`的原子`show/hide/destroy`；UI只原样回报identity和close-button/backdrop动作；programmatic hide不发user-close，stale close被Interact忽略 | [SYS-INTERACT](../03-执行层/03-内容线/02-世界交互(弹窗).md)、[SYS-GAME-UI](../03-执行层/04-独立件/02-游戏UI.md) |
 | App状态与generation | SYS-APP → Main / SYS-GAME-UI | 输出BOOT/LOADING/READY/ENTERING_GAME/PLAYING/MODAL_OPEN/ERROR/RETRYING/SHUTDOWN、真实progress和generation；Play/Retry只发意图，不持有Scene/相机/火车 | [SYS-APP](../03-执行层/04-独立件/01-应用启动与页面.md) |
 | 入口完成收据 | Main ← SYS-CAMERA / SYS-ROUTE | Main同时启动3秒相机和5秒火车；只在当前generation火车arrived且相机已稳定后进入PLAYING并释放entry control lease；stale/重复收据忽略 | [SYS-APP](../03-执行层/04-独立件/01-应用启动与页面.md)、[SYS-CAMERA](../03-执行层/02-玩法线/04-相机.md)、[SYS-ROUTE](../03-执行层/05-旁支/02-车辆与路线.md) |
@@ -76,6 +76,14 @@ updated: 2026-08-22
 | 首内容引导 | Frozen | Not Started | 只引导Memo 6，不能传送/自动打开/伪造visited |
 | 旁支生命周期端口 | Frozen | Not Started | sprayer/train/smoke各自owner；Main只接共享时机和收据 |
 | 通用Entity生命周期 | No Contract | Verified No-Code | 第二个真实消费者实现并对比前继续NO-GO |
+
+### P2.1共享内容桥（`DEC-VISIBLE-CONTENT-BRIDGE-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| 富内容payload | Accepted / Awaiting Shared Commit | Blocked Before Implementation | `body`向后兼容；`sections`无任意HTML；03数据、Main校验/冻结、04安全渲染 |
+| Main默认resolver接线 | Accepted / Awaiting Shared Commit | Not Started | shared commit先不导入03 registry；最终integration只接registry，不复制数据 |
+| 04 DOM renderer | Accepted / Awaiting Shared Commit | Dirty Preserved / Paused | 现有App/UI修改不得覆盖；contract同步后再实现sections/fallback |
 
 ## 二、数据字典（常量 / 公式，不是接口）
 

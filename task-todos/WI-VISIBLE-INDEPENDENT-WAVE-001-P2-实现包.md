@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-INDEPENDENT-WAVE-001
 phase: P3-parallel-implementation
-status: active-p3-implementation
+status: paused-awaiting-p2.1-shared-contract
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: feature/04-independent-visible-wave
@@ -22,6 +22,10 @@ parent-report: d4d848379489843984962d4616eb7cc9ab46b819
 - optional图片失败保留正文/尺寸；required失败进入ERROR。
 - Play/Retry/close有可见focus；modal隔离游戏输入并恢复焦点。
 - Entity继续NO-GO，不新增`src/entity/**`。
+
+## P2.1前置修正
+
+保留当前dirty实现；root authority提交后，先完成并验证不依赖富内容schema的App/UI foundation提交，再同步Main共享contract。之后由04在`src/game-ui/**`实现sections安全DOM渲染。
 
 ## 允许文件
 

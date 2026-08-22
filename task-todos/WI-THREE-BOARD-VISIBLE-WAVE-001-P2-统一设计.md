@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: P2
-status: accepted-persisted-implementation-authorized
+status: accepted-persisted-p2.1-correction-active
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 p2-design-tree: ec2884530db465a57b5dd20cd7811fc215e7df52
 authorization: DEC-VISIBLE-WAVE-P2-001
@@ -48,6 +48,10 @@ page-init
 - FX：factory smoke位于公开锚点约(808,539.2)，应在入口镜头路径或短路径中可见；视口外停发、返回恢复、shutdown清理。
 - NPC：保留四个公开sprayer锚点和300ms组间逃跑；玩家从出生点向row25短移即可触发。不得建通用Entity框架。
 - 内容：实现已证实英文About、Projects、Memo内容；首个引导指向Memo 6。Memo 6候选路线为左36格、上7格，实际行为以碰撞和`<30px`触发为准。图片/文案不得猜测Slovak版本。
+
+## 2.1 共享富内容桥修正
+
+P3实现前检查证明原设计漏了共享物理接口：03-owned内容registry不能直接进入Main-owned resolver，04-owned UI只能渲染纯文本。Human接受`DEC-VISIBLE-CONTENT-BRIDGE-001`：保留必需`body` fallback，新增不含任意HTML的optional结构化`sections`；Main拥有contract/resolver校验与深冻结，03拥有真实registry，04拥有安全DOM渲染，Main最终接线。精确顺序见[`WI-VISIBLE-CONTENT-BRIDGE-001`](WI-VISIBLE-CONTENT-BRIDGE-001.md)。
 
 ## 3. App与失败设计
 

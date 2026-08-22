@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P3-main-implementation-and-integration
-status: active-p3-implementation
+status: paused-p2.1-shared-contract-first
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: integration/visible-product-wave
@@ -22,6 +22,10 @@ Main并行实现共享入口，随后按顺序接收04、03、05成果，交付H
 - playable后显示非阻塞Memo 6方向引导；真人移动触发真实英文内容。
 - factory smoke在入口镜头/短路径可见；sprayer在玩家短移后触发；火车完整离场并清理。
 - production绝不调用六点111秒序列。
+
+## P2.1优先提交
+
+Main当前clean。先按`WI-VISIBLE-CONTENT-BRIDGE-001`只改shared content contract、CampusContentResolver和对应tests，形成可独立cherry-pick且全绿的提交；不得混入本包入口实现。同步03/04后再恢复本包。
 
 ## Main独占文件
 

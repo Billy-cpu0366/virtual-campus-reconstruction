@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-CONTENT-WAVE-001
 phase: P3-parallel-implementation
-status: active-p3-implementation
+status: blocked-awaiting-p2.1-shared-contract
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: feature/03-content-visible-wave
@@ -21,6 +21,10 @@ parent-report: 0a5091db237ca7cd6be6a4b8ef24da6ac43abf97
 - 正常路线候选左36格、上7格；以实际碰撞和`distance < 30`为准。
 - 保持single-active、manual suppression、visited receipt、图片失败保正文、关闭/离开/重入和teardown。
 - About/Projects/Memo三类内容都必须可呈现；正常路径门禁至少覆盖Memo 6。
+
+## P2.1前置修正
+
+03已在实现前正确停止。Main共享contract/resolver commit被cherry-pick并验证clean前，本包不再授权写功能代码；恢复后仍只写03 owner，不修改resolver/UI。
 
 ## 允许文件
 

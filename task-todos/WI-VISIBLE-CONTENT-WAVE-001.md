@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-CONTENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 03-content
-status: active-p3-implementation
+status: blocked-awaiting-p2.1-shared-contract
 branch: feature/03-content-visible-wave
 worktree-path: .pi/worktrees/03-content-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: p3-bounded-implementation
+current-authorization: blocked-before-implementation
 worktree-receipt: verified-clean-at-baseline
 updated: 2026-08-22
 ---
@@ -28,6 +28,10 @@ updated: 2026-08-22
 ## P1/P2交接
 
 P1报告`0a5091db`已并入root`fbec3e2`。Human已选择Memo 6首引导；P2范围见[实现包](WI-VISIBLE-CONTENT-WAVE-001-P2-实现包.md)。设计clean提交前不得写代码。
+
+## P3阻塞收据
+
+`4b36ad40ede8f0cff8428bb6ae7877a572a3db4f`仅提交阻塞报告，tree=`f49186a20c5e3e2a6ac8b1b3ce34cd30d74e7d8b`，parent=`0a5091db`，clean；未写功能代码。等待Main共享契约commit同步后恢复。
 
 ## 后续候选边界
 
