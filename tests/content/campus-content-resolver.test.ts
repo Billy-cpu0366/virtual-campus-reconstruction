@@ -101,6 +101,104 @@ describe("CampusContentResolver", () => {
     expect(resolver.resolve("contact")).toEqual({ status: "invalid" });
   });
 
+  it("解析合法 sections 并深冻结所有嵌套数组和对象", () => {
+    const source = {
+      projects: {
+        menuId: "projects",
+        title: "Projects",
+        body: ["Projects fallback"],
+        sections: [
+          {
+            heading: "Project one",
+            paragraphs: ["Evidence-backed paragraph"],
+            image: {
+              src: "assets/images/portfolio/project.webp",
+              alt: "Project preview",
+              fallbackText: "Project image unavailable",
+            },
+            links: [
+              { label: "Project site", href: "https://example.com/project" },
+            ],
+            tags: ["Angular", "TypeScript"],
+          },
+        ],
+      },
+    };
+    const result = resolverWith(source).resolve("projects");
+    if (result.status !== "resolved") throw new Error("expected resolved");
+
+    const sections = result.payload.sections;
+    const section = sections?.[0];
+    expect(section).toEqual(source.projects.sections[0]);
+    expect(Object.isFrozen(result.payload)).toBe(true);
+    expect(Object.isFrozen(sections)).toBe(true);
+    expect(Object.isFrozen(section)).toBe(true);
+    expect(Object.isFrozen(section?.paragraphs)).toBe(true);
+    expect(Object.isFrozen(section?.image)).toBe(true);
+    expect(Object.isFrozen(section?.links)).toBe(true);
+    expect(Object.isFrozen(section?.links?.[0])).toBe(true);
+    expect(Object.isFrozen(section?.tags)).toBe(true);
+    expect(() => (section?.paragraphs as string[]).push("mutation")).toThrow();
+    expect(() => (section?.links as unknown[]).push({})).toThrow();
+    expect(() => (section?.tags as string[]).push("mutation")).toThrow();
+    expect(source.projects.sections[0]?.paragraphs).toEqual([
+      "Evidence-backed paragraph",
+    ]);
+  });
+
+  it("严格拒绝空文本、错误字段和非法 image/link", () => {
+    const invalidSections: readonly unknown[] = [
+      [],
+      [{}],
+      [{ heading: "" }],
+      [{ paragraphs: [] }],
+      [{ paragraphs: ["ok", " "] }],
+      [{ tags: [""] }],
+      [{ heading: "Heading", rawHtml: "<b>not allowed</b>" }],
+      [{ image: { src: "https://example.com/image.webp", alt: "Image", fallbackText: "Missing" } }],
+      [{ image: { src: "assets/image.webp", alt: "", fallbackText: "Missing" } }],
+      [{ image: { src: "assets/image.webp", alt: "Image", fallbackText: "Missing", extra: true } }],
+      [{ links: [{ label: "Local", href: "/inside" }] }],
+      [{ links: [{ label: "Mail", href: "mailto:test@example.com" }] }],
+      [{ links: [{ label: "", href: "https://example.com" }] }],
+      [{ links: [{ label: "Site", href: "https://example.com", extra: true }] }],
+    ];
+
+    for (const sections of invalidSections) {
+      const result = resolverWith({
+        about: {
+          menuId: "about",
+          title: "About",
+          body: ["Fallback"],
+          sections,
+        },
+      }).resolve("about");
+      expect(result).toEqual({ status: "invalid" });
+    }
+  });
+
+  it("异常 source 或 payload getter 始终返回 invalid", () => {
+    const throwingSource = new Proxy<Record<string, unknown>>({}, {
+      getOwnPropertyDescriptor: () => {
+        throw new Error("source failed");
+      },
+    });
+    const throwingPayload = {
+      menuId: "about",
+      get title(): string {
+        throw new Error("payload failed");
+      },
+      body: ["Fallback"],
+    };
+
+    expect(resolverWith(throwingSource).resolve("about")).toEqual({
+      status: "invalid",
+    });
+    expect(resolverWith({ about: throwingPayload }).resolve("about")).toEqual({
+      status: "invalid",
+    });
+  });
+
   it("返回 immutable payload 副本，不让调用方修改 resolver 来源", () => {
     const source = {
       about: {

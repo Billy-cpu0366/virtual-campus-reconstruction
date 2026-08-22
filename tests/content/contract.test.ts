@@ -3,6 +3,7 @@ import {
   CONTENT_MENU_IDS,
   type ContentResolveResult,
   type GameUiContentPayload,
+  type GameUiContentSection,
   type GameUiHideRequest,
   type GameUiPresentation,
   type GameUiShowRequest,
@@ -77,6 +78,35 @@ describe("内容共享 contract", () => {
     };
     expect(show.payload.body).toEqual(["A paragraph"]);
     expect(hide).toMatchObject({ menuId: "memo1", reason: "user-close" });
+  });
+
+  it("以 optional readonly sections 扩展 payload，body fallback 仍为必需", () => {
+    const section: GameUiContentSection = {
+      heading: "Project",
+      paragraphs: ["Evidence-backed paragraph"],
+      image: {
+        src: "assets/images/portfolio/project.webp",
+        alt: "Project preview",
+        fallbackText: "Project image unavailable",
+      },
+      links: [{ label: "Project site", href: "https://example.com" }],
+      tags: ["Angular", "TypeScript"],
+    };
+    const rich: GameUiContentPayload = {
+      menuId: "projects",
+      title: "Projects",
+      body: ["Projects fallback"],
+      sections: [section],
+    };
+    const legacy: GameUiContentPayload = {
+      menuId: "about",
+      title: "About",
+      body: ["Legacy fallback"],
+    };
+
+    expect(rich.sections?.[0]).toEqual(section);
+    expect(legacy).not.toHaveProperty("sections");
+    expect(legacy.body).toEqual(["Legacy fallback"]);
   });
 
   it("保留精确的 resolver/UI/lease 结果分支", () => {

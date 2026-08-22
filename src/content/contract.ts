@@ -42,10 +42,30 @@ export interface InteractionVisitReceipt {
   readonly menuId: ContentMenuId;
 }
 
+export interface GameUiContentImage {
+  readonly src: string;
+  readonly alt: string;
+  readonly fallbackText: string;
+}
+
+export interface GameUiContentLink {
+  readonly label: string;
+  readonly href: string;
+}
+
+export interface GameUiContentSection {
+  readonly heading?: string;
+  readonly paragraphs?: readonly string[];
+  readonly image?: GameUiContentImage;
+  readonly links?: readonly GameUiContentLink[];
+  readonly tags?: readonly string[];
+}
+
 export interface GameUiContentPayload {
   readonly menuId: ContentMenuId;
   readonly title: string;
   readonly body: readonly string[];
+  readonly sections?: readonly GameUiContentSection[];
   // These optional fields allow the resolver payload to remain opaque while
   // keeping the residence identity owned by the show request.
   readonly residenceId?: string;

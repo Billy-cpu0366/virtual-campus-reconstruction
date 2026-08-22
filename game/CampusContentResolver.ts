@@ -4,6 +4,9 @@ import {
   type ContentPayload,
   type ContentResolveResult,
   type ContentResolverPort,
+  type GameUiContentImage,
+  type GameUiContentLink,
+  type GameUiContentSection,
   type GameUiPresentation,
 } from "../src/content/contract.js";
 
@@ -72,6 +75,92 @@ function isContentMenuId(value: unknown): value is ContentMenuId {
   );
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasOnlyKeys(
+  value: Record<string, unknown>,
+  allowedKeys: readonly string[],
+): boolean {
+  return Object.keys(value).every((key) => allowedKeys.includes(key));
+}
+
+function isText(value: unknown): value is string {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function isTextArray(value: unknown): value is readonly string[] {
+  return Array.isArray(value) && value.length > 0 && value.every(isText);
+}
+
+function isLocalImageSource(value: unknown): value is string {
+  if (!isText(value) || value !== value.trim() || value.includes("\\")) {
+    return false;
+  }
+  return !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(value);
+}
+
+function isExternalHttpLink(value: unknown): value is string {
+  if (!isText(value) || value !== value.trim()) return false;
+  try {
+    const parsed = new URL(value);
+    return (
+      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
+      parsed.hostname !== ""
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isContentImage(value: unknown): value is GameUiContentImage {
+  if (!isRecord(value)) return false;
+  return (
+    hasOnlyKeys(value, ["src", "alt", "fallbackText"]) &&
+    isLocalImageSource(value.src) &&
+    isText(value.alt) &&
+    isText(value.fallbackText)
+  );
+}
+
+function isContentLink(value: unknown): value is GameUiContentLink {
+  if (!isRecord(value)) return false;
+  return (
+    hasOnlyKeys(value, ["label", "href"]) &&
+    isText(value.label) &&
+    isExternalHttpLink(value.href)
+  );
+}
+
+function isContentSection(value: unknown): value is GameUiContentSection {
+  if (!isRecord(value)) return false;
+  const allowedKeys = ["heading", "paragraphs", "image", "links", "tags"];
+  const keys = Object.keys(value);
+  if (keys.length === 0 || !hasOnlyKeys(value, allowedKeys)) return false;
+  if ("heading" in value && !isText(value.heading)) return false;
+  if ("paragraphs" in value && !isTextArray(value.paragraphs)) return false;
+  if ("image" in value && !isContentImage(value.image)) return false;
+  if (
+    "links" in value &&
+    (!Array.isArray(value.links) ||
+      value.links.length === 0 ||
+      !value.links.every(isContentLink))
+  ) {
+    return false;
+  }
+  if ("tags" in value && !isTextArray(value.tags)) return false;
+  return true;
+}
+
+function isContentSections(
+  value: unknown,
+): value is readonly GameUiContentSection[] {
+  return (
+    Array.isArray(value) && value.length > 0 && value.every(isContentSection)
+  );
+}
+
 function isPresentation(value: unknown): value is GameUiPresentation {
   return (
     typeof value === "object" &&
@@ -107,6 +196,9 @@ function validatePayload(
   ) {
     return false;
   }
+  if ("sections" in record && !isContentSections(record.sections)) {
+    return false;
+  }
   if (
     "residenceId" in record &&
     (typeof record.residenceId !== "string" || record.residenceId === "")
@@ -119,7 +211,35 @@ function validatePayload(
   return true;
 }
 
+function immutableSection(section: GameUiContentSection): GameUiContentSection {
+  const image =
+    section.image === undefined
+      ? undefined
+      : Object.freeze({ ...section.image });
+  const links =
+    section.links === undefined
+      ? undefined
+      : Object.freeze(
+          section.links.map((link) => Object.freeze({ ...link })),
+        );
+  return Object.freeze({
+    ...(section.heading === undefined ? {} : { heading: section.heading }),
+    ...(section.paragraphs === undefined
+      ? {}
+      : { paragraphs: Object.freeze([...section.paragraphs]) }),
+    ...(image === undefined ? {} : { image }),
+    ...(links === undefined ? {} : { links }),
+    ...(section.tags === undefined
+      ? {}
+      : { tags: Object.freeze([...section.tags]) }),
+  });
+}
+
 function immutablePayload(payload: ContentPayload): ContentPayload {
+  const sections =
+    payload.sections === undefined
+      ? undefined
+      : Object.freeze(payload.sections.map(immutableSection));
   const presentation =
     payload.presentation === undefined
       ? undefined
@@ -128,6 +248,7 @@ function immutablePayload(payload: ContentPayload): ContentPayload {
     menuId: payload.menuId,
     title: payload.title,
     body: Object.freeze([...payload.body]),
+    ...(sections === undefined ? {} : { sections }),
     ...(payload.residenceId === undefined
       ? {}
       : { residenceId: payload.residenceId }),
@@ -161,8 +282,12 @@ export class CampusContentResolver implements ContentResolverPort {
       return { status: "invalid" };
     }
     if (value === undefined) return { status: "missing" };
-    if (!validatePayload(menuId, value)) return { status: "invalid" };
-    return { status: "resolved", payload: immutablePayload(value) };
+    try {
+      if (!validatePayload(menuId, value)) return { status: "invalid" };
+      return { status: "resolved", payload: immutablePayload(value) };
+    } catch {
+      return { status: "invalid" };
+    }
   }
 }
 
