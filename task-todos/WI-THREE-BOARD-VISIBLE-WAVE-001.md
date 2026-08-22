@@ -1,14 +1,16 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p2-design-persisting
-phase: p2-unified-design
+status: active-p3-parallel-implementation
+phase: p3-parallel-implementation
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
 p0-plan-commit: 3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e
 p0-plan-tree: 9c2e8b0b854a09d068c6de8e91ef9178f484c4f8
 worktree-baseline-status: verified-clean
+p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
+p2-design-tree: ec2884530db465a57b5dd20cd7811fc215e7df52
 human-visual-gate-required: true
 documentation-close-status: blocked-by-visual-gate
 updated: 2026-08-22

@@ -3,13 +3,13 @@ workflow-ref: 03-执行层/README.md
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
-work-item-status: active-p2
-current-phase: p2-unified-design-persisting
-current-gate: p2-authority-clean-baseline
-gate-status: accepted-awaiting-persist
+work-item-status: active-p3
+current-phase: p3-four-stream-implementation
+current-gate: four-implementation-commits
+gate-status: in_progress
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p3-four-stream-implementation
+next-phase: p4-branch-review
 updated: 2026-08-22
 ---
 
@@ -18,9 +18,9 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：P2统一设计已获Human选择，正在形成clean权威基线；四份P1报告已并入root tip=`1b4bc03`。
+- **当前阶段**：P3四路并行实现；P2统一设计clean提交=`c21f7ce8`，四份P1报告已并入root。
 - **已接受视觉目标**：Play后3秒Power2镜头落玩家、火车同时5秒进场后开放控制、桌面480×270逻辑画面、Memo 6首个真人引导。
-- **下一授权**：P2设计提交clean后，03内容、04独立件、05旁支和Main入口四路可按实现包并行写代码；此前仍禁止。
+- **当前授权**：03内容、04独立件、05旁支和Main入口四路按各自实现包并行写代码；不得越过owner，完成后停在ready-for-integration。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
@@ -54,7 +54,7 @@ updated: 2026-08-22
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | P1四报告已验证并入root；P2视觉目标已接受，待clean设计提交 | 落盘P2统一设计、四实现包和系统卡；提交后四路并行实现 | clean设计基线前写代码；111秒序列接正常入口；no-code冒充可见交付；push/PR/Windows同步 | 设计提交后进入P3四路实现，Main最终串行接线 |
+| 三板块可见成果并行波 | P2设计已接受并clean提交`c21f7ce8` | 四路按实现包并行写代码并返回commit/tree/clean收据 | 越过owner；111秒序列接正常入口；no-code冒充可见交付；push/PR/Windows同步 | 四提交通过P4审查后由Main串行接线 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -171,7 +171,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前无技术阻塞；P1报告和Human视觉选择已齐，等待P2设计clean提交。提交后四worktree按实现包进入P3。Zone/Interact/Game UI既有CORE只作基线，不冒充本轮可见成果。
+- 当前无技术阻塞；P2设计已进入clean提交，四worktree处于P3并行实现。Zone/Interact/Game UI既有CORE只作基线，不冒充本轮可见成果。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。

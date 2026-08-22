@@ -1,7 +1,8 @@
 ---
 work-item: WI-VISIBLE-CONTENT-WAVE-001
 phase: P3-parallel-implementation
-status: authorized-after-p2-design-clean-baseline
+status: active-p3-implementation
+p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: feature/03-content-visible-wave
 parent-report: 0a5091db237ca7cd6be6a4b8ef24da6ac43abf97

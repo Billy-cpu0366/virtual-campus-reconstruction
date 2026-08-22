@@ -1,7 +1,9 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: P2
-status: accepted-awaiting-persisted-baseline
+status: accepted-persisted-implementation-authorized
+p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
+p2-design-tree: ec2884530db465a57b5dd20cd7811fc215e7df52
 authorization: DEC-VISIBLE-WAVE-P2-001
 p1-root-tip: 1b4bc034d33675ebe6ddd4045f5c47a1739da9f4
 human-visual-target: accepted

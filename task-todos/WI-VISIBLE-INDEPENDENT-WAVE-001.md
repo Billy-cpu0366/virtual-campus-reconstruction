@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-INDEPENDENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 04-independent
-status: p1-complete-p2-authorized-after-design-commit
+status: active-p3-implementation
 branch: feature/04-independent-visible-wave
 worktree-path: .pi/worktrees/04-independent-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: p2-implementation-after-clean-design-baseline
+current-authorization: p3-bounded-implementation
 worktree-receipt: verified-clean-at-baseline
 updated: 2026-08-22
 ---

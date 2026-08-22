@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-SIDE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 05-side
-status: p1-complete-p2-authorized-after-design-commit
+status: active-p3-implementation
 branch: feature/05-side-visible-wave
 worktree-path: .pi/worktrees/05-side-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: p2-implementation-after-clean-design-baseline
+current-authorization: p3-bounded-implementation
 worktree-receipt: verified-clean-at-baseline
 updated: 2026-08-22
 ---

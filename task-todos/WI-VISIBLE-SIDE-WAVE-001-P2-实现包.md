@@ -1,7 +1,8 @@
 ---
 work-item: WI-VISIBLE-SIDE-WAVE-001
 phase: P3-parallel-implementation
-status: authorized-after-p2-design-clean-baseline
+status: active-p3-implementation
+p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: feature/05-side-visible-wave
 parent-report: 035017aee3f5166e952f4a44f2a95970e3d2f4ee

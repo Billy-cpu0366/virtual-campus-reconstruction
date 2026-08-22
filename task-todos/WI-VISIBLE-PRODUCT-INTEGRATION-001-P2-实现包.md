@@ -1,7 +1,8 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P3-main-implementation-and-integration
-status: authorized-after-p2-design-clean-baseline
+status: active-p3-implementation
+p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: integration/visible-product-wave
 parent-report: b5708b42a08022226da0e9420e278a6f69481104
