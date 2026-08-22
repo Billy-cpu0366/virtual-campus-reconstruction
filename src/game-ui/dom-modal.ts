@@ -61,6 +61,22 @@ type PreparedView = {
 
 type ActiveView = PreparedView;
 
+type DomModalSnapshot = {
+  readonly rootHidden: boolean;
+  readonly rootPointerEvents: string;
+  readonly backdropHidden: boolean;
+  readonly backdropPointerEvents: string;
+  readonly backdropZIndex: string;
+  readonly modalHidden: boolean;
+  readonly modalPointerEvents: string;
+  readonly modalZIndex: string;
+  readonly modalOverflowY: string;
+  readonly modalMaxHeight: string;
+  readonly titleText: string | null;
+  readonly bodyText: string | null;
+  readonly scrollTop: number;
+};
+
 const DESKTOP_MAX_HEIGHT_RATIO = 0.9;
 const MOBILE_MAX_HEIGHT_RATIO = 0.7;
 const MOBILE_WIDTH = 767;
@@ -101,48 +117,52 @@ function sameIdentity(left: ActiveView, right: PreparedView): boolean {
 }
 
 function validateAndBuild(request: unknown): PreparedView | undefined {
-  if (!isRecord(request)) return undefined;
-  if (!isMenuId(request.menuId) || !hasText(request.residenceId)) {
-    return undefined;
-  }
+  try {
+    if (!isRecord(request)) return undefined;
+    if (!isMenuId(request.menuId) || !hasText(request.residenceId)) {
+      return undefined;
+    }
 
-  if (!isRecord(request.payload)) return undefined;
-  const payload = request.payload;
-  if (
-    !isMenuId(payload.menuId) ||
-    payload.menuId !== request.menuId ||
-    !hasText(payload.title) ||
-    !Array.isArray(payload.body) ||
-    payload.body.length === 0 ||
-    !payload.body.every(hasText)
-  ) {
-    return undefined;
-  }
+    if (!isRecord(request.payload)) return undefined;
+    const payload = request.payload;
+    if (
+      !isMenuId(payload.menuId) ||
+      payload.menuId !== request.menuId ||
+      !hasText(payload.title) ||
+      !Array.isArray(payload.body) ||
+      payload.body.length === 0 ||
+      !payload.body.every(hasText)
+    ) {
+      return undefined;
+    }
 
-  if (
-    !isRecord(request.presentation) ||
-    !isBackdrop(request.presentation.backdrop)
-  ) {
-    return undefined;
-  }
-  if ("residenceId" in payload && !hasText(payload.residenceId)) {
-    return undefined;
-  }
-  if (
-    "presentation" in payload &&
-    (!isRecord(payload.presentation) ||
-      !isBackdrop(payload.presentation.backdrop))
-  ) {
-    return undefined;
-  }
+    if (
+      !isRecord(request.presentation) ||
+      !isBackdrop(request.presentation.backdrop)
+    ) {
+      return undefined;
+    }
+    if ("residenceId" in payload && !hasText(payload.residenceId)) {
+      return undefined;
+    }
+    if (
+      "presentation" in payload &&
+      (!isRecord(payload.presentation) ||
+        !isBackdrop(payload.presentation.backdrop))
+    ) {
+      return undefined;
+    }
 
-  return {
-    menuId: request.menuId,
-    residenceId: request.residenceId,
-    title: payload.title,
-    body: payload.body.join("\n\n"),
-    backdrop: request.presentation.backdrop,
-  };
+    return {
+      menuId: request.menuId,
+      residenceId: request.residenceId,
+      title: payload.title,
+      body: payload.body.join("\n\n"),
+      backdrop: request.presentation.backdrop,
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 export class DomModalGameUi implements GameUiPort {
@@ -151,6 +171,8 @@ export class DomModalGameUi implements GameUiPort {
   private readonly subscribers = new Set<(event: UserCloseEvent) => void>();
   private active: ActiveView | undefined;
   private unsubscribeResize: (() => void) | undefined;
+  private closeListenerBound = false;
+  private backdropListenerBound = false;
   private listenersBound = false;
   private destroyed = false;
 
@@ -164,7 +186,11 @@ export class DomModalGameUi implements GameUiPort {
 
   private readonly resizeListener = (): void => {
     if (this.destroyed || this.active === undefined) return;
-    this.applyMaxHeight();
+    try {
+      this.applyMaxHeight();
+    } catch {
+      // Resize failures must not escape the DOM event boundary.
+    }
   };
 
   constructor(elements: Partial<DomModalElements>, viewport: DomModalViewport) {
@@ -175,40 +201,53 @@ export class DomModalGameUi implements GameUiPort {
 
   show(request: GameUiShowRequest): ShowResult {
     if (this.destroyed) return { status: "destroyed" };
-    if (!this.hasAllTargets()) return { status: "missing-target" };
 
-    const prepared = validateAndBuild(request);
-    if (prepared === undefined) return { status: "invalid-payload" };
-    if (this.active !== undefined && sameIdentity(this.active, prepared)) {
-      return { status: "already-visible" };
+    try {
+      if (!this.hasAllTargets()) return { status: "missing-target" };
+
+      const prepared = validateAndBuild(request);
+      if (prepared === undefined) return { status: "invalid-payload" };
+      if (this.active !== undefined && sameIdentity(this.active, prepared)) {
+        return { status: "already-visible" };
+      }
+
+      if (!this.replaceDom(prepared)) return { status: "invalid-payload" };
+      this.active = prepared;
+      return { status: "shown" };
+    } catch {
+      return { status: "invalid-payload" };
     }
-
-    if (!this.replaceDom(prepared)) return { status: "invalid-payload" };
-    this.active = prepared;
-    return { status: "shown" };
   }
 
   hide(request: GameUiHideRequest) {
     if (this.destroyed) return { status: "destroyed" } as const;
-    const active = this.active;
-    if (active === undefined) return { status: "already-hidden" } as const;
-    if (
-      active.menuId !== request.menuId ||
-      active.residenceId !== request.residenceId
-    ) {
+    try {
+      const active = this.active;
+      if (active === undefined) return { status: "already-hidden" } as const;
+      if (
+        active.menuId !== request.menuId ||
+        active.residenceId !== request.residenceId
+      ) {
+        return { status: "target-mismatch" } as const;
+      }
+
+      this.hideDom();
+      this.active = undefined;
+      return { status: "hidden" } as const;
+    } catch {
       return { status: "target-mismatch" } as const;
     }
-
-    this.hideDom();
-    this.active = undefined;
-    return { status: "hidden" } as const;
   }
 
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
     this.removeListeners();
-    this.hideDom();
+    try {
+      this.hideDom();
+    } catch {
+      // Destroy remains best effort even if an injected DOM setter fails.
+    }
     this.active = undefined;
     this.subscribers.clear();
   }
@@ -236,32 +275,55 @@ export class DomModalGameUi implements GameUiPort {
   }
 
   private bindListeners(): void {
-    const { closeButton, backdrop } = this.elements;
-    if (!hasTarget(closeButton) || !hasTarget(backdrop)) return;
-    if (!this.hasAllTargets()) return;
-    closeButton.addEventListener("click", this.closeListener);
-    backdrop.addEventListener("click", this.backdropListener);
-    this.unsubscribeResize = this.viewport.subscribeResize(
-      this.resizeListener,
-    );
-    this.listenersBound = true;
+    try {
+      if (!this.hasAllTargets()) return;
+      const { closeButton, backdrop } = this.elements;
+      if (!hasTarget(closeButton) || !hasTarget(backdrop)) return;
+
+      this.closeListenerBound = true;
+      closeButton.addEventListener("click", this.closeListener);
+      this.backdropListenerBound = true;
+      backdrop.addEventListener("click", this.backdropListener);
+      const unsubscribeResize = this.viewport.subscribeResize(
+        this.resizeListener,
+      );
+      if (typeof unsubscribeResize !== "function") {
+        throw new TypeError("resize subscription did not return cleanup");
+      }
+      this.unsubscribeResize = unsubscribeResize;
+      this.listenersBound = true;
+    } catch (error) {
+      this.removeListeners();
+      throw error;
+    }
   }
 
   private removeListeners(): void {
-    const { closeButton, backdrop } = this.elements;
-    if (this.listenersBound && hasTarget(closeButton) && hasTarget(backdrop)) {
+    if (this.closeListenerBound) {
       try {
-        closeButton.removeEventListener("click", this.closeListener);
+        this.elements.closeButton?.removeEventListener(
+          "click",
+          this.closeListener,
+        );
       } catch {
-        // Continue removing every independently owned listener.
-      }
-      try {
-        backdrop.removeEventListener("click", this.backdropListener);
-      } catch {
-        // Continue with the injected viewport cleanup.
+        // Listener cleanup is best effort.
       }
     }
+    this.closeListenerBound = false;
+
+    if (this.backdropListenerBound) {
+      try {
+        this.elements.backdrop?.removeEventListener(
+          "click",
+          this.backdropListener,
+        );
+      } catch {
+        // Listener cleanup is best effort.
+      }
+    }
+    this.backdropListenerBound = false;
     this.listenersBound = false;
+
     const unsubscribeResize = this.unsubscribeResize;
     this.unsubscribeResize = undefined;
     try {
@@ -272,98 +334,201 @@ export class DomModalGameUi implements GameUiPort {
   }
 
   private replaceDom(prepared: PreparedView): boolean {
-    const { root, backdrop, modal, title, body } = this.elements;
-    if (
-      !hasTarget(root) ||
-      !hasTarget(backdrop) ||
-      !hasTarget(modal) ||
-      !hasTarget(title) ||
-      !hasTarget(body)
-    ) {
-      return false;
-    }
-
-    const previous = {
-      rootHidden: root.hidden,
-      rootPointerEvents: root.style.pointerEvents,
-      backdropHidden: backdrop.hidden,
-      backdropPointerEvents: backdrop.style.pointerEvents,
-      modalHidden: modal.hidden,
-      modalPointerEvents: modal.style.pointerEvents,
-      modalZIndex: modal.style.zIndex,
-      modalOverflowY: modal.style.overflowY,
-      modalMaxHeight: modal.style.maxHeight,
-      titleText: title.textContent,
-      bodyText: body.textContent,
-      scrollTop: modal.scrollTop,
-    };
-
     try {
-      title.textContent = prepared.title;
-      body.textContent = prepared.body;
-      root.hidden = false;
-      root.style.pointerEvents = "auto";
-      backdrop.hidden = prepared.backdrop !== "global";
-      backdrop.style.pointerEvents = prepared.backdrop === "global" ? "auto" : "none";
-      backdrop.style.zIndex = "9998";
-      modal.hidden = false;
-      modal.style.pointerEvents = "auto";
-      modal.style.zIndex = "9999";
-      modal.style.overflowY = "auto";
-      modal.scrollTop = 0;
-      this.applyMaxHeight();
-      return true;
+      const { root, backdrop, modal, title, body } = this.elements;
+      if (
+        !hasTarget(root) ||
+        !hasTarget(backdrop) ||
+        !hasTarget(modal) ||
+        !hasTarget(title) ||
+        !hasTarget(body)
+      ) {
+        return false;
+      }
+
+      // Resolve every throwable build input before the first DOM mutation.
+      const maxHeight = this.getMaxHeight();
+      const previous: DomModalSnapshot = {
+        rootHidden: root.hidden,
+        rootPointerEvents: root.style.pointerEvents,
+        backdropHidden: backdrop.hidden,
+        backdropPointerEvents: backdrop.style.pointerEvents,
+        backdropZIndex: backdrop.style.zIndex,
+        modalHidden: modal.hidden,
+        modalPointerEvents: modal.style.pointerEvents,
+        modalZIndex: modal.style.zIndex,
+        modalOverflowY: modal.style.overflowY,
+        modalMaxHeight: modal.style.maxHeight,
+        titleText: title.textContent,
+        bodyText: body.textContent,
+        scrollTop: modal.scrollTop,
+      };
+
+      try {
+        title.textContent = prepared.title;
+        body.textContent = prepared.body;
+        root.hidden = false;
+        root.style.pointerEvents = "auto";
+        backdrop.hidden = prepared.backdrop !== "global";
+        backdrop.style.pointerEvents =
+          prepared.backdrop === "global" ? "auto" : "none";
+        backdrop.style.zIndex = "9998";
+        modal.hidden = false;
+        modal.style.pointerEvents = "auto";
+        modal.style.zIndex = "9999";
+        modal.style.overflowY = "auto";
+        if (maxHeight !== undefined) modal.style.maxHeight = maxHeight;
+        modal.scrollTop = 0;
+        return true;
+      } catch {
+        this.restoreDom(root, backdrop, modal, title, body, previous);
+        return false;
+      }
     } catch {
-      root.hidden = previous.rootHidden;
-      root.style.pointerEvents = previous.rootPointerEvents;
-      backdrop.hidden = previous.backdropHidden;
-      backdrop.style.pointerEvents = previous.backdropPointerEvents;
-      modal.hidden = previous.modalHidden;
-      modal.style.pointerEvents = previous.modalPointerEvents;
-      modal.style.zIndex = previous.modalZIndex;
-      modal.style.overflowY = previous.modalOverflowY;
-      modal.style.maxHeight = previous.modalMaxHeight;
-      title.textContent = previous.titleText;
-      body.textContent = previous.bodyText;
-      modal.scrollTop = previous.scrollTop;
       return false;
     }
   }
 
-  private applyMaxHeight(): void {
-    const modal = this.elements.modal;
-    if (!hasTarget(modal)) return;
+  private restoreDom(
+    root: DomModalTarget,
+    backdrop: DomModalTarget,
+    modal: DomModalTarget,
+    title: DomModalTarget,
+    body: DomModalTarget,
+    previous: DomModalSnapshot,
+  ): void {
+    const restore = (operation: () => void): void => {
+      try {
+        operation();
+      } catch {
+        // Rollback is best effort and must not block the invalid result.
+      }
+    };
+
+    restore(() => {
+      root.hidden = previous.rootHidden;
+    });
+    restore(() => {
+      root.style.pointerEvents = previous.rootPointerEvents;
+    });
+    restore(() => {
+      backdrop.hidden = previous.backdropHidden;
+    });
+    restore(() => {
+      backdrop.style.pointerEvents = previous.backdropPointerEvents;
+    });
+    restore(() => {
+      backdrop.style.zIndex = previous.backdropZIndex;
+    });
+    restore(() => {
+      modal.hidden = previous.modalHidden;
+    });
+    restore(() => {
+      modal.style.pointerEvents = previous.modalPointerEvents;
+    });
+    restore(() => {
+      modal.style.zIndex = previous.modalZIndex;
+    });
+    restore(() => {
+      modal.style.overflowY = previous.modalOverflowY;
+    });
+    restore(() => {
+      modal.style.maxHeight = previous.modalMaxHeight;
+    });
+    restore(() => {
+      title.textContent = previous.titleText;
+    });
+    restore(() => {
+      body.textContent = previous.bodyText;
+    });
+    restore(() => {
+      modal.scrollTop = previous.scrollTop;
+    });
+  }
+
+  private getMaxHeight(): string | undefined {
     const size = this.viewport.getSize();
     if (
       !Number.isFinite(size.width) ||
       !Number.isFinite(size.height) ||
       size.height < 0
     ) {
-      return;
+      return undefined;
     }
     const ratio = size.width <= MOBILE_WIDTH
       ? MOBILE_MAX_HEIGHT_RATIO
       : DESKTOP_MAX_HEIGHT_RATIO;
-    modal.style.maxHeight = `${size.height * ratio}px`;
+    return `${size.height * ratio}px`;
+  }
+
+  private applyMaxHeight(): void {
+    try {
+      const modal = this.elements.modal;
+      if (!hasTarget(modal)) return;
+      const maxHeight = this.getMaxHeight();
+      if (maxHeight !== undefined) modal.style.maxHeight = maxHeight;
+    } catch {
+      // Resize failures must not escape the DOM event boundary.
+    }
   }
 
   private hideDom(): void {
-    const { root, backdrop, modal, title, body } = this.elements;
-    if (hasTarget(root)) {
-      root.hidden = true;
-      root.style.pointerEvents = "none";
+    const getTarget = (
+      key: keyof DomModalElements,
+    ): DomModalTarget | undefined => {
+      try {
+        const target = this.elements[key];
+        return hasTarget(target) ? target : undefined;
+      } catch {
+        return undefined;
+      }
+    };
+    const mutate = (operation: () => void): void => {
+      try {
+        operation();
+      } catch {
+        // Hiding is best effort and must continue after an injected failure.
+      }
+    };
+    const root = getTarget("root");
+    const backdrop = getTarget("backdrop");
+    const modal = getTarget("modal");
+    const title = getTarget("title");
+    const body = getTarget("body");
+
+    if (root !== undefined) {
+      mutate(() => {
+        root.hidden = true;
+      });
+      mutate(() => {
+        root.style.pointerEvents = "none";
+      });
     }
-    if (hasTarget(backdrop)) {
-      backdrop.hidden = true;
-      backdrop.style.pointerEvents = "none";
+    if (backdrop !== undefined) {
+      mutate(() => {
+        backdrop.hidden = true;
+      });
+      mutate(() => {
+        backdrop.style.pointerEvents = "none";
+      });
     }
-    if (hasTarget(modal)) {
-      modal.hidden = true;
-      modal.style.pointerEvents = "none";
-      modal.scrollTop = 0;
+    if (modal !== undefined) {
+      mutate(() => {
+        modal.hidden = true;
+      });
+      mutate(() => {
+        modal.style.pointerEvents = "none";
+      });
+      mutate(() => {
+        modal.scrollTop = 0;
+      });
     }
-    if (hasTarget(title)) title.textContent = "";
-    if (hasTarget(body)) body.textContent = "";
+    if (title !== undefined) mutate(() => {
+      title.textContent = "";
+    });
+    if (body !== undefined) mutate(() => {
+      body.textContent = "";
+    });
   }
 
   private emitUserClose(source: UserCloseSource): void {
