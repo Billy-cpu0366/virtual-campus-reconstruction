@@ -4,12 +4,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p4
-current-phase: p4-branch-review-and-integration-plan
-current-gate: p4-authority-clean-baseline
-gate-status: accepted-awaiting-persist
+current-phase: p4-main-serial-integration
+current-gate: main-final-integration-commit
+gate-status: in_progress
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p4-main-serial-integration
+next-phase: p5-automated-and-human-validation
 updated: 2026-08-22
 ---
 
@@ -18,9 +18,9 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：P4分支审查与Main串行集成计划；03=`71b00851`、04=`db0fd9d1+c1156cd8`、05=`0c049130`、Main=`3513ccac`均clean交付。
+- **当前阶段**：P4 Main最终接线；authority=`9d430d02`，assembled baseline=`532d8095`已通过typecheck/全测试/两build。
 - **已接受视觉目标**：Play后3秒Power2镜头落玩家、火车同时5秒进场后开放控制、桌面480×270逻辑画面、Memo 6首个真人引导。
-- **当前授权**：P4集成包已获Human“ok，继续吧”；clean authority提交前不cherry-pick、不写Main integration代码。
+- **当前授权**：只允许Main按P4包完成App/资源/registry/真实train碰撞/side lifecycle接线和对应测试；不得改产品目标或提前关闭。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
@@ -54,7 +54,7 @@ updated: 2026-08-22
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | 四路P3均ready；P4五项接线缺口已审查并获Human继续授权 | 提交P4 authority；随后Main按04→03→05接收并完成App/资源/真实train碰撞/side生命周期 | authority前合并；保留production train fake；跳过Human视觉Gate；push/PR/Windows同步 | assembled baseline全绿后Main写最终接线并进入自动+Human验收 |
+| 三板块可见成果并行波 | P4 authority`9d430d02`；assembled`532d8095`全绿 | Main完成五项真实接线与integration commit | 保留production fake；双生命周期；只跑自动化就关闭；push/PR/Windows同步 | P5全自动回归后启动实际预览和Human视觉Gate |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -171,7 +171,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前无外部阻塞；P4已明确五项必须接线：App/Retry generation、10项内容资源、registry、真实train到站收据与玩家碰撞、sprayer/smoke/side teardown。等待authority clean提交。
+- 当前无外部阻塞；assembled baseline已形成，等待Main完成五项最终接线。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。

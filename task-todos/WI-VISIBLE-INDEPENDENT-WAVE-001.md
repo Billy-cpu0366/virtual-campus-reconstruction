@@ -2,7 +2,7 @@
 work-item: WI-VISIBLE-INDEPENDENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 04-independent
-status: ready-for-p4-integration
+status: accepted-into-p4-assembled-baseline
 branch: feature/04-independent-visible-wave
 worktree-path: .pi/worktrees/04-independent-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0

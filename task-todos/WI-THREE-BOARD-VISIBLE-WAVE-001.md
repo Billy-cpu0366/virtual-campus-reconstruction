@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p4-integration-plan
+status: active-p4-main-final-integration
 phase: p4-branch-review-and-main-integration
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0

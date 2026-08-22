@@ -2,7 +2,7 @@
 work-item: WI-VISIBLE-CONTENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 03-content
-status: ready-for-p4-integration
+status: accepted-into-p4-assembled-baseline
 branch: feature/03-content-visible-wave
 worktree-path: .pi/worktrees/03-content-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
