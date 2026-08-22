@@ -17,6 +17,7 @@ const bridgeTest =
   process.env.SMOKE_BRIDGE_TEST === "true";
 const smokeUrlObject = new URL(rawSmokeUrl);
 smokeUrlObject.searchParams.set("collision-test", "1");
+smokeUrlObject.searchParams.set("entry-autoplay", "1");
 const smokeUrl = smokeUrlObject.toString();
 const moveKey = process.env.SMOKE_MOVE_KEY ?? "ArrowDown";
 const keyInfo = {

@@ -6,6 +6,7 @@ const inputUrl =
 const testUrl = new URL(inputUrl);
 testUrl.searchParams.set("content-smoke", String(Date.now()));
 testUrl.searchParams.set("lifecycle-test", "1");
+testUrl.searchParams.set("entry-autoplay", "1");
 const url = testUrl.toString();
 const timeoutMs = Number(process.env.CONTENT_SMOKE_TIMEOUT_MS ?? 12000);
 
@@ -97,7 +98,7 @@ const startedAt = Date.now();
 while (Date.now() - startedAt < timeoutMs) {
   await new Promise((resolve) => setTimeout(resolve, 50));
   ready = await evaluate(
-    "Boolean(window.__campusContentTest && window.__campusLifecycleTest && window.__campusDebug)",
+    "Boolean(window.__campusContentTest && window.__campusLifecycleTest && window.__campusDebug?.().entry?.snapshot?.status === 'playable')",
   );
   if (ready) break;
 }

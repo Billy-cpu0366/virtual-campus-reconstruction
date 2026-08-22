@@ -4,9 +4,10 @@ const inputUrl =
   "http://127.0.0.1:4175/";
 const lifecycleUrl = new URL(inputUrl);
 lifecycleUrl.searchParams.set("lifecycle-test", "1");
+lifecycleUrl.searchParams.set("entry-autoplay", "1");
 lifecycleUrl.searchParams.set("lifecycle-smoke", String(Date.now()));
 const url = lifecycleUrl.toString();
-const waitMs = Number(process.env.LIFECYCLE_WAIT_MS ?? 3500);
+const waitMs = Number(process.env.LIFECYCLE_WAIT_MS ?? 7500);
 const maxChunks = 25;
 const maxRendererLayers = maxChunks * 19;
 const maxMarkerRecords = 4109;

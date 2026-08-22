@@ -61,6 +61,7 @@ declare namespace Phaser {
         body: Body;
         anims: any;
         setDisplaySize(width: number, height: number): this;
+        setVisible(value: boolean): this;
         setCollideWorldBounds(value: boolean): this;
         setVelocity(x: number, y: number): this;
         setFrame(frame: number): this;

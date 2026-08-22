@@ -5,10 +5,11 @@ const inputUrl =
   process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
 const chunkUrl = new URL(inputUrl);
 chunkUrl.searchParams.set("collision-test", "1");
+chunkUrl.searchParams.set("entry-autoplay", "1");
 chunkUrl.searchParams.set("chunk-smoke", String(Date.now()));
 const url = chunkUrl.toString();
 const screenshotPath = process.env.SMOKE_SCREENSHOT;
-const initialWaitMs = Number(process.env.CHUNK_INITIAL_WAIT_MS ?? 2500);
+const initialWaitMs = Number(process.env.CHUNK_INITIAL_WAIT_MS ?? 7500);
 const targetWaitMs = Number(process.env.CHUNK_TARGET_WAIT_MS ?? 2000);
 const targetPosition = Object.freeze({
   x: Number(process.env.CHUNK_TARGET_X ?? 224),
@@ -102,15 +103,30 @@ await command("Runtime.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
-await new Promise((resolve) => setTimeout(resolve, initialWaitMs));
 
 const chunkResources = () => `performance.getEntriesByType("resource")
   .map((entry) => entry.name)
   .filter((name) => name.includes("/maps/chunks/chunk"))`;
+async function waitForSettledDebug(timeoutMs) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const debug = await evaluate(
+      "window.__campusDebug ? window.__campusDebug() : null",
+    );
+    if (
+      debug?.entry?.snapshot?.status === "playable" &&
+      debug?.state?.requesting?.length === 0 &&
+      debug?.state?.rendered?.length > 0
+    ) {
+      return debug;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error("chunk runtime did not settle");
+}
+
+const beforeDebug = await waitForSettledDebug(initialWaitMs + 10000);
 const before = await evaluate(chunkResources());
-const beforeDebug = await evaluate(
-  "window.__campusDebug ? window.__campusDebug() : null",
-);
 const targetHookType = await evaluate(
   "typeof window.__campusCollisionTest",
 );
@@ -122,11 +138,8 @@ await evaluate(
     `${targetPosition.x}, ${targetPosition.y})`,
 );
 await new Promise((resolve) => setTimeout(resolve, targetWaitMs));
-
+const afterDebug = await waitForSettledDebug(targetWaitMs + 10000);
 const after = await evaluate(chunkResources());
-const afterDebug = await evaluate(
-  "window.__campusDebug ? window.__campusDebug() : null",
-);
 const uniqueBefore = [...new Set(before)];
 const uniqueAfter = [...new Set(after)];
 const newRequests = uniqueAfter.filter((name) => !uniqueBefore.includes(name));
@@ -189,10 +202,14 @@ const result = {
   events,
   screenshotPath: screenshotPath ?? null,
   passed:
-    expectedNew.length > 0 &&
-    sameFiles(actualBefore, expectedBefore) &&
-    sameFiles(actualAfter, expectedAfter) &&
-    sameFiles(actualNew, expectedNew) &&
+    (allChunksPreloaded
+      ? uniqueBefore.length === 25 &&
+        uniqueAfter.length === 25 &&
+        newRequests.length === 0
+      : expectedNew.length > 0 &&
+        sameFiles(actualBefore, expectedBefore) &&
+        sameFiles(actualAfter, expectedAfter) &&
+        sameFiles(actualNew, expectedNew)) &&
     chunk20Requested &&
     (beforeDebug?.state?.failed?.length ?? -1) === 0 &&
     (afterDebug?.state?.failed?.length ?? -1) === 0 &&

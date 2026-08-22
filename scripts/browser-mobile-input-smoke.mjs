@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 
 const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:4175";
-const url = process.argv[2] ?? process.env.SMOKE_URL ?? `${baseUrl}/`;
-const waitMs = Number(process.env.SMOKE_WAIT_MS ?? "5000");
+const inputUrl = process.argv[2] ?? process.env.SMOKE_URL ?? `${baseUrl}/`;
+const smokeUrl = new URL(inputUrl);
+smokeUrl.searchParams.set("entry-autoplay", "1");
+const url = smokeUrl.toString();
+const waitMs = Number(process.env.SMOKE_WAIT_MS ?? "7500");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function jsonFetch(endpoint, options) {
@@ -117,7 +120,16 @@ async function openViewport(viewport) {
     ...(viewport.mobile ? { maxTouchPoints: 2 } : {}),
   });
   await command("Page.navigate", { url });
-  await sleep(waitMs);
+  const startedAt = Date.now();
+  let playable = false;
+  while (Date.now() - startedAt < waitMs + 10000) {
+    playable = await connection.evaluate(
+      "window.__campusDebug?.().entry?.snapshot?.status === 'playable'",
+    );
+    if (playable) break;
+    await sleep(50);
+  }
+  if (!playable) throw new Error("mobile input entry did not become playable");
   return { target, ...connection };
 }
 
@@ -188,10 +200,17 @@ try {
   assert.equal(mobileDebug.joystick.device, "mobile");
   assert.equal(mobileDebug.joystick.active, false);
 
+  const canvasRect = await mobile.evaluate(`(() => {
+    const rect = document.querySelector("#app canvas").getBoundingClientRect();
+    return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  })()`);
+  const scaleX = canvasRect.width / 480;
+  const scaleY = canvasRect.height / 270;
   const center = {
-    x: mobileDebug.joystick.x,
-    y: mobileDebug.joystick.y,
+    x: canvasRect.left + mobileDebug.joystick.x * scaleX,
+    y: canvasRect.top + mobileDebug.joystick.y * scaleY,
   };
+  const horizontalMove = 20 * scaleX;
   await dispatchTouch(mobile, "touchStart", [
     { id: 1, x: center.x, y: center.y, radiusX: 1, radiusY: 1 },
   ]);
@@ -232,7 +251,7 @@ try {
   await dispatchTouch(mobile, "touchMove", [
     {
       id: 1,
-      x: center.x + 20,
+      x: center.x + horizontalMove,
       y: center.y,
       radiusX: 1,
       radiusY: 1,
@@ -256,7 +275,7 @@ try {
   await dispatchTouch(mobile, "touchStart", [
     {
       id: 2,
-      x: center.x - 20,
+      x: center.x - horizontalMove,
       y: center.y,
       radiusX: 1,
       radiusY: 1,
@@ -265,14 +284,14 @@ try {
   await dispatchTouch(mobile, "touchMove", [
     {
       id: 1,
-      x: center.x + 20,
+      x: center.x + horizontalMove,
       y: center.y,
       radiusX: 1,
       radiusY: 1,
     },
     {
       id: 2,
-      x: center.x - 20,
+      x: center.x - horizontalMove,
       y: center.y,
       radiusX: 1,
       radiusY: 1,

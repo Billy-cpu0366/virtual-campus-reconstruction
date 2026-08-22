@@ -74,6 +74,16 @@ import {
 } from "./CampusContentResolver.js";
 import { GameplayControlLeaseRuntime } from "./GameplayControlLeaseRuntime.js";
 import {
+  ProductEntryCameraAdapter,
+  TimedTrainArrivalAdapter,
+} from "./ProductEntryAdapters.js";
+import {
+  ProductEntryRuntime,
+  type ProductEntryGuideTarget,
+  type ProductEntryResult,
+  type ProductEntrySnapshot,
+} from "./ProductEntryRuntime.js";
+import {
   BRIDGE_PLAYER_DEPTH,
   BRIDGES,
   LAYER_STRATEGIES,
@@ -97,6 +107,7 @@ import {
 const CHUNK_MASTER_URL = "/maps/chunks/master.json";
 const CHUNK_UPDATE_INTERVAL_MS = 500;
 const CONTENT_UPDATE_INTERVAL_MS = 100;
+const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
 const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
   { markerId: "about", menuId: "about", x: 944, y: 768 },
   { markerId: "cv", menuId: "cv", x: 480, y: 1776 },
@@ -131,6 +142,14 @@ const MOVEMENT_KEY_BY_CODE = new Map<string, keyof KeyState>([
   ["KeyD", "right"],
 ]);
 
+export interface CampusSceneEntryCallbacks {
+  readonly onLoadProgress?: (progress: number) => void;
+  readonly onReady?: () => void;
+  readonly onEntryStatus?: (snapshot: ProductEntrySnapshot) => void;
+  readonly onGuide?: (target: ProductEntryGuideTarget) => void | boolean;
+  readonly onError?: (error: Error) => void;
+}
+
 async function fetchJson(
   url: string,
   signal?: AbortSignal,
@@ -153,6 +172,12 @@ export class CampusScene extends Phaser.Scene {
   private cameraControlDisables = 0;
   private cameraControlEnables = 0;
   private cameraLeaseToken: GameplayControlLeaseToken | undefined;
+  private entryRuntime: ProductEntryRuntime | undefined;
+  private entryCameraRuntime: PhaserCameraRuntime | undefined;
+  private entryTrainAdapter: TimedTrainArrivalAdapter | undefined;
+  private entryResult: ProductEntryResult | undefined;
+  private sceneReady = false;
+  private requiredLoadError: Error | undefined;
   private contentLeaseRuntime: GameplayControlLeaseRuntime | undefined;
   private contentUi: GameUiPort | undefined;
   private interactRuntime: InteractRuntime | undefined;
@@ -234,11 +259,21 @@ export class CampusScene extends Phaser.Scene {
     }
   };
 
-  constructor() {
+  constructor(
+    private readonly entryCallbacks: CampusSceneEntryCallbacks = {},
+  ) {
     super("campus");
   }
 
   preload(): void {
+    this.load.on("progress", (progress: number) => {
+      this.entryCallbacks.onLoadProgress?.(progress);
+    });
+    this.load.once("loaderror", (file: { readonly key?: unknown }) => {
+      const key = typeof file?.key === "string" ? file.key : "required asset";
+      this.requiredLoadError = new Error(`required asset failed: ${key}`);
+      this.entryCallbacks.onError?.(this.requiredLoadError);
+    });
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
     this.load.image("tileset-particles", "/maps/tileset-particles.png");
@@ -259,6 +294,11 @@ export class CampusScene extends Phaser.Scene {
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.events.once("shutdown", () => {
       this.sceneDestroyed = true;
+      this.sceneReady = false;
+      this.entryRuntime?.shutdown();
+      this.entryRuntime = undefined;
+      this.entryCameraRuntime = undefined;
+      this.entryTrainAdapter = undefined;
       this.cameraRuntime?.shutdown();
       this.releaseCameraControlLease();
       this.cameraRuntime = undefined;
@@ -289,9 +329,61 @@ export class CampusScene extends Phaser.Scene {
     });
     void this.initializeDynamicWorld().catch((error: unknown) => {
       if (!this.sceneDestroyed) {
+        const failure =
+          error instanceof Error ? error : new Error(String(error));
+        this.entryCallbacks.onError?.(failure);
         console.error("动态世界初始化失败", error);
       }
     });
+  }
+
+  startProductEntry(): Promise<ProductEntryResult> {
+    if (this.entryResult !== undefined) {
+      return Promise.resolve(this.entryResult);
+    }
+    if (!this.sceneReady || this.requiredLoadError !== undefined) {
+      return Promise.resolve(
+        Object.freeze({
+          status: "failed" as const,
+          error: this.requiredLoadError ?? new Error("scene is not ready"),
+        }),
+      );
+    }
+    if (this.entryRuntime !== undefined) return this.entryRuntime.start();
+
+    this.player.setVisible(true);
+    const cameraRuntime = this.createEntryCameraRuntime();
+    const trainAdapter = new TimedTrainArrivalAdapter(this.time);
+    const entryRuntime = new ProductEntryRuntime({
+      lease: this.contentLeaseRuntime!,
+      camera: new ProductEntryCameraAdapter(cameraRuntime, () => {
+        const camera = this.cameras.main;
+        const zoom = Number.isFinite(camera.zoom) && camera.zoom > 0
+          ? camera.zoom
+          : 1;
+        return Object.freeze({
+          x: camera.scrollX + camera.width / (2 * zoom),
+          y: camera.scrollY + camera.height / (2 * zoom),
+        });
+      }),
+      train: trainAdapter,
+      guide: {
+        publish: (target) => this.entryCallbacks.onGuide?.(target),
+      },
+      onStatus: (snapshot) => this.entryCallbacks.onEntryStatus?.(snapshot),
+    });
+    this.entryCameraRuntime = cameraRuntime;
+    this.entryTrainAdapter = trainAdapter;
+    this.entryRuntime = entryRuntime;
+    const run = entryRuntime.start();
+    void run.then((result) => {
+      this.entryResult = result;
+      if (result.status === "failed" && !this.sceneDestroyed) {
+        this.entryCallbacks.onError?.(result.error);
+      }
+      if (result.status === "completed") this.maybeStartCameraTestTour();
+    });
+    return run;
   }
 
   update(): void {
@@ -415,7 +507,8 @@ export class CampusScene extends Phaser.Scene {
       },
     );
     this.playerRuntime.createAnimations();
-    this.playerRuntime.enableControls(this.time.now);
+    this.player.setVisible(false);
+    this.playerRuntime.disableControls(this.time.now);
   }
 
   private createContentFoundation(): void {
@@ -544,10 +637,14 @@ export class CampusScene extends Phaser.Scene {
   }): void {
     this.physics.world.setBounds(0, 0, bounds.width, bounds.height);
     this.player.setCollideWorldBounds(COLLIDE_WORLD_BOUNDS);
-    this.cameras.main.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-    this.cameras.main.setZoom(CAMERA_ZOOM);
-    this.cameras.main.startFollow(this.player, true, FOLLOW_LERP, FOLLOW_LERP);
-    this.cameras.main.roundPixels = true;
+    const camera = this.cameras.main;
+    camera.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+    camera.stopFollow();
+    camera.setZoom(CAMERA_ZOOM);
+    camera.setFollowOffset(0, 0);
+    camera.setDeadzone(0, 0);
+    camera.centerOn(ENTRY_CAMERA_START.x, ENTRY_CAMERA_START.y);
+    camera.roundPixels = true;
   }
 
   private async initializeDynamicWorld(): Promise<void> {
@@ -647,10 +744,18 @@ export class CampusScene extends Phaser.Scene {
           x: this.player.x,
           y: this.player.y,
           depth: (this.player as any).depth,
+          visible: (this.player as any).visible,
         },
         playerRuntime: {
           position: this.playerRuntime?.position ?? null,
           control: this.playerRuntime?.control ?? null,
+        },
+        entry: {
+          sceneReady: this.sceneReady,
+          result: this.entryResult?.status ?? null,
+          train: this.entryTrainAdapter?.status ?? null,
+          snapshot: this.entryRuntime?.snapshot ?? null,
+          leaseCount: this.contentLeaseRuntime?.activeLeaseCount ?? 0,
         },
         cameraRuntime: {
           status: this.cameraRuntime?.status ?? null,
@@ -726,9 +831,45 @@ export class CampusScene extends Phaser.Scene {
         (window as any).__campusContentTest = contentTestHook;
       }
     }
-    this.updateDynamicTargets();
-    // The playable scene enters on the player. A future pre-game flow must
-    // explicitly own the tour; only test-hooks may trigger it for now.
+    await this.updateDynamicTargetsNow();
+    if (this.sceneDestroyed || this.requiredLoadError !== undefined) return;
+    this.sceneReady = true;
+    this.entryCallbacks.onReady?.();
+  }
+
+  private createEntryCameraRuntime(): PhaserCameraRuntime {
+    const playerRuntime = this.playerRuntime;
+    if (playerRuntime === undefined) {
+      throw new Error("player runtime unavailable for product entry");
+    }
+    const camera = this.cameras.main;
+    return new PhaserCameraRuntime(
+      this as unknown as PhaserCameraSceneLike,
+      {
+        controlGate: {
+          disableControls: () => undefined,
+          enableControls: () => undefined,
+        },
+        getPlayerPosition: () => playerRuntime.position,
+        startHardFollow: (settings) => {
+          camera.startFollow(
+            this.player,
+            true,
+            settings.lerpX,
+            settings.lerpY,
+          );
+        },
+        nativeScaleProvider: () => window.devicePixelRatio,
+        onViewport: (viewport) => {
+          this.pendingCameraViewport = viewport;
+          this.cameraViewportUpdates += 1;
+        },
+        warn: () => undefined,
+      },
+    );
+  }
+
+  private maybeStartCameraTestTour(): void {
     if (
       this.cameraTestHooksEnabled &&
       new URLSearchParams(window.location.search).has("camera-smoke")
@@ -1009,17 +1150,23 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private updateDynamicTargets(): void {
+    void this.updateDynamicTargetsNow().catch((error: unknown) => {
+      console.error("动态分块更新失败", error);
+    });
+  }
+
+  private async updateDynamicTargetsNow(): Promise<void> {
     const coordinator = this.coordinator;
     const geometry = coordinator?.store.geometry;
     const spec = this.worldSpec;
     if (
       coordinator === undefined ||
       geometry === undefined ||
-      spec === undefined
+      spec === undefined ||
+      this.sceneDestroyed
     ) {
       return;
     }
-    if (this.sceneDestroyed) return;
 
     const camera = this.cameras.main;
     const viewport: CameraViewport =
@@ -1035,12 +1182,8 @@ export class CampusScene extends Phaser.Scene {
       x: this.player.x,
       y: this.player.y,
     };
-    void coordinator
-      .updateTargets(
-        targetChunks(playerPosition.x, playerPosition.y, viewport, geometry),
-      )
-      .catch((error: unknown) => {
-        console.error("动态分块更新失败", error);
-      });
+    await coordinator.updateTargets(
+      targetChunks(playerPosition.x, playerPosition.y, viewport, geometry),
+    );
   }
 }

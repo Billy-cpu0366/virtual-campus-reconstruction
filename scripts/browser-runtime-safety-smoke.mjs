@@ -104,6 +104,7 @@ try {
     diagnosticHidden: document.getElementById("diag")?.hidden ?? null,
     debugHook: typeof window.__campusDebug,
     collisionHook: typeof window.__campusCollisionTest,
+    entryHook: typeof window.__campusEntryTest,
   })`);
   const result = JSON.parse(page);
   assert.equal(result.title, "虚拟校园 · 可玩雏形");
@@ -112,6 +113,7 @@ try {
   assert.equal(result.diagnosticHidden, true);
   assert.equal(result.debugHook, "undefined");
   assert.equal(result.collisionHook, "undefined");
+  assert.equal(result.entryHook, "undefined");
   assert.deepEqual(exceptions, []);
   assert.deepEqual(failedRequests, []);
   assert.deepEqual(badResponses, []);

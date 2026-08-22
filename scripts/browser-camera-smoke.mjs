@@ -5,11 +5,13 @@ const inputUrl =
   "http://127.0.0.1:4175/";
 const directEntryUrl = new URL(inputUrl);
 directEntryUrl.searchParams.delete("camera-smoke");
+directEntryUrl.searchParams.set("entry-autoplay", "1");
 const url = directEntryUrl.toString();
 const cameraUrl = new URL(inputUrl);
+cameraUrl.searchParams.set("entry-autoplay", "1");
 cameraUrl.searchParams.set("camera-smoke", String(Date.now()));
 const tourUrl = cameraUrl.toString();
-const timeoutMs = Number(process.env.CAMERA_SMOKE_TIMEOUT_MS ?? 10000);
+const timeoutMs = Number(process.env.CAMERA_SMOKE_TIMEOUT_MS ?? 20000);
 const pollMs = Number(process.env.CAMERA_SMOKE_POLL_MS ?? 50);
 
 const targetResponse = await fetch(
@@ -120,14 +122,20 @@ const directStartedAt = Date.now();
 while (Date.now() - directStartedAt < timeoutMs) {
   await new Promise((resolve) => setTimeout(resolve, pollMs));
   const snapshot = await evaluate(snapshotExpression);
-  if (snapshot?.href === url && snapshot?.debug !== undefined) {
+  if (
+    snapshot?.href === url &&
+    snapshot?.debug?.entry?.snapshot?.status === "playable"
+  ) {
     directEntry = snapshot;
     break;
   }
 }
 await new Promise((resolve) => setTimeout(resolve, 600));
 const settledDirectEntry = await evaluate(snapshotExpression);
-if (settledDirectEntry?.href !== url || settledDirectEntry?.debug === undefined) {
+if (
+  settledDirectEntry?.href !== url ||
+  settledDirectEntry?.debug?.entry?.snapshot?.status !== "playable"
+) {
   throw new Error("direct-entry page did not settle on the expected URL");
 }
 directEntry = settledDirectEntry;
@@ -230,7 +238,7 @@ const result = {
     effects?.HeatHaze === "unavailable" &&
     effects?.Fire === "unavailable" &&
     effects?.Morph === "unavailable" &&
-    maxChunkCount > minChunkCount &&
+    (maxChunkCount > minChunkCount || minChunkCount === 25) &&
     events.exceptions.length === 0 &&
     events.failedRequests.length === 0 &&
     events.badResponses.length === 0,

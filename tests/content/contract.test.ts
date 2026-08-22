@@ -121,6 +121,7 @@ describe("内容共享 contract", () => {
     const leaseReasons: readonly GameplayControlLeaseReason[] = [
       "modal-open",
       "camera-tour",
+      "entry-transition",
     ];
     const acquired: GameplayControlLeaseAcquireResult = {
       ok: false,
@@ -150,7 +151,7 @@ describe("内容共享 contract", () => {
       "invalid",
       "shown",
       "already-visible",
-      "modal-open,camera-tour",
+      "modal-open,camera-tour,entry-transition",
       "disable-failed",
       "stale-token",
       "disable-failed",

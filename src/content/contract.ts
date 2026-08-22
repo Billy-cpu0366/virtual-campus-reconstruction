@@ -134,7 +134,10 @@ export interface ContentResolverPort {
   resolve(menuId: ContentMenuId): ContentResolveResult;
 }
 
-export type GameplayControlLeaseReason = "modal-open" | "camera-tour";
+export type GameplayControlLeaseReason =
+  | "modal-open"
+  | "camera-tour"
+  | "entry-transition";
 
 declare const gameplayControlLeaseTokenBrand: unique symbol;
 
