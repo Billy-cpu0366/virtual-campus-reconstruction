@@ -1,6 +1,6 @@
 ---
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: active-auto-work-packaging
+status: active-three-window-implementation
 work-item-type: parallel-design-implementation-pipeline
 branch-owner: master
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
@@ -9,6 +9,7 @@ definition-commit: db1f878
 shared-baseline: 42e445d
 pipeline-commit: 6fdefb1
 design-commit: 1cade08
+shared-code-commit: d2e73b50c6cdb68096c188b585822def853e8722
 updated: 2026-08-21
 ---
 

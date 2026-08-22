@@ -1,7 +1,7 @@
 ---
 workflow: PIPELINE-CONTENT-FOUNDATION-001
 work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
-status: accepted-persisted-verified-active-p3
+status: accepted-persisted-verified-active-p4
 authorization: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 pipeline-commit: 6fdefb1
 updated: 2026-08-21
@@ -92,6 +92,12 @@ Main-owned 精确范围：
 - Human 在WSL终端成功创建 `.pi/worktrees/content-foundation-integration`，分支 `integration/content-foundation`。
 - `rev-parse HEAD`=`798eda67aca9f7e7e1a4fb7f2c76290c83483dcd`；`status --short --branch`仅显示分支行，工作树clean。
 - 流程恢复P3 shared code baseline，不追溯执行被guard拒绝的命令。
+
+### P3 shared code baseline 收据
+
+- commit=`d2e73b50c6cdb68096c188b585822def853e8722`；parent=`798eda67`；tree=`8ee9b2e68cb7e1c9af271c94b96830bcd8981288`。
+- 仅6个Main-owned contract/resolver/lease及测试文件；39文件/208测试、typecheck、production/test-hooks build、CRLF diff和独立复核PASS。
+- Human创建A/B worktree，均在该commit且clean；P4任务包：`WI-CONTENT-FOUNDATION-IMPL-A-001`、`B-001`、`C-001-NO-CODE`。
 
 ### 阶段 M：Main integration
 

@@ -4,12 +4,12 @@ current-work-item: WI-PARALLEL-CONTENT-FOUNDATION-RECON-001
 work-item-level: integration
 work-item-type: parallel-design-implementation-pipeline
 work-item-status: active
-current-phase: auto-work-packaging
-current-gate: shared-code-baseline
+current-phase: three-window-implementation
+current-gate: parallel-bounded-implementation
 gate-status: in_progress
 authorization-ref: DEC-PARALLEL-CONTENT-FOUNDATION-PIPELINE-001
 preauthorized-next-work-item: none
-next-phase: three-window-implementation
+next-phase: main-integration
 updated: 2026-08-21
 ---
 
@@ -31,8 +31,9 @@ updated: 2026-08-21
 - **P1 已完成**：A `1b29908`、B `6b5970a`、C `125691d`；三分支clean。C确认统一Entity实现NO-GO。
 - **P2 已通过**：权威设计提交 `1cade08`；状态一致性、CRLF-aware diff、相对链接和独立复核 PASS。C implementation NO-GO。
 - **P3 已解除阻塞**：Human在WSL终端创建 `integration/content-foundation` worktree，HEAD=`798eda67aca9f7e7e1a4fb7f2c76290c83483dcd`，状态clean。
-- **当前执行**：Main在该worktree只实现shared contract、同步resolver、control lease及测试；通过typecheck、全测试、两build和diff后记录immutable code baseline。
-- **随后派工**：A/B从同一code baseline创建隔离实现worktree；C保持no-code。未push/远端操作。
+- **P3 已通过**：shared code baseline `d2e73b50c6cdb68096c188b585822def853e8722`，parent=`798eda67`；仅6个允许文件；typecheck、39文件/208测试、两build、diff和独立复核PASS。
+- **当前 P4**：A worktree `impl/content-interact`、B worktree `impl/content-game-ui` 均由Human创建在 `d2e73b50` 且clean；任务包已绑定runtime/design/code三个hash，A/B并行实现，C并行no-code核验。
+- **下一步**：收齐A/B commit和C收据后，Main只在integration worktree串行审查与接线。未push/远端操作。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
