@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:4175";
 const inputUrl = process.argv[2] ?? process.env.SMOKE_URL ?? `${baseUrl}/`;
 const smokeUrl = new URL(inputUrl);
-smokeUrl.searchParams.set("entry-autoplay", "1");
 const url = smokeUrl.toString();
 const waitMs = Number(process.env.SMOKE_WAIT_MS ?? "7500");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -120,6 +121,7 @@ async function openViewport(viewport) {
     ...(viewport.mobile ? { maxTouchPoints: 2 } : {}),
   });
   await command("Page.navigate", { url });
+  await clickPlay(command, connection.evaluate, waitMs + 10000);
   const startedAt = Date.now();
   let playable = false;
   while (Date.now() - startedAt < waitMs + 10000) {

@@ -233,6 +233,10 @@ export class PhaserSprayerRuntime {
     return this.group.snapshot;
   }
 
+  get spriteCount(): number {
+    return this.sprites.size;
+  }
+
   private apply(snapshot: ReturnType<SprayerGroupRuntime["tick"]>): void {
     for (const instance of snapshot.instances) {
       const sprite = this.sprites.get(instance.id);

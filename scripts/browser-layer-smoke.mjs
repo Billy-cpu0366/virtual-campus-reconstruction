@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 const inputUrl = process.argv[2] ?? "http://127.0.0.1:4175/";
 const smokeUrl = new URL(inputUrl);
-smokeUrl.searchParams.set("entry-autoplay", "1");
 const url = smokeUrl.toString();
 const waitMs = Number(process.env.LAYER_SMOKE_WAIT_MS ?? "7500");
 
@@ -61,6 +62,7 @@ try {
   await command("Runtime.enable");
   await command("Page.enable");
   await command("Page.navigate", { url });
+  await clickPlay(command, evaluate, waitMs + 10000);
   const startedAt = Date.now();
   let debug;
   while (Date.now() - startedAt < waitMs + 10000) {

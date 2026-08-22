@@ -1,5 +1,7 @@
 import { writeFileSync } from "node:fs";
 
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const cdpBase = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 const appBase = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:4175";
 const outputPath =
@@ -503,6 +505,7 @@ async function inspectTarget(target, viewport, url, testZoom) {
       screenHeight: viewport.height,
     });
     await command("Page.navigate", { url });
+    await clickPlay(command, evaluate, settleTimeoutMs);
     await sleep(initialWaitMs);
     const ready = await waitUntilReady();
     if (ready.camera === null) {

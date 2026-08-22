@@ -6,6 +6,10 @@ import {
   type AppRuntimeEffects,
 } from "../../src/app/index.js";
 
+async function settleAsyncCleanup(): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+}
+
 class FakeEffects implements AppRuntimeEffects {
   readonly callbacks = new Map<number, AppLoadCallbacks>();
   readonly cleanupCalls: number[] = [];
@@ -15,6 +19,7 @@ class FakeEffects implements AppRuntimeEffects {
     { readonly onEntered: () => void; readonly onError: (error: unknown) => void }
   >();
   cleanupThrows = false;
+  cleanupPromise: Promise<void> | undefined;
   startLoadingCalls = 0;
 
   startLoading(generation: number, callbacks: AppLoadCallbacks) {
@@ -27,9 +32,10 @@ class FakeEffects implements AppRuntimeEffects {
     };
   }
 
-  cleanup(generation: number): void {
+  cleanup(generation: number): void | Promise<void> {
     this.cleanupCalls.push(generation);
     if (this.cleanupThrows) throw new Error("cleanup failed");
+    return this.cleanupPromise;
   }
 
   enterGame(
@@ -86,7 +92,7 @@ describe("AppRuntime", () => {
     ]);
   });
 
-  it("accepts only real monotonic progress and rejects stale callbacks after Retry", () => {
+  it("accepts only real monotonic progress and rejects stale callbacks after Retry", async () => {
     const effects = new FakeEffects();
     const runtime = new AppRuntime({ effects });
     expect(runtime.start()).toBe(true);
@@ -99,6 +105,8 @@ describe("AppRuntime", () => {
     expect(runtime.snapshot.status).toBe("ERROR");
     expect(runtime.snapshot.progress).toBe(0.6);
     expect(runtime.retry()).toBe(true);
+    expect(runtime.snapshot.status).toBe("RETRYING");
+    await settleAsyncCleanup();
     expect(runtime.snapshot).toEqual({
       status: "LOADING",
       generation: 2,
@@ -114,23 +122,26 @@ describe("AppRuntime", () => {
     expect(runtime.snapshot.status).toBe("READY");
   });
 
-  it("does not start a new generation when old cleanup cannot finish", () => {
+  it("does not start a new generation when old cleanup cannot finish", async () => {
     const effects = new FakeEffects();
     const runtime = new AppRuntime({ effects });
     expect(runtime.start()).toBe(true);
     effects.cleanupThrows = true;
     effects.callbacks.get(1)?.onError("asset failed");
 
+    await settleAsyncCleanup();
     expect(runtime.snapshot.status).toBe("ERROR");
     expect(runtime.snapshot.error?.kind).toBe("cleanup");
+    expect(runtime.retry()).toBe(true);
     expect(runtime.retry()).toBe(false);
+    await settleAsyncCleanup();
     expect(runtime.snapshot.status).toBe("ERROR");
     expect(runtime.snapshot.generation).toBe(1);
     expect(effects.startLoadingCalls).toBe(1);
     expect(effects.cleanupCalls).toEqual([1, 1]);
   });
 
-  it("ignores late entry callbacks and closes an entry error", () => {
+  it("ignores late entry callbacks and closes an entry error", async () => {
     const effects = new FakeEffects();
     const runtime = new AppRuntime({ effects });
     runtime.start();
@@ -142,9 +153,33 @@ describe("AppRuntime", () => {
 
     expect(runtime.retry()).toBe(true);
     expect(runtime.markEntered(1)).toBe(false);
+    await settleAsyncCleanup();
     expect(runtime.snapshot.generation).toBe(2);
     effects.callbacks.get(2)?.onReady();
     expect(runtime.snapshot.status).toBe("READY");
+  });
+
+  it("waits for complete cleanup before creating the retry generation", async () => {
+    const effects = new FakeEffects();
+    let finishCleanup: (() => void) | undefined;
+    effects.cleanupPromise = new Promise<void>((resolve) => {
+      finishCleanup = resolve;
+    });
+    const runtime = new AppRuntime({ effects });
+
+    runtime.start();
+    effects.callbacks.get(1)?.onError(new Error("asset failed"));
+    expect(runtime.retry()).toBe(true);
+    expect(runtime.snapshot.status).toBe("RETRYING");
+    expect(effects.startLoadingCalls).toBe(1);
+
+    finishCleanup?.();
+    await settleAsyncCleanup();
+    expect(runtime.snapshot).toMatchObject({
+      status: "LOADING",
+      generation: 2,
+    });
+    expect(effects.startLoadingCalls).toBe(2);
   });
 
   it("turns observer failures into no-op and remains shutdown-safe", () => {

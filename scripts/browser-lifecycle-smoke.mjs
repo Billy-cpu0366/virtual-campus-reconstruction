@@ -1,10 +1,11 @@
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
 const inputUrl =
   process.argv[2] ??
   "http://127.0.0.1:4175/";
 const lifecycleUrl = new URL(inputUrl);
 lifecycleUrl.searchParams.set("lifecycle-test", "1");
-lifecycleUrl.searchParams.set("entry-autoplay", "1");
 lifecycleUrl.searchParams.set("lifecycle-smoke", String(Date.now()));
 const url = lifecycleUrl.toString();
 const waitMs = Number(process.env.LIFECYCLE_WAIT_MS ?? 7500);
@@ -92,6 +93,7 @@ await command("Runtime.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
+await clickPlay(command, evaluate, waitMs + 10000);
 await new Promise((resolve) => setTimeout(resolve, waitMs));
 
 const before = await evaluate(`(() => {
@@ -109,7 +111,7 @@ const before = await evaluate(`(() => {
   };
 })()`);
 
-await evaluate(
+const shutdownReceipt = await evaluate(
   "window.__campusLifecycleTest.shutdown()",
   true,
 );
@@ -130,6 +132,7 @@ const result = {
     maxRendererLayers,
     maxMarkerRecords,
   },
+  shutdownReceipt,
   events,
   passed:
     before?.debugHook === "function" &&
@@ -142,6 +145,14 @@ const result = {
     after?.debugHook === "undefined" &&
     after?.lifecycleHook === "undefined" &&
     after?.collisionHook === "undefined" &&
+    shutdownReceipt?.trainColliderActive === false &&
+    shutdownReceipt?.trainBlockingCellCount === 0 &&
+    shutdownReceipt?.trainSpriteActive === false &&
+    shutdownReceipt?.trainCollisionShapeActive === false &&
+    shutdownReceipt?.sprayerSpriteCount === 0 &&
+    shutdownReceipt?.smokeEmitterActive === false &&
+    shutdownReceipt?.physicsColliderCount === 0 &&
+    shutdownReceipt?.sideFailures?.length === 0 &&
     events.exceptions.length === 0 &&
     events.failedRequests.length === 0 &&
     events.badResponses.length === 0,

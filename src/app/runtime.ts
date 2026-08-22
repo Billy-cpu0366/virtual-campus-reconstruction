@@ -35,6 +35,7 @@ export class AppRuntime {
   private error: AppError | undefined;
   private loadHandle: AppLoadHandle | undefined;
   private generationCleaned = true;
+  private cleanupPromise: Promise<boolean> | undefined;
 
   constructor(options: AppRuntimeOptions) {
     this.effects = options.effects;
@@ -64,14 +65,22 @@ export class AppRuntime {
     this.error = undefined;
     this.emitChange();
 
-    if (!this.cleanupGeneration(previousGeneration)) {
-      this.status = "ERROR";
-      this.error = makeError("cleanup", "Previous generation cleanup failed");
-      this.emitChange();
-      return false;
-    }
-
-    return this.beginLoading();
+    void this.cleanupGeneration(previousGeneration).then((succeeded) => {
+      if (
+        this.status !== "RETRYING" ||
+        this.generation !== previousGeneration
+      ) {
+        return;
+      }
+      if (!succeeded) {
+        this.status = "ERROR";
+        this.error = makeError("cleanup", "Previous generation cleanup failed");
+        this.emitChange();
+        return;
+      }
+      this.beginLoading();
+    });
+    return true;
   }
 
   reportProgress(generation: number, ratio: number): boolean {
@@ -162,10 +171,16 @@ export class AppRuntime {
     this.error = makeError(kind, error);
     this.emitChange();
 
-    if (!this.cleanupGeneration(generation)) {
-      this.error = makeError("cleanup", "Failed to clean failed generation");
-      this.emitChange();
-    }
+    void this.cleanupGeneration(generation).then((succeeded) => {
+      if (
+        !succeeded &&
+        this.generation === generation &&
+        this.status === "ERROR"
+      ) {
+        this.error = makeError("cleanup", "Failed to clean failed generation");
+        this.emitChange();
+      }
+    });
     return true;
   }
 
@@ -175,7 +190,7 @@ export class AppRuntime {
     const generation = this.generation;
     this.status = "SHUTDOWN";
     this.emitChange();
-    if (generation > 0) this.cleanupGeneration(generation);
+    if (generation > 0) void this.cleanupGeneration(generation);
     return true;
   }
 
@@ -187,6 +202,7 @@ export class AppRuntime {
     this.error = undefined;
     this.loadHandle = undefined;
     this.generationCleaned = false;
+    this.cleanupPromise = undefined;
     this.emitChange();
 
     const callbacks: AppLoadCallbacks = {
@@ -216,26 +232,45 @@ export class AppRuntime {
     }
   }
 
-  private cleanupGeneration(generation: number): boolean {
+  private cleanupGeneration(generation: number): Promise<boolean> {
     if (generation !== this.generation || this.generationCleaned) {
-      return true;
+      return Promise.resolve(true);
     }
+    if (this.cleanupPromise !== undefined) return this.cleanupPromise;
 
     const handle = this.loadHandle;
     this.loadHandle = undefined;
-    let succeeded = true;
+    let cancelSucceeded = true;
     try {
       this.cancelHandle(handle);
     } catch {
-      succeeded = false;
+      cancelSucceeded = false;
     }
+
+    let cleanupResult: void | Promise<void>;
     try {
-      this.effects.cleanup(generation);
+      cleanupResult = this.effects.cleanup(generation);
     } catch {
-      succeeded = false;
+      cleanupResult = Promise.reject(new Error("generation cleanup failed"));
     }
-    this.generationCleaned = succeeded;
-    return succeeded;
+
+    let cleanupPromise: Promise<boolean>;
+    cleanupPromise = Promise.resolve(cleanupResult)
+      .then(
+        () => cancelSucceeded,
+        () => false,
+      )
+      .then((succeeded) => {
+        if (this.generation === generation) {
+          this.generationCleaned = succeeded;
+          if (this.cleanupPromise === cleanupPromise) {
+            this.cleanupPromise = undefined;
+          }
+        }
+        return succeeded;
+      });
+    this.cleanupPromise = cleanupPromise;
+    return cleanupPromise;
   }
 
   private cancelHandle(handle: AppLoadHandle | undefined): void {

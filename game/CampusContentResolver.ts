@@ -9,6 +9,7 @@ import {
   type GameUiContentSection,
   type GameUiPresentation,
 } from "../src/content/contract.js";
+import { CONTENT_REGISTRY } from "../src/content/registry.js";
 
 export type CampusContentPayloadSource =
   | Readonly<Record<string, unknown>>
@@ -291,6 +292,12 @@ export class CampusContentResolver implements ContentResolverPort {
   }
 }
 
+export const DEFAULT_CAMPUS_CONTENT_SOURCE: CampusContentPayloadSource =
+  Object.freeze({
+    ...CAMPUS_CONTENT_PAYLOADS,
+    ...CONTENT_REGISTRY,
+  });
+
 export function createCampusContentResolver(): CampusContentResolver {
-  return new CampusContentResolver(CAMPUS_CONTENT_PAYLOADS);
+  return new CampusContentResolver(DEFAULT_CAMPUS_CONTENT_SOURCE);
 }

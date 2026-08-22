@@ -117,12 +117,24 @@ await command("Log.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
-await new Promise((resolve) => setTimeout(resolve, 5000));
+const readyStartedAt = Date.now();
+while (Date.now() - readyStartedAt < 20000) {
+  const status = await command("Runtime.evaluate", {
+    expression: "document.body?.dataset.appState ?? null",
+    returnByValue: true,
+  });
+  if (status.result?.value === "READY") break;
+  await new Promise((resolve) => setTimeout(resolve, 50));
+}
 
 const evaluation = await command("Runtime.evaluate", {
   expression: `JSON.stringify({
     title: document.title,
     hasPhaser: Boolean(window.Phaser),
+    appState: document.body?.dataset.appState ?? null,
+    appGeneration: Number(document.body?.dataset.appGeneration ?? 0),
+    shellHidden: document.getElementById("app-shell")?.hidden ?? true,
+    playHidden: document.getElementById("app-play")?.hidden ?? true,
     canvasCount: document.querySelectorAll("#app canvas").length,
     canvasSize: (() => {
       const canvas = document.querySelector("#app canvas");
@@ -150,7 +162,13 @@ const result = {
   screenshotPath: screenshotPath ?? null,
   passed:
     page.hasPhaser &&
-    page.canvasCount > 0 &&
+    page.appState === "READY" &&
+    page.appGeneration === 1 &&
+    page.shellHidden === false &&
+    page.playHidden === false &&
+    page.canvasCount === 1 &&
+    page.canvasSize?.width === 480 &&
+    page.canvasSize?.height === 270 &&
     page.diagnostics.trim() === "" &&
     events.exceptions.length === 0 &&
     events.failedRequests.length === 0 &&

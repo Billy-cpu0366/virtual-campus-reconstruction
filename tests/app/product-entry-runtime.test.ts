@@ -150,8 +150,8 @@ describe("ProductEntryRuntime", () => {
     expect(calls).not.toContain("guide:memo6");
   });
 
-  it("shutdown 取消入口且晚到收据不能发布 guide", async () => {
-    const { runtime, calls, cameraWork, trainWork } = setup();
+  it("shutdown 取消入口、释放自身lease且晚到收据不能发布 guide", async () => {
+    const { runtime, lease, calls, cameraWork, trainWork } = setup();
     const run = runtime.start();
     runtime.shutdown();
     runtime.shutdown();
@@ -162,7 +162,8 @@ describe("ProductEntryRuntime", () => {
     expect(runtime.snapshot.status).toBe("shutdown");
     expect(calls.filter((call) => call === "camera:shutdown")).toHaveLength(1);
     expect(calls.filter((call) => call === "train:shutdown")).toHaveLength(1);
-    expect(calls).not.toContain("controls:enable");
+    expect(calls.filter((call) => call === "controls:enable")).toHaveLength(1);
+    expect(lease.activeLeaseCount).toBe(0);
     expect(calls).not.toContain("guide:memo6");
   });
 

@@ -1,0 +1,62 @@
+[
+  {
+    "src": "assets/images/peter-oravec.webp",
+    "sourceRelative": "images/peter-oravec.webp",
+    "targetRelative": "assets/images/peter-oravec.webp",
+    "sha256": "8140c740e53c619f6c2bbf67bc34955dfa4aa5d73e091ecbe020dd03b29c8f36"
+  },
+  {
+    "src": "assets/images/portfolio/portfolio-eutxo.webp",
+    "sourceRelative": "images/portfolio/portfolio-eutxo.webp",
+    "targetRelative": "assets/images/portfolio/portfolio-eutxo.webp",
+    "sha256": "96b1325b7ad2b6bb5cbbdd83f0b99cf6942ebb07f94d082325bfb6d4110e7f45"
+  },
+  {
+    "src": "assets/images/portfolio/portfolio-angularsk.webp",
+    "sourceRelative": "images/portfolio/portfolio-angularsk.webp",
+    "targetRelative": "assets/images/portfolio/portfolio-angularsk.webp",
+    "sha256": "fd9673327a68613c3a055511c06db5c7bd415e6ff31cedf22b739bc99e39a744"
+  },
+  {
+    "src": "assets/images/portfolio/peteroravec-v1.webp",
+    "sourceRelative": "images/portfolio/peteroravec-v1.webp",
+    "targetRelative": "assets/images/portfolio/peteroravec-v1.webp",
+    "sha256": "cdfaf1d557e25f9997ec9801703866774a489fb92c338a627af674d2e42ba36a"
+  },
+  {
+    "src": "/assets/images/cards/card1_base.webp",
+    "sourceRelative": "images/cards/card1_base.webp",
+    "targetRelative": "assets/images/cards/card1_base.webp",
+    "sha256": "c0c6f191d254af1c2a5ab6453d62f1289640d79ef5964c37286a6febe0f09c9a"
+  },
+  {
+    "src": "/assets/images/cards/card2_base.webp",
+    "sourceRelative": "images/cards/card2_base.webp",
+    "targetRelative": "assets/images/cards/card2_base.webp",
+    "sha256": "90adb21a28b2a2f6a4b132a1b9e66c41c141b5f3281af243260d78130ab30353"
+  },
+  {
+    "src": "/assets/images/cards/card3_base.webp",
+    "sourceRelative": "images/cards/card3_base.webp",
+    "targetRelative": "assets/images/cards/card3_base.webp",
+    "sha256": "8c707941024514946d7eb1ef36328b8b25ff102e2a5c07d045d065f71c9bf657"
+  },
+  {
+    "src": "/assets/images/cards/card4_base.webp",
+    "sourceRelative": "images/cards/card4_base.webp",
+    "targetRelative": "assets/images/cards/card4_base.webp",
+    "sha256": "d334a184ddbe7adebc1d8c9c15a8cdfe346a54de00da01ab2e0e9709a36ed0c8"
+  },
+  {
+    "src": "/assets/images/cards/card5_base.webp",
+    "sourceRelative": "images/cards/card5_base.webp",
+    "targetRelative": "assets/images/cards/card5_base.webp",
+    "sha256": "4e82c2709561ef3dc37c0852098ec6fba134f411c2cd6e7df315e75184f24293"
+  },
+  {
+    "src": "/assets/images/cards/card6_base.webp",
+    "sourceRelative": "images/cards/card6_base.webp",
+    "targetRelative": "assets/images/cards/card6_base.webp",
+    "sha256": "c825e9cf2fe9eece0250853f94c3ed3ead33bbafb40a7666fda65bac372cf38e"
+  }
+]

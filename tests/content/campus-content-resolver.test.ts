@@ -10,6 +10,7 @@ import {
   CONTENT_MENU_IDS,
   type GameUiContentPayload,
 } from "../../src/content/contract.js";
+import { CONTENT_REGISTRY } from "../../src/content/registry.js";
 
 const about: GameUiContentPayload = {
   menuId: "about",
@@ -39,6 +40,27 @@ describe("CampusContentResolver", () => {
     expect(CAMPUS_CONTENT_PAYLOADS.tech.body).toContain("Angular");
     expect(CAMPUS_CONTENT_PAYLOADS.projects.body).toContain("eUTxO.org");
     expect(CAMPUS_CONTENT_PAYLOADS.cv.body).toContain("VUB Bank");
+  });
+
+  it("默认source用03 registry覆盖8项真实内容并保留3项fallback", () => {
+    const resolver = createCampusContentResolver();
+    for (const menuId of Object.keys(CONTENT_REGISTRY) as Array<keyof typeof CONTENT_REGISTRY>) {
+      const result = resolver.resolve(menuId);
+      expect(result.status).toBe("resolved");
+      if (result.status !== "resolved") continue;
+      expect(result.payload).toEqual(CONTENT_REGISTRY[menuId]);
+      expect(result.payload.sections?.length).toBeGreaterThan(0);
+    }
+    for (const menuId of ["cv", "contact", "tech"] as const) {
+      const result = resolver.resolve(menuId);
+      expect(result).toEqual({
+        status: "resolved",
+        payload: CAMPUS_CONTENT_PAYLOADS[menuId],
+      });
+      if (result.status === "resolved") {
+        expect(result.payload.sections).toBeUndefined();
+      }
+    }
   });
 
   it("同步解析 readonly record 中的 payload", () => {

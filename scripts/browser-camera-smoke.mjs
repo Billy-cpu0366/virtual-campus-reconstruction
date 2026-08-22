@@ -1,3 +1,5 @@
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
 const inputUrl =
   process.argv[2] ??
@@ -5,10 +7,8 @@ const inputUrl =
   "http://127.0.0.1:4175/";
 const directEntryUrl = new URL(inputUrl);
 directEntryUrl.searchParams.delete("camera-smoke");
-directEntryUrl.searchParams.set("entry-autoplay", "1");
 const url = directEntryUrl.toString();
 const cameraUrl = new URL(inputUrl);
-cameraUrl.searchParams.set("entry-autoplay", "1");
 cameraUrl.searchParams.set("camera-smoke", String(Date.now()));
 const tourUrl = cameraUrl.toString();
 const timeoutMs = Number(process.env.CAMERA_SMOKE_TIMEOUT_MS ?? 20000);
@@ -116,6 +116,7 @@ await command("Runtime.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
+await clickPlay(command, evaluate, timeoutMs);
 
 let directEntry;
 const directStartedAt = Date.now();
@@ -149,6 +150,7 @@ events.failedRequests.length = 0;
 events.badResponses.length = 0;
 
 await command("Page.navigate", { url: tourUrl });
+await clickPlay(command, evaluate, timeoutMs);
 
 const samples = [];
 let sawRunning = false;

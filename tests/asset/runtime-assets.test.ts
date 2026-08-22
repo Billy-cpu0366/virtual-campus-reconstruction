@@ -1,8 +1,11 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+
+import { CONTENT_RESOURCE_RECEIPTS } from "../../src/content/registry.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SOURCE_MAPS = resolve(
@@ -25,6 +28,10 @@ function pngDimensions(path: string): { width: number; height: number } {
     width: buffer.readUInt32BE(16),
     height: buffer.readUInt32BE(20),
   };
+}
+
+function sha256(path: string): string {
+  return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
 function runtimeMapFiles(): string[] {
@@ -105,5 +112,41 @@ describe("M1 runtime particle asset contract", () => {
     }
     expect(rawVisualCounts.get("particles")).toBeGreaterThan(0);
     expect(rawVisualCounts.get("particles2")).toBeGreaterThan(0);
+
+    const manifest = JSON.parse(
+      readFileSync(resolve(ROOT, "scripts/runtime-content-assets.json"), "utf8"),
+    ) as Array<{
+      src: string;
+      sourceRelative: string;
+      targetRelative: string;
+      sha256: string;
+    }>;
+    expect(manifest).toHaveLength(10);
+    expect(manifest).toEqual(
+      CONTENT_RESOURCE_RECEIPTS.map((receipt) => ({
+        src: receipt.src,
+        sourceRelative: receipt.localPath.replace(/^mirror\/assets\//u, ""),
+        targetRelative: receipt.src.replace(/^\/+/, ""),
+        sha256: receipt.sha256,
+      })),
+    );
+    for (const asset of manifest) {
+      const source = resolve(
+        ROOT,
+        "sample/original-public-build/mirror/assets",
+        asset.sourceRelative,
+      );
+      const runtime = resolve(ROOT, "public", asset.targetRelative);
+      expect(existsSync(source)).toBe(true);
+      expect(existsSync(runtime)).toBe(true);
+      expect(sha256(source)).toBe(asset.sha256);
+      expect(sha256(runtime)).toBe(asset.sha256);
+    }
+    expect(() =>
+      execFileSync(process.execPath, ["scripts/check-runtime-assets.mjs"], {
+        cwd: ROOT,
+        stdio: "ignore",
+      }),
+    ).not.toThrow();
   });
 });

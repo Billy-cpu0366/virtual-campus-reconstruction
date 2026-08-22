@@ -1,11 +1,12 @@
 import { writeFileSync } from "node:fs";
 
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
 const inputUrl =
   process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
 const chunkUrl = new URL(inputUrl);
 chunkUrl.searchParams.set("collision-test", "1");
-chunkUrl.searchParams.set("entry-autoplay", "1");
 chunkUrl.searchParams.set("chunk-smoke", String(Date.now()));
 const url = chunkUrl.toString();
 const screenshotPath = process.env.SMOKE_SCREENSHOT;
@@ -103,6 +104,7 @@ await command("Runtime.enable");
 await command("Network.enable");
 await command("Page.enable");
 await command("Page.navigate", { url });
+await clickPlay(command, evaluate, initialWaitMs + 10000);
 
 const chunkResources = () => `performance.getEntriesByType("resource")
   .map((entry) => entry.name)

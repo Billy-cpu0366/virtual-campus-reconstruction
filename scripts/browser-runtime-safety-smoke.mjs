@@ -95,10 +95,18 @@ try {
   await command("Network.enable");
   await command("Page.enable");
   await command("Page.navigate", { url: smokeUrl });
-  await sleep(waitMs);
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < waitMs + 15000) {
+    const status = await evaluate("document.body?.dataset.appState ?? null");
+    if (status === "READY") break;
+    await sleep(50);
+  }
 
   const page = await evaluate(`JSON.stringify({
     title: document.title,
+    appState: document.body?.dataset.appState ?? null,
+    canvasCount: document.querySelectorAll("#app canvas").length,
+    playHidden: document.getElementById("app-play")?.hidden ?? true,
     diagnostics: document.getElementById("diag")?.textContent ?? "",
     diagnosticDisplay: document.getElementById("diag")?.style.display ?? "",
     diagnosticHidden: document.getElementById("diag")?.hidden ?? null,
@@ -107,7 +115,10 @@ try {
     entryHook: typeof window.__campusEntryTest,
   })`);
   const result = JSON.parse(page);
-  assert.equal(result.title, "虚拟校园 · 可玩雏形");
+  assert.equal(result.title, "Virtual Campus");
+  assert.equal(result.appState, "READY");
+  assert.equal(result.canvasCount, 1);
+  assert.equal(result.playHidden, false);
   assert.equal(result.diagnostics, "");
   assert.equal(result.diagnosticDisplay, "");
   assert.equal(result.diagnosticHidden, true);

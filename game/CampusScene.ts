@@ -61,22 +61,36 @@ import { InteractRuntime } from "../src/interact/index.js";
 import {
   DomModalGameUi,
   type DomModalElements,
+  type DomModalKeyboard,
   type DomModalTarget,
   type DomModalViewport,
 } from "../src/game-ui/index.js";
+import type { DomModalFocusPort } from "../src/game-ui/dom-modal.js";
 import {
   ZoneRuntime,
   type ZoneMarker,
   type ZoneSnapshot,
 } from "../src/zone/index.js";
-import {
-  createCampusContentResolver,
-} from "./CampusContentResolver.js";
+import { createCampusContentResolver } from "./CampusContentResolver.js";
+import { AppGameUiBridge } from "./AppGameUiBridge.js";
 import { GameplayControlLeaseRuntime } from "./GameplayControlLeaseRuntime.js";
 import {
+  PhaserTrainArrivalAdapter,
   ProductEntryCameraAdapter,
-  TimedTrainArrivalAdapter,
 } from "./ProductEntryAdapters.js";
+import {
+  PhaserTrainRuntime,
+  type PhaserTrainCollisionShapeLike,
+  type PhaserTrainSceneLike,
+} from "./PhaserTrainRuntime.js";
+import {
+  PhaserSprayerRuntime,
+  type PhaserSprayerSceneLike,
+} from "./PhaserSprayerRuntime.js";
+import {
+  PhaserFactorySmokeRuntime,
+  type PhaserFactorySmokeSceneLike,
+} from "./PhaserFactorySmokeRuntime.js";
 import {
   ProductEntryRuntime,
   type ProductEntryGuideTarget,
@@ -147,7 +161,19 @@ export interface CampusSceneEntryCallbacks {
   readonly onReady?: () => void;
   readonly onEntryStatus?: (snapshot: ProductEntrySnapshot) => void;
   readonly onGuide?: (target: ProductEntryGuideTarget) => void | boolean;
+  readonly onModalVisibility?: (visible: boolean) => void;
   readonly onError?: (error: Error) => void;
+}
+
+export interface CampusSceneShutdownReceipt {
+  readonly trainColliderActive: boolean;
+  readonly trainBlockingCellCount: number;
+  readonly trainSpriteActive: boolean;
+  readonly trainCollisionShapeActive: boolean;
+  readonly sprayerSpriteCount: number;
+  readonly smokeEmitterActive: boolean;
+  readonly sideFailures: readonly string[];
+  readonly physicsColliderCount: number | null;
 }
 
 async function fetchJson(
@@ -174,8 +200,15 @@ export class CampusScene extends Phaser.Scene {
   private cameraLeaseToken: GameplayControlLeaseToken | undefined;
   private entryRuntime: ProductEntryRuntime | undefined;
   private entryCameraRuntime: PhaserCameraRuntime | undefined;
-  private entryTrainAdapter: TimedTrainArrivalAdapter | undefined;
+  private entryTrainAdapter: PhaserTrainArrivalAdapter | undefined;
   private entryResult: ProductEntryResult | undefined;
+  private trainRuntime: PhaserTrainRuntime | undefined;
+  private sprayerRuntime: PhaserSprayerRuntime | undefined;
+  private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
+  private trainColliderActive = false;
+  private trainBlockingCells: readonly string[] = Object.freeze([]);
+  private readonly sideFailures: string[] = [];
+  private shutdownTask: Promise<CampusSceneShutdownReceipt> | undefined;
   private sceneReady = false;
   private requiredLoadError: Error | undefined;
   private contentLeaseRuntime: GameplayControlLeaseRuntime | undefined;
@@ -212,7 +245,7 @@ export class CampusScene extends Phaser.Scene {
     | { setPlayerPosition(x: number, y: number): void }
     | undefined;
   private lifecycleTestHook:
-    | { shutdown(): Promise<void> }
+    | { shutdown(): Promise<CampusSceneShutdownReceipt> }
     | undefined;
   private contentTestHook:
     | {
@@ -274,6 +307,36 @@ export class CampusScene extends Phaser.Scene {
       this.requiredLoadError = new Error(`required asset failed: ${key}`);
       this.entryCallbacks.onError?.(this.requiredLoadError);
     });
+    this.sprayerRuntime = new PhaserSprayerRuntime(
+      this as unknown as PhaserSprayerSceneLike,
+      {
+        playerPosition: () => this.playerRuntime?.position,
+        onError: (reason) => this.recordSideFailure(`sprayer:${reason}`),
+      },
+    );
+    this.trainRuntime = new PhaserTrainRuntime(
+      this as unknown as PhaserTrainSceneLike,
+      {
+        blockingZone: {
+          setTrainBlockingZone: (cells) => {
+            this.trainBlockingCells = Object.freeze([...(cells ?? [])]);
+          },
+        },
+        connectCollision: (shape) => this.connectTrainCollision(shape),
+        onError: (reason) => this.recordSideFailure(`train:${reason}`),
+      },
+    );
+    this.smokeRuntime = new PhaserFactorySmokeRuntime(
+      this as unknown as PhaserFactorySmokeSceneLike,
+      {
+        viewport: () => this.smokeViewport(),
+        onError: (reason) => this.recordSideFailure(`smoke:${reason}`),
+      },
+    );
+    this.sprayerRuntime.preload();
+    this.trainRuntime.preload();
+    this.smokeRuntime.preload();
+
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
     this.load.image("tileset-particles", "/maps/tileset-particles.png");
@@ -293,38 +356,8 @@ export class CampusScene extends Phaser.Scene {
     window.addEventListener("blur", this.handleWindowBlur);
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.events.once("shutdown", () => {
-      this.sceneDestroyed = true;
-      this.sceneReady = false;
-      this.entryRuntime?.shutdown();
-      this.entryRuntime = undefined;
-      this.entryCameraRuntime = undefined;
-      this.entryTrainAdapter = undefined;
-      this.cameraRuntime?.shutdown();
-      this.releaseCameraControlLease();
-      this.cameraRuntime = undefined;
-      this.pendingCameraViewport = undefined;
-      this.zoneRuntime?.destroy();
-      this.interactRuntime?.destroy();
-      this.contentLeaseRuntime?.shutdown();
-      this.zoneRuntime = undefined;
-      this.interactRuntime = undefined;
-      this.contentUi = undefined;
-      this.contentLeaseRuntime = undefined;
-      this.playerRuntime?.shutdown();
-      this.joystick?.shutdown();
-      this.stopPlayerMovement();
-      this.mutationScheduler.destroy();
-      this.clearRuntimeTestHooks();
-      window.removeEventListener("keydown", this.handleKeyDown);
-      window.removeEventListener("keyup", this.handleKeyUp);
-      window.removeEventListener("blur", this.handleWindowBlur);
-      document.removeEventListener(
-        "visibilitychange",
-        this.handleVisibilityChange,
-      );
-      this.dynamicWorldShutdown = this.shutdownDynamicWorld();
-      void this.dynamicWorldShutdown.catch((error: unknown) => {
-        console.error("动态世界销毁失败", error);
+      void this.beginShutdown().catch((error: unknown) => {
+        console.error("场景销毁失败", error);
       });
     });
     void this.initializeDynamicWorld().catch((error: unknown) => {
@@ -353,7 +386,20 @@ export class CampusScene extends Phaser.Scene {
 
     this.player.setVisible(true);
     const cameraRuntime = this.createEntryCameraRuntime();
-    const trainAdapter = new TimedTrainArrivalAdapter(this.time);
+    const trainRuntime = this.trainRuntime;
+    if (trainRuntime === undefined) {
+      return Promise.resolve(
+        Object.freeze({
+          status: "failed" as const,
+          error: new Error("train runtime is not ready"),
+        }),
+      );
+    }
+    const trainAdapter = new PhaserTrainArrivalAdapter(
+      trainRuntime,
+      this.events,
+      () => this.time.now,
+    );
     const entryRuntime = new ProductEntryRuntime({
       lease: this.contentLeaseRuntime!,
       camera: new ProductEntryCameraAdapter(cameraRuntime, () => {
@@ -544,7 +590,32 @@ export class CampusScene extends Phaser.Scene {
         };
       },
     };
-    const ui = new DomModalGameUi(elements, viewport);
+    const keyboard: DomModalKeyboard = {
+      subscribe: (listener) => {
+        const handler = (event: KeyboardEvent): void => listener(event);
+        document.addEventListener("keydown", handler);
+        return () => document.removeEventListener("keydown", handler);
+      },
+    };
+    const focus: DomModalFocusPort = {
+      getActiveElement: () =>
+        document.activeElement === null
+          ? undefined
+          : (document.activeElement as unknown as DomModalTarget),
+      focus: (target) => target.focus?.(),
+      getFocusableElements: (target) =>
+        [...(target as unknown as Element).querySelectorAll(
+          "button:not([disabled]), a[href], [tabindex]:not([tabindex='-1'])",
+        )] as unknown as readonly DomModalTarget[],
+    };
+    const modalUi = new DomModalGameUi(elements, viewport, {
+      keyboard,
+      focus,
+      focusRing: "3px solid #facc15",
+    });
+    const ui = new AppGameUiBridge(modalUi, (visible) => {
+      this.entryCallbacks.onModalVisibility?.(visible);
+    });
     const lease = new GameplayControlLeaseRuntime({
       disableControls: () => {
         const playerRuntime = this.playerRuntime;
@@ -627,6 +698,135 @@ export class CampusScene extends Phaser.Scene {
         maxHeight: modal?.style.maxHeight ?? "",
       },
     };
+  }
+
+  private smokeViewport() {
+    const camera = this.cameras.main;
+    const zoom = Number.isFinite(camera.zoom) && camera.zoom > 0
+      ? camera.zoom
+      : 1;
+    return {
+      left: camera.scrollX,
+      top: camera.scrollY,
+      width: camera.width / zoom,
+      height: camera.height / zoom,
+    };
+  }
+
+  private sideDebugSnapshot(): unknown {
+    return {
+      sprayer: this.sprayerRuntime?.snapshot ?? null,
+      sprayerSpriteCount: this.sprayerRuntime?.spriteCount ?? 0,
+      train: this.trainRuntime?.snapshot ?? null,
+      trainHasSprite: this.trainRuntime?.hasSprite ?? false,
+      trainHasCollisionShape: this.trainRuntime?.hasCollisionShape ?? false,
+      trainAdapter: this.entryTrainAdapter?.status ?? null,
+      trainColliderActive: this.trainColliderActive,
+      trainBlockingCellCount: this.trainBlockingCells.length,
+      smoke: this.smokeRuntime?.snapshot ?? null,
+      smokeHasEmitter: this.smokeRuntime?.hasEmitter ?? false,
+      failures: Object.freeze([...this.sideFailures]),
+    };
+  }
+
+  private recordSideFailure(reason: string): void {
+    if (this.sideFailures.length >= 20) return;
+    this.sideFailures.push(reason);
+  }
+
+  private connectTrainCollision(
+    shape: PhaserTrainCollisionShapeLike,
+  ): () => void {
+    const collider = this.physics.add.collider(
+      this.player,
+      shape as any,
+    ) as { active?: boolean; destroy(): void } | undefined;
+    if (collider === undefined) {
+      throw new Error("train player collider creation failed");
+    }
+    this.trainColliderActive = true;
+    let active = true;
+    return () => {
+      if (!active) return;
+      active = false;
+      this.trainColliderActive = false;
+      collider.active = false;
+      this.physics.world.removeCollider?.(collider);
+      collider.destroy();
+    };
+  }
+
+  async shutdownForGeneration(): Promise<CampusSceneShutdownReceipt> {
+    return this.beginShutdown();
+  }
+
+  private beginShutdown(): Promise<CampusSceneShutdownReceipt> {
+    if (this.shutdownTask !== undefined) return this.shutdownTask;
+    this.shutdownTask = this.performShutdown();
+    return this.shutdownTask;
+  }
+
+  private async performShutdown(): Promise<CampusSceneShutdownReceipt> {
+    this.sceneDestroyed = true;
+    this.sceneReady = false;
+
+    this.entryRuntime?.shutdown();
+    this.sprayerRuntime?.shutdown();
+    this.smokeRuntime?.shutdown();
+    this.trainRuntime?.shutdown(this.time?.now);
+    this.entryRuntime = undefined;
+    this.entryCameraRuntime = undefined;
+    this.entryTrainAdapter = undefined;
+
+    this.cameraRuntime?.shutdown();
+    this.releaseCameraControlLease();
+    this.cameraRuntime = undefined;
+    this.pendingCameraViewport = undefined;
+
+    this.zoneRuntime?.destroy();
+    this.interactRuntime?.destroy();
+    this.contentLeaseRuntime?.shutdown();
+    this.zoneRuntime = undefined;
+    this.interactRuntime = undefined;
+    this.contentUi = undefined;
+    this.contentLeaseRuntime = undefined;
+
+    this.playerRuntime?.shutdown();
+    this.joystick?.shutdown();
+    this.stopPlayerMovement();
+    this.mutationScheduler.destroy();
+    this.clearRuntimeTestHooks();
+    window.removeEventListener("keydown", this.handleKeyDown);
+    window.removeEventListener("keyup", this.handleKeyUp);
+    window.removeEventListener("blur", this.handleWindowBlur);
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange,
+    );
+
+    this.dynamicWorldShutdown = this.shutdownDynamicWorld();
+    await this.dynamicWorldShutdown;
+    try {
+      this.scene.stop();
+    } catch {
+      // A generation can fail during preload before ScenePlugin is active.
+    }
+    const physicsColliderCount =
+      (this.physics?.world?.colliders as any)?.getActive?.().length ?? null;
+    const receipt = Object.freeze({
+      trainColliderActive: this.trainColliderActive,
+      trainBlockingCellCount: this.trainBlockingCells.length,
+      trainSpriteActive: this.trainRuntime?.hasSprite ?? false,
+      trainCollisionShapeActive: this.trainRuntime?.hasCollisionShape ?? false,
+      sprayerSpriteCount: this.sprayerRuntime?.spriteCount ?? 0,
+      smokeEmitterActive: this.smokeRuntime?.hasEmitter ?? false,
+      sideFailures: Object.freeze([...this.sideFailures]),
+      physicsColliderCount,
+    });
+    this.sprayerRuntime = undefined;
+    this.smokeRuntime = undefined;
+    this.trainRuntime = undefined;
+    return receipt;
   }
 
   private createCamera(bounds: {
@@ -789,6 +989,7 @@ export class CampusScene extends Phaser.Scene {
         bridge2DownVisible: this.bridge2DownVisible,
         joystick: this.joystick.debugState(),
         content: this.contentDebugSnapshot(),
+        side: this.sideDebugSnapshot(),
       });
       this.debugHook = debugHook;
       (window as any).__campusDebug = debugHook;
@@ -803,13 +1004,8 @@ export class CampusScene extends Phaser.Scene {
       }
       if (new URLSearchParams(window.location.search).has("lifecycle-test")) {
         const lifecycleHook = {
-          shutdown: async (): Promise<void> => {
-            this.scene.stop();
-            while (!this.sceneDestroyed) {
-              await new Promise<void>((resolve) => setTimeout(resolve, 0));
-            }
-            await this.dynamicWorldShutdown;
-          },
+          shutdown: (): Promise<CampusSceneShutdownReceipt> =>
+            this.shutdownForGeneration(),
         };
         this.lifecycleTestHook = lifecycleHook;
         (window as any).__campusLifecycleTest = lifecycleHook;
@@ -833,6 +1029,29 @@ export class CampusScene extends Phaser.Scene {
     }
     await this.updateDynamicTargetsNow();
     if (this.sceneDestroyed || this.requiredLoadError !== undefined) return;
+    const failedChunks = this.coordinator?.state.failed ?? [];
+    if (failedChunks.length > 0) {
+      throw new Error(
+        `initial world chunks failed: ${failedChunks
+          .map((failure) => `${failure.coordinate.x},${failure.coordinate.y}`)
+          .join(";")}`,
+      );
+    }
+
+    this.sprayerRuntime?.createAnimations();
+    const sprayerStarted = this.sprayerRuntime?.start(this.time.now);
+    if (sprayerStarted === undefined || !sprayerStarted.ok) {
+      throw new Error(
+        `sprayer runtime failed: ${sprayerStarted?.reason ?? "missing-owner"}`,
+      );
+    }
+    const smokeStarted = this.smokeRuntime?.start();
+    if (smokeStarted === undefined || !smokeStarted.ok) {
+      throw new Error(
+        `factory smoke runtime failed: ${smokeStarted?.reason ?? "missing-owner"}`,
+      );
+    }
+
     this.sceneReady = true;
     this.entryCallbacks.onReady?.();
   }
@@ -1006,19 +1225,21 @@ export class CampusScene extends Phaser.Scene {
   };
 
   private waitForColliderRemoval(collider: { destroy(): void }): Promise<void> {
-    if (this.sceneDestroyed) {
-      return Promise.resolve();
-    }
     const colliders = this.physics.world.colliders as any;
     const isActive = (): boolean =>
       colliders.getActive?.().includes(collider) ?? false;
     if (!isActive()) {
       return Promise.resolve();
     }
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      const startedAt = Date.now();
       const check = (): void => {
         if (!isActive()) {
           resolve();
+          return;
+        }
+        if (Date.now() - startedAt >= 2_000) {
+          reject(new Error("timed out removing Phaser collider"));
           return;
         }
         setTimeout(check, 0);

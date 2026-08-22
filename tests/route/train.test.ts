@@ -194,6 +194,38 @@ describe("PhaserTrainRuntime", () => {
     expect(fake.events.count("shutdown")).toBe(0);
   });
 
+  it("teardown先清player collider，再清shape/sprite/blocking zone", () => {
+    const fake = makeScene();
+    const order: string[] = [];
+    let cleanupCalls = 0;
+    const runtime = new PhaserTrainRuntime(fake.scene, {
+      connectCollision: (shape) => {
+        const destroyShape = shape.destroy.bind(shape);
+        shape.destroy = () => {
+          order.push("shape");
+          destroyShape();
+        };
+        return () => {
+          cleanupCalls += 1;
+          order.push("collider");
+        };
+      },
+      blockingZone: {
+        setTrainBlockingZone: (cells) => {
+          if (cells === null) order.push("zone");
+        },
+      },
+    });
+
+    expect(runtime.start(0)).toEqual({ ok: true });
+    runtime.cancel(1_000);
+    expect(order.slice(-3)).toEqual(["collider", "shape", "zone"]);
+    expect(cleanupCalls).toBe(1);
+    runtime.cancel(1_001);
+    runtime.shutdown(1_002);
+    expect(cleanupCalls).toBe(1);
+  });
+
   it("资源失败不创建对象；cancel可重启，shutdown清理并永久拒绝", () => {
     const missing = makeScene(false);
     const errors: string[] = [];

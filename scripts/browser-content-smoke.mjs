@@ -1,37 +1,45 @@
-const base = process.env.CDP_URL ?? "http://127.0.0.1:9222";
-const inputUrl =
-  process.argv[2] ??
-  process.env.SMOKE_URL ??
-  "http://127.0.0.1:4175/";
-const testUrl = new URL(inputUrl);
-testUrl.searchParams.set("content-smoke", String(Date.now()));
-testUrl.searchParams.set("lifecycle-test", "1");
-testUrl.searchParams.set("entry-autoplay", "1");
-const url = testUrl.toString();
-const timeoutMs = Number(process.env.CONTENT_SMOKE_TIMEOUT_MS ?? 12000);
+import assert from "node:assert/strict";
 
-const targetResponse = await fetch(
-  `${base}/json/new?${encodeURIComponent(url)}`,
+import {
+  clickAppButton,
+  clickPlay,
+  waitForAppStatus,
+} from "./browser-app-actions.mjs";
+
+const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
+const inputUrl =
+  process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
+const contentUrl = new URL(inputUrl);
+contentUrl.searchParams.set("content-smoke", String(Date.now()));
+const url = contentUrl.toString();
+const timeoutMs = Number(process.env.CONTENT_SMOKE_TIMEOUT_MS ?? 35000);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function fetchJson(endpoint, options) {
+  const response = await fetch(endpoint, options);
+  if (!response.ok) {
+    throw new Error(`${options?.method ?? "GET"} ${endpoint}: ${response.status}`);
+  }
+  return response.json();
+}
+
+const target = await fetchJson(
+  `${cdpUrl}/json/new?${encodeURIComponent(url)}`,
   { method: "PUT" },
 );
-if (!targetResponse.ok) {
-  throw new Error(`could not create target: ${targetResponse.status}`);
-}
-const target = await targetResponse.json();
-const ws = new WebSocket(target.webSocketDebuggerUrl);
-await new Promise((resolve, reject) => {
-  ws.addEventListener("open", resolve, { once: true });
-  ws.addEventListener("error", reject, { once: true });
-});
-
+const socket = new WebSocket(target.webSocketDebuggerUrl);
 const pending = new Map();
 let nextId = 0;
 const events = { console: [], exceptions: [], failedRequests: [], badResponses: [] };
-ws.addEventListener("message", (event) => {
+
+socket.addEventListener("message", (event) => {
   const message = JSON.parse(event.data);
-  if (message.id && pending.has(message.id)) {
-    pending.get(message.id)(message);
+  if (message.id !== undefined) {
+    const request = pending.get(message.id);
+    if (request === undefined) return;
     pending.delete(message.id);
+    if (message.error !== undefined) request.reject(new Error(JSON.stringify(message.error)));
+    else request.resolve(message.result ?? {});
     return;
   }
   if (message.method === "Runtime.consoleAPICalled") {
@@ -45,7 +53,8 @@ ws.addEventListener("message", (event) => {
   if (message.method === "Runtime.exceptionThrown") {
     events.exceptions.push(
       message.params.exceptionDetails?.exception?.description ??
-        message.params.exceptionDetails?.text,
+        message.params.exceptionDetails?.text ??
+        "runtime exception",
     );
   }
   if (message.method === "Network.loadingFailed") {
@@ -62,178 +71,192 @@ ws.addEventListener("message", (event) => {
   }
 });
 
+await new Promise((resolve, reject) => {
+  socket.addEventListener("open", resolve, { once: true });
+  socket.addEventListener("error", reject, { once: true });
+});
+
 function command(method, params = {}) {
   const id = ++nextId;
-  ws.send(JSON.stringify({ id, method, params }));
+  socket.send(JSON.stringify({ id, method, params }));
   return new Promise((resolve, reject) => {
-    pending.set(id, (message) => {
-      if (message.error) reject(new Error(JSON.stringify(message.error)));
-      else resolve(message.result ?? {});
-    });
+    pending.set(id, { resolve, reject });
   });
 }
 
-async function evaluate(expression, awaitPromise = false) {
+async function evaluate(expression) {
   const result = await command("Runtime.evaluate", {
     expression,
     returnByValue: true,
-    awaitPromise,
+    awaitPromise: true,
   });
-  if (result.exceptionDetails) {
+  if (result.exceptionDetails !== undefined) {
     throw new Error(
       result.exceptionDetails.exception?.description ??
-        result.exceptionDetails.text,
+        result.exceptionDetails.text ??
+        "Runtime.evaluate failed",
     );
   }
   return result.result?.value;
 }
 
-await command("Runtime.enable");
-await command("Network.enable");
-await command("Page.enable");
-await command("Page.navigate", { url });
-
-let ready = false;
-const startedAt = Date.now();
-while (Date.now() - startedAt < timeoutMs) {
-  await new Promise((resolve) => setTimeout(resolve, 50));
-  ready = await evaluate(
-    "Boolean(window.__campusContentTest && window.__campusLifecycleTest && window.__campusDebug?.().entry?.snapshot?.status === 'playable')",
-  );
-  if (ready) break;
+async function waitForDebug(predicate, label, timeout = timeoutMs) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeout) {
+    const debug = await evaluate("window.__campusDebug?.() ?? null");
+    if (debug !== null && predicate(debug)) return debug;
+    await sleep(50);
+  }
+  throw new Error(`timed out waiting for ${label}`);
 }
-if (!ready) throw new Error("content test hooks did not become ready");
 
-const desktop = await evaluate(`(() => {
-  const hook = window.__campusContentTest;
-  const root = document.getElementById("content-ui-root");
-  const backdrop = document.getElementById("content-backdrop");
-  const modal = document.getElementById("content-modal");
-  const close = document.getElementById("content-close");
+async function moveUntil({ key, code, keyCode, reached, label }) {
+  await command("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key,
+    code,
+    windowsVirtualKeyCode: keyCode,
+  });
+  const startedAt = Date.now();
+  let debug;
+  try {
+    while (Date.now() - startedAt < 10000) {
+      debug = await evaluate("window.__campusDebug?.() ?? null");
+      if (debug !== null && reached(debug.player, debug)) return debug;
+      await sleep(33);
+    }
+    throw new Error(
+      `timed out during real movement: ${label}; ` +
+        JSON.stringify({ player: debug?.player, body: debug?.body }),
+    );
+  } finally {
+    await command("Input.dispatchKeyEvent", {
+      type: "keyUp",
+      key,
+      code,
+      windowsVirtualKeyCode: keyCode,
+    });
+  }
+}
 
-  hook.setPlayerPosition(944, 768);
-  const first = hook.tick();
-  const firstResidence = first.active?.residenceId;
-  const firstDom = {
-    rootPointer: getComputedStyle(root).pointerEvents,
-    backdropPointer: getComputedStyle(backdrop).pointerEvents,
-    modalPointer: getComputedStyle(modal).pointerEvents,
-    backdropZ: backdrop.style.zIndex,
-    modalZ: modal.style.zIndex,
-    outsideTarget: document.elementFromPoint(5, 5)?.id ?? "",
-  };
+try {
+  await command("Runtime.enable");
+  await command("Network.enable");
+  await command("Page.enable");
+  await command("Page.navigate", { url });
+  const clickedPoint = await clickPlay(command, evaluate, timeoutMs);
+  await waitForAppStatus(evaluate, "PLAYING", timeoutMs);
 
-  close.click();
-  const closed = hook.snapshot();
-  const sameResidence = hook.tick();
+  const playable = await waitForDebug(
+    (debug) => debug.entry?.snapshot?.status === "playable",
+    "playable entry",
+  );
+  assert.equal(playable.player.x, 1088);
+  assert.equal(playable.player.y, 304);
+  assert.equal(playable.content.active, null);
+  assert.match(
+    (await evaluate("window.__campusEntryTest.snapshot().guideText")),
+    /MEMO6/,
+  );
 
-  hook.setPlayerPosition(900, 768);
-  const left = hook.tick();
-  hook.setPlayerPosition(944, 768);
-  const reentered = hook.tick();
+  const trainComplete = await waitForDebug(
+    (debug) =>
+      debug.side?.train?.state === "complete" &&
+      debug.side?.trainHasSprite === false &&
+      debug.side?.trainColliderActive === false,
+    "real train departure cleanup",
+  );
 
-  hook.setPlayerPosition(1760, 1280);
-  const memo = hook.tick();
-  const memoDom = {
-    backdropTarget: document.elementFromPoint(5, 5)?.id ?? "",
-    backdropPointer: getComputedStyle(backdrop).pointerEvents,
-    maxHeight: modal.style.maxHeight,
-  };
+  const afterWest = await moveUntil({
+    key: "ArrowLeft",
+    code: "ArrowLeft",
+    keyCode: 37,
+    label: "west 36 tiles",
+    reached: (player) => player.x <= 512,
+  });
+  const afterNorth = await moveUntil({
+    key: "ArrowUp",
+    code: "ArrowUp",
+    keyCode: 38,
+    label: "north 7 tiles",
+    reached: (player, debug) =>
+      player.y <= 192 || debug.content?.active?.menuId === "memo6",
+  });
 
-  return {
-    first,
-    firstResidence,
-    firstDom,
-    closed,
-    sameResidence,
-    left,
-    reentered,
+  await waitForAppStatus(evaluate, "MODAL_OPEN", 5000);
+  const memo = await waitForDebug(
+    (debug) => debug.content?.active?.menuId === "memo6",
+    "Memo 6 residence",
+    5000,
+  );
+  const dom = await evaluate(`(() => {
+    const body = document.getElementById("content-body");
+    const image = body?.querySelector("img");
+    const fallback = body?.querySelector("figure span");
+    return {
+      title: document.getElementById("content-title")?.textContent ?? "",
+      body: body?.textContent ?? "",
+      sectionCount: body?.querySelectorAll("section").length ?? 0,
+      heading: body?.querySelector("h3")?.textContent ?? "",
+      imageSrc: image?.getAttribute("src") ?? "",
+      imageVisible: image ? getComputedStyle(image).visibility !== "hidden" : false,
+      fallbackVisible: fallback ? !fallback.hidden : false,
+      focusedId: document.activeElement?.id ?? "",
+    };
+  })()`);
+
+  assert.equal(memo.content.active.menuId, "memo6");
+  assert.ok(memo.content.visited.includes("memo6"));
+  assert.equal(memo.content.leases, 1);
+  assert.equal(memo.content.playerControlEnabled, false);
+  assert.equal(dom.title, "I'm not a game developer");
+  assert.match(dom.body, /clean architecture and logical solutions/);
+  assert.equal(dom.sectionCount, 1);
+  assert.equal(dom.heading, "I'm not a game developer");
+  assert.equal(dom.imageSrc, "/assets/images/cards/card6_base.webp");
+  assert.equal(dom.imageVisible || dom.fallbackVisible, true);
+  assert.equal(dom.focusedId, "content-close");
+
+  await clickAppButton(
+    command,
+    evaluate,
+    "#content-close",
+    "MODAL_OPEN",
+    5000,
+  );
+  await waitForAppStatus(evaluate, "PLAYING", 5000);
+  const closed = await waitForDebug(
+    (debug) =>
+      debug.content?.active === null &&
+      debug.content?.leases === 0 &&
+      debug.content?.playerControlEnabled === true,
+    "Memo 6 close cleanup",
+    5000,
+  );
+
+  assert.ok(afterWest.player.x <= 512);
+  assert.ok(
+    Math.hypot(afterNorth.player.x - 496, afterNorth.player.y - 176) < 30,
+  );
+  assert.deepEqual(events.console, []);
+  assert.deepEqual(events.exceptions, []);
+  assert.deepEqual(events.failedRequests, []);
+  assert.deepEqual(events.badResponses, []);
+
+  console.log(JSON.stringify({
+    ok: true,
+    url,
+    clickedPoint,
+    playable,
+    trainComplete,
+    afterWest: afterWest.player,
+    afterNorth: afterNorth.player,
     memo,
-    memoDom,
-  };
-})()`);
-
-await command("Emulation.setDeviceMetricsOverride", {
-  width: 375,
-  height: 667,
-  deviceScaleFactor: 1,
-  mobile: true,
-});
-await new Promise((resolve) => setTimeout(resolve, 100));
-const mobile = await evaluate(`(() => {
-  const hook = window.__campusContentTest;
-  const backdrop = document.getElementById("content-backdrop");
-  const beforeClose = hook.snapshot();
-  const maxHeight = document.getElementById("content-modal").style.maxHeight;
-  backdrop.click();
-  return { beforeClose, maxHeight, afterClose: hook.snapshot() };
-})()`);
-
-const lifecycle = await evaluate(`(async () => {
-  const shutdown = window.__campusLifecycleTest.shutdown;
-  await shutdown();
-  return {
-    rootHidden: document.getElementById("content-ui-root")?.hidden ?? false,
-    backdropHidden: document.getElementById("content-backdrop")?.hidden ?? false,
-    modalHidden: document.getElementById("content-modal")?.hidden ?? false,
-    contentHookPresent: Boolean(window.__campusContentTest),
-    lifecycleHookPresent: Boolean(window.__campusLifecycleTest),
-    debugHookPresent: Boolean(window.__campusDebug),
-  };
-})()`, true);
-
-const first = desktop.first;
-const closed = desktop.closed;
-const reentered = desktop.reentered;
-const memo = desktop.memo;
-const mobileHeight = Number.parseFloat(mobile.maxHeight);
-const passed =
-  first?.active?.menuId === "about" &&
-  first?.ui?.title === "About Me" &&
-  first?.ui?.backdropHidden === true &&
-  first?.visited?.includes("about") &&
-  first?.leases === 1 &&
-  first?.playerControlEnabled === false &&
-  desktop.firstDom.rootPointer === "none" &&
-  desktop.firstDom.backdropPointer === "none" &&
-  desktop.firstDom.modalPointer === "auto" &&
-  desktop.firstDom.backdropZ === "9998" &&
-  desktop.firstDom.modalZ === "9999" &&
-  desktop.firstDom.outsideTarget !== "content-ui-root" &&
-  closed?.active === null &&
-  closed?.ui?.rootHidden === true &&
-  closed?.suppressed?.includes(desktop.firstResidence) &&
-  closed?.leases === 0 &&
-  closed?.playerControlEnabled === true &&
-  desktop.sameResidence?.active === null &&
-  desktop.left?.suppressed?.length === 0 &&
-  reentered?.active?.menuId === "about" &&
-  reentered?.active?.residenceId !== desktop.firstResidence &&
-  memo?.active?.menuId === "memo1" &&
-  memo?.ui?.title === "Memo #1" &&
-  memo?.ui?.backdropHidden === false &&
-  memo?.leases === 1 &&
-  desktop.memoDom.backdropTarget === "content-backdrop" &&
-  desktop.memoDom.backdropPointer === "auto" &&
-  mobile.beforeClose?.active?.menuId === "memo1" &&
-  Math.abs(mobileHeight - 466.9) < 1 &&
-  mobile.afterClose?.active === null &&
-  mobile.afterClose?.suppressed?.length === 1 &&
-  mobile.afterClose?.leases === 0 &&
-  mobile.afterClose?.playerControlEnabled === true &&
-  lifecycle.rootHidden === true &&
-  lifecycle.backdropHidden === true &&
-  lifecycle.modalHidden === true &&
-  lifecycle.contentHookPresent === false &&
-  lifecycle.lifecycleHookPresent === false &&
-  lifecycle.debugHookPresent === false &&
-  events.console.length === 0 &&
-  events.exceptions.length === 0 &&
-  events.failedRequests.length === 0 &&
-  events.badResponses.length === 0;
-
-const result = { url, desktop, mobile, lifecycle, events, passed };
-console.log(JSON.stringify(result, null, 2));
-await command("Target.closeTarget", { targetId: target.id });
-ws.close();
-if (!passed) process.exitCode = 1;
+    dom,
+    closed,
+    events,
+  }, null, 2));
+} finally {
+  socket.close();
+  await fetch(`${cdpUrl}/json/close/${target.id}`).catch(() => {});
+}

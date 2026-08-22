@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 const inputUrl =
   process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
@@ -100,8 +102,13 @@ const snapshotExpression = `(() => {
   const canvas = document.querySelector("#app canvas");
   const rect = canvas?.getBoundingClientRect();
   return {
-    bodyState: document.body?.dataset.entryState ?? null,
-    entry,
+    bodyState: document.body?.dataset.appState ?? null,
+    entry: entry === undefined ? null : {
+      ...entry,
+      shellHidden: document.getElementById("app-shell")?.hidden ?? true,
+      playHidden: document.getElementById("app-play")?.hidden ?? true,
+      playDisabled: document.getElementById("app-play")?.disabled ?? true,
+    },
     debug,
     canvas: canvas ? {
       width: canvas.width,
@@ -134,15 +141,15 @@ try {
   while (Date.now() - readyStartedAt < timeoutMs) {
     const snapshot = await evaluate(snapshotExpression);
     if (snapshot?.bodyState !== null) observedStates.add(snapshot.bodyState);
-    if (snapshot?.entry?.state === "ready" && snapshot?.debug?.entry?.sceneReady) {
+    if (snapshot?.entry?.app?.status === "READY" && snapshot?.debug?.entry?.sceneReady) {
       ready = snapshot;
       break;
     }
     await sleep(25);
   }
   assert.ok(ready !== undefined, "entry did not reach ready");
-  assert.ok(observedStates.has("loading"), "loading state was not observed");
-  assert.equal(ready.entry.progress, 100);
+  assert.ok(observedStates.has("LOADING"), "loading state was not observed");
+  assert.equal(ready.entry.app.progress, 1);
   assert.equal(ready.entry.playHidden, false);
   assert.equal(ready.entry.playDisabled, false);
   assert.equal(ready.debug.player.visible, false);
@@ -160,9 +167,9 @@ try {
   assert.ok(Math.abs(readyCenter.y - 928) < 1);
 
   const clickedAt = Date.now();
-  await evaluate("window.__campusEntryTest.play()");
+  const clickedPoint = await clickPlay(command, evaluate, timeoutMs);
   const entering = await waitFor(
-    (snapshot) => snapshot?.entry?.state === "entering",
+    (snapshot) => snapshot?.entry?.app?.status === "ENTERING_GAME",
     "entry transition",
   );
   assert.equal(entering.entry.shellHidden, true);
@@ -194,7 +201,7 @@ try {
   );
 
   const playable = await waitFor(
-    (snapshot) => snapshot?.entry?.state === "playable",
+    (snapshot) => snapshot?.entry?.app?.status === "PLAYING",
     "playable receipt",
   );
   const playableElapsedMs = Date.now() - clickedAt;
@@ -203,6 +210,11 @@ try {
   assert.equal(playable.debug.entry.snapshot.cameraStable, true);
   assert.equal(playable.debug.entry.snapshot.trainArrived, true);
   assert.equal(playable.debug.entry.train, "arrived");
+  assert.equal(playable.debug.side.train.state, "holding");
+  assert.equal(playable.debug.side.trainHasSprite, true);
+  assert.equal(playable.debug.side.trainHasCollisionShape, true);
+  assert.equal(playable.debug.side.trainColliderActive, true);
+  assert.ok(playable.debug.side.trainBlockingCellCount > 0);
   assert.equal(playable.debug.entry.leaseCount, 0);
   assert.equal(playable.debug.playerRuntime.control.enabled, true);
   assert.equal(playable.entry.guideHidden, false);
@@ -218,6 +230,7 @@ try {
     ok: true,
     url,
     observedStates: [...observedStates],
+    clickedPoint,
     cameraElapsedMs,
     playableElapsedMs,
     ready,

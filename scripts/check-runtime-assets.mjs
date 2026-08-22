@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Check the runtime files and sanitized map expected by game/CampusScene.ts.
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +11,7 @@ const SOURCE_ROOT = resolve(
   ROOT,
   "sample/original-public-build/mirror/assets",
 );
+const CONTENT_MANIFEST = resolve(ROOT, "scripts/runtime-content-assets.json");
 
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
@@ -121,7 +123,53 @@ function checkLayerContracts(layers, label) {
   }
 }
 
+function sha256(path) {
+  return createHash("sha256").update(readFileSync(path)).digest("hex");
+}
+
+function safeResolve(root, relative) {
+  const path = resolve(root, relative);
+  return path === root || path.startsWith(`${root}/`) ? path : undefined;
+}
+
 const errors = [];
+
+try {
+  const contentAssets = JSON.parse(readFileSync(CONTENT_MANIFEST, "utf8"));
+  if (!Array.isArray(contentAssets) || contentAssets.length !== 10) {
+    errors.push("content runtime manifest must contain exactly 10 assets");
+  } else {
+    for (const asset of contentAssets) {
+      const expectedTarget = String(asset.src).replace(/^\/+/, "");
+      if (asset.targetRelative !== expectedTarget) {
+        errors.push(`content target does not match registry src: ${asset.src}`);
+        continue;
+      }
+      const source = safeResolve(SOURCE_ROOT, asset.sourceRelative);
+      const target = safeResolve(RUNTIME_ROOT, asset.targetRelative);
+      if (source === undefined || target === undefined) {
+        errors.push(`unsafe content asset path: ${asset.src}`);
+        continue;
+      }
+      if (!existsSync(source)) {
+        errors.push(`missing content source: ${asset.sourceRelative}`);
+        continue;
+      }
+      if (sha256(source) !== asset.sha256) {
+        errors.push(`content source hash mismatch: ${asset.sourceRelative}`);
+      }
+      if (!existsSync(target)) {
+        errors.push(`missing content runtime file: public/${asset.targetRelative}`);
+        continue;
+      }
+      if (sha256(target) !== asset.sha256) {
+        errors.push(`content runtime hash mismatch: ${asset.targetRelative}`);
+      }
+    }
+  }
+} catch (error) {
+  errors.push(`invalid content runtime manifest: ${error.message}`);
+}
 
 for (const [sourceRelative, targetRelative] of FILES) {
   const source = resolve(SOURCE_ROOT, sourceRelative);

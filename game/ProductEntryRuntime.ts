@@ -95,6 +95,9 @@ export class ProductEntryRuntime {
   shutdown(): void {
     if (this.statusState === "shutdown") return;
     this.statusState = "shutdown";
+    const token = this.leaseToken;
+    this.leaseToken = undefined;
+    if (token !== undefined) this.options.lease.release(token);
     this.options.camera.shutdown();
     this.options.train.shutdown();
     this.notify();

@@ -208,6 +208,10 @@ export class PhaserFactorySmokeRuntime {
     return this.runtime.snapshot;
   }
 
+  get hasEmitter(): boolean {
+    return this.emitter !== undefined;
+  }
+
   private emitterConfig(): Record<string, unknown> {
     return {
       speed: 0,

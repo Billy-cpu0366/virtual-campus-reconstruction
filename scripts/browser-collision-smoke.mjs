@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 
+import { clickPlay } from "./browser-app-actions.mjs";
+
 const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 const positionalArgs = process.argv.slice(2).filter(
   (argument) => !argument.startsWith("--"),
@@ -17,7 +19,6 @@ const bridgeTest =
   process.env.SMOKE_BRIDGE_TEST === "true";
 const smokeUrlObject = new URL(rawSmokeUrl);
 smokeUrlObject.searchParams.set("collision-test", "1");
-smokeUrlObject.searchParams.set("entry-autoplay", "1");
 const smokeUrl = smokeUrlObject.toString();
 const moveKey = process.env.SMOKE_MOVE_KEY ?? "ArrowDown";
 const keyInfo = {
@@ -187,6 +188,11 @@ try {
   await command("Network.enable");
   await command("Page.enable");
   await command("Page.navigate", { url: smokeUrl });
+  await clickPlay(
+    command,
+    (expression) => evaluate(command, expression),
+    waitMs + 10000,
+  );
 
   await sleep(waitMs);
 
@@ -197,7 +203,7 @@ try {
   const title = await evaluate(command, "document.title");
   const readyState = await evaluate(command, "document.readyState");
 
-  assert.equal(title, "虚拟校园 · 可玩雏形");
+  assert.equal(title, "Virtual Campus");
   assert.equal(readyState, "complete");
   assert.ok(debug !== null, "campus debug state is unavailable");
   assert.ok(debug.state !== undefined, "chunk coordinator state unavailable");

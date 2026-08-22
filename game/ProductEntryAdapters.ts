@@ -52,6 +52,123 @@ export class ProductEntryCameraAdapter implements ProductEntryCameraPort {
   }
 }
 
+type ProductEntryUpdateListener = (...args: unknown[]) => void;
+
+export interface ProductEntryTrainRuntimeLike {
+  readonly snapshot: {
+    readonly state: string;
+  };
+  start(nowMs: number): { readonly ok: true } | { readonly ok: false; readonly reason: string };
+  shutdown(nowMs?: number): void;
+}
+
+export interface ProductEntryUpdateEventsLike {
+  on(event: "update", listener: ProductEntryUpdateListener, context?: unknown): unknown;
+  off(event: "update", listener: ProductEntryUpdateListener, context?: unknown): unknown;
+}
+
+/** Resolves only from the real route entering holding; it owns no truth timer. */
+export class PhaserTrainArrivalAdapter implements ProductEntryTrainPort {
+  private promise: Promise<void> | undefined;
+  private resolvePromise: (() => void) | undefined;
+  private rejectPromise: ((error: Error) => void) | undefined;
+  private listenerAttached = false;
+  private state: "idle" | "entering" | "arrived" | "failed" | "shutdown" = "idle";
+
+  private readonly handleUpdate: ProductEntryUpdateListener = (): void => {
+    this.observeRoute();
+  };
+
+  constructor(
+    private readonly runtime: ProductEntryTrainRuntimeLike,
+    private readonly events: ProductEntryUpdateEventsLike,
+    private readonly now: () => number,
+  ) {}
+
+  get status(): "idle" | "entering" | "arrived" | "failed" | "shutdown" {
+    return this.state;
+  }
+
+  waitForArrival(): Promise<void> {
+    if (this.promise !== undefined) return this.promise;
+    if (this.state === "shutdown") {
+      return Promise.reject(new Error("entry train adapter has been shut down"));
+    }
+
+    this.promise = new Promise<void>((resolve, reject) => {
+      this.resolvePromise = resolve;
+      this.rejectPromise = reject;
+    });
+    this.state = "entering";
+    try {
+      const started = this.runtime.start(this.now());
+      if (!started.ok) {
+        this.fail(new Error(`entry train start failed: ${started.reason}`));
+        return this.promise;
+      }
+      this.attach();
+      this.observeRoute();
+    } catch (error) {
+      this.fail(error instanceof Error ? error : new Error(String(error)));
+    }
+    return this.promise;
+  }
+
+  shutdown(): void {
+    if (this.state === "shutdown") return;
+    this.state = "shutdown";
+    this.detach();
+    this.runtime.shutdown(this.now());
+    const reject = this.rejectPromise;
+    this.resolvePromise = undefined;
+    this.rejectPromise = undefined;
+    reject?.(new Error("entry train adapter has been shut down"));
+  }
+
+  private observeRoute(): void {
+    if (this.state !== "entering") return;
+    const routeState = this.runtime.snapshot.state;
+    if (routeState === "holding") {
+      this.state = "arrived";
+      this.detach();
+      const resolve = this.resolvePromise;
+      this.resolvePromise = undefined;
+      this.rejectPromise = undefined;
+      resolve?.();
+      return;
+    }
+    if (
+      routeState === "complete" ||
+      routeState === "cancelled" ||
+      routeState === "shutdown"
+    ) {
+      this.fail(new Error(`entry train ended before arrival: ${routeState}`));
+    }
+  }
+
+  private fail(error: Error): void {
+    if (this.state === "shutdown" || this.state === "arrived") return;
+    this.state = "failed";
+    this.detach();
+    const reject = this.rejectPromise;
+    this.resolvePromise = undefined;
+    this.rejectPromise = undefined;
+    reject?.(error);
+  }
+
+  private attach(): void {
+    if (this.listenerAttached) return;
+    this.events.on("update", this.handleUpdate, this);
+    this.listenerAttached = true;
+  }
+
+  private detach(): void {
+    if (!this.listenerAttached) return;
+    this.events.off("update", this.handleUpdate, this);
+    this.listenerAttached = false;
+  }
+}
+
 export interface ProductEntryTimerLike {
   remove?(destroy?: boolean): unknown;
   destroy?(): unknown;

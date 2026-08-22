@@ -77,8 +77,14 @@ export interface PhaserTrainBlockingZonePort {
   setTrainBlockingZone(cells: readonly string[] | null): void;
 }
 
+export type PhaserTrainCollisionCleanup = () => void;
+export type PhaserTrainCollisionConnector = (
+  shape: PhaserTrainCollisionShapeLike,
+) => PhaserTrainCollisionCleanup;
+
 export interface PhaserTrainRuntimeOptions {
   readonly blockingZone?: PhaserTrainBlockingZonePort;
+  readonly connectCollision?: PhaserTrainCollisionConnector;
   readonly onError?: (reason: string) => void;
 }
 
@@ -103,8 +109,10 @@ export class PhaserTrainRuntime {
   private readonly route = new TrainRouteRuntime();
   private readonly blockingZone: PhaserTrainBlockingZonePort | undefined;
   private readonly onError: ((reason: string) => void) | undefined;
+  private readonly connectCollision: PhaserTrainCollisionConnector | undefined;
   private sprite: PhaserTrainSpriteLike | undefined;
   private collisionShape: PhaserTrainCollisionShapeLike | undefined;
+  private collisionCleanup: PhaserTrainCollisionCleanup | undefined;
   private updateAttached = false;
   private shutdownState = false;
   private lastCells = "";
@@ -122,6 +130,7 @@ export class PhaserTrainRuntime {
     options: PhaserTrainRuntimeOptions = {},
   ) {
     this.blockingZone = options.blockingZone;
+    this.connectCollision = options.connectCollision;
     this.onError = options.onError;
   }
 
@@ -198,6 +207,14 @@ export class PhaserTrainRuntime {
     return this.route.snapshot;
   }
 
+  get hasSprite(): boolean {
+    return this.sprite !== undefined;
+  }
+
+  get hasCollisionShape(): boolean {
+    return this.collisionShape !== undefined;
+  }
+
   private createCollision(band: TrainCollisionBand): void {
     if (this.collisionShape !== undefined) return;
     const shape = this.scene.add.rectangle(
@@ -210,6 +227,11 @@ export class PhaserTrainRuntime {
     );
     this.scene.physics?.add?.existing(shape, true);
     this.collisionShape = shape;
+    const cleanup = this.connectCollision?.(shape);
+    if (cleanup !== undefined && typeof cleanup !== "function") {
+      throw new TypeError("train collision connector did not return cleanup");
+    }
+    this.collisionCleanup = cleanup;
     this.updateCollision(band);
   }
 
@@ -226,10 +248,17 @@ export class PhaserTrainRuntime {
   }
 
   private cleanupObjects(): void {
-    this.sprite?.destroy();
-    this.sprite = undefined;
+    const cleanup = this.collisionCleanup;
+    this.collisionCleanup = undefined;
+    try {
+      cleanup?.();
+    } catch {
+      this.report("collision-cleanup-failed");
+    }
     this.collisionShape?.destroy();
     this.collisionShape = undefined;
+    this.sprite?.destroy();
+    this.sprite = undefined;
     this.lastCells = "";
     this.blockingZone?.setTrainBlockingZone(null);
   }

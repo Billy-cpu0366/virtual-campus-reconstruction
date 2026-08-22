@@ -43,7 +43,7 @@ export interface AppRuntimeEffects {
     generation: number,
     callbacks: AppLoadCallbacks,
   ): AppLoadHandle | void;
-  cleanup(generation: number): void;
+  cleanup(generation: number): void | Promise<void>;
   enterGame(
     generation: number,
     onEntered: () => void,
