@@ -5,11 +5,11 @@ work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p2.1
 current-phase: p2.1-shared-content-bridge
-current-gate: shared-content-authority-clean-baseline
-gate-status: accepted-awaiting-persist
+current-gate: main-shared-contract-commit
+gate-status: in_progress
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p3-four-stream-implementation
+next-phase: p2.1-sync-03-and-04
 updated: 2026-08-22
 ---
 
@@ -18,9 +18,9 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：P2.1共享内容桥修正；P2统一设计clean提交=`c21f7ce8`，03在实现前正确触发owner阻塞。
+- **当前阶段**：P2.1共享内容桥执行；authority clean提交=`0a525393`，03在实现前正确触发owner阻塞。
 - **已接受视觉目标**：Play后3秒Power2镜头落玩家、火车同时5秒进场后开放控制、桌面480×270逻辑画面、Memo 6首个真人引导。
-- **当前授权**：05继续P3；03保持blocked；04保留dirty修改暂停；Main保持clean。P2.1 authority提交后，Main先产出单独共享contract/resolver提交。
+- **当前授权**：Main只做独立shared contract/resolver提交；04保留现有修改并完成不依赖富内容schema的foundation提交；05继续P3；03仍blocked。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
@@ -54,7 +54,7 @@ updated: 2026-08-22
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | P2设计`c21f7ce8`；Human接受P2.1共享内容桥 | 05继续；03 blocked；04/Main暂停保留现场；根authority提交后Main先做兼容共享契约 | 越过owner；覆盖04 dirty修改；111秒序列接正常入口；no-code冒充可见交付；push/PR/Windows同步 | shared commit同步03/04后恢复P3，最终Main串行接线 |
+| 三板块可见成果并行波 | P2.1 authority已提交`0a525393` | Main做shared contract/resolver单独提交；04做foundation单独提交；05继续；03 blocked | 越过owner；覆盖04 dirty修改；shared提交混入正文/UI/入口；push/PR/Windows同步 | shared commit同步03/04后恢复P3，最终Main串行接线 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -171,7 +171,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前有一个已定位设计阻塞：03无法在自身白名单内把富内容送入Main resolver和04 UI。Human已接受P2.1共享契约桥；等待root authority clean提交。05不受影响；04现有dirty修改必须保留。
+- 03共享接口阻塞已接受并落盘到`0a525393`；当前等待Main shared contract/resolver commit与04 foundation commit。05不受影响；04现有dirty修改必须保留。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。

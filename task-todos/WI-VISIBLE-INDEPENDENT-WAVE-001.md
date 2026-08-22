@@ -2,12 +2,12 @@
 work-item: WI-VISIBLE-INDEPENDENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 04-independent
-status: paused-dirty-awaiting-p2.1-contract
+status: active-p2.1-foundation-preserve-dirty
 branch: feature/04-independent-visible-wave
 worktree-path: .pi/worktrees/04-independent-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: preserve-existing-work-no-new-edits
+current-authorization: p2.1-foundation-only
 worktree-receipt: verified-clean-at-baseline
 updated: 2026-08-22
 ---

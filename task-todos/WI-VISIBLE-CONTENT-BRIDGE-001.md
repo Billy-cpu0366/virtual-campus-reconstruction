@@ -1,9 +1,11 @@
 ---
 work-item: WI-VISIBLE-CONTENT-BRIDGE-001
 parent: WI-THREE-BOARD-VISIBLE-WAVE-001
-status: accepted-awaiting-authority-commit
+status: active-main-contract-and-04-foundation
 phase: P2.1-shared-content-bridge
 authorization: DEC-VISIBLE-CONTENT-BRIDGE-001
+authority-commit: 0a5253933c94938917221721c9cfdafeee6c7dcf
+authority-tree: df621a66391323443142cc8c9f1b4a9036479c5f
 main-branch: integration/visible-product-wave
 content-blocked-commit: 4b36ad40ede8f0cff8428bb6ae7877a572a3db4f
 updated: 2026-08-22
