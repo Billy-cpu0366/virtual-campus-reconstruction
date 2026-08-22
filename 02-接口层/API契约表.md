@@ -83,7 +83,18 @@ updated: 2026-08-22
 |---|---|---|---|
 | 富内容payload | Frozen | Shared Core Verified（`f243764f`） | `body`向后兼容；`sections`无任意HTML；03数据、Main校验/冻结、04安全渲染 |
 | Main默认resolver接线 | Frozen | Shared Validation Verified / Registry Not Integrated | `f243764f`先不导入03 registry；最终integration只接registry，不复制数据 |
-| 04 DOM renderer | Frozen | Foundation Verified / Rich Renderer In Progress | `db0fd9d1`保留App/UI成果；shared已同步，继续sections/fallback |
+| 04 DOM renderer | Frozen | Bounded Verified（`c1156cd8`） | sections/body fallback/图片与链接安全已验证，待Main真实接线 |
+
+### P4最终集成接口（`DEC-VISIBLE-WAVE-P4-INTEGRATION-001`）
+
+| 接口 | 契约状态 | 工程状态 | 当前边界 |
+|---|---|---|---|
+| App generation effects | Frozen | Owners Ready / Not Integrated | Main创建/销毁每个Phaser generation；04 AppRuntime只协调状态；Retry先cleanup成功再重建 |
+| 默认内容source | Frozen | Registry/Renderer Ready / Not Integrated | 03 registry覆盖8项真实内容；其余3项保留最小fallback；Main resolver不复制正文 |
+| 内容runtime assets | Frozen | Receipts Ready / Not Integrated | Main从10项已确认sample镜像复制并验hash；不联网；失败保正文 |
+| 真实train到站收据 | Frozen | Route Ready / Not Integrated | production包装`PhaserTrainRuntime`，snapshot进入holding才resolve；禁止独立5秒真值timer |
+| train玩家collider | Frozen | Shape Ready / Connector Missing | Main注入collider connector/cleanup；teardown先collider后shape，不建第二套碰撞系统 |
+| side运行时生命周期 | Frozen | Owners Ready / Not Integrated | Main preload/start并提供player snapshot/viewport；Retry/shutdown先side后Scene/World |
 
 ## 二、数据字典（常量 / 公式，不是接口）
 

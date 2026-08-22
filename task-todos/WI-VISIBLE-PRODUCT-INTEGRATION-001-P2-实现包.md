@@ -1,7 +1,7 @@
 ---
 work-item: WI-VISIBLE-PRODUCT-INTEGRATION-001
 phase: P3-main-implementation-and-integration
-status: active-p3-entry-implementation
+status: ready-for-p4-serial-integration
 p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 authorization: DEC-VISIBLE-WAVE-P2-001
 branch: integration/visible-product-wave

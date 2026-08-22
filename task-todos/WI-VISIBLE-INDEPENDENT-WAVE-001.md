@@ -2,13 +2,13 @@
 work-item: WI-VISIBLE-INDEPENDENT-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 04-independent
-status: active-p3-rich-renderer
+status: ready-for-p4-integration
 branch: feature/04-independent-visible-wave
 worktree-path: .pi/worktrees/04-independent-visible
 baseline-commit: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
-current-authorization: p3-rich-renderer-implementation
-worktree-receipt: foundation-db0fd9d1-plus-shared-4309399b-clean
+current-authorization: wait-main-serial-integration
+worktree-receipt: foundation-db0fd9d1-rich-c1156cd8-clean
 updated: 2026-08-22
 ---
 

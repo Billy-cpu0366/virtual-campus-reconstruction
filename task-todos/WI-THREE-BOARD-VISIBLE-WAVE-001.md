@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p3-parallel-implementation
-phase: p3-parallel-implementation
+status: active-p4-integration-plan
+phase: p4-branch-review-and-main-integration
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
@@ -51,6 +51,11 @@ updated: 2026-08-22
 - 计划提交：`3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e`，tree=`9c2e8b0b854a09d068c6de8e91ef9178f484c4f8`，root clean。
 - 03内容、04独立件、05旁支、Main integration四个worktree均为`8ae7692b45b16f4b0ce6e96faa448197734db3b0`，tree=`c825bb6a99f363e30a665d58d4a2eadf7b18f537`，状态clean。
 - P0 Gate PASS。
+
+## P3/P4收据
+
+- 03 registry `71b00851`、04 foundation/rich renderer `db0fd9d1`/`c1156cd8`、05 side `0c049130`、Main entry `3513ccac`均ready且clean。
+- Human已接受[P4 Main串行集成包](WI-VISIBLE-PRODUCT-INTEGRATION-001-P4-集成包.md)；authority clean提交前不合并。
 
 ## P1/P2收据
 
