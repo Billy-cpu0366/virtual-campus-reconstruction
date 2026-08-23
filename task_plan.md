@@ -3,20 +3,20 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: frozen-awaiting-wip-sync
+correction-phase: audit
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-wip-snapshot-sync
-current-gate: wip-delivery-bundle-preparation
-gate-status: human-authorized-wip-branch-push
+current-phase: p5.1-full-visual-parity-audit
+current-gate: systemic-audit-difference-table
+gate-status: in-progress
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p5.1-full-visual-parity-diagnosis
-updated: 2026-08-22
+next-phase: p5.1-root-cause-clustering
+updated: 2026-08-23
 ---
 
 # 原站逆向重构计划
@@ -24,12 +24,12 @@ updated: 2026-08-22
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：先把P5.1前的当前进度形成统一WIP snapshot并同步远端分支；随后恢复完整视觉与动态一致性诊断。
-- **同步内容**：已冻结delivery `0d552684`包含功能candidate=`0fadf309`及生成当时三项Human FAIL；随后新增的火车/NPC/roof/FX反馈只在本地后续提交记录，不改写不可变outbox，也不影响该代码WIP快照继续交付。
-- **当前授权**：生成Git bundle并由Windows外部Pi推唯一WIP分支；不允许PR、merge、修改`main`。首次正式仓库路径/remote/dirty/fetch审计仍必须执行。
+- **当前阶段**：Human已说明WIP仓库完成推送；父流程结束冻结等待，进入P5.1完整视觉与动态差异审计。
+- **同步内容**：不可变delivery `0d552684`包含功能candidate=`0fadf309`及生成当时三项Human FAIL；Human报告已推送，但WSL未收到远端commit/tree收据，因此只记为human-reported、remote-unverified，不阻塞本地系统审计。
+- **当前授权**：一次性审计Loading/性能/chunk/火车/NPC/roof/FX完整Human路径，形成一张差异表并按共同根因聚类；整体修正方案经Human Gate接受前不写修复代码。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
-- **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
+- **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
@@ -60,7 +60,7 @@ updated: 2026-08-22
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；`0fadf309`自动全绿但Human视觉FAIL | WIP同步后按统一差异表一次审计Loading/性能/chunk/火车/NPC/roof/FX，再按根因聚类 | 逐点开调查；用状态计数代签视觉；未确认就改30FPS事实；push/PR/Windows同步 | Human只审一次整体修正包；接受后成批实现并跑完整路径回归 |
+| 三板块可见成果并行波 | `systemic-failure`；`0fadf309`自动全绿但Human视觉FAIL；WIP推送由Human报告完成 | 按统一差异表一次审计Loading/性能/chunk/火车/NPC/roof/FX，再按根因聚类 | 逐点打补丁；用状态计数代签视觉；未确认就改30FPS事实；PR/merge/main或其他远端操作 | Human只审一次整体修正包；接受后成批实现并跑完整路径回归 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -177,13 +177,13 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前产品阻塞仍为Human视觉FAIL；本次远端同步仅备份当前WIP进度，不代表视觉通过。外部Pi若发现正式仓库dirty、remote不匹配、未知分叉、bundle/hash不符或测试失败必须停止。
+- 当前产品阻塞仍为Human视觉FAIL；Human已报告WIP仓库完成推送，但WSL没有远端commit/tree收据，不能把远端状态标为verified；这不阻塞本地P5.1系统审计，也不代表视觉通过。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- 当前没有技术阻塞；`Q-LAYER-002/003` 继续保持 UNKNOWN。请求取消和当前重构 teardown 已有界验证；最终硬件性能阈值、完整动态消费者和完整玩法线不并入本设计项。
+- 当前没有本地审计技术阻塞；`Q-LAYER-002/003` 继续保持 UNKNOWN。补救实现必须等待完整差异表、根因聚类和一次Human方案Gate；请求取消和当前重构 teardown 已有界验证，最终硬件性能阈值仍需本轮证据决定。
 
 ## 近期候选
 

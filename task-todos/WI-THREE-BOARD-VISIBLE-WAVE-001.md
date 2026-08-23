@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-corrective-diagnosis
-phase: p5.1-loading-startup-performance-diagnosis
+status: active-p5.1-systemic-audit
+phase: p5.1-full-visual-parity-audit
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
@@ -13,7 +13,7 @@ p2-design-commit: c21f7ce8ddeafc071aa77988d69fe2d1b538637e
 p2-design-tree: ec2884530db465a57b5dd20cd7811fc215e7df52
 human-visual-gate-required: true
 documentation-close-status: blocked-by-visual-gate
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # 三板块可见成果并行波
@@ -31,7 +31,7 @@ updated: 2026-08-22
 - A/B/C不修改`game/CampusScene.ts`、`game/main.ts`、`index.html`、`package.json`或共享browser smoke；这些归Main integration。
 - no-code/调查报告不能冒充板块可见交付。
 - 自动检查不能替代Human视觉Gate；Human通过前不得关闭文档。
-- 不push、不PR、不操作Windows正式仓库。
+- WIP分支推送已由Human报告完成；仍不PR、不merge、不修改`main`，不发起新的远端操作。
 
 ## P2.1内容桥修正
 

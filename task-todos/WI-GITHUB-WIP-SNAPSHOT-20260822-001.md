@@ -1,11 +1,11 @@
 ---
 work-item: WI-GITHUB-WIP-SNAPSHOT-20260822-001
-status: active-bundle-preparation
+status: human-reported-pushed-remote-unverified
 work-item-type: delivery-snapshot
 authorization: DEC-WIP-SNAPSHOT-PUSH-001
 delivery-id: vc-wip-visible-p51-20260822-01
 target-branch: wip/visible-product-p5.1-20260822
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # 当前可见产品进度 WIP 远端快照
@@ -49,4 +49,4 @@ updated: 2026-08-22
 
 ## 成功收据
 
-外部Pi必须返回远端branch、commit、tree、push后`ls-remote`核对、实际检查结果和未解决风险。没有远端收据前，本任务只算本地bundle prepared，不算synced。
+外部Pi必须返回远端branch、commit、tree、push后`ls-remote`核对、实际检查结果和未解决风险。Human于2026-08-23明确说明“仓库已经推送过了”；本地补救流程可继续。由于WSL没有收到远端branch/commit/tree收据，本任务当前记为`human-reported-pushed-remote-unverified`，不得冒充项目侧已复核的远端verified收据。
