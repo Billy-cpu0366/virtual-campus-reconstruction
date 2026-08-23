@@ -127,11 +127,21 @@ try {
       };
     })()`);
     entrySamples.push({ elapsedMs: Date.now() - entryStartedAt, ...sample });
-    if (sample.appState === "PLAYING") break;
+    if (
+      sample.appState === "PLAYING" &&
+      sample.rendered === 15 &&
+      sample.targets === 15
+    ) break;
     await new Promise((resolve) => setTimeout(resolve, 25));
   }
   if (entrySamples.at(-1)?.appState !== "PLAYING") {
     throw new Error("PLAYING timeout after 15000ms");
+  }
+  if (
+    entrySamples.at(-1)?.rendered !== 15 ||
+    entrySamples.at(-1)?.targets !== 15
+  ) {
+    throw new Error("entry cleanup did not settle after 15000ms");
   }
   const entryMilestones = [];
   for (const sample of entrySamples) {
@@ -210,6 +220,10 @@ try {
         chunksSettledAtMs !== undefined &&
         playingAtMs !== undefined &&
         chunksSettledAtMs <= playingAtMs,
+      cleanupSettledAfterPlayingMs:
+        chunksSettledAtMs === undefined || playingAtMs === undefined
+          ? undefined
+          : chunksSettledAtMs - playingAtMs,
       milestones: entryMilestones,
     },
     frames: rows.length,
@@ -231,7 +245,9 @@ try {
     ...receipt,
     passed:
       hookTypes.debug === "function" &&
-      receipt.entryChunkRelease.settledBeforePlaying &&
+      receipt.entryChunkRelease.cleanupSettledAfterPlayingMs !== undefined &&
+      receipt.entryChunkRelease.cleanupSettledAfterPlayingMs >= 0 &&
+      receipt.entryChunkRelease.cleanupSettledAfterPlayingMs <= 1500 &&
       cameraStableAtMs !== undefined &&
       lockReleasedAtMs !== undefined &&
       lockReleasedAtMs - cameraStableAtMs <= 200 &&

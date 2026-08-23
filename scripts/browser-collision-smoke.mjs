@@ -17,6 +17,9 @@ const cleanupStale = process.env.SMOKE_CLEANUP_STALE !== "false";
 const bridgeTest =
   process.argv.includes("--bridge-test") ||
   process.env.SMOKE_BRIDGE_TEST === "true";
+const ourArtRulesTest =
+  process.argv.includes("--our-art-rules-test") ||
+  process.env.SMOKE_OUR_ART_RULES_TEST === "true";
 const smokeUrlObject = new URL(rawSmokeUrl);
 smokeUrlObject.searchParams.set("collision-test", "1");
 const smokeUrl = smokeUrlObject.toString();
@@ -322,6 +325,62 @@ try {
     };
   }
 
+  let ourArtRules = null;
+  if (ourArtRulesTest) {
+    const setPlayerPosition = async (x, y) => {
+      await evaluate(
+        command,
+        `window.__campusCollisionTest.setPlayerPosition(${x}, ${y})`,
+      );
+      await sleep(750);
+    };
+    await setPlayerPosition(1850, 1176);
+    const openPavement = await holdDirection(
+      command,
+      "ArrowLeft",
+      "ArrowLeft",
+      37,
+      500,
+    );
+    assert.ok(
+      openPavement.before.x - openPavement.after.x >= 40,
+      `OUR ART blank pavement did not remain passable: ${JSON.stringify(openPavement)}`,
+    );
+    assert.equal(
+      openPavement.blockedSamples,
+      0,
+      `OUR ART blank pavement reported a hidden wall: ${JSON.stringify(openPavement)}`,
+    );
+
+    await setPlayerPosition(1704, 1180);
+    const sign = await holdDirection(
+      command,
+      "ArrowUp",
+      "ArrowUp",
+      38,
+      1_000,
+    );
+    assert.ok(
+      sign.before.y - sign.after.y < 80 && sign.after.y >= 1120,
+      `OUR ART sign base was physically traversed: ${JSON.stringify(sign)}`,
+    );
+
+    await setPlayerPosition(1760, 1320);
+    const garbagePile = await holdDirection(
+      command,
+      "ArrowUp",
+      "ArrowUp",
+      38,
+      1_000,
+    );
+    assert.ok(
+      garbagePile.before.y - garbagePile.after.y < 40 &&
+        garbagePile.after.y >= 1290,
+      `OUR ART garbage pile was physically traversed: ${JSON.stringify(garbagePile)}`,
+    );
+    ourArtRules = { openPavement, sign, garbagePile };
+  }
+
   assert.deepEqual(runtimeErrors, [], `browser runtime errors: ${runtimeErrors}`);
 
   console.log(
@@ -334,6 +393,7 @@ try {
         moveKey,
         movement,
         bridgeTransitions,
+        ourArtRules,
         runtimeErrors,
         rendererLayers: debug.rendererLayers,
         collisionLayers: debug.collisionLayers,

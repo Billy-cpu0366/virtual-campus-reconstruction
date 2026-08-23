@@ -16,6 +16,7 @@
     "browser:layer-smoke": "node scripts/browser-layer-smoke.mjs",
     "browser:lifecycle-smoke": "node scripts/browser-lifecycle-smoke.mjs",
     "browser:collision-smoke": "node scripts/browser-collision-smoke.mjs",
+    "browser:garbage-collision-smoke": "node scripts/browser-collision-smoke.mjs --our-art-rules-test",
     "browser:runtime-safety-smoke": "node scripts/browser-runtime-safety-smoke.mjs",
     "browser:mobile-input-smoke": "node scripts/browser-mobile-input-smoke.mjs",
     "browser:camera-smoke": "node scripts/browser-camera-smoke.mjs",

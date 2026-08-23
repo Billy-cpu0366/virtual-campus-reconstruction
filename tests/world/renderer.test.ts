@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   LAYER_STRATEGIES,
@@ -6,7 +6,10 @@ import {
   type TileCoordinate,
 } from "../../src/layer/index.js";
 import { createWorld } from "../../src/world/index.js";
-import { PhaserWorldRenderer } from "../../game/PhaserWorldRenderer.js";
+import {
+  CLEAR_LAYERS_PER_FRAME,
+  PhaserWorldRenderer,
+} from "../../game/PhaserWorldRenderer.js";
 import { makeChunk, makeSpec } from "./fixtures.js";
 
 class FakeTilemapLayer {
@@ -158,6 +161,60 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     expect(collisionTarget.destroyed).toBe(false);
     await collisionClear;
     expect(collisionTarget.destroyed).toBe(true);
+  });
+
+  it("async clear 按固定图层数让出帧预算", async () => {
+    const frames: Array<() => void> = [];
+    vi.stubGlobal("requestAnimationFrame", (callback: () => void) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    try {
+      const map = new FakeTilemap();
+      const renderer = new PhaserWorldRenderer(
+        map,
+        [],
+        makeSpec(),
+        LAYER_STRATEGIES,
+      );
+      const hooks = renderer.hooks();
+      const chunk = makeChunk(0, 0);
+      const visuals = ["layer1", "layer2", "layer3", "layer4", "layer5"].map(
+        (name) => chunk.layers.find((layer) => layer.name === name)!,
+      );
+      for (const layer of visuals) {
+        hooks.writeLayer!(layer, chunk.coordinate);
+      }
+
+      for (const layer of visuals.slice(0, CLEAR_LAYERS_PER_FRAME - 1)) {
+        await hooks.clearLayerAsync!(layer, chunk.coordinate);
+      }
+      expect(frames).toHaveLength(0);
+
+      const budgeted = hooks.clearLayerAsync!(
+        visuals[CLEAR_LAYERS_PER_FRAME - 1]!,
+        chunk.coordinate,
+      );
+      expect(frames).toHaveLength(1);
+      expect(renderer.teardownSnapshot).toEqual({
+        clearLayersPerFrame: CLEAR_LAYERS_PER_FRAME,
+        asyncClearedLayers: CLEAR_LAYERS_PER_FRAME,
+        frameYields: 1,
+        pendingBudgetCount: 0,
+      });
+      frames.shift()?.();
+      await budgeted;
+
+      await hooks.clearLayerAsync!(visuals[CLEAR_LAYERS_PER_FRAME]!, chunk.coordinate);
+      expect(renderer.teardownSnapshot).toEqual({
+        clearLayersPerFrame: CLEAR_LAYERS_PER_FRAME,
+        asyncClearedLayers: CLEAR_LAYERS_PER_FRAME + 1,
+        frameYields: 1,
+        pendingBudgetCount: 1,
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("raw visual 未知 GID 失败时可被 World apply 回滚", () => {

@@ -1214,6 +1214,7 @@ export class CampusScene extends Phaser.Scene {
         state: this.coordinator?.state,
         entryChunkTargetLock: this.entryChunkTargetLock ?? [],
         rendererLayers: renderer.layers.size,
+        teardown: renderer.teardownSnapshot,
         markerRecords: renderer.markerRecords.length,
         particles3Diagnostics: renderer.particles3Diagnostics.length,
         rawParticleLayers: [...renderer.layers.keys()].filter(

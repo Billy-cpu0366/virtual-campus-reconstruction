@@ -246,7 +246,7 @@ try {
   assert.ok(samples.every((sample) => sample.smokeGeneration === 1));
   assert.ok(smokeVisibleDurationMs >= 2000, `smoke visible only ${smokeVisibleDurationMs}ms`);
   assert.ok(trainVisibleDurationMs >= 5000, `train visible only ${trainVisibleDurationMs}ms`);
-  assert.ok((holding.side.trainVisual?.depth ?? Infinity) < holding.player.depth);
+  assert.ok((holding.side.trainVisual?.depth ?? -Infinity) > holding.player.depth);
   assert.ok(
     holding.side.sprayerVisuals.every(
       (visual) => visual.depth > holding.side.trainVisual.depth,

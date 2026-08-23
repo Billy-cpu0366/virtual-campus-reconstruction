@@ -102,6 +102,8 @@ function nextAnimationFrame(): Promise<void> {
   });
 }
 
+export const CLEAR_LAYERS_PER_FRAME = 4;
+
 /**
  * Phaser-only adapter. Each rendered chunk owns a small 28x28 Tilemap layer;
  * World still owns transaction order and rendered-chunk bookkeeping.
@@ -121,6 +123,9 @@ export class PhaserWorldRenderer {
     ["factory", "visible"],
   ]);
   #destroyPromise: Promise<void> | undefined;
+  #asyncClearedLayers = 0;
+  #clearFrameYields = 0;
+  #clearedSinceFrameYield = 0;
 
   constructor(
     map: any,
@@ -166,6 +171,15 @@ export class PhaserWorldRenderer {
 
   get particles3Diagnostics(): readonly LayerDiagnostic[] {
     return this.diagnostics.filter((item) => item.layerName === "particles3");
+  }
+
+  get teardownSnapshot() {
+    return Object.freeze({
+      clearLayersPerFrame: CLEAR_LAYERS_PER_FRAME,
+      asyncClearedLayers: this.#asyncClearedLayers,
+      frameYields: this.#clearFrameYields,
+      pendingBudgetCount: this.#clearedSinceFrameYield,
+    });
   }
 
   markersForChunk(
@@ -612,6 +626,15 @@ export class PhaserWorldRenderer {
     this.destroyLayer(id, target);
   }
 
+  private async recordBudgetedLayerClear(): Promise<void> {
+    this.#asyncClearedLayers += 1;
+    this.#clearedSinceFrameYield += 1;
+    if (this.#clearedSinceFrameYield < CLEAR_LAYERS_PER_FRAME) return;
+    this.#clearedSinceFrameYield = 0;
+    this.#clearFrameYields += 1;
+    await nextAnimationFrame();
+  }
+
   private async clearLayerAsync(
     layer: ChunkLayer,
     coordinate: ChunkCoordinate,
@@ -627,6 +650,7 @@ export class PhaserWorldRenderer {
     }
     if (!this.isCollisionLayer(layer.name)) {
       this.destroyLayer(id, target);
+      await this.recordBudgetedLayerClear();
       return;
     }
     await this.#options.onCollisionLayerDestroyed?.(layer.name, target);
@@ -637,6 +661,7 @@ export class PhaserWorldRenderer {
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
     if (this.layers.get(id) === target) {
       this.destroyLayer(id, target);
+      await this.recordBudgetedLayerClear();
     }
   }
 }

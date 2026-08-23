@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { playerDepth } from "../../src/layer/index.js";
+import { SPRAYER_CONFIGS, SPRAYER_TILE_SIZE } from "../../src/npc/index.js";
+import { SPAWN_Y } from "../../src/player/index.js";
 import {
   TRAIN_COLLISION_ROW,
   TRAIN_DEPARTURE_DURATION,
@@ -7,6 +10,7 @@ import {
   TRAIN_ENTRY_DURATION,
   TRAIN_HOLD_DURATION,
   TRAIN_START_X,
+  TRAIN_Y,
   TrainRouteRuntime,
 } from "../../src/route/index.js";
 import {
@@ -171,6 +175,17 @@ describe("TrainRouteRuntime", () => {
 });
 
 describe("PhaserTrainRuntime", () => {
+  it("train世界深度遮住出生玩家但保留sprayer前景", () => {
+    const closestSprayerY = Math.min(
+      ...SPRAYER_CONFIGS.map((config) => config.tileY * SPRAYER_TILE_SIZE),
+    );
+    expect(TRAIN_PRESENTATION_DEPTH).toBe(playerDepth(TRAIN_Y));
+    expect(TRAIN_PRESENTATION_DEPTH).toBeGreaterThan(playerDepth(SPAWN_Y));
+    expect(TRAIN_PRESENTATION_DEPTH).toBeLessThan(
+      playerDepth(closestSprayerY),
+    );
+  });
+
   it("创建单个火车和静态碰撞带，进出场时更新blocking zone并完整清理", () => {
     const fake = makeScene();
     const calls: Array<readonly string[] | null> = [];

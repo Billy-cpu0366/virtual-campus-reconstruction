@@ -154,6 +154,14 @@ try {
   assert.equal(ready.entry.playDisabled, false);
   assert.equal(ready.debug.player.visible, false);
   assert.equal(ready.debug.playerRuntime.control.enabled, false);
+  assert.equal(ready.debug.state.rendered.length, 25);
+  assert.equal(ready.debug.rendererLayers, 525);
+  assert.deepEqual(ready.debug.teardown, {
+    clearLayersPerFrame: 4,
+    asyncClearedLayers: 0,
+    frameYields: 0,
+    pendingBudgetCount: 0,
+  });
   assert.equal(ready.canvas.width, 480);
   assert.equal(ready.canvas.height, 270);
   assert.ok(Math.abs(ready.canvas.cssWidth / ready.canvas.cssHeight - 16 / 9) < 0.01);
@@ -215,12 +223,37 @@ try {
   assert.equal(playable.debug.side.trainHasCollisionShape, true);
   assert.equal(playable.debug.side.trainColliderActive, true);
   assert.ok(playable.debug.side.trainBlockingCellCount > 0);
+  assert.ok(
+    playable.debug.side.trainVisual.depth > playable.debug.player.depth,
+    `train must occlude the spawn player: ${JSON.stringify({
+      train: playable.debug.side.trainVisual.depth,
+      player: playable.debug.player.depth,
+    })}`,
+  );
+  assert.equal(playable.debug.side.sprayerVisuals.length, 4);
+  assert.ok(
+    playable.debug.side.sprayerVisuals.every(
+      (visual) => visual.depth > playable.debug.side.trainVisual.depth,
+    ),
+    "sprayers must remain in front of the train",
+  );
   assert.equal(playable.debug.entry.leaseCount, 0);
   assert.equal(playable.debug.playerRuntime.control.enabled, true);
   assert.equal(playable.entry.guideHidden, false);
   assert.match(playable.entry.guideText, /MEMO6/);
   assert.equal(playable.debug.cameraRuntime.status, null);
   assert.equal(playable.debug.cameraRuntime.result, null);
+
+  const cleanupSettled = await waitFor(
+    (snapshot) =>
+      snapshot?.debug?.state?.rendered?.length === 15 &&
+      snapshot?.debug?.rendererLayers === 315 &&
+      snapshot?.debug?.teardown?.asyncClearedLayers === 210,
+    "entry cleanup budget receipt",
+  );
+  assert.equal(cleanupSettled.debug.teardown.clearLayersPerFrame, 4);
+  assert.equal(cleanupSettled.debug.teardown.frameYields, 52);
+  assert.equal(cleanupSettled.debug.teardown.pendingBudgetCount, 2);
   assert.deepEqual(events.console, []);
   assert.deepEqual(events.exceptions, []);
   assert.deepEqual(events.failedRequests, []);
@@ -237,6 +270,7 @@ try {
     entering,
     cameraStable,
     playable,
+    cleanupSettled,
     events,
   }, null, 2));
 } finally {

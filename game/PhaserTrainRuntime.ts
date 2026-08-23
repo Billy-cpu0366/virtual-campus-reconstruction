@@ -1,3 +1,4 @@
+import { playerDepth } from "../src/layer/index.js";
 import {
   TRAIN_END_X,
   TRAIN_ENTRY_DURATION,
@@ -14,7 +15,7 @@ export const TRAIN_RUNTIME_ASSET = Object.freeze({
 });
 
 const TRAIN_SCALE = (1 / 3) * 0.75 * 4.1;
-export const TRAIN_PRESENTATION_DEPTH = 520;
+export const TRAIN_PRESENTATION_DEPTH = playerDepth(TRAIN_Y);
 
 type TrainListener = (...args: unknown[]) => void;
 
