@@ -1,0 +1,16 @@
+{
+  "candidate": "0fadf309963ba5d23c092ec049654791901f806e",
+  "path": "test-hooks build with real ArrowRight input after normal Play entry",
+  "viewport": "browser default CSS 776.875x437 over logical 480x270",
+  "durationMs": 2200,
+  "renderFrames": 133,
+  "distinctPlayerPositions": 67,
+  "startX": 1088,
+  "endX": 1396.000000000005,
+  "zeroDeltaFrames": 66,
+  "nonzeroDeltaFrames": 66,
+  "onlyNonzeroDeltaX": 4.6666666666667425,
+  "maxRafDeltaMs": 16.799999999999272,
+  "finding": "rAF stayed near 60Hz while player and camera positions changed every other frame at the 30Hz physics cadence",
+  "boundary": "This proves candidate stepping, not that the accepted 30 FPS physics FACT is wrong; original visual interpolation remains UNKNOWN."
+}

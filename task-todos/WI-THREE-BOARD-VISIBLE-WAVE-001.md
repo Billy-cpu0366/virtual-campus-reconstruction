@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-systemic-audit
-phase: p5.1-full-visual-parity-audit
+status: active-p5.1-awaiting-human-plan-gate
+phase: p5.1-systemic-repair-plan
 authorization: DEC-VISIBLE-WAVE-P2-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
@@ -75,6 +75,10 @@ updated: 2026-08-23
 7. **P6 AUTOMATED VERIFY**：全量测试和真实浏览器回归。
 8. **P7 HUMAN VISUAL GATE**：Human先看实际效果；失败则退回，不关闭文档。
 9. **P8 AUTHORITY CLOSE**：仅Human通过后回写系统卡/总账/状态并本地提交。
+
+## P5.1系统审计
+
+完整差异表、证据收据、五个根因簇和A/B/C修复候选见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。当前停在一次Human方案Gate；接受前不写产品代码。
 
 ## 本轮成功标准
 

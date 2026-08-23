@@ -1,0 +1,31 @@
+{
+  "normalProductionPath": true,
+  "testHooks": false,
+  "route": [
+    [
+      "right",
+      2300
+    ],
+    [
+      "down",
+      900
+    ],
+    [
+      "left",
+      1000
+    ]
+  ],
+  "state": "PLAYING",
+  "frameSummary": {
+    "count": 421,
+    "max": 16.80000000000291,
+    "p95": 16.700000000000728,
+    "above34": 0,
+    "above50": 0
+  },
+  "events": {
+    "exceptions": [],
+    "failed": [],
+    "bad": []
+  }
+}

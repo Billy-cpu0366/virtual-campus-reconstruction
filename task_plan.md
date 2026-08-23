@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: audit
+correction-phase: human-plan-gate
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-full-visual-parity-audit
-current-gate: systemic-audit-difference-table
-gate-status: in-progress
+current-phase: p5.1-systemic-repair-plan
+current-gate: p5.1-human-repair-plan-gate
+gate-status: awaiting-human-selection
 authorization-ref: DEC-THREE-BOARD-VISIBLE-WAVE-001
 preauthorized-next-work-item: none
-next-phase: p5.1-root-cause-clustering
+next-phase: p5.1-batch-implement
 updated: 2026-08-23
 ---
 
@@ -24,9 +24,9 @@ updated: 2026-08-23
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：Human已说明WIP仓库完成推送；父流程结束冻结等待，进入P5.1完整视觉与动态差异审计。
-- **同步内容**：不可变delivery `0d552684`包含功能candidate=`0fadf309`及生成当时三项Human FAIL；Human报告已推送，但WSL未收到远端commit/tree收据，因此只记为human-reported、remote-unverified，不阻塞本地系统审计。
-- **当前授权**：一次性审计Loading/性能/chunk/火车/NPC/roof/FX完整Human路径，形成一张差异表并按共同根因聚类；整体修正方案经Human Gate接受前不写修复代码。
+- **当前阶段**：P5.1完整差异审计与五个根因簇已形成；当前停在一次整体修复方案Human Gate。
+- **同步内容**：不可变delivery `0d552684`包含功能candidate=`0fadf309`及生成当时三项Human FAIL；Human报告已推送，但WSL未收到远端commit/tree收据，因此只记为human-reported、remote-unverified，不阻塞本地系统补救。
+- **当前授权**：Human审查[系统审计与根因包](task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)，选择完整证据补救、当前纵切片补救或只救入口；选择前不写产品代码。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -60,7 +60,7 @@ updated: 2026-08-23
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；`0fadf309`自动全绿但Human视觉FAIL；WIP推送由Human报告完成 | 按统一差异表一次审计Loading/性能/chunk/火车/NPC/roof/FX，再按根因聚类 | 逐点打补丁；用状态计数代签视觉；未确认就改30FPS事实；PR/merge/main或其他远端操作 | Human只审一次整体修正包；接受后成批实现并跑完整路径回归 |
+| 三板块可见成果并行波 | `systemic-failure`；完整差异表与RC-1..RC-5已落盘；WIP推送由Human报告完成 | 审查方案A完整证据补救、B当前纵切片补救、C只救入口 | Gate前写产品代码；逐点打补丁；用状态计数代签视觉；直接改30FPS事实；PR/merge/main或其他远端操作 | 选择后进入成批实现；所有包完成后跑完整路径回归与Human整体验收 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -183,7 +183,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- 当前没有本地审计技术阻塞；`Q-LAYER-002/003` 继续保持 UNKNOWN。补救实现必须等待完整差异表、根因聚类和一次Human方案Gate；请求取消和当前重构 teardown 已有界验证，最终硬件性能阈值仍需本轮证据决定。
+- 当前无审计阻塞；完整差异表已形成，补救实现只等待一次Human方案选择。`Q-LAYER-002/003`继续UNKNOWN；Human硬件卡顿未在WSL复现，实施包必须采集正常路径LoAF/input latency并保留30FPS物理FACT。
 
 ## 近期候选
 

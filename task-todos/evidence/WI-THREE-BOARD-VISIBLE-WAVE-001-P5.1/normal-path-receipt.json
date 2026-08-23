@@ -1,0 +1,164 @@
+{
+  "url": "http://127.0.0.1:4201/",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "normalProductionPath": true,
+  "testHooks": false,
+  "receipts": [
+    {
+      "label": "ready",
+      "at": 1787452566651,
+      "page": {
+        "state": "READY",
+        "shellHidden": false,
+        "guideHidden": true,
+        "guideText": "",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "label": "play-0s",
+      "at": 1787452566912,
+      "page": {
+        "state": "ENTERING_GAME",
+        "shellHidden": true,
+        "guideHidden": true,
+        "guideText": "",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "label": "play-3s",
+      "at": 1787452570012,
+      "page": {
+        "state": "ENTERING_GAME",
+        "shellHidden": true,
+        "guideHidden": true,
+        "guideText": "",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "label": "play-5s",
+      "at": 1787452572204,
+      "page": {
+        "state": "PLAYING",
+        "shellHidden": true,
+        "guideHidden": false,
+        "guideText": "Explore MEMO6 · head west 36 tiles, then north 7",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "label": "play-8s",
+      "at": 1787452575396,
+      "page": {
+        "state": "PLAYING",
+        "shellHidden": true,
+        "guideHidden": false,
+        "guideText": "Explore MEMO6 · head west 36 tiles, then north 7",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "label": "play-17s",
+      "at": 1787452584575,
+      "page": {
+        "state": "PLAYING",
+        "shellHidden": true,
+        "guideHidden": false,
+        "guideText": "Explore MEMO6 · head west 36 tiles, then north 7",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    }
+  ],
+  "frameSummary": {
+    "count": 1075,
+    "min": 8.699999999999818,
+    "max": 16.80000000000291,
+    "mean": 16.65851162790698,
+    "p50": 16.69999999999891,
+    "p95": 16.700000000000728,
+    "p99": 16.800000000000182,
+    "above34": 0,
+    "above50": 0,
+    "above100": 0,
+    "above200": 0
+  },
+  "metrics": {
+    "Timestamp": 167370.85565,
+    "AudioHandlers": 0,
+    "AudioWorkletProcessors": 0,
+    "Documents": 1,
+    "Frames": 1,
+    "JSEventListeners": 79,
+    "LayoutObjects": 22,
+    "MediaKeySessions": 0,
+    "MediaKeys": 0,
+    "Nodes": 101,
+    "Resources": 17,
+    "ContextLifecycleStateObservers": 4,
+    "V8PerContextDatas": 1,
+    "WorkerGlobalScopes": 0,
+    "UACSSResources": 0,
+    "RTCPeerConnections": 0,
+    "ResourceFetchers": 1,
+    "AdSubframes": 0,
+    "DetachedScriptStates": 0,
+    "ArrayBufferContents": 35,
+    "LayoutCount": 11,
+    "RecalcStyleCount": 14,
+    "LayoutDuration": 0.001958,
+    "RecalcStyleDuration": 0.001161,
+    "DevToolsCommandDuration": 0.010588,
+    "ScriptDuration": 2.341711,
+    "V8CompileDuration": 0.000423,
+    "TaskDuration": 9.441825,
+    "TaskOtherDuration": 7.085984,
+    "ThreadTime": 3.609939,
+    "ProcessTime": 0,
+    "JSHeapUsedSize": 281887832,
+    "JSHeapTotalSize": 323399680,
+    "FirstMeaningfulPaint": 167349.401932,
+    "DomContentLoaded": 167349.468379,
+    "NavigationStart": 167349.331812
+  },
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failed": [],
+    "bad": []
+  }
+}

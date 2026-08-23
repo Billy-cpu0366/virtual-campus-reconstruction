@@ -1,0 +1,25 @@
+{
+  "normalProductionPath": true,
+  "testHooks": false,
+  "viewport": {
+    "width": 375,
+    "height": 667,
+    "mobile": true
+  },
+  "page": {
+    "state": "PLAYING",
+    "guide": "Explore MEMO6 · head west 36 tiles, then north 7",
+    "canvas": {
+      "x": 0,
+      "y": 228,
+      "width": 375,
+      "height": 210.9375
+    },
+    "canvasCount": 1
+  },
+  "events": {
+    "exceptions": [],
+    "failed": [],
+    "bad": []
+  }
+}

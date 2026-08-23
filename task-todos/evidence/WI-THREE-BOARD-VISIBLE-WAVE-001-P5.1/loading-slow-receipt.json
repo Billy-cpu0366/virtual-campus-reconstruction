@@ -1,0 +1,90 @@
+{
+  "url": "http://127.0.0.1:4201/",
+  "throttle": {
+    "latencyMs": 120,
+    "downloadBytesPerSec": 102400
+  },
+  "rows": [
+    {
+      "t": 100,
+      "page": {
+        "state": "BOOT",
+        "text": "0%",
+        "barValue": "",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 500,
+      "page": {
+        "state": "BOOT",
+        "text": "0%",
+        "barValue": "",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 1000,
+      "page": {
+        "state": "BOOT",
+        "text": "0%",
+        "barValue": "",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 2000,
+      "page": {
+        "state": "BOOT",
+        "text": "0%",
+        "barValue": "",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 4000,
+      "page": {
+        "state": "LOADING",
+        "text": "83%",
+        "barValue": "83.3333%",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 6000,
+      "page": {
+        "state": "LOADING",
+        "text": "91%",
+        "barValue": "91.6667%",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 9000,
+      "page": {
+        "state": "LOADING",
+        "text": "100%",
+        "barValue": "100%",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    },
+    {
+      "t": 12000,
+      "page": {
+        "state": "READY",
+        "text": "100%",
+        "barValue": "100%",
+        "shellHidden": false,
+        "title": "Virtual Campus"
+      }
+    }
+  ],
+  "durationMs": 13092
+}

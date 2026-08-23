@@ -1,0 +1,26 @@
+{
+  "normalProductionPath": true,
+  "testHooks": false,
+  "route": [
+    [
+      "left",
+      4100
+    ],
+    [
+      "up",
+      1200
+    ]
+  ],
+  "page": {
+    "state": "MODAL_OPEN",
+    "guide": "Explore MEMO6 · head west 36 tiles, then north 7",
+    "modalHidden": false,
+    "title": "I'm not a game developer",
+    "body": "I'm not a game developerDon't be fooled by the visuals – I'm not a game developer. My priority is large, long-term projects that require clean architecture and "
+  },
+  "events": {
+    "exceptions": [],
+    "failed": [],
+    "bad": []
+  }
+}
