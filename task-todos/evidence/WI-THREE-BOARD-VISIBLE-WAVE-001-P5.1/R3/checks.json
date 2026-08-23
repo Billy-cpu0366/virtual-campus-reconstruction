@@ -1,0 +1,38 @@
+{
+  "work_item": "WI-THREE-BOARD-VISIBLE-WAVE-001",
+  "repair_package": "P5.1-R3",
+  "implementation_commit": "5d0d96d2acca5fdf6596e01ef4a5399ea91e2017",
+  "implementation_tree": "e522c71704b9ec86ac92f62469085f8c487198b3",
+  "base_commit": "00c38dd",
+  "classification": "systemic-failure",
+  "physics_contract": {
+    "fixed_fps": 30,
+    "changed": false,
+    "presentation_strategy": "render-only mirror interpolation"
+  },
+  "checks": [
+    {"command": "npm test", "result": "PASS", "test_files": 54, "tests": 303},
+    {"command": "npm run typecheck", "result": "PASS"},
+    {"command": "npm run check:runtime", "result": "PASS"},
+    {"command": "npm run build:test-hooks", "result": "PASS"},
+    {"command": "npm run build", "result": "PASS"},
+    {"command": "browser:entry-smoke", "result": "PASS"},
+    {"command": "browser:chunk-smoke", "result": "PASS"},
+    {"command": "browser:camera-smoke", "result": "PASS"},
+    {"command": "browser:collision-smoke", "result": "PASS"},
+    {"command": "browser:lifecycle-smoke", "result": "PASS"},
+    {"command": "browser:mobile-input-smoke", "result": "PASS"},
+    {"command": "browser:content-smoke", "result": "PASS"},
+    {"command": "browser:visual-smoothing-smoke", "result": "PASS"},
+    {"command": "browser:smoke (production)", "result": "PASS"},
+    {"command": "browser:runtime-safety-smoke (production)", "result": "PASS"},
+    {"command": "browser:performance-smoke (production)", "result": "PASS"},
+    {"command": "git diff --check", "result": "PASS"}
+  ],
+  "independent_verification": {
+    "static_and_unit": "PASS",
+    "browser": "UNVERIFIED_BY_SUBAGENT_SANDBOX",
+    "main_browser_replay": "PASS"
+  },
+  "remaining_boundary": "WSL evidence does not disprove Human hardware-specific jank; final Human visual/performance gate remains required."
+}

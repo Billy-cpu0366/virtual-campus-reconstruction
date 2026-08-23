@@ -1,0 +1,11 @@
+commit: 5d0d96d2acca5fdf6596e01ef4a5399ea91e2017
+tree: e522c71704b9ec86ac92f62469085f8c487198b3
+parent: 00c38dd
+subject: fix: smooth player rendering without changing physics
+branch: integration/visible-product-wave
+
+Summary:
+- add a render-only player mirror for 30 Hz physics presentation
+- release entry chunk lock at camera stability
+- preserve lifecycle yield only for collision layers
+- add repeatable visual smoothing and production performance gates

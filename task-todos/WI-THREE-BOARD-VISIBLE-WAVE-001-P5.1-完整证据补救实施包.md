@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r3-visual-smoothing
+status: active-r4-visible-orchestration
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -61,6 +61,8 @@ updated: 2026-08-23
 **允许**：player/camera Phaser adapter、必要只读快照、性能审计脚本与tests。
 
 **检查**：碰撞/blocked/速度合同不变；位置不再每隔一帧静止后跳4.67px；Human硬件trace未取得时不伪造最终阈值。
+
+**R3收据（bounded verified）**：integration提交`5d0d96d`；保持30Hz physics/body不变，render mirror与camera约97%帧连续，入口屏外块4.71秒收敛早于5.02秒PLAYING；production入口/移动无LoAF/long task，最大input handler延迟约4.4ms。详见[R3收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R3-收据.md)。
 
 ### R4 train / sprayer / smoke可见编排
 
