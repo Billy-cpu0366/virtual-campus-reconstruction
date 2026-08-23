@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: batch-implement
+correction-phase: human-acceptance
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-batch-r7-complete-regression
-current-gate: p5.1-r7-complete-production-regression
-gate-status: verification-in-progress
+current-phase: p5.1-human-integrated-visual-acceptance
+current-gate: p5.1-human-integrated-visual-acceptance
+gate-status: awaiting-human
 authorization-ref: DEC-P5.1-SYSTEMIC-REPAIR-001
 preauthorized-next-work-item: none
-next-phase: p5.1-human-integrated-visual-acceptance
+next-phase: p5.1-close-or-reopen-from-human-result
 updated: 2026-08-23
 ---
 
@@ -24,7 +24,7 @@ updated: 2026-08-23
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：方案A连续实施中；R1–R6已完成并验证（R6 `32e7f74`），当前进入R7完整production主路径回归。
+- **当前阶段**：方案A的R1–R7实现与自动回归均已完成；最终candidate=`1e24fd1`，当前等待Human在实际设备上做一次整体验收。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
 - **当前授权**：按[完整证据补救实施包](task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)连续执行R1–R7；中间不为表面症状重复开Gate，全部回归后进入一次Human整体验收。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
@@ -60,7 +60,7 @@ updated: 2026-08-23
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；R1–R6 bounded verified，R6=`32e7f74` | 执行R7完整production主路径、双视口、性能、Retry/shutdown与状态一致性回归 | 新增R8功能；恢复111秒入口；猜particles3/69360或无证据消费者；远端操作 | R7完整回归通过后进入一次Human整体验收 |
+| 三板块可见成果并行波 | `systemic-failure`；R1–R7自动/production回归PASS，candidate=`1e24fd1` | Human在实际设备整体验收Loading、入口、平滑度、对象、roof/footsteps、地图HUD/导航/对话与整体密度 | 自动代签视觉；新增R8功能；恢复111秒入口；猜UNKNOWN；远端操作 | Human通过则关闭；不通过则按整体验收结果重新分类，不回到逐点补丁 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -183,7 +183,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- R6本机有界结果：持续mini-map、big-map、11个真实位置点、动态玩家点、Visited与8个已核对内容入口进入正常production；CV/Contact/Tech保持禁用UNKNOWN。R7只做完整回归与证据收口，不新增功能；`Q-LAYER-002/003`及particles3/69360继续UNKNOWN。
+- R7本机结果：1920×1080慢网与375×667正常网络均在单一无hooks production session完成Loading→入口→真人Memo6→Visited→sprayer→roof→footsteps；312测试、双build、production/test-hooks全门禁和性能PASS。最终Human硬件与视觉仍待签字；`Q-LAYER-002/003`及particles3/69360继续UNKNOWN。
 
 ## 近期候选
 

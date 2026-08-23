@@ -1,0 +1,33 @@
+{
+  "repairPackage": "P5.1-R7",
+  "verifiedAt": "2026-08-23T17:05:00+08:00",
+  "gateCommit": "1e24fd1e9e4cfa7e06ed8db0243b4f214364569c",
+  "gateTree": "657101daa0419409ea046a3716badd9d6fd57a61",
+  "integrationChain": ["ae2bf33", "00c38dd", "5d0d96d", "da68d08", "6c8c66d", "32e7f74", "1e24fd1"],
+  "checks": {
+    "unitTests": "PASS: 56 files / 312 tests",
+    "typecheck": "PASS",
+    "runtimeAssets": "PASS",
+    "productionBuild": "PASS",
+    "testHooksBuild": "PASS",
+    "completeProductionDesktop": "PASS: 1920x1080, slow network, one session, 6 distinct loading samples, entry 0/1/3/5/8/17s, physical Memo6, visited map, sprayer, roof route, footsteps, no hooks",
+    "completeProductionMobile": "PASS: 375x667, normal network, one session, 4 distinct loading samples, entry 0/1/3/5/8/17s, physical Memo6, visited map, sprayer, roof route, footsteps, no hooks",
+    "productionGates": "PASS: smoke, runtime-safety, visible-entry, map-production, performance",
+    "testHooksGates": "PASS: map, lifecycle, side, entry, chunk, layer, camera, collision, mobile-input, content, visual-smoothing, app-retry, roof-footsteps",
+    "productionPerformance": "PASS: entry p95 16.8ms; movement p95 16.7ms; >34ms frames 0; LoAF 0; long tasks 0; maximum input handler delay 2.2ms",
+    "stateConsistency": "PASS: active systemic-flow work item and 16 execution cards aligned",
+    "diffAndSyntax": "PASS: node --check and explicit R7 paths",
+    "independentVerifier": "PASS: no project hooks, no teleport/state write, complete routes and receipts, cleanup, evidence integrity; Human visual not signed"
+  },
+  "humanGate": {
+    "status": "awaiting-human-integrated-visual-acceptance",
+    "automaticEvidenceCannotSign": true,
+    "hardwareTrace": "not available; WSL performance cannot negate prior Human hardware result"
+  },
+  "boundaries": {
+    "particles3And69360": "UNKNOWN and not implemented",
+    "camera111Seconds": "not connected to production",
+    "remote": "no push, PR, merge, or main modification authorized",
+    "newFeaturesAfterR7": "none"
+  }
+}

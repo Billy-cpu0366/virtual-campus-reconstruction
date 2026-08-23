@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r7-complete-regression
+status: awaiting-human-integrated-visual-acceptance
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -101,6 +101,8 @@ updated: 2026-08-23
 **必需路径**：冷启动慢网Loading→Play→0/3/5/8/17秒入口→真人Memo6→真人sprayer→factory roof进入/离开→移动性能→Retry/shutdown；桌面1920×1080与移动375×667。
 
 **完整检查**：typecheck、全测试、production/test-hooks build、现有browser gates、新正常路径视觉/性能门禁、状态一致性、CRLF-aware diff、独立验证。全部通过后才进入Human整体验收。
+
+**R7收据（auto verified / awaiting Human）**：gate提交`1e24fd1`；1920×1080慢网与375×667正常网络均在单一无hooks production session完成Loading、0/1/3/5/8/17秒入口、真人Memo6、Visited、sprayer、factory roof与footsteps。56文件/312测试、双build、production/test-hooks全部门禁、性能、状态一致性和独立终审PASS。详见[R7收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R7-收据.md)。当前只等待Human整体验收，不自动关闭。
 
 ## 停止条件
 

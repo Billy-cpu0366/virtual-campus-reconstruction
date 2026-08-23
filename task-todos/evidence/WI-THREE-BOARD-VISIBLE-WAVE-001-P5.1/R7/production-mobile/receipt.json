@@ -1,0 +1,549 @@
+{
+  "passed": true,
+  "url": "http://127.0.0.1:4237/?r7-complete=mobile",
+  "label": "mobile",
+  "viewport": {
+    "width": 375,
+    "height": 667
+  },
+  "slowNetwork": false,
+  "loadingSamples": [
+    {
+      "elapsedMs": 26,
+      "appState": "BOOT",
+      "progress": 0,
+      "guideHidden": true,
+      "guideText": "",
+      "contentHidden": true,
+      "contentTitle": "",
+      "hudHidden": true,
+      "mapHidden": true,
+      "visitedMemo6": false,
+      "hooks": {
+        "debug": "undefined",
+        "entry": "undefined",
+        "collision": "undefined",
+        "lifecycle": "undefined",
+        "content": "undefined"
+      }
+    },
+    {
+      "elapsedMs": 504,
+      "appState": "LOADING",
+      "progress": 72,
+      "guideHidden": true,
+      "guideText": "",
+      "contentHidden": true,
+      "contentTitle": "",
+      "hudHidden": true,
+      "mapHidden": true,
+      "visitedMemo6": false,
+      "hooks": {
+        "debug": "undefined",
+        "entry": "undefined",
+        "collision": "undefined",
+        "lifecycle": "undefined",
+        "content": "undefined"
+      }
+    },
+    {
+      "elapsedMs": 630,
+      "appState": "LOADING",
+      "progress": 92,
+      "guideHidden": true,
+      "guideText": "",
+      "contentHidden": true,
+      "contentTitle": "",
+      "hudHidden": true,
+      "mapHidden": true,
+      "visitedMemo6": false,
+      "hooks": {
+        "debug": "undefined",
+        "entry": "undefined",
+        "collision": "undefined",
+        "lifecycle": "undefined",
+        "content": "undefined"
+      }
+    },
+    {
+      "elapsedMs": 3936,
+      "appState": "READY",
+      "progress": 100,
+      "guideHidden": true,
+      "guideText": "",
+      "contentHidden": true,
+      "contentTitle": "",
+      "hudHidden": true,
+      "mapHidden": true,
+      "visitedMemo6": false,
+      "hooks": {
+        "debug": "undefined",
+        "entry": "undefined",
+        "collision": "undefined",
+        "lifecycle": "undefined",
+        "content": "undefined"
+      }
+    }
+  ],
+  "entryMilestones": [
+    {
+      "expectedElapsedMs": 0,
+      "actualElapsedMs": 10,
+      "appState": "ENTERING_GAME",
+      "guideText": "",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-entry-00000.png"
+    },
+    {
+      "expectedElapsedMs": 1000,
+      "actualElapsedMs": 1004,
+      "appState": "ENTERING_GAME",
+      "guideText": "",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-entry-01000.png"
+    },
+    {
+      "expectedElapsedMs": 3000,
+      "actualElapsedMs": 3003,
+      "appState": "ENTERING_GAME",
+      "guideText": "",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-entry-03000.png"
+    },
+    {
+      "expectedElapsedMs": 5000,
+      "actualElapsedMs": 5002,
+      "appState": "PLAYING",
+      "guideText": "Explore MEMO6 · head west 36 tiles, then north 7",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-entry-05000.png"
+    },
+    {
+      "expectedElapsedMs": 8000,
+      "actualElapsedMs": 8005,
+      "appState": "PLAYING",
+      "guideText": "Explore MEMO6 · head west 36 tiles, then north 7",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-entry-08000.png"
+    },
+    {
+      "expectedElapsedMs": 17000,
+      "actualElapsedMs": 17015,
+      "appState": "PLAYING",
+      "guideText": "Trackside crew · east 20, then south 7, then west 8",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-entry-17000.png"
+    }
+  ],
+  "memoRoute": [
+    {
+      "direction": "left",
+      "target": 500,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 4248,
+      "position": {
+        "x": 495.33333333333644,
+        "y": 304
+      }
+    },
+    {
+      "direction": "up",
+      "target": 200,
+      "axis": "y",
+      "comparison": "lte",
+      "durationMs": 809,
+      "position": {
+        "x": 495.33333333333644,
+        "y": 191.9999999999999
+      }
+    }
+  ],
+  "visitedMap": {
+    "appState": "MODAL_OPEN",
+    "progress": 100,
+    "guideHidden": true,
+    "guideText": "Trackside crew · east 20, then south 7, then west 8",
+    "contentHidden": true,
+    "contentTitle": "",
+    "hudHidden": true,
+    "mapHidden": false,
+    "visitedMemo6": true,
+    "hooks": {
+      "debug": "undefined",
+      "entry": "undefined",
+      "collision": "undefined",
+      "lifecycle": "undefined",
+      "content": "undefined"
+    }
+  },
+  "sprayerRoute": [
+    {
+      "direction": "down",
+      "target": 304,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 799,
+      "position": {
+        "x": 495.33333333333644,
+        "y": 304
+      }
+    },
+    {
+      "direction": "right",
+      "target": 1408,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 6534,
+      "position": {
+        "x": 1410.0000000000052,
+        "y": 304
+      }
+    },
+    {
+      "direction": "down",
+      "target": 416,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 801,
+      "position": {
+        "x": 1410.0000000000052,
+        "y": 416.00000000000045
+      }
+    },
+    {
+      "direction": "left",
+      "target": 1280,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 957,
+      "position": {
+        "x": 1279.3333333333364,
+        "y": 416.00000000000045
+      }
+    }
+  ],
+  "returnRoute": [
+    {
+      "direction": "right",
+      "target": 1408,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 955,
+      "position": {
+        "x": 1410.0000000000052,
+        "y": 416.00000000000045
+      }
+    },
+    {
+      "direction": "up",
+      "target": 304,
+      "axis": "y",
+      "comparison": "lte",
+      "durationMs": 795,
+      "position": {
+        "x": 1410.0000000000052,
+        "y": 304
+      }
+    },
+    {
+      "direction": "left",
+      "target": 1088,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 2347,
+      "position": {
+        "x": 1083.3333333333333,
+        "y": 304
+      }
+    }
+  ],
+  "roofRoute": [
+    {
+      "direction": "left",
+      "target": 552,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 3796,
+      "position": {
+        "x": 551.3333333333364,
+        "y": 304
+      }
+    },
+    {
+      "direction": "down",
+      "target": 556,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1859,
+      "position": {
+        "x": 546.6666666666698,
+        "y": 560.666666666667
+      }
+    },
+    {
+      "direction": "right",
+      "target": 680,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 1007,
+      "position": {
+        "x": 682.000000000002,
+        "y": 565.3333333333336
+      }
+    },
+    {
+      "direction": "down",
+      "target": 616,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 373,
+      "position": {
+        "x": 686.6666666666687,
+        "y": 616.6666666666665
+      }
+    },
+    {
+      "direction": "left",
+      "target": 668,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 216,
+      "position": {
+        "x": 666,
+        "y": 621.3333333333331
+      }
+    },
+    {
+      "direction": "down",
+      "target": 728,
+      "axis": "y",
+      "comparison": "gte",
+      "capture": "roof-outside",
+      "durationMs": 798,
+      "position": {
+        "x": 666,
+        "y": 733.3333333333322
+      }
+    },
+    {
+      "direction": "down",
+      "target": 960,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1650,
+      "position": {
+        "x": 666,
+        "y": 961.999999999997
+      }
+    },
+    {
+      "direction": "left",
+      "target": 640,
+      "axis": "x",
+      "comparison": "lte",
+      "capture": "roof-inside",
+      "durationMs": 214,
+      "position": {
+        "x": 638.0000000000002,
+        "y": 966.6666666666637
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1080,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 849,
+      "position": {
+        "x": 638.0000000000002,
+        "y": 1083.3333333333312
+      }
+    },
+    {
+      "direction": "right",
+      "target": 728,
+      "axis": "x",
+      "comparison": "gte",
+      "capture": "roof-after",
+      "durationMs": 697,
+      "position": {
+        "x": 731.3333333333328,
+        "y": 1087.999999999998
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1200,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 856,
+      "position": {
+        "x": 735.9999999999994,
+        "y": 1204.6666666666665
+      }
+    },
+    {
+      "direction": "left",
+      "target": 712,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 266,
+      "position": {
+        "x": 703.333333333333,
+        "y": 1209.3333333333333
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1464,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1863,
+      "position": {
+        "x": 698.6666666666664,
+        "y": 1466.000000000004
+      }
+    },
+    {
+      "direction": "right",
+      "target": 760,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 531,
+      "position": {
+        "x": 768.6666666666658,
+        "y": 1470.6666666666708
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1560,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 689,
+      "position": {
+        "x": 773.3333333333325,
+        "y": 1564.0000000000057
+      }
+    },
+    {
+      "direction": "left",
+      "target": 456,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 2332,
+      "position": {
+        "x": 446.6666666666673,
+        "y": 1564.0000000000057
+      }
+    },
+    {
+      "direction": "right",
+      "target": 464,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 162,
+      "position": {
+        "x": 470.00000000000074,
+        "y": 1564.0000000000057
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1640,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 583,
+      "position": {
+        "x": 470.00000000000074,
+        "y": 1643.3333333333403
+      }
+    },
+    {
+      "direction": "left",
+      "target": 236,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 1743,
+      "position": {
+        "x": 234,
+        "y": 1648.000000000007
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1704,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 428,
+      "position": {
+        "x": 234,
+        "y": 1708.6666666666747
+      }
+    },
+    {
+      "direction": "left",
+      "target": 216,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 161,
+      "position": {
+        "x": 210.6666666666667,
+        "y": 1708.6666666666747
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1824,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 852,
+      "position": {
+        "x": 210.6666666666667,
+        "y": 1825.3333333333433
+      }
+    }
+  ],
+  "footprintMove": {
+    "direction": "right",
+    "target": 336,
+    "axis": "x",
+    "comparison": "gte",
+    "durationMs": 959,
+    "position": {
+      "x": 341.33333333333354,
+      "y": 1830.00000000001
+    }
+  },
+  "final": {
+    "appState": "PLAYING",
+    "progress": 100,
+    "guideHidden": false,
+    "guideText": "Factory smoke · west 30, then south 8",
+    "contentHidden": true,
+    "contentTitle": "",
+    "hudHidden": false,
+    "mapHidden": true,
+    "visitedMemo6": true,
+    "hooks": {
+      "debug": "undefined",
+      "entry": "undefined",
+      "collision": "undefined",
+      "lifecycle": "undefined",
+      "content": "undefined"
+    }
+  },
+  "screenshots": {
+    "loadingLate": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-loading-late.png",
+    "ready": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-ready.png",
+    "playing": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-playing.png",
+    "memo6": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-memo6-physical.png",
+    "mapVisited": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-map-visited-memo6.png",
+    "sprayer": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-sprayer-trigger.png",
+    "roof-outside": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-roof-outside.png",
+    "roof-inside": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-roof-inside.png",
+    "roof-after": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-roof-after.png",
+    "footsteps": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r7/complete-mobile/mobile-footsteps.png"
+  },
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}

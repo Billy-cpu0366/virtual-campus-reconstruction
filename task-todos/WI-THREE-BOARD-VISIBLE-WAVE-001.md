@@ -1,11 +1,11 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-batch-implement
-phase: p5.1-batch-r5-roof-footsteps
+status: awaiting-human-integrated-visual-acceptance
+phase: p5.1-human-integrated-visual-acceptance
 authorization: DEC-P5.1-SYSTEMIC-REPAIR-001
-code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
-code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
+code-baseline: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
+code-baseline-tree: 657101daa0419409ea046a3716badd9d6fd57a61
 p0-plan-commit: 3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e
 p0-plan-tree: 9c2e8b0b854a09d068c6de8e91ef9178f484c4f8
 worktree-baseline-status: verified-clean
@@ -78,7 +78,7 @@ updated: 2026-08-23
 
 ## P5.1系统审计
 
-完整差异表、证据收据和五个根因簇见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。Human已选择方案A；当前按[完整证据补救实施包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)连续执行。R1–R6已完成并验证（R6 `32e7f74`），收据见[P5.1 R1](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R1-收据.md)、[R2](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R2-收据.md)、[R3](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R3-收据.md)、[R4](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R4-收据.md)、[R5](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R5-收据.md)和[R6](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R6-收据.md)；当前R7完整回归。
+完整差异表、证据收据和五个根因簇见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。Human已选择方案A；[完整证据补救实施包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)的R1–R7实现与自动回归均已完成，最终candidate=`1e24fd1`。收据见[P5.1 R1](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R1-收据.md)、[R2](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R2-收据.md)、[R3](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R3-收据.md)、[R4](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R4-收据.md)、[R5](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R5-收据.md)、[R6](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R6-收据.md)和[R7](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R7-收据.md)。当前等待Human整体验收，未签字前不关闭。
 
 ## 本轮成功标准
 
