@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: awaiting-p5.1-c1-c2-repeat-human-acceptance
-phase: p5.1-c1-c2-repeat-human-acceptance
+status: active-p5.1-c3-human-rejection-audit
+phase: p5.1-c3-intent-evidence-workflow-retrospective
 authorization: DEC-P5.1-R7-REPAIR-001
 code-baseline: 54c0e2922ce3fc6b3ced78118db6b2b867b6eff7
 code-baseline-tree: 3b05f56ed58c0e0861eff3cbff6787ce93aa0290
@@ -78,7 +78,7 @@ updated: 2026-08-23
 
 ## P5.1系统审计
 
-完整差异表见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。C1+C2实现`54c0e29`及[自动收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-C1-C2-收据.md)已完成：入口cleanup预算、train世界深度、OUR ART定点碰撞和完整双视口production均PASS。当前等待Human复验；未签字前不关闭。
+完整差异表见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。C1+C2 candidate=`54c0e29`及[自动收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-C1-C2-收据.md)虽PASS，Human再次确认入口仍有约2秒停滞/相机回切、Loading与原站差异大、party屋顶未淡隐；贴图/NPC/喷泉粒子等第四项先登记不实施。当前冻结candidate，先完善意图合同与证据适配工作流，再提交前三项整体修复方案；未签字前不关闭。
 
 ## 本轮成功标准
 
