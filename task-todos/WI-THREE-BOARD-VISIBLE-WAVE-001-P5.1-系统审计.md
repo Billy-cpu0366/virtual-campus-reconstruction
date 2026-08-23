@@ -1,11 +1,11 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-systemic-audit
-status: audit-complete-awaiting-human-plan-gate
+status: audit-complete-plan-a-accepted
 issue-class: systemic-failure
 candidate-commit: 0fadf309963ba5d23c092ec049654791901f806e
 candidate-tree: 86c8f85f1f59106399d1a2f2040851b100eb2f5a
-authority: DEC-AI-CORRECTION-ROUTING-001
+authority: DEC-P5.1-SYSTEMIC-REPAIR-001
 updated: 2026-08-23
 ---
 
@@ -106,4 +106,4 @@ updated: 2026-08-23
 
 Main推荐 **方案 A**。理由：Human已明确要求系统补救和逐场景差异总表；方案B仍可能重复“自动正确、整体看起来没变化”的失败。
 
-Human Gate 只需选择 A/B/C 或明确修改边界。接受后父流程进入 `batch-implement`；未接受前不写产品代码。
+Human已选择**方案A：完整证据补救**。父流程进入`batch-implement`，实施权威见[完整证据补救实施包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)。

@@ -1,9 +1,9 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-awaiting-human-plan-gate
-phase: p5.1-systemic-repair-plan
-authorization: DEC-VISIBLE-WAVE-P2-001
+status: active-p5.1-batch-implement
+phase: p5.1-batch-r1-app-loading
+authorization: DEC-P5.1-SYSTEMIC-REPAIR-001
 code-baseline: 8ae7692b45b16f4b0ce6e96faa448197734db3b0
 code-baseline-tree: c825bb6a99f363e30a665d58d4a2eadf7b18f537
 p0-plan-commit: 3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e
@@ -78,7 +78,7 @@ updated: 2026-08-23
 
 ## P5.1系统审计
 
-完整差异表、证据收据、五个根因簇和A/B/C修复候选见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。当前停在一次Human方案Gate；接受前不写产品代码。
+完整差异表、证据收据和五个根因簇见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。Human已选择方案A；当前按[完整证据补救实施包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)连续执行R1–R7。
 
 ## 本轮成功标准
 
