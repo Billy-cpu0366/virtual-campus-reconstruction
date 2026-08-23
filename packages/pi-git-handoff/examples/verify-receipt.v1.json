@@ -1,0 +1,55 @@
+{
+  "schema-version": 1,
+  "protocol-version": "0.1",
+  "receipt-id": "receipt-verify-0001",
+  "delivery-id": "example-20260823-a1b2c3d",
+  "attempt-id": "attempt-0001",
+  "stage": "verify",
+  "status": "PASS",
+  "created-at": "2026-08-23T00:02:00Z",
+  "producer": {
+    "package": "pi-git-handoff",
+    "version": "0.1.0-alpha.1",
+    "command": "verify-push",
+    "environment": "external"
+  },
+  "adapter-sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "manifest-sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+  "artifact-index-sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+  "previous-receipt-sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+  "project-id": "example-project",
+  "canonical-remote": "https://example.invalid/example/example-project.git",
+  "canonical-base": {
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "delivery": {
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "tree": "dddddddddddddddddddddddddddddddddddddddd"
+  },
+  "files-sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+  "checks": [
+    {
+      "id": "test",
+      "argv": ["npm", "test"],
+      "duration-ms": 3000,
+      "exit-code": 0,
+      "result": "PASS",
+      "log-sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+    },
+    {
+      "id": "build",
+      "argv": ["npm", "run", "build"],
+      "duration-ms": 2500,
+      "exit-code": 0,
+      "result": "PASS",
+      "log-sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+    }
+  ],
+  "human-gate": {
+    "required": true,
+    "status": "pending",
+    "method": "external preview"
+  },
+  "unresolved-risks": []
+}

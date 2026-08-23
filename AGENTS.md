@@ -11,6 +11,7 @@
 sample/          原站公开证据、初步分析和采集工具
 src/             已授权工作项的正式实现；当前有SYS-CHUNK确定性CORE
 tests/           与正式实现对应的自动化测试
+packages/pi-git-handoff/  独立跨项目 Git 中转 Package 设计候选
 migration-history/doc-v0.1/  旧精确文档历史，只读可查
 ```
 
@@ -24,6 +25,7 @@ migration-history/doc-v0.1/  旧精确文档历史，只读可查
 4. 读取 `task_plan.md`，确认当前工作项、阶段、Gate 和下一步；按其中 `workflow-ref` 读取操作规则。`current-work-item: none` 表示当前处于合法选择状态，不得写正式代码。
 5. 有当前工作项时，只读取其任务卡、对应的 `03-执行层/`系统卡、验收标准和必要`sample/`证据；没有当前工作项时，只读取总账与`task_plan.md`列出的候选来源。
 6. 讨论未收敛或 Human 未确认前，不修改设计、代码或项目协议。
+7. 处理 `packages/pi-git-handoff/` 时完整读取其 `AGENTS.md`；该独立成果不替代虚拟校园 `task_plan.md` 的当前工作项。
 
 ### 2.1 修正任务强制分流
 
@@ -52,6 +54,7 @@ Human提出不满意、修改、Bug或验收失败时，AI在写代码前必须�
 | 请求与不可用资源 | `sample/original-public-build/network/` |
 | 初步技术分析 | `sample/analysis/` |
 | 采集与验证工具 | `sample/tools/` |
+| 跨项目 Git 中转 Package 设计 | `packages/pi-git-handoff/AGENTS.md`、`packages/pi-git-handoff/README.md` |
 
 同一结论只维护一处。`sample/`保存证据，`03-执行层/`保存经过评审的当前工程知识，二者不得混用。
 

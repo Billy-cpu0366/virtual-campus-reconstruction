@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.pi.local/git-handoff/manifest.v1.schema.json",
+  "title": "Pi git-handoff immutable artifact manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema-version",
+    "protocol-version",
+    "producer",
+    "adapter-sha256",
+    "delivery-id",
+    "created-at",
+    "profile",
+    "project-id",
+    "canonical-remote",
+    "canonical-base",
+    "delivery",
+    "target-branch",
+    "files",
+    "excluded-paths",
+    "bundle",
+    "authorization",
+    "unresolved-risks"
+  ],
+  "properties": {
+    "schema-version": {
+      "const": 1
+    },
+    "protocol-version": {
+      "const": "0.1"
+    },
+    "producer": {
+      "$ref": "#/$defs/producer"
+    },
+    "adapter-sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "delivery-id": {
+      "$ref": "#/$defs/id"
+    },
+    "created-at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "project-id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,79}$"
+    },
+    "canonical-remote": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical-base": {
+      "$ref": "#/$defs/object-identity"
+    },
+    "delivery": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/object-identity"
+        },
+        {
+          "type": "object",
+          "required": ["ref"],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "pattern": "^refs/[A-Za-z0-9._/-]+$"
+            }
+          }
+        }
+      ]
+    },
+    "target-branch": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    },
+    "files": {
+      "$ref": "#/$defs/path-list"
+    },
+    "excluded-paths": {
+      "$ref": "#/$defs/path-list"
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "object-format", "verification"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relative-path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "object-format": {
+          "enum": ["sha1", "sha256"]
+        },
+        "verification": {
+          "const": "PASS"
+        }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prepare-invoked", "push-authorized"],
+      "properties": {
+        "prepare-invoked": {
+          "const": true
+        },
+        "push-authorized": {
+          "const": false
+        },
+        "authority-ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "unresolved-risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "git-oid": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{5,119}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "relative-path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "path-list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relative-path"
+      },
+      "uniqueItems": true
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "version", "command"],
+      "properties": {
+        "package": {
+          "const": "pi-git-handoff"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "const": "prepare"
+        }
+      }
+    },
+    "object-identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "tree"],
+      "properties": {
+        "commit": {
+          "$ref": "#/$defs/git-oid"
+        },
+        "tree": {
+          "$ref": "#/$defs/git-oid"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

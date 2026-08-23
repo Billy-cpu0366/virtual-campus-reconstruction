@@ -1,0 +1,69 @@
+---
+name: git-handoff
+description: 设计和执行受限沙盒到外部正式仓库的 Git bundle 中转、外部复核、显式推送 Gate 和版本化收据。仅在已有项目 adapter 且成果已通过 verification-delivery 时使用；不用于普通本地提交、分支集成、dirty 修复或自动 PR/merge。当前候选仅有设计与 schema，执行器尚未实现。
+disable-model-invocation: true
+---
+
+# Git handoff
+
+This Skill owns cross-host transport, not delivery readiness. Load
+`verification-delivery` first when scope, checks, state persistence, or Human
+authorization is not already resolved.
+
+## Current stop condition
+
+This candidate is design-only. The deterministic `prepare` and `verify-push`
+executors do not exist. Explain that limitation and do not improvise equivalent
+Git commands, create an adapter, install global configuration, or claim an
+operational handoff.
+
+## Intended routes
+
+When implementation is separately authorized:
+
+- `prepare`: run only in the restricted sandbox after a coherent result is
+  committed and delivery readiness is established;
+- `verify-push`: run only in the external environment that owns the canonical
+  repository and remote credentials.
+
+Read `references/protocol.md` for the stage contract and
+`references/failure-rules.md` for mandatory stop conditions.
+
+## Authority and adapter
+
+Require a trusted project adapter with a valid `extensions.git-handoff`
+namespace. Project paths, remotes, refs, profiles, transport paths, checks, and
+protected paths come only from that namespace. Missing values remain unknown;
+never infer them from the current directory, remembered projects, or a prior
+receipt.
+
+The adapter is stable mapping and policy. Live work-item state and Human Gate
+status remain in the authority files named by the project workflow.
+
+## Security boundary
+
+- Do not duplicate or weaken the environment security guard.
+- A future sandbox executor exposes one fixed prepare workflow, not arbitrary
+  Git subcommands.
+- Sandbox preparation contains no fetch, pull, push, clone, remote mutation,
+  credential access, or host-path access.
+- External verification does not rewrite the canonical base, clean unrelated
+  work, force-push, or update a protected base branch.
+- A blocked environment operation is a STOP result, not permission to bypass
+  the guard through a script or alternate command.
+
+## Result language
+
+Distinguish these states:
+
+- `prepared`: immutable sandbox artifact exists and passed prepare checks;
+- `externally-verified`: external identity, bundle, diff, and checks passed;
+- `push-authorized`: Human explicitly approved the displayed exact target;
+- `pushed`: the push command returned success;
+- `remote-verified`: the remote ref and object identity were independently
+  re-read and match;
+- `failed` or `stopped`: evidence exists, but delivery did not advance.
+
+Only `remote-verified` supports a claim that the exact delivery reached the
+remote. It does not imply PR, merge, base-branch inclusion, or product
+acceptance.

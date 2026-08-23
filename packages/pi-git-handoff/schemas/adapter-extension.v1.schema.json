@@ -1,0 +1,199 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.pi.local/git-handoff/adapter-extension.v1.schema.json",
+  "title": "Pi git-handoff project adapter extension v1",
+  "description": "Schema for the extensions.git-handoff object. It contains stable project mappings and policy, never live workflow state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema-version",
+    "required-package-version",
+    "project-id",
+    "repositories",
+    "refs",
+    "transport",
+    "checks",
+    "policy"
+  ],
+  "properties": {
+    "schema-version": {
+      "const": 1
+    },
+    "required-package-version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "project-id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,79}$"
+    },
+    "repositories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sandbox-root", "external-root", "canonical-remote"],
+      "properties": {
+        "sandbox-root": {
+          "$ref": "#/$defs/relative-path"
+        },
+        "external-root": {
+          "$ref": "#/$defs/external-absolute-path"
+        },
+        "canonical-remote": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?![^:]+://[^/]*@)\\S+$",
+          "description": "Exact canonical Git remote without embedded credentials."
+        }
+      }
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical-base", "remote-base", "delivery-template", "targets"],
+      "properties": {
+        "canonical-base": {
+          "$ref": "#/$defs/git-ref"
+        },
+        "remote-base": {
+          "$ref": "#/$defs/branch-name"
+        },
+        "delivery-template": {
+          "$ref": "#/$defs/ref-template"
+        },
+        "targets": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/ref-template"
+          },
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9-]{0,31}$"
+          }
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sandbox-outbox", "external-staging"],
+      "properties": {
+        "sandbox-outbox": {
+          "$ref": "#/$defs/relative-path"
+        },
+        "external-staging": {
+          "$ref": "#/$defs/external-absolute-path"
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prepare", "external"],
+      "properties": {
+        "prepare": {
+          "$ref": "#/$defs/check-list"
+        },
+        "external": {
+          "$ref": "#/$defs/check-list"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require-clean-worktree",
+        "require-exact-base",
+        "allow-force-push",
+        "allow-direct-base-push",
+        "protected-paths"
+      ],
+      "properties": {
+        "require-clean-worktree": {
+          "type": "boolean"
+        },
+        "require-exact-base": {
+          "type": "boolean"
+        },
+        "allow-force-push": {
+          "const": false
+        },
+        "allow-direct-base-push": {
+          "const": false
+        },
+        "protected-paths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relative-pattern"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "relative-path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:\\.|(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+)$"
+    },
+    "relative-pattern": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "external-absolute-path": {
+      "type": "string",
+      "minLength": 2,
+      "pattern": "^(?!.*?/\\.\\.(?:/|$))(?:/[^\\u0000]*|[A-Za-z]:/[^\\u0000]*)$",
+      "description": "Platform absolute path using forward slashes and without parent traversal."
+    },
+    "git-ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^refs/[A-Za-z0-9._/-]+$"
+    },
+    "branch-name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    },
+    "ref-template": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._/-]*\\{delivery-id\\}[A-Za-z0-9._/-]*$"
+    },
+    "check-list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "argv"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "cwd": {
+          "$ref": "#/$defs/relative-path"
+        },
+        "timeout-seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schema-version": 1,
+  "required-package-version": "0.1.0-alpha.1",
+  "project-id": "example-project",
+  "repositories": {
+    "sandbox-root": ".",
+    "external-root": "/srv/repos/example-project",
+    "canonical-remote": "https://example.invalid/example/example-project.git"
+  },
+  "refs": {
+    "canonical-base": "refs/pi-handoff/canonical/main",
+    "remote-base": "main",
+    "delivery-template": "delivery/{delivery-id}",
+    "targets": {
+      "review": "handoff/{delivery-id}",
+      "wip": "wip/{delivery-id}"
+    }
+  },
+  "transport": {
+    "sandbox-outbox": ".pi/handoff/outbox",
+    "external-staging": "/srv/pi-handoff/example-project"
+  },
+  "checks": {
+    "prepare": [
+      {
+        "id": "typecheck",
+        "argv": ["npm", "run", "typecheck"],
+        "timeout-seconds": 600
+      }
+    ],
+    "external": [
+      {
+        "id": "test",
+        "argv": ["npm", "test"],
+        "timeout-seconds": 1200
+      },
+      {
+        "id": "build",
+        "argv": ["npm", "run", "build"],
+        "timeout-seconds": 1200
+      }
+    ]
+  },
+  "policy": {
+    "require-clean-worktree": true,
+    "require-exact-base": true,
+    "allow-force-push": false,
+    "allow-direct-base-push": false,
+    "protected-paths": [
+      ".git/**",
+      ".env"
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "schema-version": 1,
+  "protocol-version": "0.1",
+  "producer": {
+    "package": "pi-git-handoff",
+    "version": "0.1.0-alpha.1",
+    "command": "prepare"
+  },
+  "adapter-sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "delivery-id": "example-20260823-a1b2c3d",
+  "created-at": "2026-08-23T00:00:00Z",
+  "profile": "review",
+  "project-id": "example-project",
+  "canonical-remote": "https://example.invalid/example/example-project.git",
+  "canonical-base": {
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "delivery": {
+    "ref": "refs/heads/delivery/example-20260823-a1b2c3d",
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "tree": "dddddddddddddddddddddddddddddddddddddddd"
+  },
+  "target-branch": "handoff/example-20260823-a1b2c3d",
+  "files": [
+    "src/example.ts",
+    "tests/example.test.ts"
+  ],
+  "excluded-paths": [
+    ".env"
+  ],
+  "bundle": {
+    "path": "delivery.bundle",
+    "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "object-format": "sha1",
+    "verification": "PASS"
+  },
+  "authorization": {
+    "prepare-invoked": true,
+    "push-authorized": false,
+    "authority-ref": "DEC-EXAMPLE-DELIVERY-001"
+  },
+  "unresolved-risks": []
+}

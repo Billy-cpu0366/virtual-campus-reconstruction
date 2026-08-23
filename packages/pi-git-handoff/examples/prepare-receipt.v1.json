@@ -1,0 +1,45 @@
+{
+  "schema-version": 1,
+  "protocol-version": "0.1",
+  "receipt-id": "receipt-prepare-0001",
+  "delivery-id": "example-20260823-a1b2c3d",
+  "attempt-id": "attempt-0001",
+  "stage": "prepare",
+  "status": "PASS",
+  "created-at": "2026-08-23T00:01:00Z",
+  "producer": {
+    "package": "pi-git-handoff",
+    "version": "0.1.0-alpha.1",
+    "command": "prepare",
+    "environment": "sandbox"
+  },
+  "adapter-sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "manifest-sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+  "project-id": "example-project",
+  "canonical-remote": "https://example.invalid/example/example-project.git",
+  "canonical-base": {
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "delivery": {
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "tree": "dddddddddddddddddddddddddddddddddddddddd"
+  },
+  "files-sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+  "checks": [
+    {
+      "id": "typecheck",
+      "argv": ["npm", "run", "typecheck"],
+      "duration-ms": 1500,
+      "exit-code": 0,
+      "result": "PASS",
+      "log-sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+    }
+  ],
+  "human-gate": {
+    "required": false,
+    "status": "not-required",
+    "method": "explicit prepare invocation"
+  },
+  "unresolved-risks": []
+}

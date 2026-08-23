@@ -1,0 +1,17 @@
+{
+  "name": "pi-git-handoff",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "description": "Design-only Pi Package candidate for cross-host Git bundle delivery and versioned receipts.",
+  "keywords": [
+    "pi-package"
+  ],
+  "scripts": {
+    "validate": "python3 scripts/validate-package.py"
+  },
+  "pi": {
+    "skills": [
+      "./skills/git-handoff/SKILL.md"
+    ]
+  }
+}

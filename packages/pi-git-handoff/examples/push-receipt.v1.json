@@ -1,0 +1,46 @@
+{
+  "schema-version": 1,
+  "protocol-version": "0.1",
+  "receipt-id": "receipt-push-0001",
+  "delivery-id": "example-20260823-a1b2c3d",
+  "attempt-id": "attempt-0001",
+  "stage": "push",
+  "status": "PASS",
+  "created-at": "2026-08-23T00:03:00Z",
+  "producer": {
+    "package": "pi-git-handoff",
+    "version": "0.1.0-alpha.1",
+    "command": "verify-push",
+    "environment": "external"
+  },
+  "adapter-sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "manifest-sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+  "artifact-index-sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+  "previous-receipt-sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "project-id": "example-project",
+  "canonical-remote": "https://example.invalid/example/example-project.git",
+  "canonical-base": {
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "delivery": {
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "tree": "dddddddddddddddddddddddddddddddddddddddd"
+  },
+  "remote-result": {
+    "branch": "handoff/example-20260823-a1b2c3d",
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "tree": "dddddddddddddddddddddddddddddddddddddddd",
+    "verification": "remote-verified"
+  },
+  "files-sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+  "checks": [],
+  "human-gate": {
+    "required": true,
+    "status": "accepted",
+    "method": "interactive external confirmation",
+    "authority-ref": "DEC-EXAMPLE-PUSH-001",
+    "quote": "confirm exact target"
+  },
+  "unresolved-risks": []
+}
