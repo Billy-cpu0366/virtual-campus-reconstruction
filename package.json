@@ -25,6 +25,8 @@
     "browser:side-smoke": "node scripts/browser-side-smoke.mjs",
     "browser:visual-smoothing-smoke": "node scripts/browser-visual-smoothing-smoke.mjs",
     "browser:visible-entry-smoke": "node scripts/browser-visible-entry-smoke.mjs",
+    "browser:roof-footsteps-smoke": "node scripts/browser-roof-footsteps-smoke.mjs",
+    "browser:roof-footsteps-production": "node scripts/browser-roof-footsteps-production.mjs",
     "browser:performance-smoke": "node scripts/browser-performance-smoke.mjs",
     "browser:perf-baseline": "node scripts/browser-perf-baseline.mjs",
     "check:perf-baseline-evidence": "node scripts/check-perf-baseline-evidence.mjs",

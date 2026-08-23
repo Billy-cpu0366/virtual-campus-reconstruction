@@ -100,6 +100,10 @@ import {
   type PhaserFactorySmokeSceneLike,
 } from "./PhaserFactorySmokeRuntime.js";
 import {
+  PhaserFootstepRuntime,
+  type PhaserFootstepSceneLike,
+} from "./PhaserFootstepRuntime.js";
+import {
   ProductEntryRuntime,
   type ProductEntryGuideTarget,
   type ProductEntryResult,
@@ -113,6 +117,7 @@ import {
   isBridge1ExitZone,
   isBridge2Zone,
   playerDepth,
+  type RoofGroupState,
 } from "../src/layer/index.js";
 import { createWorld, worldSpecFromMaster, type WorldSpec } from "../src/world/index.js";
 import { PhaserWorldMutationScheduler } from "./PhaserWorldMutationScheduler.js";
@@ -141,6 +146,12 @@ const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
 const ENTRY_SMOKE_PREVIEW_DURATION_MS = 200;
 const ENTRY_SMOKE_PREVIEW_STAY_MS = 1_750;
 const ENTRY_SMOKE_RETURN_DURATION_MS = 1_050;
+const FACTORY_ROOF_BOUNDS = Object.freeze({
+  left: 112,
+  right: 640,
+  top: 736,
+  bottom: 1_152,
+});
 const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
   { markerId: "about", menuId: "about", x: 944, y: 768 },
   { markerId: "cv", menuId: "cv", x: 480, y: 1776 },
@@ -238,6 +249,8 @@ export interface CampusSceneShutdownReceipt {
   readonly trainCollisionShapeActive: boolean;
   readonly sprayerSpriteCount: number;
   readonly smokeEmitterActive: boolean;
+  readonly footstepActiveCount: number;
+  readonly factoryRoofTweenActive: boolean;
   readonly sideFailures: readonly string[];
   readonly physicsColliderCount: number | null;
 }
@@ -272,6 +285,11 @@ export class CampusScene extends Phaser.Scene {
   private trainRuntime: PhaserTrainRuntime | undefined;
   private sprayerRuntime: PhaserSprayerRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
+  private footstepRuntime: PhaserFootstepRuntime | undefined;
+  private factoryRoofInside: boolean | undefined;
+  private factoryRoofTween:
+    | { stop?(): unknown; remove?(): unknown }
+    | undefined;
   private trainColliderActive = false;
   private trainBlockingCells: readonly string[] = Object.freeze([]);
   private readonly sideFailures: string[] = [];
@@ -291,7 +309,7 @@ export class CampusScene extends Phaser.Scene {
   >;
   private lastDirection: Direction = DEFAULT_FACING;
   private coordinator: ChunkCoordinator | undefined;
-  private renderer: PhaserWorldRenderer | undefined;
+  private worldRenderer: PhaserWorldRenderer | undefined;
   private dataStore: ChunkDataStore | undefined;
   private dynamicWorldShutdown: Promise<void> | undefined;
   private worldSpec: WorldSpec | undefined;
@@ -574,6 +592,8 @@ export class CampusScene extends Phaser.Scene {
     }
 
     this.updatePlayerDepth();
+    this.updateFactoryRoof();
+    this.updateFootsteps();
     this.bridgeCheckFrames += 1;
     if (this.bridgeCheckFrames >= 3) {
       this.bridgeCheckFrames = 0;
@@ -655,6 +675,10 @@ export class CampusScene extends Phaser.Scene {
       this as unknown as PhaserPlayerVisualSceneLike,
       this.player as unknown as PhaserPlayerVisualSourceLike,
     );
+    this.footstepRuntime = new PhaserFootstepRuntime(
+      this as unknown as PhaserFootstepSceneLike,
+    );
+    this.footstepRuntime.start();
   }
 
   private createContentFoundation(): void {
@@ -895,6 +919,8 @@ export class CampusScene extends Phaser.Scene {
     this.contentUi = undefined;
     this.contentLeaseRuntime = undefined;
 
+    this.stopFactoryRoofTween();
+    this.footstepRuntime?.shutdown();
     this.playerRuntime?.shutdown();
     this.playerVisualInterpolator?.shutdown();
     this.playerVisualInterpolator = undefined;
@@ -926,6 +952,8 @@ export class CampusScene extends Phaser.Scene {
       trainCollisionShapeActive: this.trainRuntime?.hasCollisionShape ?? false,
       sprayerSpriteCount: this.sprayerRuntime?.spriteCount ?? 0,
       smokeEmitterActive: this.smokeRuntime?.hasEmitter ?? false,
+      footstepActiveCount: this.footstepRuntime?.activeCount ?? 0,
+      factoryRoofTweenActive: this.factoryRoofTween !== undefined,
       sideFailures: Object.freeze([...this.sideFailures]),
       physicsColliderCount,
     });
@@ -1018,9 +1046,12 @@ export class CampusScene extends Phaser.Scene {
       {
         onCollisionLayerCreated: this.handleCollisionLayerCreated,
         onCollisionLayerDestroyed: this.handleCollisionLayerDestroyed,
+        onRoofStateApplied: (state, layers) => {
+          this.applyFactoryRoofTween(state, layers);
+        },
       },
     );
-    this.renderer = renderer;
+    this.worldRenderer = renderer;
     this.configureInitialCollisionLayers();
     const worldResult = createWorld(spec, { hooks: renderer.hooks() });
     if (worldResult.kind !== "ready") {
@@ -1045,6 +1076,25 @@ export class CampusScene extends Phaser.Scene {
         roofStates: {
           concert: renderer.getRoofState("concert"),
           factory: renderer.getRoofState("factory"),
+          factoryInside: this.factoryRoofInside ?? false,
+          tweenActive: this.factoryRoofTween !== undefined,
+          layerAlphas: Object.fromEntries(
+            [...renderer.layers.entries()]
+              .filter(([id]) =>
+                id.startsWith("roof_factory@") ||
+                id.startsWith("roof_factory2@") ||
+                id.startsWith("roof_concert@") ||
+                id.startsWith("roof_concert2@"),
+              )
+              .map(([id, layer]) => [id, (layer as any).alpha ?? null]),
+          ),
+        },
+        footsteps: {
+          surfaceMarkerCount: renderer.markerRecords.filter(
+            (marker) => marker.layerName === "footsteps",
+          ).length,
+          activeCount: this.footstepRuntime?.activeCount ?? 0,
+          visuals: this.footstepRuntime?.visualSnapshots ?? [],
         },
         collisionLayers: this.collisionColliders.size,
         physicsColliders:
@@ -1312,13 +1362,13 @@ export class CampusScene extends Phaser.Scene {
     }
 
     try {
-      await this.renderer?.destroyAsync();
+      await this.worldRenderer?.destroyAsync();
     } catch (error) {
       rememberError(error);
     }
 
     this.coordinator = undefined;
-    this.renderer = undefined;
+    this.worldRenderer = undefined;
     this.dataStore = undefined;
 
     if (firstError !== undefined) {
@@ -1413,7 +1463,7 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private configureInitialCollisionLayers(): void {
-    const renderer = this.renderer;
+    const renderer = this.worldRenderer;
     if (renderer === undefined) {
       return;
     }
@@ -1426,15 +1476,15 @@ export class CampusScene extends Phaser.Scene {
 
   private setBridge1DownVisible(value: boolean): void {
     this.bridge1DownVisible = value;
-    this.renderer?.setCollisionLayerEnabled(BRIDGES.bridge1.down, value);
-    this.renderer?.setCollisionLayerEnabled(BRIDGES.bridge1.up, !value);
+    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge1.down, value);
+    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge1.up, !value);
     this.updatePlayerDepth();
   }
 
   private setBridge2DownVisible(value: boolean): void {
     this.bridge2DownVisible = value;
-    this.renderer?.setCollisionLayerEnabled(BRIDGES.bridge2.down, value);
-    this.renderer?.setCollisionLayerEnabled(BRIDGES.bridge2.up, !value);
+    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge2.down, value);
+    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge2.up, !value);
     this.updatePlayerDepth();
   }
 
@@ -1486,6 +1536,60 @@ export class CampusScene extends Phaser.Scene {
     this.player.setVelocity(0, 0);
     this.player.anims.stop();
     this.player.setFrame(walkFrameStart(this.lastDirection));
+  }
+
+  private updateFactoryRoof(): void {
+    const renderer = this.worldRenderer;
+    if (renderer === undefined) return;
+    const inside =
+      this.player.x >= FACTORY_ROOF_BOUNDS.left &&
+      this.player.x <= FACTORY_ROOF_BOUNDS.right &&
+      this.player.y >= FACTORY_ROOF_BOUNDS.top &&
+      this.player.y <= FACTORY_ROOF_BOUNDS.bottom;
+    if (inside === this.factoryRoofInside) return;
+    this.factoryRoofInside = inside;
+    renderer.setRoofState("factory", inside ? "faded" : "visible");
+  }
+
+  private updateFootsteps(): void {
+    const runtime = this.footstepRuntime;
+    if (runtime === undefined) return;
+    runtime.update(
+      this.time.now,
+      {
+        x: this.player.x,
+        y: this.player.y,
+        depth: (this.player as any).depth ?? playerDepth(this.player.y),
+        velocityX: this.player.body.velocity.x,
+        velocityY: this.player.body.velocity.y,
+        controlsEnabled: this.playerRuntime?.control.enabled ?? false,
+        teleporting: false,
+      },
+      this.worldRenderer?.markerRecords ?? [],
+    );
+  }
+
+  private applyFactoryRoofTween(
+    state: RoofGroupState,
+    layers: readonly TilemapLayerLike[],
+  ): void {
+    this.stopFactoryRoofTween();
+    if (layers.length === 0) return;
+    this.factoryRoofTween = this.tweens.add({
+      targets: [...layers],
+      alpha: state.alpha,
+      duration: state.durationMs,
+      ease: "Power2",
+      onComplete: () => {
+        this.factoryRoofTween = undefined;
+      },
+    }) as { stop?(): unknown; remove?(): unknown };
+  }
+
+  private stopFactoryRoofTween(): void {
+    this.factoryRoofTween?.stop?.();
+    this.factoryRoofTween?.remove?.();
+    this.factoryRoofTween = undefined;
   }
 
   private updateDynamicTargets(): void {

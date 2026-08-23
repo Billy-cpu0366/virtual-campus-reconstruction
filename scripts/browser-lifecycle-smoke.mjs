@@ -151,6 +151,8 @@ const result = {
     shutdownReceipt?.trainCollisionShapeActive === false &&
     shutdownReceipt?.sprayerSpriteCount === 0 &&
     shutdownReceipt?.smokeEmitterActive === false &&
+    shutdownReceipt?.footstepActiveCount === 0 &&
+    shutdownReceipt?.factoryRoofTweenActive === false &&
     shutdownReceipt?.physicsColliderCount === 0 &&
     shutdownReceipt?.sideFailures?.length === 0 &&
     events.exceptions.length === 0 &&

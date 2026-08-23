@@ -303,6 +303,8 @@ try {
     trainCollisionShapeActive: false,
     sprayerSpriteCount: 0,
     smokeEmitterActive: false,
+    footstepActiveCount: 0,
+    factoryRoofTweenActive: false,
     sideFailures: [],
     physicsColliderCount: 0,
   });
