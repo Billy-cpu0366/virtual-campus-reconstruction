@@ -6,6 +6,7 @@ import {
 } from "../../src/npc/index.js";
 import {
   PhaserSprayerRuntime,
+  sprayerPresentationDepth,
   type PhaserSprayerAnimationManagerLike,
   type PhaserSprayerEventsLike,
   type PhaserSprayerSceneLike,
@@ -84,6 +85,9 @@ class FakeSprite implements PhaserSprayerSpriteLike {
   x: number;
   y: number;
   texture: string;
+  readonly displayWidth = 48;
+  readonly displayHeight = 48;
+  depth = 0;
   destroyed = false;
   readonly played: string[] = [];
   readonly anims = {
@@ -103,7 +107,8 @@ class FakeSprite implements PhaserSprayerSpriteLike {
     return this;
   }
 
-  setDepth(_value: number): this {
+  setDepth(value: number): this {
+    this.depth = value;
     return this;
   }
 
@@ -222,9 +227,13 @@ describe("PhaserSprayerRuntime", () => {
     const clock = new FakeClock();
     let player: { x: number; y: number } | undefined;
     const fake = makeScene();
+    let triggered = 0;
     const runtime = new PhaserSprayerRuntime(fake.scene, {
       random: () => 0,
       playerPosition: () => player,
+      onTriggered: () => {
+        triggered += 1;
+      },
     });
     runtime.preload();
     runtime.createAnimations();
@@ -235,12 +244,25 @@ describe("PhaserSprayerRuntime", () => {
 
     expect(runtime.start(clock.nowMs)).toEqual({ ok: true });
     expect(fake.sprites).toHaveLength(4);
+    expect(fake.sprites[0]?.depth).toBe(
+      sprayerPresentationDepth(25 * 16),
+    );
+    expect(runtime.visualSnapshots[0]).toMatchObject({
+      width: 48,
+      height: 48,
+      depth: sprayerPresentationDepth(25 * 16),
+    });
     expect(fake.events.count("update")).toBe(1);
     player = { x: 60 * 16, y: 25 * 16 };
     fake.events.emit("update", clock.nowMs);
     expect(fake.sprites[0]?.texture).toBe("npc-sprayer-running");
+    expect(triggered).toBe(1);
     fake.events.emit("update", clock.advance(300));
     expect(fake.sprites[1]?.texture).toBe("npc-sprayer-running");
+    expect(triggered).toBe(1);
+    expect(fake.sprites[1]?.depth).toBe(
+      sprayerPresentationDepth(fake.sprites[1]?.y ?? 0),
+    );
     fake.events.emit("update", clock.advance(25_000));
     expect(fake.sprites.every((sprite) => sprite.destroyed)).toBe(true);
     expect(fake.events.count("update")).toBe(0);

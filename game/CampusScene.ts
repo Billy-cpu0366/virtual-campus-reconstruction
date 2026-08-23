@@ -60,6 +60,7 @@ import {
   type CameraRunResult,
   type CameraRuntimeStartOptions,
 } from "../src/camera/index.js";
+import { FACTORY_SMOKE_CONFIG } from "../src/fx/index.js";
 import {
   type GameUiPort,
   type GameplayControlLeaseToken,
@@ -137,6 +138,9 @@ const LOGICAL_VIEWPORT_WIDTH = 480;
 const LOGICAL_VIEWPORT_HEIGHT = 270;
 const ENTRY_CORRIDOR_SAMPLES = 6;
 const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
+const ENTRY_SMOKE_PREVIEW_DURATION_MS = 200;
+const ENTRY_SMOKE_PREVIEW_STAY_MS = 1_750;
+const ENTRY_SMOKE_RETURN_DURATION_MS = 1_050;
 const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
   { markerId: "about", menuId: "about", x: 944, y: 768 },
   { markerId: "cv", menuId: "cv", x: 480, y: 1776 },
@@ -187,11 +191,42 @@ const MOVEMENT_KEY_BY_CODE = new Map<string, keyof KeyState>([
   ["KeyD", "right"],
 ]);
 
+export interface CampusAmbientGuideStep {
+  readonly direction: "north" | "south" | "east" | "west";
+  readonly tiles: number;
+}
+
+export interface CampusAmbientGuideTarget {
+  readonly id: "trackside-sprayers" | "factory-smoke";
+  readonly label: string;
+  readonly steps: readonly CampusAmbientGuideStep[];
+}
+
+const TRACKSIDE_SPRAYER_GUIDE: CampusAmbientGuideTarget = Object.freeze({
+  id: "trackside-sprayers",
+  label: "Trackside crew",
+  steps: Object.freeze([
+    Object.freeze({ direction: "east", tiles: 20 }),
+    Object.freeze({ direction: "south", tiles: 7 }),
+    Object.freeze({ direction: "west", tiles: 8 }),
+  ]),
+});
+
+const FACTORY_SMOKE_GUIDE: CampusAmbientGuideTarget = Object.freeze({
+  id: "factory-smoke",
+  label: "Factory smoke",
+  steps: Object.freeze([
+    Object.freeze({ direction: "west", tiles: 30 }),
+    Object.freeze({ direction: "south", tiles: 8 }),
+  ]),
+});
+
 export interface CampusSceneEntryCallbacks {
   readonly onLoadProgress?: (progress: number) => void;
   readonly onReady?: () => void;
   readonly onEntryStatus?: (snapshot: ProductEntrySnapshot) => void;
   readonly onGuide?: (target: ProductEntryGuideTarget) => void | boolean;
+  readonly onAmbientGuide?: (target: CampusAmbientGuideTarget) => void;
   readonly onModalVisibility?: (visible: boolean) => void;
   readonly onError?: (error: Error) => void;
 }
@@ -346,6 +381,11 @@ export class CampusScene extends Phaser.Scene {
       this as unknown as PhaserSprayerSceneLike,
       {
         playerPosition: () => this.playerRuntime?.position,
+        onTriggered: () => {
+          if (!this.sceneDestroyed) {
+            this.entryCallbacks.onAmbientGuide?.(FACTORY_SMOKE_GUIDE);
+          }
+        },
         onError: (reason) => this.recordSideFailure(`sprayer:${reason}`),
       },
     );
@@ -358,6 +398,11 @@ export class CampusScene extends Phaser.Scene {
           },
         },
         connectCollision: (shape) => this.connectTrainCollision(shape),
+        onComplete: () => {
+          if (!this.sceneDestroyed) {
+            this.entryCallbacks.onAmbientGuide?.(TRACKSIDE_SPRAYER_GUIDE);
+          }
+        },
         onError: (reason) => this.recordSideFailure(`train:${reason}`),
       },
     );
@@ -437,16 +482,28 @@ export class CampusScene extends Phaser.Scene {
     );
     const entryRuntime = new ProductEntryRuntime({
       lease: this.contentLeaseRuntime!,
-      camera: new ProductEntryCameraAdapter(cameraRuntime, () => {
-        const camera = this.cameras.main;
-        const zoom = Number.isFinite(camera.zoom) && camera.zoom > 0
-          ? camera.zoom
-          : 1;
-        return Object.freeze({
-          x: camera.scrollX + camera.width / (2 * zoom),
-          y: camera.scrollY + camera.height / (2 * zoom),
-        });
-      }),
+      camera: new ProductEntryCameraAdapter(
+        cameraRuntime,
+        () => {
+          const camera = this.cameras.main;
+          const zoom = Number.isFinite(camera.zoom) && camera.zoom > 0
+            ? camera.zoom
+            : 1;
+          return Object.freeze({
+            x: camera.scrollX + camera.width / (2 * zoom),
+            y: camera.scrollY + camera.height / (2 * zoom),
+          });
+        },
+        {
+          preview: {
+            x: FACTORY_SMOKE_CONFIG.x,
+            y: FACTORY_SMOKE_CONFIG.y,
+            duration: ENTRY_SMOKE_PREVIEW_DURATION_MS,
+            stayDuration: ENTRY_SMOKE_PREVIEW_STAY_MS,
+            returnDuration: ENTRY_SMOKE_RETURN_DURATION_MS,
+          },
+        },
+      ),
       train: trainAdapter,
       guide: {
         publish: (target) => this.entryCallbacks.onGuide?.(target),
@@ -760,13 +817,16 @@ export class CampusScene extends Phaser.Scene {
     return {
       sprayer: this.sprayerRuntime?.snapshot ?? null,
       sprayerSpriteCount: this.sprayerRuntime?.spriteCount ?? 0,
+      sprayerVisuals: this.sprayerRuntime?.visualSnapshots ?? [],
       train: this.trainRuntime?.snapshot ?? null,
+      trainVisual: this.trainRuntime?.visualSnapshot ?? null,
       trainHasSprite: this.trainRuntime?.hasSprite ?? false,
       trainHasCollisionShape: this.trainRuntime?.hasCollisionShape ?? false,
       trainAdapter: this.entryTrainAdapter?.status ?? null,
       trainColliderActive: this.trainColliderActive,
       trainBlockingCellCount: this.trainBlockingCells.length,
       smoke: this.smokeRuntime?.snapshot ?? null,
+      smokeVisual: this.smokeRuntime?.visualSnapshot ?? null,
       smokeHasEmitter: this.smokeRuntime?.hasEmitter ?? false,
       failures: Object.freeze([...this.sideFailures]),
     };
@@ -1448,24 +1508,36 @@ export class CampusScene extends Phaser.Scene {
     geometry: ChunkGeometry,
   ): readonly ChunkCoordinate[] {
     const targets: Array<readonly ChunkCoordinate[]> = [];
-    for (let index = 0; index <= ENTRY_CORRIDOR_SAMPLES; index += 1) {
-      const progress = index / ENTRY_CORRIDOR_SAMPLES;
-      const centerX = ENTRY_CAMERA_START.x + (SPAWN_X - ENTRY_CAMERA_START.x) * progress;
-      const centerY = ENTRY_CAMERA_START.y + (SPAWN_Y - ENTRY_CAMERA_START.y) * progress;
-      targets.push(
-        targetChunks(
-          SPAWN_X,
-          SPAWN_Y,
-          {
-            scrollX: centerX - LOGICAL_VIEWPORT_WIDTH / 2,
-            scrollY: centerY - LOGICAL_VIEWPORT_HEIGHT / 2,
-            width: LOGICAL_VIEWPORT_WIDTH,
-            height: LOGICAL_VIEWPORT_HEIGHT,
-            zoom: CAMERA_ZOOM,
-          },
-          geometry,
-        ),
-      );
+    const centers = [
+      ENTRY_CAMERA_START,
+      Object.freeze({
+        x: FACTORY_SMOKE_CONFIG.x,
+        y: FACTORY_SMOKE_CONFIG.y,
+      }),
+      Object.freeze({ x: SPAWN_X, y: SPAWN_Y }),
+    ];
+    for (let segment = 1; segment < centers.length; segment += 1) {
+      const from = centers[segment - 1]!;
+      const to = centers[segment]!;
+      for (let index = 0; index <= ENTRY_CORRIDOR_SAMPLES; index += 1) {
+        const progress = index / ENTRY_CORRIDOR_SAMPLES;
+        const centerX = from.x + (to.x - from.x) * progress;
+        const centerY = from.y + (to.y - from.y) * progress;
+        targets.push(
+          targetChunks(
+            SPAWN_X,
+            SPAWN_Y,
+            {
+              scrollX: centerX - LOGICAL_VIEWPORT_WIDTH / 2,
+              scrollY: centerY - LOGICAL_VIEWPORT_HEIGHT / 2,
+              width: LOGICAL_VIEWPORT_WIDTH,
+              height: LOGICAL_VIEWPORT_HEIGHT,
+              zoom: CAMERA_ZOOM,
+            },
+            geometry,
+          ),
+        );
+      }
     }
     return mergeChunkTargets(...targets);
   }

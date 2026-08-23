@@ -14,7 +14,7 @@ export const TRAIN_RUNTIME_ASSET = Object.freeze({
 });
 
 const TRAIN_SCALE = (1 / 3) * 0.75 * 4.1;
-const TRAIN_DEPTH = 1_001;
+export const TRAIN_PRESENTATION_DEPTH = 520;
 
 type TrainListener = (...args: unknown[]) => void;
 
@@ -30,6 +30,7 @@ export interface PhaserTrainSpriteLike {
   x: number;
   y: number;
   readonly displayWidth?: number;
+  readonly displayHeight?: number;
   setOrigin(x: number, y: number): this;
   setScale(value: number): this;
   setDepth(value: number): this;
@@ -85,6 +86,7 @@ export type PhaserTrainCollisionConnector = (
 export interface PhaserTrainRuntimeOptions {
   readonly blockingZone?: PhaserTrainBlockingZonePort;
   readonly connectCollision?: PhaserTrainCollisionConnector;
+  readonly onComplete?: () => void;
   readonly onError?: (reason: string) => void;
 }
 
@@ -110,6 +112,7 @@ export class PhaserTrainRuntime {
   private readonly blockingZone: PhaserTrainBlockingZonePort | undefined;
   private readonly onError: ((reason: string) => void) | undefined;
   private readonly connectCollision: PhaserTrainCollisionConnector | undefined;
+  private readonly onComplete: (() => void) | undefined;
   private sprite: PhaserTrainSpriteLike | undefined;
   private collisionShape: PhaserTrainCollisionShapeLike | undefined;
   private collisionCleanup: PhaserTrainCollisionCleanup | undefined;
@@ -131,6 +134,7 @@ export class PhaserTrainRuntime {
   ) {
     this.blockingZone = options.blockingZone;
     this.connectCollision = options.connectCollision;
+    this.onComplete = options.onComplete;
     this.onError = options.onError;
   }
 
@@ -155,7 +159,7 @@ export class PhaserTrainRuntime {
       sprite
         .setOrigin(0, 0.5)
         .setScale(TRAIN_SCALE)
-        .setDepth(TRAIN_DEPTH)
+        .setDepth(TRAIN_PRESENTATION_DEPTH)
         .setAlpha(1);
       this.sprite = sprite;
       this.route.setCollisionWidth(
@@ -184,6 +188,13 @@ export class PhaserTrainRuntime {
     this.updateCollision(snapshot.collisionBand);
     if (snapshot.state === "complete" || snapshot.state === "cancelled") {
       this.detachUpdate();
+      if (snapshot.state === "complete") {
+        try {
+          this.onComplete?.();
+        } catch {
+          this.report("complete-observer-failed");
+        }
+      }
       this.cleanupObjects();
     }
   }
@@ -213,6 +224,24 @@ export class PhaserTrainRuntime {
 
   get hasCollisionShape(): boolean {
     return this.collisionShape !== undefined;
+  }
+
+  get visualSnapshot() {
+    const sprite = this.sprite;
+    if (sprite === undefined) return null;
+    const width = sprite.displayWidth ?? 0;
+    const height = sprite.displayHeight ?? 0;
+    return Object.freeze({
+      x: sprite.x,
+      y: sprite.y,
+      width,
+      height,
+      left: sprite.x,
+      right: sprite.x + width,
+      top: sprite.y - height / 2,
+      bottom: sprite.y + height / 2,
+      depth: TRAIN_PRESENTATION_DEPTH,
+    });
   }
 
   private createCollision(band: TrainCollisionBand): void {

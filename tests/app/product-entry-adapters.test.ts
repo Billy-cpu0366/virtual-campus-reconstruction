@@ -45,6 +45,42 @@ describe("ProductEntryCameraAdapter", () => {
     expect(shutdowns).toBe(1);
   });
 
+  it("在3秒总时长内先预览factory smoke再回到玩家", async () => {
+    const starts: CameraRuntimeStartOptions[] = [];
+    const adapter = new ProductEntryCameraAdapter(
+      {
+        start: (options) => {
+          starts.push(options);
+          return Promise.resolve({ status: "completed" });
+        },
+        shutdown: () => undefined,
+      },
+      () => ({ x: 944, y: 928 }),
+      {
+        preview: {
+          x: 808,
+          y: 539.2,
+          duration: 200,
+          stayDuration: 1_750,
+          returnDuration: 1_050,
+        },
+      },
+    );
+
+    await expect(adapter.settleOnPlayer()).resolves.toBeUndefined();
+    expect(starts).toEqual([
+      {
+        sequence: [
+          { x: 808, y: 539.2, duration: 200, stayDuration: 1_750 },
+        ],
+        returnDuration: 1_050,
+      },
+    ]);
+    expect(
+      200 + 1_750 + (starts[0]?.returnDuration ?? 0),
+    ).toBe(PRODUCT_ENTRY_CAMERA_DURATION_MS);
+  });
+
   it.each([
     { status: "cancelled" as const },
     { status: "failed" as const, error: new Error("camera failed") },

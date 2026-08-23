@@ -26,6 +26,15 @@ export const SPRAYER_RUNTIME_ASSETS = Object.freeze([
 
 const SPRAY_ANIMATION = "npc-sprayer-spray";
 const RUNNING_ANIMATION = "npc-sprayer-running-anim";
+const SPRAYER_PRESENTATION_DEPTH_BASE = 500;
+const SPRAYER_PRESENTATION_DEPTH_OFFSET_Y = 24;
+
+export function sprayerPresentationDepth(y: number): number {
+  return (
+    SPRAYER_PRESENTATION_DEPTH_BASE +
+    (y + SPRAYER_PRESENTATION_DEPTH_OFFSET_Y) * 0.1
+  );
+}
 
 type PhaserListener = (...args: unknown[]) => void;
 
@@ -69,6 +78,8 @@ export interface PhaserSprayerSpriteLike {
   x: number;
   y: number;
   readonly anims?: PhaserSprayerAnimationControllerLike;
+  readonly displayWidth?: number;
+  readonly displayHeight?: number;
   setScale(value: number): this;
   setDepth(value: number): this;
   setTexture(key: string): this;
@@ -94,6 +105,7 @@ export interface PhaserSprayerSceneLike {
 export interface PhaserSprayerRuntimeOptions {
   readonly random?: () => number;
   readonly playerPosition?: () => SprayerPlayerPosition | undefined;
+  readonly onTriggered?: () => void;
   readonly onError?: (reason: string) => void;
 }
 
@@ -118,8 +130,10 @@ function eventTime(args: readonly unknown[]): number {
 export class PhaserSprayerRuntime {
   private readonly group: SprayerGroupRuntime;
   private readonly playerPosition: (() => SprayerPlayerPosition | undefined) | undefined;
+  private readonly onTriggered: (() => void) | undefined;
   private readonly onError: ((reason: string) => void) | undefined;
   private readonly sprites = new Map<string, PhaserSprayerSpriteLike>();
+  private triggerPublished = false;
   private updateAttached = false;
   private shutdownState = false;
 
@@ -137,6 +151,7 @@ export class PhaserSprayerRuntime {
   ) {
     this.group = new SprayerGroupRuntime({ random: options.random ?? Math.random });
     this.playerPosition = options.playerPosition;
+    this.onTriggered = options.onTriggered;
     this.onError = options.onError;
   }
 
@@ -194,7 +209,9 @@ export class PhaserSprayerRuntime {
           snapshot.position.y,
           "npc-sprayer",
         );
-        sprite.setScale(instance.scale).setDepth(instance.depth);
+        sprite
+          .setScale(instance.scale)
+          .setDepth(sprayerPresentationDepth(snapshot.position.y));
         this.sprites.set(instance.id, sprite);
       }
     } catch {
@@ -204,6 +221,7 @@ export class PhaserSprayerRuntime {
       return { ok: false, reason: "sprite-create-failed" };
     }
 
+    this.triggerPublished = false;
     this.attachUpdate();
     this.apply(this.group.tick(nowMs, this.playerPosition?.()));
     return { ok: true };
@@ -237,6 +255,27 @@ export class PhaserSprayerRuntime {
     return this.sprites.size;
   }
 
+  get visualSnapshots() {
+    return Object.freeze(
+      [...this.sprites.entries()].map(([id, sprite]) => {
+        const width = sprite.displayWidth ?? 0;
+        const height = sprite.displayHeight ?? 0;
+        return Object.freeze({
+          id,
+          x: sprite.x,
+          y: sprite.y,
+          width,
+          height,
+          left: sprite.x - width / 2,
+          right: sprite.x + width / 2,
+          top: sprite.y - height / 2,
+          bottom: sprite.y + height / 2,
+          depth: sprayerPresentationDepth(sprite.y),
+        });
+      }),
+    );
+  }
+
   private apply(snapshot: ReturnType<SprayerGroupRuntime["tick"]>): void {
     for (const instance of snapshot.instances) {
       const sprite = this.sprites.get(instance.id);
@@ -252,12 +291,21 @@ export class PhaserSprayerRuntime {
       }
       sprite.x = instance.position.x;
       sprite.y = instance.position.y;
+      sprite.setDepth(sprayerPresentationDepth(instance.position.y));
       if (instance.state === "fleeing") {
         sprite.setTexture("npc-sprayer-running");
         sprite.anims?.play(RUNNING_ANIMATION, true);
       } else if (instance.sprayReady) {
         sprite.setTexture("npc-sprayer");
         sprite.anims?.play(SPRAY_ANIMATION, true);
+      }
+    }
+    if (snapshot.triggeredAt !== null && !this.triggerPublished) {
+      this.triggerPublished = true;
+      try {
+        this.onTriggered?.();
+      } catch {
+        this.report("trigger-observer-failed");
       }
     }
     if (

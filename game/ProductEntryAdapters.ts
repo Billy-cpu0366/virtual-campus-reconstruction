@@ -16,28 +16,50 @@ interface ProductEntryCameraRuntimeLike {
   shutdown(): void;
 }
 
+export interface ProductEntryCameraPreview {
+  readonly x: number;
+  readonly y: number;
+  readonly duration: number;
+  readonly stayDuration: number;
+  readonly returnDuration: number;
+}
+
+export interface ProductEntryCameraAdapterOptions {
+  readonly preview?: ProductEntryCameraPreview;
+}
+
 export class ProductEntryCameraAdapter implements ProductEntryCameraPort {
   private promise: Promise<void> | undefined;
 
   constructor(
     private readonly runtime: ProductEntryCameraRuntimeLike,
     private readonly getCurrentCenter: () => CameraPosition,
+    private readonly options: ProductEntryCameraAdapterOptions = {},
   ) {}
 
   settleOnPlayer(): Promise<void> {
     if (this.promise !== undefined) return this.promise;
+    const preview = this.options.preview;
     const center = this.getCurrentCenter();
     this.promise = this.runtime
       .start({
         sequence: [
-          Object.freeze({
-            x: center.x,
-            y: center.y,
-            duration: 0,
-            stayDuration: 0,
-          }),
+          preview === undefined
+            ? Object.freeze({
+                x: center.x,
+                y: center.y,
+                duration: 0,
+                stayDuration: 0,
+              })
+            : Object.freeze({
+                x: preview.x,
+                y: preview.y,
+                duration: preview.duration,
+                stayDuration: preview.stayDuration,
+              }),
         ],
-        returnDuration: PRODUCT_ENTRY_CAMERA_DURATION_MS,
+        returnDuration:
+          preview?.returnDuration ?? PRODUCT_ENTRY_CAMERA_DURATION_MS,
       })
       .then((result) => {
         if (result.status === "completed") return;

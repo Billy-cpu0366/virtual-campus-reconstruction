@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { writeFileSync } from "node:fs";
 
 import { clickPlay, waitForAppStatus } from "./browser-app-actions.mjs";
 
@@ -10,7 +11,33 @@ smokeUrl.searchParams.set("lifecycle-test", "1");
 smokeUrl.searchParams.set("side-smoke", String(Date.now()));
 const url = smokeUrl.toString();
 const timeoutMs = Number(process.env.SIDE_SMOKE_TIMEOUT_MS ?? 55000);
+const receiptPath = process.env.SIDE_SMOKE_RECEIPT;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function intersects(bounds, viewport) {
+  return Boolean(
+    bounds &&
+      viewport &&
+      bounds.right >= viewport.left &&
+      bounds.left <= viewport.right &&
+      bounds.bottom >= viewport.top &&
+      bounds.top <= viewport.bottom
+  );
+}
+
+function longestVisibleDuration(samples, key) {
+  let activeAt;
+  let best = 0;
+  for (const sample of samples) {
+    if (sample[key]) {
+      activeAt ??= sample.elapsedMs;
+      best = Math.max(best, sample.elapsedMs - activeAt);
+    } else {
+      activeAt = undefined;
+    }
+  }
+  return best;
+}
 
 async function fetchJson(endpoint, options) {
   const response = await fetch(endpoint, options);
@@ -171,12 +198,21 @@ try {
   while (Date.now() - routeStartedAt < 22000) {
     const snapshot = await debug();
     if (snapshot !== null) {
+      const viewport = {
+        left: snapshot.camera.scrollX,
+        right: snapshot.camera.scrollX + 480,
+        top: snapshot.camera.scrollY,
+        bottom: snapshot.camera.scrollY + 270,
+      };
       samples.push({
         elapsedMs: Date.now() - clickedAt,
         state: snapshot.side.train?.state,
         x: snapshot.side.train?.x,
         collider: snapshot.side.trainColliderActive,
         sprite: snapshot.side.trainHasSprite,
+        trainVisible: intersects(snapshot.side.trainVisual, viewport),
+        smokeVisible: intersects(snapshot.side.smokeVisual?.bounds, viewport),
+        smokeParticleCount: snapshot.side.smokeVisual?.aliveParticleCount ?? 0,
         smokeState: snapshot.side.smoke?.state,
         smokeGeneration: snapshot.side.smoke?.generation,
       });
@@ -204,10 +240,24 @@ try {
   assert.equal(complete.side.trainHasCollisionShape, false);
   assert.equal(complete.side.trainColliderActive, false);
   assert.equal(complete.side.trainBlockingCellCount, 0);
+  const smokeVisibleDurationMs = longestVisibleDuration(samples, "smokeVisible");
+  const trainVisibleDurationMs = longestVisibleDuration(samples, "trainVisible");
   assert.ok(samples.some((sample) => sample.smokeState === "emitting"));
   assert.ok(samples.every((sample) => sample.smokeGeneration === 1));
+  assert.ok(smokeVisibleDurationMs >= 2000, `smoke visible only ${smokeVisibleDurationMs}ms`);
+  assert.ok(trainVisibleDurationMs >= 5000, `train visible only ${trainVisibleDurationMs}ms`);
+  assert.ok((holding.side.trainVisual?.depth ?? Infinity) < holding.player.depth);
+  assert.ok(
+    holding.side.sprayerVisuals.every(
+      (visual) => visual.depth > holding.side.trainVisual.depth,
+    ),
+  );
 
   await waitForAppStatus(evaluate, "PLAYING", 1000);
+  const guideAfterTrain = await evaluate(
+    "document.getElementById('content-guide')?.textContent ?? ''",
+  );
+  assert.match(guideAfterTrain, /Trackside crew.*east 20.*south 7.*west 8/);
   const moved = await moveToSprayers();
   const fleeing = await waitForDebug(
     (snapshot) =>
@@ -216,6 +266,10 @@ try {
     "sprayer 300ms cascade trigger",
     5000,
   );
+  const guideAfterSprayer = await evaluate(
+    "document.getElementById('content-guide')?.textContent ?? ''",
+  );
+  assert.match(guideAfterSprayer, /Factory smoke.*west 30.*south 8/);
   const gone = await waitForDebug(
     (snapshot) =>
       snapshot.side.sprayer.instances.some((instance) => instance.state === "gone") &&
@@ -259,13 +313,17 @@ try {
   assert.deepEqual(events.failedRequests, []);
   assert.deepEqual(events.badResponses, []);
 
-  console.log(JSON.stringify({
+  const result = {
     ok: true,
     url,
     clickedPoint,
     ready,
     holdingElapsedMs,
     completeElapsedMs,
+    smokeVisibleDurationMs,
+    trainVisibleDurationMs,
+    guideAfterTrain,
+    guideAfterSprayer,
     holding,
     complete,
     moved: moved.player,
@@ -273,7 +331,11 @@ try {
     gone,
     lifecycle,
     events,
-  }, null, 2));
+  };
+  if (receiptPath) {
+    writeFileSync(receiptPath, `${JSON.stringify(result, null, 2)}\n`);
+  }
+  console.log(JSON.stringify(result, null, 2));
 } finally {
   socket.close();
   await fetch(`${cdpUrl}/json/close/${target.id}`).catch(() => {});

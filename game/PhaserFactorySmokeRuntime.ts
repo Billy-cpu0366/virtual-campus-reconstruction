@@ -10,6 +10,10 @@ export const FACTORY_SMOKE_RUNTIME_ASSET = Object.freeze({
   url: new URL("../src/fx/assets/smoke-white.webp", import.meta.url).href,
 });
 
+// Presentation-only correction: the reconstruction's factory roof layers use
+// depths 3200/3300, while the public smoke config retains its depth=500 FACT.
+export const FACTORY_SMOKE_PRESENTATION_DEPTH = 3_400;
+
 type SmokeListener = (...args: unknown[]) => void;
 
 export interface PhaserFactorySmokeLoaderLike {
@@ -25,6 +29,8 @@ export interface PhaserFactorySmokeParticleLike {
   y: number;
   alpha: number;
   readonly lifeT?: number;
+  readonly displayWidth?: number;
+  readonly displayHeight?: number;
   velocityX?: number;
 }
 
@@ -117,6 +123,15 @@ export class PhaserFactorySmokeRuntime {
   private pathGraphics: PhaserFactorySmokeGraphicsLike | undefined;
   private updateAttached = false;
   private shutdownState = false;
+  private visibleParticleCountState = 0;
+  private visibleParticleBoundsState:
+    | Readonly<{
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+      }>
+    | null = null;
 
   private readonly handleUpdate: SmokeListener = (): void => {
     this.update();
@@ -160,7 +175,7 @@ export class PhaserFactorySmokeRuntime {
 
     try {
       this.pathGraphics = this.scene.add.graphics().setDepth(
-        FACTORY_SMOKE_CONFIG.depth + 1,
+        FACTORY_SMOKE_PRESENTATION_DEPTH + 1,
       );
       this.emitter = this.scene.add.particles(
         FACTORY_SMOKE_CONFIG.x,
@@ -169,7 +184,7 @@ export class PhaserFactorySmokeRuntime {
         this.emitterConfig(),
       );
       this.emitter
-        .setDepth(FACTORY_SMOKE_CONFIG.depth)
+        .setDepth(FACTORY_SMOKE_PRESENTATION_DEPTH)
         .setVisible(false);
     } catch {
       this.runtime.shutdown();
@@ -193,6 +208,8 @@ export class PhaserFactorySmokeRuntime {
     } else {
       this.emitter.stop();
       this.emitter.setVisible(false);
+      this.visibleParticleCountState = 0;
+      this.visibleParticleBoundsState = null;
     }
   }
 
@@ -210,6 +227,17 @@ export class PhaserFactorySmokeRuntime {
 
   get hasEmitter(): boolean {
     return this.emitter !== undefined;
+  }
+
+  get visualSnapshot() {
+    return Object.freeze({
+      anchor: Object.freeze({
+        x: FACTORY_SMOKE_CONFIG.x,
+        y: FACTORY_SMOKE_CONFIG.y,
+      }),
+      aliveParticleCount: this.visibleParticleCountState,
+      bounds: this.visibleParticleBoundsState,
+    });
   }
 
   private emitterConfig(): Record<string, unknown> {
@@ -237,12 +265,29 @@ export class PhaserFactorySmokeRuntime {
   }
 
   private updateParticles(): void {
+    let count = 0;
+    let left = Number.POSITIVE_INFINITY;
+    let right = Number.NEGATIVE_INFINITY;
+    let top = Number.POSITIVE_INFINITY;
+    let bottom = Number.NEGATIVE_INFINITY;
     this.emitter?.forEachAlive?.((particle) => {
       const position = this.runtime.particlePosition(particle.lifeT ?? 0);
       particle.x = FACTORY_SMOKE_CONFIG.x + position.x;
       particle.y = FACTORY_SMOKE_CONFIG.y + position.y;
       particle.alpha = Math.min(particle.alpha, FACTORY_SMOKE_CONFIG.maxAlpha);
+      const halfWidth = (particle.displayWidth ?? 0) / 2;
+      const halfHeight = (particle.displayHeight ?? 0) / 2;
+      left = Math.min(left, particle.x - halfWidth);
+      right = Math.max(right, particle.x + halfWidth);
+      top = Math.min(top, particle.y - halfHeight);
+      bottom = Math.max(bottom, particle.y + halfHeight);
+      count += 1;
     });
+    this.visibleParticleCountState = count;
+    this.visibleParticleBoundsState =
+      count === 0
+        ? null
+        : Object.freeze({ left, right, top, bottom });
   }
 
   private attachUpdate(): void {
@@ -265,6 +310,8 @@ export class PhaserFactorySmokeRuntime {
     this.emitter = undefined;
     this.pathGraphics?.clear().destroy();
     this.pathGraphics = undefined;
+    this.visibleParticleCountState = 0;
+    this.visibleParticleBoundsState = null;
   }
 
   private report(reason: string): void {

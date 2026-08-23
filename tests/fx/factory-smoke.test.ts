@@ -5,6 +5,7 @@ import {
   FactorySmokeRuntime,
 } from "../../src/fx/index.js";
 import {
+  FACTORY_SMOKE_PRESENTATION_DEPTH,
   PhaserFactorySmokeRuntime,
   type PhaserFactorySmokeEmitterLike,
   type PhaserFactorySmokeEventsLike,
@@ -54,9 +55,17 @@ class FakeEmitter implements PhaserFactorySmokeEmitterLike {
   starts = 0;
   stops = 0;
   visible = false;
+  depth = 0;
   destroyed = false;
   readonly particles: PhaserFactorySmokeParticleLike[] = [
-    { x: FACTORY_SMOKE_CONFIG.x, y: FACTORY_SMOKE_CONFIG.y, alpha: 1, lifeT: 0.5 },
+    {
+      x: FACTORY_SMOKE_CONFIG.x,
+      y: FACTORY_SMOKE_CONFIG.y,
+      alpha: 1,
+      lifeT: 0.5,
+      displayWidth: 64,
+      displayHeight: 64,
+    },
   ];
 
   start(): void {
@@ -72,7 +81,8 @@ class FakeEmitter implements PhaserFactorySmokeEmitterLike {
     return this;
   }
 
-  setDepth(_value: number): this {
+  setDepth(value: number): this {
+    this.depth = value;
     return this;
   }
 
@@ -200,12 +210,22 @@ describe("PhaserFactorySmokeRuntime", () => {
       emitting: false,
     });
     expect(fake.emitters[0]?.visible).toBe(true);
+    expect(fake.emitters[0]?.depth).toBe(FACTORY_SMOKE_PRESENTATION_DEPTH);
+    expect(runtime.visualSnapshot).toMatchObject({
+      anchor: { x: 808, y: 539.2 },
+      aliveParticleCount: 1,
+    });
+    expect(runtime.visualSnapshot.bounds?.left).toBeLessThan(
+      FACTORY_SMOKE_CONFIG.x,
+    );
     const starts = fake.emitters[0]?.starts;
 
     viewport = OUTSIDE_VIEWPORT;
     fake.events.emit("update");
     expect(fake.emitters[0]?.visible).toBe(false);
     expect(fake.emitters[0]?.stops).toBeGreaterThan(0);
+    expect(runtime.visualSnapshot.aliveParticleCount).toBe(0);
+    expect(runtime.visualSnapshot.bounds).toBeNull();
     viewport = INSIDE_VIEWPORT;
     fake.events.emit("update");
     expect(fake.emitters).toHaveLength(1);

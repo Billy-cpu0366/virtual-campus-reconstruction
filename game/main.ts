@@ -14,6 +14,7 @@ import {
 } from "../src/game-ui/index.js";
 import {
   CampusScene,
+  type CampusAmbientGuideTarget,
   type CampusSceneEntryCallbacks,
   type CampusSceneShutdownReceipt,
 } from "./CampusScene.js";
@@ -136,6 +137,14 @@ function publishGuide(target: ProductEntryGuideTarget): boolean {
   return true;
 }
 
+function publishAmbientGuide(target: CampusAmbientGuideTarget): void {
+  const route = target.steps
+    .map((step) => `${step.direction} ${step.tiles}`)
+    .join(", then ");
+  guide.textContent = `${target.label} · ${route}`;
+  guide.hidden = false;
+}
+
 function isCurrent(generation: number): boolean {
   const current = currentGeneration;
   return (
@@ -163,6 +172,9 @@ function createSceneCallbacks(
     },
     onGuide: (target) =>
       isCurrent(generation) ? publishGuide(target) : false,
+    onAmbientGuide: (target) => {
+      if (isCurrent(generation)) publishAmbientGuide(target);
+    },
     onModalVisibility: (visible) => {
       if (!isCurrent(generation)) return;
       if (visible) appRuntime.openModal();

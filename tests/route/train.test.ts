@@ -11,6 +11,7 @@ import {
 } from "../../src/route/index.js";
 import {
   PhaserTrainRuntime,
+  TRAIN_PRESENTATION_DEPTH,
   type PhaserTrainCollisionShapeLike,
   type PhaserTrainEventsLike,
   type PhaserTrainSceneLike,
@@ -45,6 +46,8 @@ class FakeSprite implements PhaserTrainSpriteLike {
   x: number;
   y: number;
   readonly displayWidth = 128;
+  readonly displayHeight = 64;
+  depth = 0;
   destroyed = false;
 
   constructor(x: number, y: number) {
@@ -60,7 +63,8 @@ class FakeSprite implements PhaserTrainSpriteLike {
     return this;
   }
 
-  setDepth(_value: number): this {
+  setDepth(value: number): this {
+    this.depth = value;
     return this;
   }
 
@@ -170,13 +174,23 @@ describe("PhaserTrainRuntime", () => {
   it("创建单个火车和静态碰撞带，进出场时更新blocking zone并完整清理", () => {
     const fake = makeScene();
     const calls: Array<readonly string[] | null> = [];
+    let completes = 0;
     const runtime = new PhaserTrainRuntime(fake.scene, {
       blockingZone: { setTrainBlockingZone: (cells) => calls.push(cells) },
+      onComplete: () => {
+        completes += 1;
+      },
     });
     runtime.preload();
     expect(runtime.start(0)).toEqual({ ok: true });
     expect(fake.sprites).toHaveLength(1);
     expect(fake.shapes).toHaveLength(1);
+    expect(fake.sprites[0]?.depth).toBe(TRAIN_PRESENTATION_DEPTH);
+    expect(runtime.visualSnapshot).toMatchObject({
+      width: 128,
+      height: 64,
+      depth: TRAIN_PRESENTATION_DEPTH,
+    });
     expect(fake.events.count("update")).toBe(1);
     expect(calls.at(-1)).not.toBeNull();
 
@@ -192,6 +206,8 @@ describe("PhaserTrainRuntime", () => {
     expect(calls.at(-1)).toBeNull();
     expect(fake.events.count("update")).toBe(0);
     expect(fake.events.count("shutdown")).toBe(0);
+    expect(completes).toBe(1);
+    expect(runtime.visualSnapshot).toBeNull();
   });
 
   it("teardown先清player collider，再清shape/sprite/blocking zone", () => {
