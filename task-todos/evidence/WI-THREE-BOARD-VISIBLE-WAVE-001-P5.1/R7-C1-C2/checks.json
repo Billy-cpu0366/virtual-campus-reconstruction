@@ -1,0 +1,38 @@
+{
+  "repairPackage": "P5.1-R7-C1-C2",
+  "verifiedAt": "2026-08-23T21:18:00+08:00",
+  "implementationCommit": "54c0e2922ce3fc6b3ced78118db6b2b867b6eff7",
+  "implementationTree": "3b05f56ed58c0e0861eff3cbff6787ce93aa0290",
+  "baseCommit": "1e24fd1e9e4cfa7e06ed8db0243b4f214364569c",
+  "checks": {
+    "unitTests": "PASS: 56 files / 314 tests",
+    "typecheck": "PASS",
+    "runtimeAssets": "PASS",
+    "productionBuild": "PASS and restored after test-hooks",
+    "testHooksBuild": "PASS",
+    "c1EntryBudget": "PASS: READY 25 chunks / 525 layers / 0 clears; final 15 / 315; 210 async clears; four layers per frame; 52 yields; remainder 2",
+    "entryTiming": "PASS: camera stable about 3.15s; PLAYING/control about 5.05s; budgeted cleanup settled 831ms after PLAYING in final visual-smoothing gate",
+    "c2Depth": "PASS: spawn player 532.8 < train 533.4 < four sprayers 542.4",
+    "garbageCollision": "PASS: OUR ART blank pavement moved left about 74.7px with zero blocked samples; sign and garbage pile positional probes did not traverse visible obstacles; walls data unchanged",
+    "completeProductionDesktop": "PASS: 1920x1080 slow network, full no-hooks R7 session",
+    "completeProductionMobile": "PASS: 375x667 normal network, full no-hooks R7 session",
+    "productionGates": "PASS: smoke, runtime-safety, visible-entry, map-production, performance; runtime-safety repeated after final production restore",
+    "testHooksGates": "PASS: entry, garbage-collision, map, lifecycle, side, chunk, layer, camera, collision, mobile-input, content, visual-smoothing, app-retry, roof-footsteps",
+    "productionPerformance": "PASS: entry p95 16.8ms; movement p95 16.7ms; >34ms frames 0; LoAF 0; long tasks 0; maximum input handler delay 7ms",
+    "syntaxAndDiff": "PASS",
+    "independentVerifier": "PASS after explicit initial 25/525 assertion and positional sign assertion were added"
+  },
+  "visualReview": {
+    "mainScreenshotReview": "PASS: 3/5/8s player no longer draws over carriage; 17s player reappears; sprayers remain foreground; desktop and mobile key frames inspected",
+    "humanStatus": "awaiting-repeat-integrated-visual-acceptance",
+    "risk": "Human must decide whether temporary 3-8s train occlusion and actual-device opening smoothness are acceptable"
+  },
+  "boundaries": {
+    "trainRouteScaleTimingCollision": "unchanged",
+    "physicsFps": "30 unchanged",
+    "ourArtWalls": "unchanged",
+    "particles3And69360": "UNKNOWN and not implemented",
+    "camera111Seconds": "not connected to production",
+    "remote": "no push, PR, merge, or main modification authorized"
+  }
+}

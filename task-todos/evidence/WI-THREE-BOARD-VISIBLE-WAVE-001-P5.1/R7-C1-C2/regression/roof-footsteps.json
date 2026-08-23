@@ -1,0 +1,645 @@
+{
+  "passed": true,
+  "url": "http://127.0.0.1:4237/?c1c2-final-rerun=roof&collision-test=1&lifecycle-test=1&roof-footsteps=1787490781966",
+  "route": [
+    {
+      "direction": "left",
+      "target": 552,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 3857,
+      "position": {
+        "x": 551.3333333333364,
+        "y": 304,
+        "depth": 532.8,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 556,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1836,
+      "position": {
+        "x": 546.6666666666698,
+        "y": 556.0000000000003,
+        "depth": 558,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "right",
+      "target": 680,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 1024,
+      "position": {
+        "x": 686.6666666666687,
+        "y": 560.666666666667,
+        "depth": 558.4666666666667,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 616,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 435,
+      "position": {
+        "x": 686.6666666666687,
+        "y": 621.3333333333331,
+        "depth": 564.0666666666666,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "left",
+      "target": 668,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 203,
+      "position": {
+        "x": 666,
+        "y": 625.9999999999998,
+        "depth": 565,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 728,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 771,
+      "position": {
+        "x": 666,
+        "y": 733.3333333333322,
+        "depth": 575.2666666666665,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 960,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1637,
+      "position": {
+        "x": 666,
+        "y": 966.6666666666637,
+        "depth": 598.5999999999997,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "left",
+      "target": 640,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 201,
+      "position": {
+        "x": 638.0000000000002,
+        "y": 971.3333333333303,
+        "depth": 599.5333333333331,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1080,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 861,
+      "position": {
+        "x": 633.3333333333336,
+        "y": 1087.999999999998,
+        "depth": 611.1999999999998,
+        "visible": true
+      },
+      "roofInside": true,
+      "roofState": "faded",
+      "footstepCount": 0
+    },
+    {
+      "direction": "right",
+      "target": 728,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 703,
+      "position": {
+        "x": 731.3333333333328,
+        "y": 1092.6666666666647,
+        "depth": 611.6666666666665,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1200,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 834,
+      "position": {
+        "x": 735.9999999999994,
+        "y": 1204.6666666666665,
+        "depth": 622.8666666666667,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "left",
+      "target": 712,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 196,
+      "position": {
+        "x": 707.9999999999997,
+        "y": 1209.3333333333333,
+        "depth": 623.3333333333334,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1464,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1872,
+      "position": {
+        "x": 707.9999999999997,
+        "y": 1466.000000000004,
+        "depth": 649.0000000000005,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "right",
+      "target": 760,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 471,
+      "position": {
+        "x": 768.6666666666658,
+        "y": 1470.6666666666708,
+        "depth": 649.4666666666672,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1560,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 724,
+      "position": {
+        "x": 773.3333333333325,
+        "y": 1568.6666666666724,
+        "depth": 659.2666666666672,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "left",
+      "target": 456,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 2343,
+      "position": {
+        "x": 451.333333333334,
+        "y": 1573.3333333333392,
+        "depth": 659.7333333333339,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "right",
+      "target": 464,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 129,
+      "position": {
+        "x": 465.33333333333405,
+        "y": 1573.3333333333392,
+        "depth": 659.7333333333339,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1640,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 526,
+      "position": {
+        "x": 465.33333333333405,
+        "y": 1643.3333333333403,
+        "depth": 666.2666666666673,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "left",
+      "target": 236,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 1712,
+      "position": {
+        "x": 234,
+        "y": 1648.000000000007,
+        "depth": 667.2000000000007,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1704,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 417,
+      "position": {
+        "x": 234,
+        "y": 1704.000000000008,
+        "depth": 672.8000000000009,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "left",
+      "target": 216,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 184,
+      "position": {
+        "x": 210.6666666666667,
+        "y": 1708.6666666666747,
+        "depth": 673.2666666666674,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    },
+    {
+      "direction": "down",
+      "target": 1824,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 886,
+      "position": {
+        "x": 206.00000000000006,
+        "y": 1830.00000000001,
+        "depth": 685.400000000001,
+        "visible": true
+      },
+      "roofInside": false,
+      "roofState": "visible",
+      "footstepCount": 0
+    }
+  ],
+  "beforeFootsteps": {
+    "surfaceMarkerCount": 368,
+    "activeCount": 0,
+    "visuals": []
+  },
+  "roofInside": {
+    "concert": {
+      "group": "concert",
+      "state": "visible",
+      "visible": true,
+      "alpha": 1,
+      "durationMs": 300
+    },
+    "factory": {
+      "group": "factory",
+      "state": "faded",
+      "visible": true,
+      "alpha": 0,
+      "durationMs": 300
+    },
+    "factoryInside": true,
+    "tweenActive": false,
+    "layerAlphas": {
+      "roof_concert@0_0": 1,
+      "roof_concert2@0_0": 1,
+      "roof_concert@1_0": 1,
+      "roof_factory@0_0": 0,
+      "roof_concert2@1_0": 1,
+      "roof_concert@3_0": 1,
+      "roof_factory2@0_0": 0,
+      "roof_factory@1_0": 0,
+      "roof_concert2@3_0": 1,
+      "roof_concert@2_0": 1,
+      "roof_factory2@1_0": 0,
+      "roof_factory@3_0": 0,
+      "roof_concert2@2_0": 1,
+      "roof_factory2@3_0": 0,
+      "roof_factory@2_0": 0,
+      "roof_concert@0_1": 1,
+      "roof_factory2@2_0": 0,
+      "roof_concert2@0_1": 1,
+      "roof_factory@0_1": 0,
+      "roof_factory2@0_1": 0,
+      "roof_concert@1_1": 1,
+      "roof_concert2@1_1": 1,
+      "roof_concert@2_1": 1,
+      "roof_factory@1_1": 0,
+      "roof_concert2@2_1": 1,
+      "roof_factory2@1_1": 0,
+      "roof_factory@2_1": 0,
+      "roof_concert@3_1": 1,
+      "roof_factory2@2_1": 0,
+      "roof_concert2@3_1": 1,
+      "roof_concert@0_2": 1,
+      "roof_factory@3_1": 0,
+      "roof_concert2@0_2": 1,
+      "roof_concert@1_2": 1,
+      "roof_factory2@3_1": 0,
+      "roof_factory@0_2": 0,
+      "roof_concert2@1_2": 1,
+      "roof_factory2@0_2": 0,
+      "roof_factory@1_2": 0,
+      "roof_factory2@1_2": 0,
+      "roof_concert@2_2": 1,
+      "roof_concert2@2_2": 1,
+      "roof_concert@3_2": 1,
+      "roof_factory@2_2": 0,
+      "roof_concert2@3_2": 1,
+      "roof_factory2@2_2": 0,
+      "roof_factory@3_2": 0,
+      "roof_factory2@3_2": 0,
+      "roof_concert@0_3": 1,
+      "roof_concert2@0_3": 1,
+      "roof_factory@0_3": 0,
+      "roof_factory2@0_3": 0,
+      "roof_concert@1_3": 1,
+      "roof_concert2@1_3": 1,
+      "roof_factory@1_3": 0,
+      "roof_factory2@1_3": 0,
+      "roof_concert@2_3": 1,
+      "roof_concert2@2_3": 1,
+      "roof_factory@2_3": 0,
+      "roof_factory2@2_3": 0,
+      "roof_concert@3_3": 1,
+      "roof_concert2@3_3": 1,
+      "roof_factory@3_3": 0,
+      "roof_factory2@3_3": 0,
+      "roof_concert@4_1": 1,
+      "roof_concert2@4_1": 1,
+      "roof_factory@4_1": 0,
+      "roof_factory2@4_1": 0,
+      "roof_concert@4_2": 1,
+      "roof_concert2@4_2": 1,
+      "roof_factory@4_2": 0,
+      "roof_factory2@4_2": 0,
+      "roof_concert@4_3": 1,
+      "roof_concert2@4_3": 1,
+      "roof_factory@4_3": 0,
+      "roof_factory2@4_3": 0,
+      "roof_concert@0_4": 1,
+      "roof_concert2@0_4": 1,
+      "roof_factory@0_4": 0,
+      "roof_factory2@0_4": 0,
+      "roof_concert@1_4": 1,
+      "roof_concert2@1_4": 1,
+      "roof_factory@1_4": 0,
+      "roof_factory2@1_4": 0,
+      "roof_concert@2_4": 1,
+      "roof_concert2@2_4": 1,
+      "roof_factory@2_4": 0,
+      "roof_factory2@2_4": 0,
+      "roof_concert@3_4": 1,
+      "roof_concert2@3_4": 1,
+      "roof_factory@3_4": 0,
+      "roof_factory2@3_4": 0,
+      "roof_concert@4_4": 1,
+      "roof_concert2@4_4": 1,
+      "roof_factory@4_4": 0,
+      "roof_factory2@4_4": 0
+    }
+  },
+  "roofAfter": {
+    "concert": {
+      "group": "concert",
+      "state": "visible",
+      "visible": true,
+      "alpha": 1,
+      "durationMs": 300
+    },
+    "factory": {
+      "group": "factory",
+      "state": "visible",
+      "visible": true,
+      "alpha": 1,
+      "durationMs": 300
+    },
+    "factoryInside": false,
+    "tweenActive": false,
+    "layerAlphas": {
+      "roof_concert@0_1": 1,
+      "roof_concert2@0_1": 1,
+      "roof_factory@0_1": 1,
+      "roof_factory2@0_1": 1,
+      "roof_concert@1_1": 1,
+      "roof_concert2@1_1": 1,
+      "roof_concert@2_1": 1,
+      "roof_factory@1_1": 1,
+      "roof_concert2@2_1": 1,
+      "roof_factory2@1_1": 1,
+      "roof_factory@2_1": 1,
+      "roof_concert@3_1": 1,
+      "roof_factory2@2_1": 1,
+      "roof_concert2@3_1": 1,
+      "roof_concert@0_2": 1,
+      "roof_factory@3_1": 1,
+      "roof_concert2@0_2": 1,
+      "roof_concert@1_2": 1,
+      "roof_factory2@3_1": 1,
+      "roof_factory@0_2": 1,
+      "roof_concert2@1_2": 1,
+      "roof_factory2@0_2": 1,
+      "roof_factory@1_2": 1,
+      "roof_factory2@1_2": 1,
+      "roof_concert@2_2": 1,
+      "roof_concert2@2_2": 1,
+      "roof_concert@3_2": 1,
+      "roof_factory@2_2": 1,
+      "roof_concert2@3_2": 1,
+      "roof_factory2@2_2": 1,
+      "roof_factory@3_2": 1,
+      "roof_factory2@3_2": 1,
+      "roof_concert@0_3": 1,
+      "roof_concert2@0_3": 1,
+      "roof_factory@0_3": 1,
+      "roof_factory2@0_3": 1,
+      "roof_concert@1_3": 1,
+      "roof_concert2@1_3": 1,
+      "roof_factory@1_3": 1,
+      "roof_factory2@1_3": 1,
+      "roof_concert@2_3": 1,
+      "roof_concert2@2_3": 1,
+      "roof_factory@2_3": 1,
+      "roof_factory2@2_3": 1,
+      "roof_concert@3_3": 1,
+      "roof_concert2@3_3": 1,
+      "roof_factory@3_3": 1,
+      "roof_factory2@3_3": 1,
+      "roof_concert@0_4": 1,
+      "roof_concert2@0_4": 1,
+      "roof_factory@0_4": 1,
+      "roof_factory2@0_4": 1,
+      "roof_concert@1_4": 1,
+      "roof_concert2@1_4": 1,
+      "roof_factory@1_4": 1,
+      "roof_factory2@1_4": 1,
+      "roof_concert@2_4": 1,
+      "roof_concert2@2_4": 1,
+      "roof_factory@2_4": 1,
+      "roof_factory2@2_4": 1,
+      "roof_concert@3_4": 1,
+      "roof_concert2@3_4": 1,
+      "roof_factory@3_4": 1,
+      "roof_factory2@3_4": 1,
+      "roof_concert@4_1": 1,
+      "roof_concert2@4_1": 1,
+      "roof_factory@4_1": 1,
+      "roof_factory2@4_1": 1,
+      "roof_concert@4_2": 1,
+      "roof_concert2@4_2": 1,
+      "roof_factory@4_2": 1,
+      "roof_factory2@4_2": 1,
+      "roof_concert@4_3": 1,
+      "roof_concert2@4_3": 1,
+      "roof_factory@4_3": 1,
+      "roof_factory2@4_3": 1,
+      "roof_concert@4_4": 1
+    }
+  },
+  "footprints": {
+    "surfaceMarkerCount": 368,
+    "activeCount": 5,
+    "visuals": [
+      {
+        "x": 275.99999999999994,
+        "y": 1844.6666666666767,
+        "alpha": 0.6,
+        "depth": 450,
+        "sourceChunk": "0,4"
+      },
+      {
+        "x": 290,
+        "y": 1844.6666666666767,
+        "alpha": 0.6,
+        "depth": 450,
+        "sourceChunk": "0,4"
+      },
+      {
+        "x": 304.00000000000006,
+        "y": 1844.6666666666767,
+        "alpha": 0.6,
+        "depth": 450,
+        "sourceChunk": "0,4"
+      },
+      {
+        "x": 318.0000000000001,
+        "y": 1844.6666666666767,
+        "alpha": 0.6,
+        "depth": 450,
+        "sourceChunk": "0,4"
+      },
+      {
+        "x": 332.00000000000017,
+        "y": 1844.6666666666767,
+        "alpha": 0.6,
+        "depth": 450,
+        "sourceChunk": "0,4"
+      }
+    ]
+  },
+  "particles3Diagnostics": 35,
+  "lifecycle": {
+    "trainColliderActive": false,
+    "trainBlockingCellCount": 0,
+    "trainSpriteActive": false,
+    "trainCollisionShapeActive": false,
+    "sprayerSpriteCount": 0,
+    "smokeEmitterActive": false,
+    "footstepActiveCount": 0,
+    "factoryRoofTweenActive": false,
+    "mapHudHidden": true,
+    "mapRootHidden": true,
+    "mapLeaseActive": false,
+    "sideFailures": [],
+    "physicsColliderCount": 0
+  },
+  "screenshots": {
+    "outside": null,
+    "inside": null,
+    "after": null,
+    "footsteps": null
+  },
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}

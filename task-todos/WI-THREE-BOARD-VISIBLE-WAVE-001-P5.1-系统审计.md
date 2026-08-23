@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-systemic-audit
-status: audit-complete-repair-plan-accepted
+status: repair-auto-verified-awaiting-repeat-human-acceptance
 issue-class: systemic-failure
 candidate-commit: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
 candidate-tree: 657101daa0419409ea046a3716badd9d6fd57a61
@@ -141,3 +141,5 @@ Human已选择**方案A：完整证据补救**。R1–R7已实施并完成自动
 **代价与风险**：C1会触及CHUNK/WORLD/LAYER调度和collider清理，属MEDIUM风险，必须保留原子收敛和shutdown；C2为LOW/MEDIUM呈现层改动，风险是玩家被train正确遮住的时间过长。两包均不恢复111秒序列、不实现particles3/69360、不改sample/路线/scale/物理FPS。
 
 Human在结构化Gate选择**`实施C1+C2 (Recommended)`**。方案状态从`proposed`转为`accepted`；实施授权为`DEC-P5.1-R7-REPAIR-001`。
+
+C1+C2已由integration `54c0e29`实现并完成自动/双视口production回归；量化结果见[C1+C2收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-C1-C2-收据.md)。当前只等待Human复验，不自动关闭D-PERF-02/D-TRAIN-02。

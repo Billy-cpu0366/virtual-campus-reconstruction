@@ -1,0 +1,169 @@
+{
+  "url": "http://127.0.0.1:4237/?c1c2-final-rerun=visual",
+  "build": "test-hooks",
+  "sampleDurationMs": 2200,
+  "hookTypes": {
+    "debug": "function",
+    "entry": "object"
+  },
+  "entryChunkRelease": {
+    "cameraStableAtMs": 3053,
+    "lockReleasedAtMs": 3053,
+    "chunksSettledAtMs": 5849,
+    "playingAtMs": 5018,
+    "settledBeforePlaying": false,
+    "cleanupSettledAfterPlayingMs": 831,
+    "milestones": [
+      {
+        "elapsedMs": 24,
+        "appState": "ENTERING_GAME",
+        "cameraStable": false,
+        "lock": 25,
+        "targets": 25,
+        "rendered": 25,
+        "key": "ENTERING_GAME:false:25:25:25"
+      },
+      {
+        "elapsedMs": 3053,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 25,
+        "key": "ENTERING_GAME:true:0:15:25"
+      },
+      {
+        "elapsedMs": 3349,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 24,
+        "key": "ENTERING_GAME:true:0:15:24"
+      },
+      {
+        "elapsedMs": 3650,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 23,
+        "key": "ENTERING_GAME:true:0:15:23"
+      },
+      {
+        "elapsedMs": 3916,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 22,
+        "key": "ENTERING_GAME:true:0:15:22"
+      },
+      {
+        "elapsedMs": 4151,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 21,
+        "key": "ENTERING_GAME:true:0:15:21"
+      },
+      {
+        "elapsedMs": 4449,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 20,
+        "key": "ENTERING_GAME:true:0:15:20"
+      },
+      {
+        "elapsedMs": 4719,
+        "appState": "ENTERING_GAME",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 19,
+        "key": "ENTERING_GAME:true:0:15:19"
+      },
+      {
+        "elapsedMs": 5018,
+        "appState": "PLAYING",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 18,
+        "key": "PLAYING:true:0:15:18"
+      },
+      {
+        "elapsedMs": 5283,
+        "appState": "PLAYING",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 17,
+        "key": "PLAYING:true:0:15:17"
+      },
+      {
+        "elapsedMs": 5549,
+        "appState": "PLAYING",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 16,
+        "key": "PLAYING:true:0:15:16"
+      },
+      {
+        "elapsedMs": 5849,
+        "appState": "PLAYING",
+        "cameraStable": true,
+        "lock": 0,
+        "targets": 15,
+        "rendered": 15,
+        "key": "PLAYING:true:0:15:15"
+      }
+    ]
+  },
+  "frames": 133,
+  "frameTiming": {
+    "maximumMs": 16.80000000000109,
+    "over34Ms": 0,
+    "over50Ms": 0
+  },
+  "body": {
+    "start": 1088,
+    "end": 1396.000000000005,
+    "zeroDeltaFrames": 66,
+    "movingFrames": 66,
+    "movingRatio": 0.5,
+    "medianMovingDelta": 4.6666666666667425,
+    "maximumMovingDelta": 4.6666666666667425
+  },
+  "visual": {
+    "start": 1088,
+    "end": 1388.988324000005,
+    "zeroDeltaFrames": 3,
+    "movingFrames": 129,
+    "movingRatio": 0.9772727272727273,
+    "medianMovingDelta": 2.3309976643286063,
+    "maximumMovingDelta": 2.361417407999852
+  },
+  "camera": {
+    "start": 848,
+    "end": 1148,
+    "zeroDeltaFrames": 3,
+    "movingFrames": 129,
+    "movingRatio": 0.9772727272727273,
+    "medianMovingDelta": 2,
+    "maximumMovingDelta": 3
+  },
+  "renderedRange": [
+    12,
+    15
+  ],
+  "runtimeEvents": {
+    "console": [],
+    "exceptions": []
+  },
+  "passed": true
+}

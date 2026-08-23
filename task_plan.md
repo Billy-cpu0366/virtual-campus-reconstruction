@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: batch-implement
+correction-phase: human-acceptance
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-c1-entry-cleanup-implementation
-current-gate: p5.1-c1-bounded-implementation
-gate-status: implementation-in-progress
+current-phase: p5.1-c1-c2-repeat-human-acceptance
+current-gate: p5.1-c1-c2-integrated-visual-acceptance
+gate-status: awaiting-human
 authorization-ref: DEC-P5.1-R7-REPAIR-001
 preauthorized-next-work-item: none
-next-phase: p5.1-c2-train-occlusion-implementation
+next-phase: p5.1-close-or-reopen-from-human-result
 updated: 2026-08-23
 ---
 
@@ -24,9 +24,9 @@ updated: 2026-08-23
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：Human已接受C1+C2；当前实施C1入口cleanup预算与可见过渡隔离，随后连续实施C2 train世界深度并完整回归。
+- **当前阶段**：C1+C2已实现并完成自动/双视口production回归，最终candidate=`54c0e29`；当前等待Human实际设备复验开头流畅度与train遮挡观感。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
-- **当前授权**：按`DEC-P5.1-R7-REPAIR-001`实施C1+C2及对应测试/production门禁；垃圾堆不删碰撞，不改train路线/scale/5s+3s+9s/30 FPS。
+- **当前授权**：Human只做C1+C2整体验收；自动结果不代签。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -60,7 +60,7 @@ updated: 2026-08-23
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；Human已选择`实施C1+C2` | 连续实施入口cleanup预算、train世界深度、定点碰撞回归与完整production路径 | 删除原站一致碰撞；控制提前3秒；改train路线/scale；猜UNKNOWN；远端操作 | C1/C2全回归后再次Human整体验收 |
+| 三板块可见成果并行波 | `systemic-failure`；C1+C2自动/production PASS，candidate=`54c0e29` | Human复验开头是否仍卡、train 3–8秒遮挡、OUR ART通行与完整主路径 | 自动代签；新增功能；删除walls；改路线/scale/timing；远端操作 | Human通过则关闭；不通过回同一差异表 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -183,7 +183,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- R7失败审计结果：`OUR ART / OUR / OUR RULES`处walls数据与原站逐格哈希一致，碰撞只覆盖可见招牌基座和垃圾堆下半轮廓；入口每次在约3.05–4.76秒执行25→15块、210层卸载且控制到5秒；R4 train depth=520低于玩家532.8，视觉穿模已确认。`Q-LAYER-002/003`及particles3/69360继续UNKNOWN。
+- C1+C2结果：每4层让出rAF，READY 25块/525层最终收敛15/315，210 clears/52 yields；player 532.8 < train 533.4 < sprayer 542.4；OUR ART空白路面可走、可见实体阻挡。56文件/314测试、双build、双视口完整production和全部browser门禁PASS；`Q-LAYER-002/003`及particles3/69360继续UNKNOWN。
 
 ## 近期候选
 

@@ -1,11 +1,11 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-c1-c2-repair
-phase: p5.1-c1-entry-cleanup-implementation
-authorization: DEC-P5.1-SYSTEMIC-REPAIR-001
-code-baseline: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
-code-baseline-tree: 657101daa0419409ea046a3716badd9d6fd57a61
+status: awaiting-p5.1-c1-c2-repeat-human-acceptance
+phase: p5.1-c1-c2-repeat-human-acceptance
+authorization: DEC-P5.1-R7-REPAIR-001
+code-baseline: 54c0e2922ce3fc6b3ced78118db6b2b867b6eff7
+code-baseline-tree: 3b05f56ed58c0e0861eff3cbff6787ce93aa0290
 p0-plan-commit: 3f0fc0fcf4cbc6d906ab022f2b7061ab373e8f7e
 p0-plan-tree: 9c2e8b0b854a09d068c6de8e91ef9178f484c4f8
 worktree-baseline-status: verified-clean
@@ -78,7 +78,7 @@ updated: 2026-08-23
 
 ## P5.1系统审计
 
-完整差异表见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。R7失败审计已完成：指定垃圾堆区域未复现重构Bug；RC-6确认入口3–5秒cleanup/控制耦合，RC-7确认R4 train depth决策导致视觉穿模。Human已选择`实施C1+C2`；当前按`DEC-P5.1-R7-REPAIR-001`实施C1，随后连续C2与完整回归。
+完整差异表见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。C1+C2实现`54c0e29`及[自动收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-C1-C2-收据.md)已完成：入口cleanup预算、train世界深度、OUR ART定点碰撞和完整双视口production均PASS。当前等待Human复验；未签字前不关闭。
 
 ## 本轮成功标准
 
