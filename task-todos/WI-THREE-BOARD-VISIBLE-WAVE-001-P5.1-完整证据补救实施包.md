@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r6-visual-completeness
+status: active-r7-complete-regression
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -91,6 +91,8 @@ updated: 2026-08-23
 **允许**：对应系统卡已确认资源与接口；新资源必须来自当前公开镜像并纳入可复现流程。
 
 **检查**：桌面/移动不遮挡控制、guide/modal；不把静态截图或marker冒充动态消费者；内容和输入控制合同不回归。
+
+**R6收据（bounded verified）**：integration提交`32e7f74`；持续mini-map、big-map、11个真实位置点、动态玩家点和Visited已接入，About/Projects/Memo1–6复用现有内容链，CV/Contact/Tech保持禁用UNKNOWN。56文件/312测试、双build、完整browser门禁、1920×1080与375×667 production正常路径、性能及独立复核PASS。详见[R6收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R6-收据.md)。
 
 ### R7 门禁重建与完整回归
 

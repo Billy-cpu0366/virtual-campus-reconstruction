@@ -1,0 +1,181 @@
+{
+  "passed": true,
+  "url": "http://127.0.0.1:4237/?r6-final=test-hooks&collision-test=1&lifecycle-test=1&content-smoke=1&map-smoke=1787473674780",
+  "viewport": "browser-default",
+  "initial": {
+    "appState": "PLAYING",
+    "hudHidden": false,
+    "rootHidden": true,
+    "dialogHidden": true,
+    "contentHidden": true,
+    "contentTitle": "",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "visitedMini": 0,
+    "visitedBig": 0,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "activeId": "",
+    "hudRect": {
+      "left": 4,
+      "top": 232,
+      "right": 293,
+      "bottom": 437,
+      "width": 289,
+      "height": 205
+    },
+    "guideRect": {
+      "left": 16,
+      "top": 185,
+      "right": 506.375,
+      "bottom": 224,
+      "width": 490.375,
+      "height": 39
+    },
+    "joystickRect": null
+  },
+  "opened": {
+    "appState": "MODAL_OPEN",
+    "hudHidden": true,
+    "rootHidden": false,
+    "dialogHidden": false,
+    "contentHidden": true,
+    "contentTitle": "",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "visitedMini": 0,
+    "visitedBig": 0,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "activeId": "campus-map-close",
+    "hudRect": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0
+    },
+    "guideRect": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0
+    },
+    "joystickRect": null
+  },
+  "directContent": {
+    "appState": "MODAL_OPEN",
+    "hudHidden": true,
+    "rootHidden": true,
+    "dialogHidden": true,
+    "contentHidden": false,
+    "contentTitle": "I'm not a game developer",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "visitedMini": 0,
+    "visitedBig": 0,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "activeId": "content-close",
+    "hudRect": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0
+    },
+    "guideRect": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0
+    },
+    "joystickRect": null
+  },
+  "visited": {
+    "dom": {
+      "appState": "MODAL_OPEN",
+      "hudHidden": true,
+      "rootHidden": false,
+      "dialogHidden": false,
+      "contentHidden": true,
+      "contentTitle": "",
+      "miniMarkers": 11,
+      "bigMarkers": 11,
+      "disabledMarkers": 3,
+      "visitedMini": 1,
+      "visitedBig": 1,
+      "miniLoaded": true,
+      "bigLoaded": true,
+      "activeId": "campus-map-close",
+      "hudRect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "guideRect": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "joystickRect": null
+    },
+    "map": {
+      "hudEnabled": true,
+      "hudHidden": true,
+      "mapOpen": true,
+      "rootHidden": false,
+      "contentModalVisible": false,
+      "visitedMarkerIds": [
+        "memo6"
+      ],
+      "playerPercent": {
+        "x": 22.142857142857142,
+        "y": 7.857142857142857
+      },
+      "destroyed": false
+    }
+  },
+  "shutdown": {
+    "trainColliderActive": false,
+    "trainBlockingCellCount": 0,
+    "trainSpriteActive": false,
+    "trainCollisionShapeActive": false,
+    "sprayerSpriteCount": 0,
+    "smokeEmitterActive": false,
+    "footstepActiveCount": 0,
+    "factoryRoofTweenActive": false,
+    "mapHudHidden": true,
+    "mapRootHidden": true,
+    "mapLeaseActive": false,
+    "sideFailures": [],
+    "physicsColliderCount": 0
+  },
+  "screenshots": {
+    "hud": null,
+    "bigMap": null,
+    "directContent": null,
+    "visited": null
+  },
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}

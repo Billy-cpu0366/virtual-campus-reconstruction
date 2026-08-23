@@ -1,0 +1,28 @@
+{
+  "repairPackage": "P5.1-R6",
+  "verifiedAt": "2026-08-23T16:35:00+08:00",
+  "implementationCommit": "32e7f74506085c9d6ba23d7fa518e4f4fb2f9ec1",
+  "implementationTree": "0deb597c5563913a20eb21d4157c31b64bb0d648",
+  "checks": {
+    "unitTests": "PASS: 56 files / 312 tests",
+    "typecheck": "PASS",
+    "runtimeAssets": "PASS: mini-map, big-map, and map-holder source/runtime SHA-256 match",
+    "productionBuild": "PASS",
+    "testHooksBuild": "PASS",
+    "mapTestHooks": "PASS: 11 markers, 3 disabled UNKNOWN-content markers, map lease, Memo6 direct open, physical visited synchronization, teardown zero",
+    "productionDesktop1920x1080": "PASS: no hooks; persistent HUD, big-map, Memo6 navigation, backdrop close, and dynamic player point visually reviewed",
+    "productionMobile375x667": "PASS: no hooks; left-bottom map safe area, big-map, Memo6 navigation, and dynamic player point visually reviewed",
+    "productionPerformance": "PASS: entry p95 16.8ms; movement p95 16.7ms; >34ms frames 0; LoAF 0; long tasks 0; maximum input handler delay 1.5ms",
+    "browserProduction": "PASS: smoke, runtime-safety, visible-entry, performance, map desktop/mobile",
+    "browserTestHooks": "PASS: map, lifecycle, side, entry, chunk, layer, camera, collision, mobile-input, content, visual-smoothing, app-retry, roof-footsteps",
+    "diffCheck": "PASS: explicit R6 paths",
+    "independentVerifier": "PASS after exact FACT correction: Resume(CV) and sunburn/vortex preserved; target tests, typecheck, resources, lifecycle, hook isolation, and diff passed"
+  },
+  "boundaries": {
+    "enabledMapContent": ["about", "projects", "memo1", "memo2", "memo3", "memo4", "memo5", "memo6"],
+    "disabledUnknownContent": ["cv", "contact", "tech"],
+    "directMapVisitSemantics": "Opening content from the map does not forge a physical Zone visited receipt.",
+    "deferred": ["top menu parity", "mobile quick-actions parity", "CV full content", "Contact full content", "Technologies full content", "particles3/69360", "111-second camera sequence"],
+    "humanVisualGate": "still required after R7"
+  }
+}

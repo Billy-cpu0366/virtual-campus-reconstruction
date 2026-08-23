@@ -1,0 +1,190 @@
+{
+  "passed": true,
+  "url": "http://127.0.0.1:4237/?r6-final=mobile",
+  "viewport": {
+    "width": 375,
+    "height": 667
+  },
+  "initial": {
+    "appState": "PLAYING",
+    "hooks": {
+      "debug": "undefined",
+      "collision": "undefined",
+      "lifecycle": "undefined",
+      "content": "undefined"
+    },
+    "hudHidden": false,
+    "rootHidden": true,
+    "dialogHidden": true,
+    "guideHidden": false,
+    "contentHidden": true,
+    "contentTitle": "",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "miniPlayer": {
+      "left": "48.5714%",
+      "top": "13.5714%"
+    },
+    "hudRect": {
+      "left": 4,
+      "top": 547,
+      "right": 173,
+      "bottom": 667,
+      "width": 169,
+      "height": 120
+    },
+    "canvasRect": {
+      "left": 0,
+      "top": 0,
+      "right": 375,
+      "bottom": 667,
+      "width": 375,
+      "height": 667
+    }
+  },
+  "opened": {
+    "appState": "MODAL_OPEN",
+    "hooks": {
+      "debug": "undefined",
+      "collision": "undefined",
+      "lifecycle": "undefined",
+      "content": "undefined"
+    },
+    "hudHidden": true,
+    "rootHidden": false,
+    "dialogHidden": false,
+    "guideHidden": true,
+    "contentHidden": true,
+    "contentTitle": "",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "miniPlayer": {
+      "left": "48.5714%",
+      "top": "13.5714%"
+    },
+    "hudRect": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0
+    },
+    "canvasRect": {
+      "left": 0,
+      "top": 0,
+      "right": 375,
+      "bottom": 667,
+      "width": 375,
+      "height": 667
+    }
+  },
+  "content": {
+    "appState": "MODAL_OPEN",
+    "hooks": {
+      "debug": "undefined",
+      "collision": "undefined",
+      "lifecycle": "undefined",
+      "content": "undefined"
+    },
+    "hudHidden": true,
+    "rootHidden": true,
+    "dialogHidden": true,
+    "guideHidden": true,
+    "contentHidden": false,
+    "contentTitle": "I'm not a game developer",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "miniPlayer": {
+      "left": "48.5714%",
+      "top": "13.5714%"
+    },
+    "hudRect": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0
+    },
+    "canvasRect": {
+      "left": 0,
+      "top": 0,
+      "right": 375,
+      "bottom": 667,
+      "width": 375,
+      "height": 667
+    }
+  },
+  "movement": {
+    "before": {
+      "left": "48.5714%",
+      "top": "13.5714%"
+    },
+    "after": {
+      "left": "52.7381%",
+      "top": "13.5714%"
+    }
+  },
+  "closed": {
+    "appState": "PLAYING",
+    "hooks": {
+      "debug": "undefined",
+      "collision": "undefined",
+      "lifecycle": "undefined",
+      "content": "undefined"
+    },
+    "hudHidden": false,
+    "rootHidden": true,
+    "dialogHidden": true,
+    "guideHidden": false,
+    "contentHidden": true,
+    "contentTitle": "",
+    "miniMarkers": 11,
+    "bigMarkers": 11,
+    "disabledMarkers": 3,
+    "miniLoaded": true,
+    "bigLoaded": true,
+    "miniPlayer": {
+      "left": "52.7381%",
+      "top": "13.5714%"
+    },
+    "hudRect": {
+      "left": 4,
+      "top": 547,
+      "right": 173,
+      "bottom": 667,
+      "width": 169,
+      "height": 120
+    },
+    "canvasRect": {
+      "left": 0,
+      "top": 0,
+      "right": 375,
+      "bottom": 667,
+      "width": 375,
+      "height": 667
+    }
+  },
+  "screenshots": {
+    "hud": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r6/final/production-mobile/mobile-hud.png",
+    "bigMap": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r6/final/production-mobile/mobile-big-map.png",
+    "content": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r6/final/production-mobile/mobile-memo6-direct.png",
+    "moved": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r6/final/production-mobile/mobile-hud-moved.png"
+  },
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}
