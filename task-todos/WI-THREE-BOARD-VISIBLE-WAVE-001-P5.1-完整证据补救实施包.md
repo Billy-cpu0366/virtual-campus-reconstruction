@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: human-rejected-repair-plan-gate
+status: active-c1-c2-repair
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -102,7 +102,7 @@ updated: 2026-08-23
 
 **完整检查**：typecheck、全测试、production/test-hooks build、现有browser gates、新正常路径视觉/性能门禁、状态一致性、CRLF-aware diff、独立验证。全部通过后才进入Human整体验收。
 
-**R7收据（auto verified / Human rejected）**：gate提交`1e24fd1`；双视口production、312测试与全部自动门禁PASS，但Human实际验收FAIL。后续审计判定：指定垃圾堆碰撞与原站walls/可见轮廓一致，未复现Bug；入口3–5秒固定执行210层卸载并保持控制锁；R4 train depth=520低于玩家532.8直接造成视觉穿模。当前C1+C2方案待Human接受，不自动关闭、不先补丁。
+**R7收据（auto verified / Human rejected）**：gate提交`1e24fd1`；双视口production、312测试与全部自动门禁PASS，但Human实际验收FAIL。后续审计判定：指定垃圾堆碰撞与原站walls/可见轮廓一致，未复现Bug；入口3–5秒固定执行210层卸载并保持控制锁；R4 train depth=520低于玩家532.8直接造成视觉穿模。Human已选择`实施C1+C2`，当前连续实施，不自动关闭。
 
 ## 停止条件
 

@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-systemic-audit
-status: audit-complete-awaiting-repair-plan-gate
+status: audit-complete-repair-plan-accepted
 issue-class: systemic-failure
 candidate-commit: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
 candidate-tree: 657101daa0419409ea046a3716badd9d6fd57a61
@@ -131,7 +131,7 @@ Human已选择**方案A：完整证据补救**。R1–R7已实施并完成自动
 - **confirmed**：R4为让玩家和sprayer可辨识，把train固定depth降到520；出生玩家为532.8，因此重叠时必然画在车厢前。
 - **不是**：不是Human报告的物理穿越，也没有证据指向train路线/scale/5s+3s+9s FACT错误。
 
-### 推荐方案：C1 + C2（proposed，未接受）
+### 推荐方案：C1 + C2（accepted）
 
 1. **C1入口cleanup隔离**：保留已接受的3秒camera、5秒train到站和5秒前控制锁，不改30 FPS；`cameraStable`只结束相机，不再在同一可见帧无预算拆210层。为offscreen chunk teardown增加明确每帧时间/层数预算并记录mutation receipt，要求点击Play后0–5秒production无>34ms帧/LoAF且25→15最终仍收敛、无chunk reveal/旧collider。
 2. **C2 train世界深度**：不回到会盖住所有sprayer的固定1001；按train世界y使用同一depth公式，使train约533.4，高于出生玩家532.8、低于sprayer约542.4。保持路线、scale、5s/3s/9s、碰撞带不变；用3/5/8秒production截图证明玩家不再贴在车厢前且sprayer仍可见。
@@ -139,3 +139,5 @@ Human已选择**方案A：完整证据补救**。R1–R7已实施并完成自动
 4. **回归**：重跑R7双视口完整production、入口0–5秒性能与mutation收据、train 3/5/8秒、碰撞/生命周期/Retry/shutdown，最后再次Human整体验收。
 
 **代价与风险**：C1会触及CHUNK/WORLD/LAYER调度和collider清理，属MEDIUM风险，必须保留原子收敛和shutdown；C2为LOW/MEDIUM呈现层改动，风险是玩家被train正确遮住的时间过长。两包均不恢复111秒序列、不实现particles3/69360、不改sample/路线/scale/物理FPS。
+
+Human在结构化Gate选择**`实施C1+C2 (Recommended)`**。方案状态从`proposed`转为`accepted`；实施授权为`DEC-P5.1-R7-REPAIR-001`。

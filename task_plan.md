@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-plan-gate
+correction-phase: batch-implement
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-human-rejection-repair-plan-gate
-current-gate: p5.1-c1-entry-c2-train-repair-plan
-gate-status: awaiting-human
-authorization-ref: DEC-P5.1-SYSTEMIC-REPAIR-001
+current-phase: p5.1-c1-entry-cleanup-implementation
+current-gate: p5.1-c1-bounded-implementation
+gate-status: implementation-in-progress
+authorization-ref: DEC-P5.1-R7-REPAIR-001
 preauthorized-next-work-item: none
-next-phase: p5.1-c1-c2-bounded-implementation
+next-phase: p5.1-c2-train-occlusion-implementation
 updated: 2026-08-23
 ---
 
@@ -24,9 +24,9 @@ updated: 2026-08-23
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：R7失败审计已收敛；candidate=`1e24fd1`保持冻结，当前等待Human一次性确认C1入口cleanup隔离与C2火车遮挡修复方案。
+- **当前阶段**：Human已接受C1+C2；当前实施C1入口cleanup预算与可见过渡隔离，随后连续实施C2 train世界深度并完整回归。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
-- **当前授权**：只审C1/C2方案取舍；Human接受前禁止修改产品代码。垃圾堆指定区域当前判为原站一致的可见障碍碰撞，不纳入代码修复。
+- **当前授权**：按`DEC-P5.1-R7-REPAIR-001`实施C1+C2及对应测试/production门禁；垃圾堆不删碰撞，不改train路线/scale/5s+3s+9s/30 FPS。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -60,7 +60,7 @@ updated: 2026-08-23
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；审计完成：垃圾堆未复现Bug，RC-6/RC-7已收敛 | Human选择C1入口cleanup隔离+5秒控制边界、C2按世界深度遮挡train | 未确认先实现；删除原站一致碰撞；改train路线/scale；猜UNKNOWN；远端操作 | 接受后连续实施C1/C2并重跑完整production路径 |
+| 三板块可见成果并行波 | `systemic-failure`；Human已选择`实施C1+C2` | 连续实施入口cleanup预算、train世界深度、定点碰撞回归与完整production路径 | 删除原站一致碰撞；控制提前3秒；改train路线/scale；猜UNKNOWN；远端操作 | C1/C2全回归后再次Human整体验收 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
