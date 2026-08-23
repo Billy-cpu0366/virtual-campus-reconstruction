@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-HANDOFF-V1-001
-status: active-windows-readonly-audit-request-ready
+status: active-reconciliation-plan-gate
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-23
@@ -17,21 +17,15 @@ protocol-commit: 0a105dc
 
 ## 当前阶段
 
-`windows-readonly-audit-request-ready`
+`reconciliation-plan-human-gate`
 
-Human 于 2026-08-23 明确要求推进首次历史对齐，并把结果交给 Windows 终端 Pi 处理。可整段发送的请求已落盘到 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-REQUEST.md`。本轮只授权 Windows 正式仓库只读审计和一次 `fetch origin --prune`；不授权处理 dirty、reconciliation、commit、push、PR、merge或修改`main`。
+Human 已转交 Windows 外部 Pi 的完整 `AUDIT-RESULT-V1`，原始结构化收据保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-RESULT-V1.md`，SHA-256 为 `21b76920f6a1928a608dc94226a4b9b341322fba090b64329d5fecfe75b262da`。该收据属于 `human-relayed / external-runtime-unverified-by-wsl`，不能冒充 WSL 独立验证。
 
-此前 WIP 快照目标仍只允许非保护 WIP 分支，不代表产品通过；在外部审计收据返回并经 Human 接受无损方案前，不恢复实际交付。
+报告结论：canonical remote 精确匹配且唯一一次 fetch 成功；Windows local main 与 origin/main 为 ahead 18 / behind 4，存在 3 个原因未明的 tracked `.M`、1 个 untracked 文件，以及 8 个双方共同修改的权威路径。外部 Pi 已按 Gate 停止，未处理 dirty、reconciliation、commit 或 push。
 
-外部 Pi 已报告：
+WSL 本地对象核对保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WSL-CORRELATION-V1.md`：Windows local HEAD 对象缺失；reported origin/main 对象存在，但与当前 WSL HEAD 无共同 merge-base且根提交不同。因此不能直接 fast-forward、普通 merge或假定 Windows 18 个本地提交已被当前 WSL 吸收。
 
-- 正式路径正确并读取 `AGENTS.md`；
-- 当前分支 `main`；
-- 3个 tracked 文档修改及未跟踪 `task-todos/`；
-- fetch 前远端引用显示 ahead 18 / behind 4；
-- 未执行 fetch、复制、应用、测试、commit 或 push。
-
-以上只作为待复核输入；fetch 后哈希、分叉和 dirty 明细仍为 `UNKNOWN`。
+此前 WIP 快照目标仍只允许非保护 WIP 分支，不代表产品通过；Human 接受 preservation/reconciliation 方案前，不恢复实际交付。
 
 ## alpha.3 Adapter 接入
 
@@ -48,8 +42,8 @@ adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才
 ## 允许
 
 - 外部 Pi 只读检查路径、origin、status、diff、未跟踪文件、提交图和 cherry 等价；
-- `git fetch origin --prune`；
-- 生成短审计报告和 SHA-256；
+- 已消费的一次 `git fetch origin --prune` 仅作为审计历史；未取得新授权前不得再次 fetch；
+- 生成和登记审计报告、SHA-256 与 WSL 本地对象相关性；
 - 项目侧维护本协议、任务卡、决策、计划和日志。
 
 ## 禁止
@@ -64,9 +58,7 @@ adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才
 
 ## 下一 Gate
 
-外部 Pi 按 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-REQUEST.md` 返回 `AUDIT-RESULT-V1`：正式 HEAD、origin/main、merge-base、ahead/behind、dirty tracked/untracked、local-only/remote-only、cherry 等价和潜在冲突。
-
-Main 根据收据提出无损保护与 reconciliation 方案；Human 接受后才进入首次对齐实现。
+Main 根据审计收据和 WSL 本地对象核对提出最小无损 preservation/reconciliation 方案；Human 接受后才生成下一份 Windows 执行包。未接受前，不授权复制 dirty、生成 bundle、写 WSL inbox、导入 refs、创建 worktree、merge、commit 或 push。
 
 ## 完成标准
 

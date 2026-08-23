@@ -45,7 +45,7 @@ Human：审查后确认推送
 
 ## 3. 一次性历史对齐
 
-当前 WSL 与 GitHub 尚未共享可靠交付基线，Windows 正式仓库又报告 dirty 和 main 分叉。因此 v1 首次启用必须先完成。Human 于 2026-08-23 已恢复第 1–4 步的 Windows 只读审计授权；外部执行请求固定在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-REQUEST.md`：
+当前 WSL 与 GitHub 尚未共享可靠交付基线，Windows 正式仓库又报告 dirty 和 main 分叉。因此 v1 首次启用必须先完成。Human 于 2026-08-23 恢复的第 1–4 步 Windows 只读审计授权已经消费；结果保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-RESULT-V1.md`。当前停在 reconciliation 方案 Human Gate，以下步骤仍是后续合同而非现行授权：
 
 1. 外部 Pi 完整读取正式仓库 `AGENTS.md`。
 2. 只读核对路径、canonical `origin`、分支、dirty 文件。
@@ -152,7 +152,8 @@ prepare-receipt.v1.json
 - `persisted`：本协议、决定记录和工作项状态已由提交 `0a105dc` 进入项目仓库。
 - `adapter-accepted`：Human 于 2026-08-23 接受 `03-执行层/git-handoff.adapter.v1.json` 的路径、refs、profiles、检查和固定 STOP；本行所在结果提交负责落盘。
 - `local-static-verified`：alpha.3 adapter runtime 解析、17 项 Package 测试、outbox ignore、状态一致性、diff 检查与最终独立复核 PASS；未运行 adapter commands 或真实外部流程。
-- `windows-audit-request-ready`：只读审计任务包已落盘；允许一次 `fetch origin --prune`，禁止仓库内容修改、reconciliation、commit 和 push，等待 `AUDIT-RESULT-V1`。
+- `windows-audit-received`：Human 已转交完整 `AUDIT-RESULT-V1`；报告称 canonical remote 匹配、唯一一次 fetch 成功、local main ahead 18 / behind 4，并保留 3 个 tracked `.M` 与 1 个 untracked。该结果是 `human-relayed`，未由 WSL 独立复核外部运行时。
+- `reconciliation-plan-gate`：WSL 已证明 current HEAD 与 reported origin/main 无共同 merge-base，且缺少 Windows local HEAD 对象；必须先经 Human 接受 preservation 方案，不能直接 merge 或推送。
 - `unverified`：尚未完成 Windows 正式仓库审计、首次 reconciliation、canonical bundle 入站、alpha.3 真实往返和远端 push。
 - 只有首次完整交付收据通过后，v1 才能标为 `verified` 并候选安装到 Windows 全局 Pi workflow。
 
