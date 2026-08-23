@@ -6,6 +6,8 @@ import {
   targetChunks,
   tilesetFirstGid,
   type CameraViewport,
+  type ChunkCoordinate,
+  type ChunkGeometry,
   type JsonLoader,
 } from "../src/chunk/index.js";
 import {
@@ -126,6 +128,9 @@ const INITIAL_TARGETS_STARTED_PROGRESS = 0.92;
 const INITIAL_TARGETS_READY_PROGRESS = 0.98;
 const CHUNK_UPDATE_INTERVAL_MS = 500;
 const CONTENT_UPDATE_INTERVAL_MS = 100;
+const LOGICAL_VIEWPORT_WIDTH = 480;
+const LOGICAL_VIEWPORT_HEIGHT = 270;
+const ENTRY_CORRIDOR_SAMPLES = 6;
 const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
 const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
   { markerId: "about", menuId: "about", x: 944, y: 768 },
@@ -150,6 +155,22 @@ const CAMERA_TEST_HOOK_START_OPTIONS: CameraRuntimeStartOptions = Object.freeze(
   ),
   returnDuration: 200,
 });
+function mergeChunkTargets(
+  ...groups: readonly (readonly ChunkCoordinate[])[]
+): readonly ChunkCoordinate[] {
+  const unique = new Map<string, ChunkCoordinate>();
+  for (const group of groups) {
+    for (const coordinate of group) {
+      unique.set(`${coordinate.x}_${coordinate.y}`, coordinate);
+    }
+  }
+  return Object.freeze(
+    [...unique.values()].sort(
+      (left, right) => left.y - right.y || left.x - right.x,
+    ),
+  );
+}
+
 const MOVEMENT_KEY_BY_CODE = new Map<string, keyof KeyState>([
   ["ArrowUp", "up"],
   ["KeyW", "up"],
@@ -233,6 +254,7 @@ export class CampusScene extends Phaser.Scene {
   private dataStore: ChunkDataStore | undefined;
   private dynamicWorldShutdown: Promise<void> | undefined;
   private worldSpec: WorldSpec | undefined;
+  private entryChunkTargetLock: readonly ChunkCoordinate[] | undefined;
   private chunkUpdateElapsed = CHUNK_UPDATE_INTERVAL_MS;
   private bridgeCheckFrames = 0;
   private bridge1DownVisible = true;
@@ -434,7 +456,15 @@ export class CampusScene extends Phaser.Scene {
       if (result.status === "failed" && !this.sceneDestroyed) {
         this.entryCallbacks.onError?.(result.error);
       }
-      if (result.status === "completed") this.maybeStartCameraTestTour();
+      if (result.status === "completed") {
+        this.entryChunkTargetLock = undefined;
+        void this.updateDynamicTargetsNow().catch((error: unknown) => {
+          if (!this.sceneDestroyed) {
+            console.error("入口分块屏障释放失败", error);
+          }
+        });
+        this.maybeStartCameraTestTour();
+      }
     });
     return run;
   }
@@ -776,6 +806,7 @@ export class CampusScene extends Phaser.Scene {
   private async performShutdown(): Promise<CampusSceneShutdownReceipt> {
     this.sceneDestroyed = true;
     this.sceneReady = false;
+    this.entryChunkTargetLock = undefined;
 
     this.entryRuntime?.shutdown();
     this.sprayerRuntime?.shutdown();
@@ -935,6 +966,7 @@ export class CampusScene extends Phaser.Scene {
     if (this.testHooksEnabled) {
       const debugHook = (): unknown => ({
         state: this.coordinator?.state,
+        entryChunkTargetLock: this.entryChunkTargetLock ?? [],
         rendererLayers: renderer.layers.size,
         markerRecords: renderer.markerRecords.length,
         particles3Diagnostics: renderer.particles3Diagnostics.length,
@@ -1036,6 +1068,11 @@ export class CampusScene extends Phaser.Scene {
         (window as any).__campusContentTest = contentTestHook;
       }
     }
+    const entryGeometry = this.coordinator.store.geometry;
+    if (entryGeometry === undefined) {
+      throw new Error("入口分块屏障缺少master geometry");
+    }
+    this.entryChunkTargetLock = this.createEntryChunkTargetLock(entryGeometry);
     this.entryCallbacks.onLoadProgress?.(INITIAL_TARGETS_STARTED_PROGRESS);
     await this.updateDynamicTargetsNow();
     if (this.sceneDestroyed || this.requiredLoadError !== undefined) return;
@@ -1388,6 +1425,32 @@ export class CampusScene extends Phaser.Scene {
     });
   }
 
+  private createEntryChunkTargetLock(
+    geometry: ChunkGeometry,
+  ): readonly ChunkCoordinate[] {
+    const targets: Array<readonly ChunkCoordinate[]> = [];
+    for (let index = 0; index <= ENTRY_CORRIDOR_SAMPLES; index += 1) {
+      const progress = index / ENTRY_CORRIDOR_SAMPLES;
+      const centerX = ENTRY_CAMERA_START.x + (SPAWN_X - ENTRY_CAMERA_START.x) * progress;
+      const centerY = ENTRY_CAMERA_START.y + (SPAWN_Y - ENTRY_CAMERA_START.y) * progress;
+      targets.push(
+        targetChunks(
+          SPAWN_X,
+          SPAWN_Y,
+          {
+            scrollX: centerX - LOGICAL_VIEWPORT_WIDTH / 2,
+            scrollY: centerY - LOGICAL_VIEWPORT_HEIGHT / 2,
+            width: LOGICAL_VIEWPORT_WIDTH,
+            height: LOGICAL_VIEWPORT_HEIGHT,
+            zoom: CAMERA_ZOOM,
+          },
+          geometry,
+        ),
+      );
+    }
+    return mergeChunkTargets(...targets);
+  }
+
   private async updateDynamicTargetsNow(): Promise<void> {
     const coordinator = this.coordinator;
     const geometry = coordinator?.store.geometry;
@@ -1415,8 +1478,21 @@ export class CampusScene extends Phaser.Scene {
       x: this.player.x,
       y: this.player.y,
     };
-    await coordinator.updateTargets(
-      targetChunks(playerPosition.x, playerPosition.y, viewport, geometry),
+    const currentTargets = targetChunks(
+      playerPosition.x,
+      playerPosition.y,
+      {
+        ...viewport,
+        width: LOGICAL_VIEWPORT_WIDTH,
+        height: LOGICAL_VIEWPORT_HEIGHT,
+      },
+      geometry,
     );
+    await coordinator.updateTargets(
+      this.entryChunkTargetLock === undefined
+        ? currentTargets
+        : mergeChunkTargets(currentTargets, this.entryChunkTargetLock),
+    );
+    await this.mutationScheduler.waitForIdle();
   }
 }

@@ -14,6 +14,7 @@ export class PhaserWorldMutationScheduler {
   #queue: PendingMutation[] = [];
   #frameRequested = false;
   #active: Promise<void> | undefined;
+  #idleWaiters: Array<() => void> = [];
   #destroyed = false;
 
   readonly schedule: ChunkMutationScheduler = (mutation) => {
@@ -36,12 +37,18 @@ export class PhaserWorldMutationScheduler {
     for (const item of pending) {
       item.resolve();
     }
+    this.#resolveIdleIfNeeded();
   }
 
-  async waitForActiveIdle(): Promise<void> {
-    while (this.#active !== undefined) {
-      await this.#active;
-    }
+  waitForIdle(): Promise<void> {
+    if (this.#isIdle()) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      this.#idleWaiters.push(resolve);
+    });
+  }
+
+  waitForActiveIdle(): Promise<void> {
+    return this.waitForIdle();
   }
 
   #requestFrame(): void {
@@ -58,10 +65,12 @@ export class PhaserWorldMutationScheduler {
       this.#frameRequested = false;
       const item = this.#queue.shift();
       if (item === undefined) {
+        this.#resolveIdleIfNeeded();
         return;
       }
       if (this.#destroyed) {
         item.resolve();
+        this.#resolveIdleIfNeeded();
         return;
       }
 
@@ -90,7 +99,22 @@ export class PhaserWorldMutationScheduler {
           this.#active = undefined;
         }
         this.#requestFrame();
+        this.#resolveIdleIfNeeded();
       });
     });
+  }
+
+  #isIdle(): boolean {
+    return (
+      this.#queue.length === 0 &&
+      !this.#frameRequested &&
+      this.#active === undefined
+    );
+  }
+
+  #resolveIdleIfNeeded(): void {
+    if (!this.#isIdle()) return;
+    const waiters = this.#idleWaiters.splice(0);
+    for (const resolve of waiters) resolve();
   }
 }

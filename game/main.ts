@@ -27,6 +27,9 @@ const LOGICAL_WORLD_WIDTH = 480;
 const LOGICAL_WORLD_HEIGHT = 270;
 
 interface PhaserGameLike {
+  readonly scale?: {
+    refresh(): void;
+  };
   destroy(removeCanvas?: boolean): void;
 }
 
@@ -104,6 +107,9 @@ const appUi = new DomAppUi({
   },
   viewport,
   focus,
+  onViewportChange: () => {
+    currentGeneration?.game?.scale?.refresh();
+  },
   optionalImages: [
     {
       image: asAppImageTarget("app-loading-image"),
@@ -148,7 +154,9 @@ function createSceneCallbacks(
       if (isCurrent(generation)) callbacks.onProgress(ratio);
     },
     onReady: () => {
-      if (isCurrent(generation)) callbacks.onReady();
+      if (!isCurrent(generation)) return;
+      currentGeneration?.game?.scale?.refresh();
+      callbacks.onReady();
     },
     onEntryStatus: (snapshot) => {
       if (isCurrent(generation)) latestEntrySnapshot = snapshot;

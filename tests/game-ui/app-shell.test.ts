@@ -118,6 +118,7 @@ describe("DomAppUi", () => {
     const viewport = new FakeViewport();
     const calls: string[] = [];
     const focused: DomAppTarget[] = [];
+    let viewportChanges = 0;
     const ui = new DomAppUi({
       elements,
       viewport,
@@ -127,6 +128,9 @@ describe("DomAppUi", () => {
       },
       onPlay: () => calls.push("play"),
       onRetry: () => calls.push("retry"),
+      onViewportChange: () => {
+        viewportChanges += 1;
+      },
     });
 
     ui.renderReady();
@@ -149,6 +153,7 @@ describe("DomAppUi", () => {
     expect(elements.root.style.padding).toBe("16px");
     viewport.resize(1024, 700);
     expect(elements.root.style.padding).toBe("24px");
+    expect(viewportChanges).toBe(2);
   });
 
   it("keeps optional image layout space and exposes a text fallback", () => {

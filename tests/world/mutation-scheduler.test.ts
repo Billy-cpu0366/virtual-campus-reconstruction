@@ -51,6 +51,44 @@ describe("PhaserWorldMutationScheduler 生命周期", () => {
     vi.unstubAllGlobals();
   });
 
+  it("waitForIdle 同时等待排队和 active mutation", async () => {
+    const frames: Array<() => void> = [];
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      (callback: () => void) => {
+        frames.push(callback);
+        return frames.length;
+      },
+    );
+
+    const scheduler = new PhaserWorldMutationScheduler();
+    const calls: string[] = [];
+    const first = scheduler.schedule(() => {
+      calls.push("first");
+    });
+    const second = scheduler.schedule(() => {
+      calls.push("second");
+    });
+    let idle = false;
+    const idlePromise = scheduler.waitForIdle().then(() => {
+      idle = true;
+    });
+
+    expect(idle).toBe(false);
+    frames.shift()?.();
+    await first;
+    await vi.waitFor(() => expect(frames.length).toBe(1));
+    expect(idle).toBe(false);
+    frames.shift()?.();
+    await second;
+    await idlePromise;
+    expect(calls).toEqual(["first", "second"]);
+    expect(idle).toBe(true);
+
+    scheduler.destroy();
+    vi.unstubAllGlobals();
+  });
+
   it("active mutation rejection 可观察且 idle 等待不再产生 rejection", async () => {
     const frames: Array<() => void> = [];
     vi.stubGlobal(

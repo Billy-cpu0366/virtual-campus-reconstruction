@@ -62,6 +62,7 @@ export interface DomAppUiOptions {
   readonly optionalImages?: readonly DomAppOptionalImage[];
   readonly onPlay?: () => void;
   readonly onRetry?: () => void;
+  readonly onViewportChange?: () => void;
 }
 
 export type DomAppView =
@@ -110,6 +111,7 @@ export class DomAppUi {
   private readonly optionalImages: readonly DomAppOptionalImage[];
   private readonly onPlay: (() => void) | undefined;
   private readonly onRetry: (() => void) | undefined;
+  private readonly onViewportChange: (() => void) | undefined;
   private readonly imageListeners: Array<{
     readonly image: DomAppImageTarget;
     readonly listener: (event: unknown) => void;
@@ -141,6 +143,7 @@ export class DomAppUi {
   private readonly resizeListener = (): void => {
     if (this.destroyed) return;
     this.applyViewport();
+    this.notifyViewportChange();
   };
 
   constructor(options: DomAppUiOptions) {
@@ -150,6 +153,7 @@ export class DomAppUi {
     this.optionalImages = options.optionalImages ?? [];
     this.onPlay = options.onPlay;
     this.onRetry = options.onRetry;
+    this.onViewportChange = options.onViewportChange;
 
     try {
       this.bindActions();
@@ -337,6 +341,14 @@ export class DomAppUi {
       size.width <= MOBILE_WIDTH ? "16px" : "24px",
     );
     this.setStyle(root, "maxWidth", "100vw");
+  }
+
+  private notifyViewportChange(): void {
+    try {
+      this.onViewportChange?.();
+    } catch {
+      // The game scale owner reports its own failure; DOM sizing remains usable.
+    }
   }
 
   private focusTarget(target: DomAppTarget | undefined): void {
