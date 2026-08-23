@@ -44,6 +44,11 @@ import {
   type PhaserPlayerVisualLike,
 } from "./PhaserPlayerRuntime.js";
 import {
+  PhaserPlayerVisualInterpolator,
+  type PhaserPlayerVisualSceneLike,
+  type PhaserPlayerVisualSourceLike,
+} from "./PhaserPlayerVisualInterpolator.js";
+import {
   PhaserCameraRuntime,
   type PhaserCameraSceneLike,
 } from "./PhaserCameraRuntime.js";
@@ -217,6 +222,7 @@ async function fetchJson(
 export class CampusScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
   private playerRuntime: PhaserPlayerRuntime | undefined;
+  private playerVisualInterpolator: PhaserPlayerVisualInterpolator | undefined;
   private cameraRuntime: PhaserCameraRuntime | undefined;
   private cameraRunResult: CameraRunResult | undefined;
   private pendingCameraViewport: CameraViewport | undefined;
@@ -445,7 +451,10 @@ export class CampusScene extends Phaser.Scene {
       guide: {
         publish: (target) => this.entryCallbacks.onGuide?.(target),
       },
-      onStatus: (snapshot) => this.entryCallbacks.onEntryStatus?.(snapshot),
+      onStatus: (snapshot) => {
+        if (snapshot.cameraStable) this.releaseEntryChunkTargetLock();
+        this.entryCallbacks.onEntryStatus?.(snapshot);
+      },
     });
     this.entryCameraRuntime = cameraRuntime;
     this.entryTrainAdapter = trainAdapter;
@@ -456,15 +465,7 @@ export class CampusScene extends Phaser.Scene {
       if (result.status === "failed" && !this.sceneDestroyed) {
         this.entryCallbacks.onError?.(result.error);
       }
-      if (result.status === "completed") {
-        this.entryChunkTargetLock = undefined;
-        void this.updateDynamicTargetsNow().catch((error: unknown) => {
-          if (!this.sceneDestroyed) {
-            console.error("入口分块屏障释放失败", error);
-          }
-        });
-        this.maybeStartCameraTestTour();
-      }
+      if (result.status === "completed") this.maybeStartCameraTestTour();
     });
     return run;
   }
@@ -533,6 +534,7 @@ export class CampusScene extends Phaser.Scene {
       this.chunkUpdateElapsed = 0;
       this.updateDynamicTargets();
     }
+    this.playerVisualInterpolator?.update(this.time.now);
   }
 
   private createPlayerAndInput(): void {
@@ -592,6 +594,10 @@ export class CampusScene extends Phaser.Scene {
     this.playerRuntime.createAnimations();
     this.player.setVisible(false);
     this.playerRuntime.disableControls(this.time.now);
+    this.playerVisualInterpolator = new PhaserPlayerVisualInterpolator(
+      this as unknown as PhaserPlayerVisualSceneLike,
+      this.player as unknown as PhaserPlayerVisualSourceLike,
+    );
   }
 
   private createContentFoundation(): void {
@@ -830,6 +836,8 @@ export class CampusScene extends Phaser.Scene {
     this.contentLeaseRuntime = undefined;
 
     this.playerRuntime?.shutdown();
+    this.playerVisualInterpolator?.shutdown();
+    this.playerVisualInterpolator = undefined;
     this.joystick?.shutdown();
     this.stopPlayerMovement();
     this.mutationScheduler.destroy();
@@ -987,6 +995,7 @@ export class CampusScene extends Phaser.Scene {
           depth: (this.player as any).depth,
           visible: (this.player as any).visible,
         },
+        playerVisual: this.playerVisualInterpolator?.position ?? null,
         playerRuntime: {
           position: this.playerRuntime?.position ?? null,
           control: this.playerRuntime?.control ?? null,
@@ -1121,7 +1130,7 @@ export class CampusScene extends Phaser.Scene {
         getPlayerPosition: () => playerRuntime.position,
         startHardFollow: (settings) => {
           camera.startFollow(
-            this.player,
+            this.playerVisualInterpolator?.sprite ?? this.player,
             true,
             settings.lerpX,
             settings.lerpY,
@@ -1161,7 +1170,7 @@ export class CampusScene extends Phaser.Scene {
         getPlayerPosition: () => playerRuntime.position,
         startHardFollow: (settings) => {
           camera.startFollow(
-            this.player,
+            this.playerVisualInterpolator?.sprite ?? this.player,
             true,
             settings.lerpX,
             settings.lerpY,
@@ -1422,6 +1431,16 @@ export class CampusScene extends Phaser.Scene {
   private updateDynamicTargets(): void {
     void this.updateDynamicTargetsNow().catch((error: unknown) => {
       console.error("动态分块更新失败", error);
+    });
+  }
+
+  private releaseEntryChunkTargetLock(): void {
+    if (this.entryChunkTargetLock === undefined) return;
+    this.entryChunkTargetLock = undefined;
+    void this.updateDynamicTargetsNow().catch((error: unknown) => {
+      if (!this.sceneDestroyed) {
+        console.error("入口分块屏障释放失败", error);
+      }
     });
   }
 

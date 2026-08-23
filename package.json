@@ -23,6 +23,8 @@
     "browser:app-retry-smoke": "node scripts/browser-app-retry-smoke.mjs",
     "browser:content-smoke": "node scripts/browser-content-smoke.mjs",
     "browser:side-smoke": "node scripts/browser-side-smoke.mjs",
+    "browser:visual-smoothing-smoke": "node scripts/browser-visual-smoothing-smoke.mjs",
+    "browser:performance-smoke": "node scripts/browser-performance-smoke.mjs",
     "browser:perf-baseline": "node scripts/browser-perf-baseline.mjs",
     "check:perf-baseline-evidence": "node scripts/check-perf-baseline-evidence.mjs",
     "predev": "npm run prepare:runtime",

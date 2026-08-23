@@ -130,6 +130,36 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     expect(renderer.diagnostics).toEqual([]);
   });
 
+  it("async clear 只为 collision layer 等待生命周期让步", async () => {
+    const map = new FakeTilemap();
+    const renderer = new PhaserWorldRenderer(
+      map,
+      [],
+      makeSpec(),
+      LAYER_STRATEGIES,
+    );
+    const hooks = renderer.hooks();
+    const chunk = makeChunk(0, 0);
+    const visual = chunk.layers.find((layer) => layer.name === "layer1")!;
+    const collision = chunk.layers.find(
+      (layer) => layer.name === "walls",
+    )!;
+    hooks.writeLayer!(visual, chunk.coordinate);
+    hooks.writeLayer!(collision, chunk.coordinate);
+
+    const visualTarget = map.created.get("layer1@0_0")!;
+    const visualClear = hooks.clearLayerAsync!(visual, chunk.coordinate);
+    expect(visualTarget.destroyed).toBe(true);
+    await visualClear;
+
+    const collisionTarget = map.created.get("walls@0_0")!;
+    const collisionClear = hooks.clearLayerAsync!(collision, chunk.coordinate);
+    expect(collisionTarget.visible).toBe(false);
+    expect(collisionTarget.destroyed).toBe(false);
+    await collisionClear;
+    expect(collisionTarget.destroyed).toBe(true);
+  });
+
   it("raw visual 未知 GID 失败时可被 World apply 回滚", () => {
     const map = new FakeTilemap();
     const renderer = new PhaserWorldRenderer(

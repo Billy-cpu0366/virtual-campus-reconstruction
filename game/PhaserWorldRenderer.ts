@@ -625,12 +625,14 @@ export class PhaserWorldRenderer {
     if (target === undefined) {
       return;
     }
-    if (this.isCollisionLayer(layer.name)) {
-      await this.#options.onCollisionLayerDestroyed?.(layer.name, target);
+    if (!this.isCollisionLayer(layer.name)) {
+      this.destroyLayer(id, target);
+      return;
     }
-    // Arcade queues collider removal until its next physics update. Wait for
-    // the current frame to finish before destroying the Tilemap layer it
-    // references.
+    await this.#options.onCollisionLayerDestroyed?.(layer.name, target);
+    // Arcade queues collider removal until its next physics update. Only
+    // collision layers need this yield; delaying every visual layer makes a
+    // 24-layer chunk teardown span hundreds of milliseconds.
     target.setVisible?.(false);
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
     if (this.layers.get(id) === target) {
