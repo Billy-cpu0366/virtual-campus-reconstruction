@@ -1,0 +1,4 @@
+da68d0887995b9cfff9749dcf7ad179702afcb95
+bdd9d834c354b816c23c4047761258570c5bf22a
+5d0d96d2acca5fdf6596e01ef4a5399ea91e2017
+fix: orchestrate visible train NPC and smoke entry

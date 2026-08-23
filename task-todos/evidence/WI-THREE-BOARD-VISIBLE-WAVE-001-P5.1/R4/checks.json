@@ -1,0 +1,49 @@
+{
+  "work_item": "WI-THREE-BOARD-VISIBLE-WAVE-001",
+  "repair_package": "P5.1-R4",
+  "implementation_commit": "da68d0887995b9cfff9749dcf7ad179702afcb95",
+  "implementation_tree": "bdd9d834c354b816c23c4047761258570c5bf22a",
+  "base_commit": "5d0d96d2acca5fdf6596e01ef4a5399ea91e2017",
+  "classification": "systemic-failure",
+  "fact_boundaries": {
+    "train_route_scale_timing_collision_changed": false,
+    "sprayer_anchors_trigger_delay_speed_routes_changed": false,
+    "smoke_anchor_particle_parameters_changed": false,
+    "camera_total_entry_duration_ms": 3000,
+    "production_111_second_tour_enabled": false
+  },
+  "presentation_decisions": {
+    "train_depth": 520,
+    "sprayer_depth": "500 + (y + 24) * 0.1",
+    "smoke_depth": 3400,
+    "ambient_guides": "train complete -> trackside; sprayer trigger -> factory"
+  },
+  "checks": [
+    {"command": "npm test", "result": "PASS", "test_files": 54, "tests": 304},
+    {"command": "npm run typecheck", "result": "PASS"},
+    {"command": "npm run check:runtime", "result": "PASS"},
+    {"command": "npm run build:test-hooks", "result": "PASS"},
+    {"command": "npm run build", "result": "PASS"},
+    {"command": "browser:entry-smoke", "result": "PASS"},
+    {"command": "browser:chunk-smoke", "result": "PASS"},
+    {"command": "browser:camera-smoke", "result": "PASS"},
+    {"command": "browser:collision-smoke", "result": "PASS"},
+    {"command": "browser:lifecycle-smoke", "result": "PASS"},
+    {"command": "browser:mobile-input-smoke", "result": "PASS"},
+    {"command": "browser:content-smoke", "result": "PASS"},
+    {"command": "browser:visual-smoothing-smoke", "result": "PASS"},
+    {"command": "browser:side-smoke", "result": "PASS"},
+    {"command": "browser:smoke (production)", "result": "PASS"},
+    {"command": "browser:runtime-safety-smoke (production)", "result": "PASS"},
+    {"command": "browser:performance-smoke (production)", "result": "PASS"},
+    {"command": "browser:visible-entry-smoke desktop 1920x1080", "result": "PASS"},
+    {"command": "browser:visible-entry-smoke mobile 375x667", "result": "PASS"},
+    {"command": "git diff --check", "result": "PASS"}
+  ],
+  "independent_verification": {
+    "fact_diff_scope_typecheck_unit_production": "PASS",
+    "side_smoke": "UNVERIFIED_BY_SUBAGENT_AFTER_DIST_OVERWRITE",
+    "main_test_hooks_side_replay": "PASS"
+  },
+  "remaining_boundary": "Screenshots and automated screen-bounds are bounded evidence; final integrated Human visual acceptance remains required after R1-R7."
+}

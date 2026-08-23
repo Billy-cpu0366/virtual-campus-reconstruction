@@ -2,16 +2,16 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # NPC 与环境实体（SYS-NPC）
 
 ## 👀 先看这里（人话总结，给 Human）
 
-**P5 Human FAIL**：Human在实际入口没有看到NPC。`0fadf309`的sprayer计数、触发状态和teardown自动收据不能证明入口可见；P5.1必须核对坐标、视口、depth、纹理、启动时序，并区分四个sprayer实现故障与其余原站NPC尚未纳入范围。
+**P5.1 R4（bounded verified）**：`da68d08`保持四锚点、触发窗、300ms、速度140和路线FACT不变；sprayer presentation depth按`500+(y+24)*0.1`动态更新，train holding时四人可与player同屏辨识。train complete发布无teleport路径，真人键盘到约`(1280,416)`触发后切换factory提示；route完成与shutdown sprite/listener=0。
 
-**P4集成结果（auto verified）**：Main只提供玩家只读位置和生命周期；真实键盘可走路径触发sprayer，shutdown sprite/listener=0。完整跨chunk/intro语义仍UNKNOWN。
+**仍未完成**：其余原站NPC、intro跨场景复位和完整跨chunk长路线语义；R4不等于完整SYS-NPC。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 

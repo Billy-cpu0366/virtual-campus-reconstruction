@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r4-visible-orchestration
+status: active-r5-roof-footsteps
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -71,6 +71,8 @@ updated: 2026-08-23
 **允许**：route/NPC/FX Phaser owners、入口编排、guide/content提示、对应tests和视觉证据。
 
 **检查**：保持原站路线/scale/timing FACT；任何主动偏离标记为重构DECISION；正常production路径不用teleport即可验证。
+
+**R4收据（bounded verified）**：integration提交`da68d08`；train/smoke真实进屏约10.62s/2.10s，train/player/sprayers层级可辨识；train离场与sprayer触发后按顺序发布无teleport环境路线；desktop/mobile production截图、304测试和完整browser门禁PASS。详见[R4收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R4-收据.md)。
 
 ### R5 factory roof / confirmed footsteps
 

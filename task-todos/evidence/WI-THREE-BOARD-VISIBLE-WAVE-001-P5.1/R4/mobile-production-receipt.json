@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "url": "http://127.0.0.1:4234/",
+  "label": "mobile",
+  "viewport": {
+    "width": 375,
+    "height": 667
+  },
+  "hookTypes": {
+    "debug": "undefined",
+    "entry": "undefined",
+    "lifecycle": "undefined"
+  },
+  "canvas": {
+    "width": 480,
+    "height": 270,
+    "cssWidth": 375,
+    "cssHeight": 210.9375
+  },
+  "captures": [
+    {
+      "name": "smoke",
+      "elapsedMs": 1000,
+      "actualElapsedMs": 1000,
+      "appState": "ENTERING_GAME",
+      "guideText": "",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r4/mobile-smoke.png"
+    },
+    {
+      "name": "train",
+      "elapsedMs": 5200,
+      "actualElapsedMs": 5201,
+      "appState": "PLAYING",
+      "guideText": "Explore MEMO6 · head west 36 tiles, then north 7",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r4/mobile-train.png"
+    },
+    {
+      "name": "ambient-guide",
+      "elapsedMs": 18000,
+      "actualElapsedMs": 18012,
+      "appState": "PLAYING",
+      "guideText": "Trackside crew · east 20, then south 7, then west 8",
+      "screenshot": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r4/mobile-ambient-guide.png"
+    }
+  ],
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}

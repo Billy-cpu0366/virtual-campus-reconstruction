@@ -1,0 +1,126 @@
+{
+  "passed": true,
+  "implementation_commit": "da68d0887995b9cfff9749dcf7ad179702afcb95",
+  "holdingElapsedMs": 5025,
+  "completeElapsedMs": 17060,
+  "smokeVisibleDurationMs": 2101,
+  "trainVisibleDurationMs": 10615,
+  "guideAfterTrain": "Trackside crew · east 20, then south 7, then west 8",
+  "guideAfterSprayer": "Factory smoke · west 30, then south 8",
+  "holdingPresentation": {
+    "playerDepth": 532.8,
+    "trainVisual": {
+      "x": 480,
+      "y": 310,
+      "width": 1470.8749999999998,
+      "height": 102.49999999999999,
+      "left": 480,
+      "right": 1950.8749999999998,
+      "top": 258.75,
+      "bottom": 361.25,
+      "depth": 520
+    },
+    "sprayerVisuals": [
+      {
+        "id": "sprayer-60-25",
+        "x": 960,
+        "y": 400,
+        "width": 57.6,
+        "height": 57.6,
+        "left": 931.2,
+        "right": 988.8,
+        "top": 371.2,
+        "bottom": 428.8,
+        "depth": 542.4
+      },
+      {
+        "id": "sprayer-67-25",
+        "x": 1072,
+        "y": 400,
+        "width": 57.6,
+        "height": 57.6,
+        "left": 1043.2,
+        "right": 1100.8,
+        "top": 371.2,
+        "bottom": 428.8,
+        "depth": 542.4
+      },
+      {
+        "id": "sprayer-71-25",
+        "x": 1136,
+        "y": 400,
+        "width": 57.6,
+        "height": 57.6,
+        "left": 1107.2,
+        "right": 1164.8,
+        "top": 371.2,
+        "bottom": 428.8,
+        "depth": 542.4
+      },
+      {
+        "id": "sprayer-78-25",
+        "x": 1248,
+        "y": 400,
+        "width": 57.6,
+        "height": 57.6,
+        "left": 1219.2,
+        "right": 1276.8,
+        "top": 371.2,
+        "bottom": 428.8,
+        "depth": 542.4
+      }
+    ],
+    "trainColliderActive": true,
+    "trainBlockingCellCount": 460
+  },
+  "naturalRoutePlayer": {
+    "x": 1274.6666666666697,
+    "y": 416.00000000000045,
+    "depth": 544,
+    "visible": true
+  },
+  "sprayerTrigger": {
+    "triggeredAt": 24404.1,
+    "fleeAt": [
+      25304.1,
+      25004.1,
+      24704.1,
+      24404.1
+    ],
+    "states": [
+      "idle",
+      "idle",
+      "idle",
+      "fleeing"
+    ]
+  },
+  "sprayerGone": {
+    "spriteCount": 3,
+    "states": [
+      "fleeing",
+      "fleeing",
+      "gone",
+      "fleeing"
+    ]
+  },
+  "lifecycle": {
+    "receipt": {
+      "trainColliderActive": false,
+      "trainBlockingCellCount": 0,
+      "trainSpriteActive": false,
+      "trainCollisionShapeActive": false,
+      "sprayerSpriteCount": 0,
+      "smokeEmitterActive": false,
+      "sideFailures": [],
+      "physicsColliderCount": 0
+    },
+    "debugHook": "undefined",
+    "lifecycleHook": "undefined",
+    "contentHook": "undefined"
+  },
+  "events": {
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}
