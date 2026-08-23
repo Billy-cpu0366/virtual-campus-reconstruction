@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-HANDOFF-V1-001
-status: active-wip-snapshot-preparation
+status: active-windows-readonly-audit-request-ready
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-23
@@ -17,9 +17,11 @@ protocol-commit: 0a105dc
 
 ## 当前阶段
 
-`wip-snapshot-bundle-preparation`
+`windows-readonly-audit-request-ready`
 
-Human要求立即同步当前进度。当前交付只允许推远端WIP分支：统一`0fadf309`功能代码与最新Human视觉FAIL状态；不代表产品通过，不允许PR、merge或修改`main`。外部Pi仍须先完成下述正式仓库只读审计。
+Human 于 2026-08-23 明确要求推进首次历史对齐，并把结果交给 Windows 终端 Pi 处理。可整段发送的请求已落盘到 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-REQUEST.md`。本轮只授权 Windows 正式仓库只读审计和一次 `fetch origin --prune`；不授权处理 dirty、reconciliation、commit、push、PR、merge或修改`main`。
+
+此前 WIP 快照目标仍只允许非保护 WIP 分支，不代表产品通过；在外部审计收据返回并经 Human 接受无损方案前，不恢复实际交付。
 
 外部 Pi 已报告：
 
@@ -39,7 +41,7 @@ Human 于 2026-08-23 接受把独立 `pi-git-handoff` 接入本项目；落盘�
 - `refs/pi-handoff/canonical/main` 是固定 WSL canonical ref，但当前尚不存在；
 - profiles 只定义 `wip/<delivery-id>` 与 `delivery/<delivery-id>`，不授权实际 push；
 - 外部检查固定为状态一致性、typecheck、测试和 build；
-- 本轮不运行 prepare、external checks、fetch 或 push，不改变本卡当前阶段和下一 Gate。
+- 2026-08-23 adapter 落盘轮次未运行 prepare、external checks、fetch 或 push；该轮次已关闭。后续 `DEC-GITHUB-HANDOFF-WINDOWS-AUDIT-RESUME-001` 只对 Windows 只读审计新增一次 `fetch origin --prune` 授权，不开放其他外部动作。
 
 adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才能用于真实 handoff；它不得自动处理已知 Windows dirty 或 main 分叉。alpha.3 静态接入已通过 runtime 解析、17 项 Package 测试、outbox ignore、状态一致性与独立复核，但仍是 `remote-unverified`。
 
@@ -62,7 +64,7 @@ adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才
 
 ## 下一 Gate
 
-外部 Pi 返回 fetch 后固定收据：正式 HEAD、origin/main、merge-base、ahead/behind、dirty tracked/untracked、local-only/remote-only、cherry 等价和潜在冲突。
+外部 Pi 按 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-REQUEST.md` 返回 `AUDIT-RESULT-V1`：正式 HEAD、origin/main、merge-base、ahead/behind、dirty tracked/untracked、local-only/remote-only、cherry 等价和潜在冲突。
 
 Main 根据收据提出无损保护与 reconciliation 方案；Human 接受后才进入首次对齐实现。
 
