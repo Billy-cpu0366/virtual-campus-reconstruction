@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the design-only package with a focused Draft-07 subset.
+"""Validate the git-handoff candidate with a focused Draft-07 subset.
 
 This is a static package validator, not a full JSON Schema implementation.
 """
@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_VERSION = "0.1.0-alpha.1"
+PACKAGE_VERSION = "0.1.0-alpha.2"
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 
 EXPECTED_FILES = {
@@ -34,7 +34,11 @@ EXPECTED_FILES = {
     "examples/prepare-receipt.v1.json",
     "examples/verify-receipt.v1.json",
     "examples/push-receipt.v1.json",
+    "scripts/core.mjs",
+    "scripts/prepare.mjs",
+    "scripts/verify-push.mjs",
     "scripts/validate-package.py",
+    "tests/executors.test.mjs",
 }
 
 JSON_FILES = {
@@ -68,6 +72,10 @@ GENERIC_SCAN_FILES = {
     "skills/git-handoff/SKILL.md",
     "skills/git-handoff/references/failure-rules.md",
     "skills/git-handoff/references/protocol.md",
+    "scripts/core.mjs",
+    "scripts/prepare.mjs",
+    "scripts/verify-push.mjs",
+    "tests/executors.test.mjs",
     *SCHEMA_FILES,
 }
 
@@ -216,17 +224,17 @@ class Validator:
         if set(fields) != {"name", "description", "disable-model-invocation"}:
             self.error(relative, "frontmatter keys are not the fixed contract")
 
-        lowered = text.lower()
+        lowered = " ".join(text.lower().split())
         required_phrases = (
-            "design-only",
             "do not improvise",
-            "executors do not exist",
+            "project-level json adapter",
+            "never run it from wsl",
             "prepare",
             "verify-push",
         )
         for phrase in required_phrases:
             if phrase not in lowered:
-                self.error(relative, f"missing design-only boundary text: {phrase}")
+                self.error(relative, f"missing executor boundary text: {phrase}")
 
     def check_readme(self) -> None:
         relative = "README.md"
@@ -236,9 +244,9 @@ class Validator:
         except OSError as exc:
             self.error(relative, f"cannot read file ({exc.strerror or 'read error'})")
             return
-        for phrase in ("design-only", "not implemented", "not be described as operational"):
+        for phrase in ("real windows/github round trip", "not verified", "fake git runner"):
             if phrase not in lowered:
-                self.error(relative, f"missing design-only boundary text: {phrase}")
+                self.error(relative, f"missing local-only verification boundary text: {phrase}")
 
     def check_schema_metadata(self, relative: str, schema: Any | None, expected_id: str) -> None:
         if not isinstance(schema, dict):

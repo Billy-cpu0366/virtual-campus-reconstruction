@@ -9,7 +9,7 @@
   "created-at": "2026-08-23T00:01:00Z",
   "producer": {
     "package": "pi-git-handoff",
-    "version": "0.1.0-alpha.1",
+    "version": "0.1.0-alpha.2",
     "command": "prepare",
     "environment": "sandbox"
   },
@@ -26,16 +26,7 @@
     "tree": "dddddddddddddddddddddddddddddddddddddddd"
   },
   "files-sha256": "5555555555555555555555555555555555555555555555555555555555555555",
-  "checks": [
-    {
-      "id": "typecheck",
-      "argv": ["npm", "run", "typecheck"],
-      "duration-ms": 1500,
-      "exit-code": 0,
-      "result": "PASS",
-      "log-sha256": "6666666666666666666666666666666666666666666666666666666666666666"
-    }
-  ],
+  "checks": [],
   "human-gate": {
     "required": false,
     "status": "not-required",

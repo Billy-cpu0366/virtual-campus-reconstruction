@@ -13,36 +13,45 @@
 
 ## 2. Adapter input
 
-The project adapter's `extensions.git-handoff` object is the only source for:
+The project-level JSON adapter passed to the executor is the only source for:
 
 - project identity and required package version;
 - sandbox and external repository paths;
 - canonical remote and base ref;
 - delivery and target branch templates;
 - outbox and external staging paths;
-- prepare and external checks;
+- external replay checks; local readiness checks remain in the project workflow
+  consumed by `verification-delivery`;
 - protected paths and fixed non-destructive policy.
 
-The package validates this object with
-`schemas/adapter-extension.v1.schema.json`. The artifact records the exact
-adapter SHA-256. The external stage must use byte-identical adapter input or
-stop.
+The package validates this object against the contract in
+`schemas/adapter-extension.v1.schema.json`. A broader workflow adapter may
+point to this JSON file from `extensions.git-handoff`. The artifact records the
+exact adapter SHA-256. The external stage must use byte-identical adapter input
+or stop.
 
 ## 3. Prepare contract
 
 Preconditions:
 
-1. delivery readiness has been assessed by `verification-delivery`;
+1. delivery readiness has been assessed by `verification-delivery`, and the
+   prepare invocation carries its authoritative reference;
 2. the repository root and adapter are known and trusted;
 3. the selected profile exists in the adapter;
 4. the worktree is clean when policy requires it;
 5. `HEAD` is a coherent local commit and satisfies the declared base policy;
 6. actual changed paths do not intersect protected paths;
-7. all adapter `prepare` checks pass.
+7. the configured outbox is ignored by Git, so preparation cannot dirty the
+   project.
 
-A future prepare executor performs a fixed sequence. It may inspect local Git
-objects and create a bundle, but it does not expose arbitrary Git command
-execution. It does not stage, commit, merge, rewrite, fetch, push, access host
+`prepare` does not execute adapter-defined commands. This preserves the sandbox
+security boundary: `verification-delivery` runs and records local readiness
+checks before handoff, while the external executor reruns adapter `external`
+checks after import.
+
+The prepare executor performs a fixed sequence. It may inspect local Git
+objects, create one delivery ref, and create a bundle, but it does not expose
+arbitrary Git command execution. It does not stage, commit, merge, rewrite, fetch, push, access host
 paths, or change the environment guard.
 
 Output:
@@ -89,10 +98,10 @@ After external verification, display at least:
 - check results and unresolved risks;
 - explicit statements that force-push and direct base-branch push are disabled.
 
-The Human must explicitly confirm this displayed target. A future external
-workflow may pause for that confirmation inside the same user-started command,
-but it must preserve the confirmation method and authoritative reference in
-the push receipt.
+The Human must explicitly confirm this displayed target. The external workflow
+emits a confirmation token bound to the artifact, commit, and target. It may
+pause interactively or resume with that exact token, and it preserves the
+confirmation method and authoritative reference in the push receipt.
 
 The executor then pushes only the exact verified commit to the adapter-derived
 target ref. Success from the push process is not final proof. It must re-read
@@ -137,5 +146,7 @@ committed
   -> remote-verified
 ```
 
-`failed` and `stopped` are evidence-bearing results for one attempt. They do
-not automatically roll back or mutate repository state.
+`failed` and `stopped` are evidence-bearing results for one attempt. Safe
+preflight failures before an attempt directory exists are reported only on the
+structured command channel; later failures also persist a receipt. No failure
+automatically rolls back or mutates unrelated repository state.

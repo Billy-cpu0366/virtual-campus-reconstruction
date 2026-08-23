@@ -106,7 +106,7 @@
     "authorization": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["prepare-invoked", "push-authorized"],
+      "required": ["prepare-invoked", "push-authorized", "authority-ref"],
       "properties": {
         "prepare-invoked": {
           "const": true

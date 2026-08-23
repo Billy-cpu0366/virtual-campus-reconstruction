@@ -30,7 +30,7 @@
     "repositories": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sandbox-root", "external-root", "canonical-remote"],
+      "required": ["sandbox-root", "external-root", "remote-name", "canonical-remote"],
       "properties": {
         "sandbox-root": {
           "$ref": "#/$defs/relative-path"
@@ -38,10 +38,14 @@
         "external-root": {
           "$ref": "#/$defs/external-absolute-path"
         },
+        "remote-name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
         "canonical-remote": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^(?![^:]+://[^/]*@)\\S+$",
+          "pattern": "^(?!-)(?![^:]+://[^/]*@)\\S+$",
           "description": "Exact canonical Git remote without embedded credentials."
         }
       }
@@ -78,7 +82,7 @@
       "required": ["sandbox-outbox", "external-staging"],
       "properties": {
         "sandbox-outbox": {
-          "$ref": "#/$defs/relative-path"
+          "$ref": "#/$defs/non-root-relative-path"
         },
         "external-staging": {
           "$ref": "#/$defs/external-absolute-path"
@@ -88,11 +92,8 @@
     "checks": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["prepare", "external"],
+      "required": ["external"],
       "properties": {
-        "prepare": {
-          "$ref": "#/$defs/check-list"
-        },
         "external": {
           "$ref": "#/$defs/check-list"
         }
@@ -136,6 +137,11 @@
       "type": "string",
       "minLength": 1,
       "pattern": "^(?:\\.|(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+)$"
+    },
+    "non-root-relative-path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\.$)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
     },
     "relative-pattern": {
       "type": "string",

@@ -1,13 +1,14 @@
 {
   "name": "pi-git-handoff",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "private": true,
-  "description": "Design-only Pi Package candidate for cross-host Git bundle delivery and versioned receipts.",
+  "description": "Pi Package candidate for cross-host Git bundle delivery and versioned receipts.",
   "keywords": [
     "pi-package"
   ],
   "scripts": {
-    "validate": "python3 scripts/validate-package.py"
+    "test": "node --test tests/executors.test.mjs",
+    "validate": "python3 scripts/validate-package.py && node --check scripts/core.mjs && node --check scripts/prepare.mjs && node --check scripts/verify-push.mjs && node --test tests/executors.test.mjs"
   },
   "pi": {
     "skills": [

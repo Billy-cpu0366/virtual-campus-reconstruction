@@ -1,10 +1,11 @@
 {
   "schema-version": 1,
-  "required-package-version": "0.1.0-alpha.1",
+  "required-package-version": "0.1.0-alpha.2",
   "project-id": "example-project",
   "repositories": {
     "sandbox-root": ".",
     "external-root": "/srv/repos/example-project",
+    "remote-name": "upstream",
     "canonical-remote": "https://example.invalid/example/example-project.git"
   },
   "refs": {
@@ -21,13 +22,6 @@
     "external-staging": "/srv/pi-handoff/example-project"
   },
   "checks": {
-    "prepare": [
-      {
-        "id": "typecheck",
-        "argv": ["npm", "run", "typecheck"],
-        "timeout-seconds": 600
-      }
-    ],
     "external": [
       {
         "id": "test",

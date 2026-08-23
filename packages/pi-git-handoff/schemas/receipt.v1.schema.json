@@ -15,10 +15,8 @@
     "created-at",
     "producer",
     "adapter-sha256",
-    "manifest-sha256",
     "project-id",
     "canonical-remote",
-    "delivery",
     "checks",
     "unresolved-risks"
   ],
@@ -174,13 +172,25 @@
     {
       "if": {
         "properties": {
+          "status": {
+            "const": "PASS"
+          }
+        }
+      },
+      "then": {
+        "required": ["manifest-sha256", "canonical-base", "delivery", "files-sha256"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
           "stage": {
             "enum": ["verify", "push"]
           }
         }
       },
       "then": {
-        "required": ["previous-receipt-sha256", "artifact-index-sha256", "canonical-base", "files-sha256"]
+        "required": ["manifest-sha256", "previous-receipt-sha256", "artifact-index-sha256", "canonical-base", "delivery", "files-sha256"]
       }
     },
     {
@@ -295,25 +305,30 @@
         }
       }
     },
+    "relative-path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:\\.|(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+)$"
+    },
     "check-result": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "argv", "result", "duration-ms"],
+      "required": ["id", "argv", "cwd", "exit-code", "result", "duration-ms", "log-sha256"],
       "properties": {
         "id": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
         },
         "argv": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           }
         },
         "cwd": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "#/$defs/relative-path"
         },
         "exit-code": {
           "type": "integer"

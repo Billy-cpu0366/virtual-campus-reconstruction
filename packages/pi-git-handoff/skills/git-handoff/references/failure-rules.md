@@ -7,7 +7,8 @@
 - repository root, local commit, base ref, or tree cannot be proved;
 - required clean-worktree policy fails;
 - a changed path is protected or escapes the repository root;
-- a prepare check fails, times out, or cannot start;
+- the configured outbox is not ignored by Git;
+- delivery readiness from `verification-delivery` is absent or unresolved;
 - the environment guard blocks an operation;
 - the delivery ID or outbox path already exists;
 - generated bundle, manifest, receipt, file list, or hash inventory disagree.
@@ -38,10 +39,17 @@ rewriting, cleaning, fetching, using host paths, or changing security policy.
 
 ## Failure evidence
 
-Every attempted stage writes a `FAIL` or `STOPPED` receipt when it can do so
-without weakening safety. Record a stable error code, concise message,
-completed checks, and unresolved repository state. Do not store credentials,
-tokens, environment secrets, or unredacted authenticated URLs.
+A receipt-bearing attempt starts only after trusted identity and a safe evidence
+directory are established. Before that point, preflight failures return a
+structured `FAIL` or `STOPPED` result on the command channel and do not modify
+the artifact or an untrusted path. After the attempt directory exists,
+prepare/verify failures write a receipt; a push attempt begins only after the
+exact Human confirmation token is accepted, and every later push failure writes
+a receipt.
+
+Receipts record a stable error code, concise message, completed checks, and
+unresolved repository state. They do not store credentials, tokens,
+environment secrets, or unredacted authenticated URLs.
 
 A failed receipt is not a request to retry automatically. Human or project
 authority must resolve the blocking condition and start a new attempt.

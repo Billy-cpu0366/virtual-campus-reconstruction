@@ -1,23 +1,25 @@
 # Pi Git Handoff
 
-`pi-git-handoff` is a design-only candidate Pi Package for moving a committed
-Git result from a restricted WSL sandbox to an external canonical repository,
-then verifying and pushing the exact result with versioned receipts.
+`pi-git-handoff` is a candidate Pi Package for moving a committed Git result
+from a restricted WSL sandbox to an external canonical repository, then
+verifying and pushing the exact result with versioned receipts.
 
 ## Status
 
 | Dimension | Status |
 |---|---|
-| Human direction | accepted |
-| Design persistence | persisted by the containing result commit |
-| Static validation | verified: package validator, project state check, and independent review PASS |
-| Prepare implementation | not implemented |
-| External verify/push implementation | not implemented |
+| Human direction | design and executor implementation accepted |
+| Design persistence | persisted in `683ea17` |
+| Executor persistence | persisted by the containing result commit |
+| Local validation | verified: 15 tests, real offline bundle, state consistency, independent review |
+| Prepare implementation | implemented; sandbox-local operations only |
+| External verify/push implementation | implemented; WSL tests use a fake Git runner |
 | Global or project installation | not authorized |
-| Real GitHub round trip | not verified |
+| Real Windows/GitHub round trip | not verified |
 
-This package must not be described as operational until the two deterministic
-executors and their isolated Git tests exist.
+The package is locally testable, but it must not be described as remotely
+verified until a separately authorized Windows round trip produces a valid
+push receipt.
 
 ## Why this is independent
 
@@ -38,16 +40,22 @@ verification-delivery
 
 ## Intended user interface
 
-These are command contracts, not currently executable commands:
+The Skill invokes deterministic Node.js executors relative to its package:
 
 ```text
-Sandbox Pi:  /skill:git-handoff prepare --profile <adapter-profile>
-External Pi: /skill:git-handoff verify-push <delivery-id>
+Sandbox executor:
+node scripts/prepare.mjs --adapter <git-handoff.json> --profile <name> \
+  --authority-ref <verification-delivery-reference>
+
+External executor:
+node scripts/verify-push.mjs --external \
+  --adapter <git-handoff.json> --artifact <outbox-directory>
 ```
 
-The Human starts one command on each side. A future external command may pause
-inside the same workflow for the required push confirmation. Automation must
-not infer push authorization from tests, a local commit, or bundle creation.
+`verify-push` first emits the exact preview and confirmation token. It pushes
+only after the same verified workflow receives that token through interactive
+input or `--confirm-token`. Automation must not infer push authorization from
+tests, a local commit, or bundle creation.
 
 ## Package contents
 
@@ -55,22 +63,25 @@ not infer push authorization from tests, a local commit, or bundle creation.
 skills/git-handoff/          Skill contract and one-level references
 schemas/                     Adapter extension, manifest, and receipt schemas
 examples/                    Generic cross-project examples
+scripts/core.mjs             Shared deterministic implementation
+scripts/prepare.mjs          Sandbox-only preparation entry point
+scripts/verify-push.mjs      External verification and push entry point
 scripts/validate-package.py  Standard-library static validation
+tests/executors.test.mjs     Fake-runner and artifact tests
 ```
-
-There is deliberately no `prepare` or `verify-push` executor in this design
-milestone.
 
 ## Adapter boundary
 
-Every project-specific value belongs under the existing project adapter's
-`extensions.git-handoff` namespace:
+Every project-specific value belongs in the project-level JSON adapter passed
+through `--adapter`. A future project workflow adapter may point to this file
+from its `extensions.git-handoff` namespace:
 
 - sandbox and external repository paths;
 - canonical remote identity;
 - canonical base, local delivery ref template, and allowed target templates;
 - sandbox outbox and external staging paths;
-- prepare and external check commands;
+- external replay check commands; local readiness checks remain owned by
+  `verification-delivery` and the project workflow adapter;
 - protected paths and non-destructive policy.
 
 The generic Skill and future executors must reject a missing or incompatible
@@ -96,12 +107,13 @@ See `skills/git-handoff/references/protocol.md` for the complete state flow.
 
 ## Explicit non-scope
 
-This milestone does not:
+This implementation milestone does not:
 
 - modify global Pi settings or install a Pi Package;
-- create a project `.ai-workflow/project.yaml`;
+- create a real project adapter;
 - modify the existing WSL security guard;
 - maintain a second Git command denylist;
-- stage, commit, merge, bundle, fetch, push, create a PR, or update a remote;
+- stage, commit, merge, fetch, push, create a PR, or update a remote from WSL;
+- run the external executor against GitHub during sandbox tests;
 - reconcile unrelated dirty work or divergent histories;
 - claim that a Human product or visual gate passed.

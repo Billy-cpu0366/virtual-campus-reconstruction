@@ -5,10 +5,14 @@ This directory is the machine entry for the independent cross-project
 
 ## Current maturity
 
-- Decision: accepted under `DEC-PI-GIT-HANDOFF-DESIGN-001`.
-- Persistence: persisted by the containing result commit.
-- Verification: static package/schema checks and independent design review PASS.
-- Execution: not implemented; do not claim that prepare or push commands work.
+- Design decision: accepted under `DEC-PI-GIT-HANDOFF-DESIGN-001`.
+- Executor authorization: accepted under `DEC-PI-GIT-HANDOFF-EXECUTORS-001`.
+- Persistence: executor implementation is persisted by the containing result commit.
+- Verification: local-verified by 15 automated tests, real offline Git bundle,
+  project state consistency, and independent review; Windows/GitHub remains
+  remote-unverified.
+- Execution: `prepare` and `verify-push` exist, but real external use still requires
+  a project adapter, external authorization, and the Human push Gate.
 
 ## Reading order
 
@@ -28,5 +32,7 @@ This directory is the machine entry for the independent cross-project
 - Do not duplicate the sandbox command denylist inside this package. A future
   prepare implementation exposes a fixed workflow, not arbitrary Git command
   execution, and must stop when the environment guard blocks an operation.
-- No Extension, global installation, adapter creation, real bundle, fetch,
-  push, PR, or merge is authorized by this design candidate.
+- No Extension, global installation, real project adapter creation, GitHub
+  fetch/push, PR, or merge is authorized in the WSL implementation trial.
+- Tests may use fake process/Git runners and ignored local artifacts. They must
+  not execute real fetch or push from this sandbox.
