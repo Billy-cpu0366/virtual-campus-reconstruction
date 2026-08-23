@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-r7-human-rejection-audit
-phase: p5.1-r7-human-rejection-audit
+status: awaiting-p5.1-human-repair-plan-gate
+phase: p5.1-human-rejection-repair-plan-gate
 authorization: DEC-P5.1-SYSTEMIC-REPAIR-001
 code-baseline: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
 code-baseline-tree: 657101daa0419409ea046a3716badd9d6fd57a61
@@ -78,7 +78,7 @@ updated: 2026-08-23
 
 ## P5.1系统审计
 
-完整差异表、证据收据和五个根因簇见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。Human已选择方案A；R1–R7实现与自动回归完成后，最终candidate=`1e24fd1`在Human实际验收中仍失败：垃圾堆不可通行、开头停顿、火车离场玩家穿模。三项已回到同一systemic差异表审计；未完成根因聚类和新的Human方案Gate前不修改产品代码。
+完整差异表见[系统审计与根因包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md)。R7失败审计已完成：指定垃圾堆区域未复现重构Bug；RC-6确认入口3–5秒cleanup/控制耦合，RC-7确认R4 train depth决策导致视觉穿模。当前推荐C1入口cleanup隔离+C2 train世界深度；Human一次性接受前不修改产品代码。
 
 ## 本轮成功标准
 

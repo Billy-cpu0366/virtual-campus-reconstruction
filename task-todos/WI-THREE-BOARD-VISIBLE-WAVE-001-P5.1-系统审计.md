@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-systemic-audit
-status: reopened-after-r7-human-rejection
+status: audit-complete-awaiting-repair-plan-gate
 issue-class: systemic-failure
 candidate-commit: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
 candidate-tree: 657101daa0419409ea046a3716badd9d6fd57a61
@@ -114,6 +114,28 @@ Human已选择**方案A：完整证据补救**。R1–R7已实施并完成自动
 
 | ID | expected source | candidate actual evidence | 严重度 | 根因候选 | 状态/UNKNOWN |
 |---|---|---|---|---|---|
-| D-COLLISION-02 | 地图可通行区域应与视觉阻挡一致；垃圾堆局部是否原站有意阻挡仍需对照公开collision/walls证据 | Human报告“垃圾堆哪里有一些不能通过的地方”；精确坐标和原站同点行为待复现 | Major（待坐标确认） | MOVE/WORLD/LAYER碰撞数据或视觉-碰撞错位 | expected/actual边界未收敛，暂不能判定Bug |
-| D-PERF-02 | 已接受入口目标为连续3秒Power2镜头与5秒train编排；正常Play不应出现无反馈停顿 | Human报告“开头那段会卡着一会”；WSL R7 trace无>34ms帧，说明自动环境与Human设备继续冲突 | Critical | APP/ENTRY主线程、资源解码、chunk mutation或控制/状态等待 | Human actual confirmed；现场长帧/等待类型UNKNOWN |
-| D-TRAIN-02 | 火车离场期间玩家主体不应出现错误穿模；原站路线/scale FACT与玩家/列车遮挡关系需逐帧核对 | Human报告“开头火车开走的时候那段主角穿模了”；现有R7仅按固定时点截图，未覆盖离场交叉逐帧 | Critical | TRAIN路径/碰撞、PLAYER深度或presentation layer时序 | Human actual confirmed；穿模类型和精确帧UNKNOWN |
+| D-COLLISION-02 | 地图可通行区域应与视觉阻挡一致；原站玩家使用同一`walls`层 | Human定位`OUR ART / OUR / OUR RULES`与垃圾堆约`(1816,1176)`；当前/原站walls数据SHA-256均为`a1fb8b…788b1`。叠图显示强制碰撞只覆盖招牌基座和垃圾堆下半轮廓，二者间空白路面无强制碰撞 | Not reproduced as bug | 原站一致的可见障碍碰撞 | 当前不修；若Human仍在空白路面复现，需带玩家坐标截图重新打开该行 |
+| D-PERF-02 | 已接受入口为3秒camera、5秒train到站/控制放行；过程中不得出现设备可见冻结 | Human确认既有无控制也有冻结/跳帧。三次probe均在约3.05秒释放25块锁，并于4.71–4.76秒完成25→15块、525→315层，即210层卸载；约5秒控制才启用 | Critical | RC-6 | cleanup与3–5秒可见过渡耦合confirmed；WSL未稳定复现Human长帧，设备blocking duration仍UNKNOWN |
+| D-TRAIN-02 | train/player/sprayer应按世界位置形成正确遮挡，不让玩家贴在车厢表面 | Human确认是“人物盖在车厢前”而非物理穿越；R4主动把train从depth 1001改为520，出生玩家depth=532.8，R7 3/5/8秒截图直接显示玩家画在车厢前 | Critical | RC-7 | confirmed presentation-policy defect |
+
+## 7. R7失败根因簇与一次修复方案Gate
+
+### RC-6：入口cleanup与可见过渡耦合
+
+- **confirmed**：`cameraStable`约3秒直接释放entry corridor lock；每次固定从25块/525层降到15块/315层，210个Tilemap层删除持续到约4.7秒；控制仍等train约5秒到站。
+- **Human actual**：这段同时表现为无控制和可见冻结/跳帧。
+- **边界**：WSL focused probes稳定证明工作量与时序，但没有稳定复现Human设备的长帧；不得声称已取得设备blocking trace。
+
+### RC-7：R4 train层级决策与最终视觉冲突
+
+- **confirmed**：R4为让玩家和sprayer可辨识，把train固定depth降到520；出生玩家为532.8，因此重叠时必然画在车厢前。
+- **不是**：不是Human报告的物理穿越，也没有证据指向train路线/scale/5s+3s+9s FACT错误。
+
+### 推荐方案：C1 + C2（proposed，未接受）
+
+1. **C1入口cleanup隔离**：保留已接受的3秒camera、5秒train到站和5秒前控制锁，不改30 FPS；`cameraStable`只结束相机，不再在同一可见帧无预算拆210层。为offscreen chunk teardown增加明确每帧时间/层数预算并记录mutation receipt，要求点击Play后0–5秒production无>34ms帧/LoAF且25→15最终仍收敛、无chunk reveal/旧collider。
+2. **C2 train世界深度**：不回到会盖住所有sprayer的固定1001；按train世界y使用同一depth公式，使train约533.4，高于出生玩家532.8、低于sprayer约542.4。保持路线、scale、5s/3s/9s、碰撞带不变；用3/5/8秒production截图证明玩家不再贴在车厢前且sprayer仍可见。
+3. **垃圾堆不改代码**：保留原站一致walls；增加该区域“空白路面可走、招牌/垃圾堆可挡”的定点回归。若Human指出具体空白格，再以坐标重开D-COLLISION-02。
+4. **回归**：重跑R7双视口完整production、入口0–5秒性能与mutation收据、train 3/5/8秒、碰撞/生命周期/Retry/shutdown，最后再次Human整体验收。
+
+**代价与风险**：C1会触及CHUNK/WORLD/LAYER调度和collider清理，属MEDIUM风险，必须保留原子收敛和shutdown；C2为LOW/MEDIUM呈现层改动，风险是玩家被train正确遮住的时间过长。两包均不恢复111秒序列、不实现particles3/69360、不改sample/路线/scale/物理FPS。

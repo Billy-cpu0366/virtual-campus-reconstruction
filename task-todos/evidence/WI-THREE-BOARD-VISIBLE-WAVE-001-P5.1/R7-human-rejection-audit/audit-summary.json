@@ -1,0 +1,43 @@
+{
+  "candidate": "1e24fd1e9e4cfa7e06ed8db0243b4f214364569c",
+  "humanGate": "failed",
+  "humanClarification": {
+    "collisionLocation": "OUR ART / OUR / OUR RULES sign and garbage pile near world (1816,1176)",
+    "opening": "both control-unresponsive and visually frozen/jumpy",
+    "train": "player is drawn in front of the carriage, not physical traversal"
+  },
+  "collisionAudit": {
+    "currentWallsSha256": "a1fb8b28f7108f8b9460339d552d59e6b43ac3c453f0656575a2f73ebb2788b1",
+    "originalWallsSha256": "a1fb8b28f7108f8b9460339d552d59e6b43ac3c453f0656575a2f73ebb2788b1",
+    "forcedCollisionGid": 69345,
+    "result": "not reproduced as a reconstruction bug: forced cells align with the visible sign base and lower garbage-pile footprint; the blank pavement between them has no forced collision",
+    "remainingUnknown": "an exact blank pavement cell would require a player-coordinate screenshot if Human can still reproduce it"
+  },
+  "entryAudit": {
+    "repeatedProbeCount": 3,
+    "initialRenderedChunks": 25,
+    "finalRenderedChunks": 15,
+    "initialLayerCount": 525,
+    "finalLayerCount": 315,
+    "removedLayerCountEachRun": 210,
+    "removalWindowsMs": [
+      [3053.7, 4712.0],
+      [3070.5, 4745.0],
+      [3081.8, 4759.3]
+    ],
+    "controlEnabledAtApproxMs": 5000,
+    "confirmed": "camera-stable releases the entry chunk lock around 3 seconds; visible entry remains control-locked until train arrival around 5 seconds while 10 chunks / 210 layers are removed",
+    "performanceBoundary": "the focused WSL headless reruns did not deterministically reproduce the Human-visible long frame; the workload/timing coupling is confirmed but device-side blocking duration remains UNKNOWN"
+  },
+  "trainAudit": {
+    "r4DecisionDepth": 520,
+    "spawnPlayerDepth": 532.8,
+    "preR4TrainDepth": 1001,
+    "result": "confirmed presentation-policy defect: R4 intentionally lowered train depth below the player, so the player is drawn over the carriage during overlap",
+    "physicalTraversalReported": false
+  },
+  "proposedClusters": [
+    "RC-6 entry cleanup is coupled to the visible 3-5 second transition",
+    "RC-7 train occlusion policy contradicts the Human visual result"
+  ]
+}

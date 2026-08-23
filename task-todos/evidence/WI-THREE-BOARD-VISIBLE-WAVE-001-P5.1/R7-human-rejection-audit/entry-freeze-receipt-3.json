@@ -1,0 +1,221 @@
+{
+  "source": "entry-freeze-receipt-3",
+  "auditStart": null,
+  "frameSummary": {
+    "count": 391,
+    "p95": 16.700000000000728,
+    "max": 16.80000000000109,
+    "over34": 0,
+    "over50": 0
+  },
+  "removeLayerCount": 210,
+  "firstRemove": {
+    "t": 3070.5,
+    "duration": 0.09999999403953552,
+    "name": "layer1@0_3"
+  },
+  "lastRemove": {
+    "t": 4745,
+    "duration": 0,
+    "name": "particles2@4_4"
+  },
+  "entryLongTasks": [],
+  "entryLongAnimationFrames": [],
+  "timeline500ms": [
+    {
+      "elapsedMs": 4,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 704,
+        "y": 793
+      }
+    },
+    {
+      "elapsedMs": 519,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 568,
+        "y": 404
+      }
+    },
+    {
+      "elapsedMs": 1017,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 568,
+        "y": 404
+      }
+    },
+    {
+      "elapsedMs": 1515,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 568,
+        "y": 404
+      }
+    },
+    {
+      "elapsedMs": 2016,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 593,
+        "y": 382
+      }
+    },
+    {
+      "elapsedMs": 2516,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 814,
+        "y": 197
+      }
+    },
+    {
+      "elapsedMs": 3023,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": false,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 25,
+      "layers": 525,
+      "camera": {
+        "x": 847,
+        "y": 169
+      }
+    },
+    {
+      "elapsedMs": 3547,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": true,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 23,
+      "layers": 465,
+      "camera": {
+        "x": 848,
+        "y": 169
+      }
+    },
+    {
+      "elapsedMs": 4053,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": true,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 20,
+      "layers": 402,
+      "camera": {
+        "x": 848,
+        "y": 169
+      }
+    },
+    {
+      "elapsedMs": 4500,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": true,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 17,
+      "layers": 341,
+      "camera": {
+        "x": 848,
+        "y": 169
+      }
+    },
+    {
+      "elapsedMs": 5001,
+      "appState": "ENTERING_GAME",
+      "entryStatus": "entering",
+      "cameraStable": true,
+      "trainArrived": false,
+      "controlEnabled": false,
+      "trainState": "arriving",
+      "rendered": 15,
+      "layers": 315,
+      "camera": {
+        "x": 848,
+        "y": 169
+      }
+    },
+    {
+      "elapsedMs": 5501,
+      "appState": "PLAYING",
+      "entryStatus": "playable",
+      "cameraStable": true,
+      "trainArrived": true,
+      "controlEnabled": true,
+      "trainState": "holding",
+      "rendered": 15,
+      "layers": 315,
+      "camera": {
+        "x": 848,
+        "y": 169
+      }
+    },
+    {
+      "elapsedMs": 6001,
+      "appState": "PLAYING",
+      "entryStatus": "playable",
+      "cameraStable": true,
+      "trainArrived": true,
+      "controlEnabled": true,
+      "trainState": "holding",
+      "rendered": 15,
+      "layers": 315,
+      "camera": {
+        "x": 848,
+        "y": 169
+      }
+    }
+  ]
+}
