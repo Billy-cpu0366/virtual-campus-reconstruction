@@ -1,10 +1,10 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-systemic-audit
-status: audit-complete-plan-a-accepted
+status: reopened-after-r7-human-rejection
 issue-class: systemic-failure
-candidate-commit: 0fadf309963ba5d23c092ec049654791901f806e
-candidate-tree: 86c8f85f1f59106399d1a2f2040851b100eb2f5a
+candidate-commit: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
+candidate-tree: 657101daa0419409ea046a3716badd9d6fd57a61
 authority: DEC-P5.1-SYSTEMIC-REPAIR-001
 updated: 2026-08-23
 ---
@@ -106,4 +106,14 @@ updated: 2026-08-23
 
 Main推荐 **方案 A**。理由：Human已明确要求系统补救和逐场景差异总表；方案B仍可能重复“自动正确、整体看起来没变化”的失败。
 
-Human已选择**方案A：完整证据补救**。父流程进入`batch-implement`，实施权威见[完整证据补救实施包](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)。
+Human已选择**方案A：完整证据补救**。R1–R7已实施并完成自动回归；最终Human整体验收未通过，父流程按协议回到本差异表继续审计。
+
+## 6. R7 Human拒绝后的新增差异（审计中）
+
+> 来源为2026-08-23 Human实际操作结果。以下三行属于同一父工作项，不分别建立Bug工作项；未完成复现前不写产品代码。
+
+| ID | expected source | candidate actual evidence | 严重度 | 根因候选 | 状态/UNKNOWN |
+|---|---|---|---|---|---|
+| D-COLLISION-02 | 地图可通行区域应与视觉阻挡一致；垃圾堆局部是否原站有意阻挡仍需对照公开collision/walls证据 | Human报告“垃圾堆哪里有一些不能通过的地方”；精确坐标和原站同点行为待复现 | Major（待坐标确认） | MOVE/WORLD/LAYER碰撞数据或视觉-碰撞错位 | expected/actual边界未收敛，暂不能判定Bug |
+| D-PERF-02 | 已接受入口目标为连续3秒Power2镜头与5秒train编排；正常Play不应出现无反馈停顿 | Human报告“开头那段会卡着一会”；WSL R7 trace无>34ms帧，说明自动环境与Human设备继续冲突 | Critical | APP/ENTRY主线程、资源解码、chunk mutation或控制/状态等待 | Human actual confirmed；现场长帧/等待类型UNKNOWN |
+| D-TRAIN-02 | 火车离场期间玩家主体不应出现错误穿模；原站路线/scale FACT与玩家/列车遮挡关系需逐帧核对 | Human报告“开头火车开走的时候那段主角穿模了”；现有R7仅按固定时点截图，未覆盖离场交叉逐帧 | Critical | TRAIN路径/碰撞、PLAYER深度或presentation layer时序 | Human actual confirmed；穿模类型和精确帧UNKNOWN |

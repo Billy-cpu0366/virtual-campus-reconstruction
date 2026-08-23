@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 repair-package: P5.1-R7
-status: auto-verified-awaiting-human
+status: auto-verified-human-rejected
 implementation-commit: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
 implementation-tree: 657101daa0419409ea046a3716badd9d6fd57a61
 base-commit: 32e7f74506085c9d6ba23d7fa518e4f4fb2f9ec1
@@ -50,10 +50,20 @@ R7脚本前两次运行只暴露门禁自身问题：最早DOM采样未容忍`bo
 
 证据目录：[`task-todos/evidence/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1/R7/`](evidence/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1/R7/)
 
-## 4. 状态
+## 4. Human整体验收结果
+
+2026-08-23，Human实际操作后明确选择“仍有问题”，并报告：
+
+1. 垃圾堆附近存在一些不能通过的位置，需核对是否为碰撞Bug；
+2. 开头一段会卡住一会；
+3. 开头火车开走时玩家出现穿模。
+
+因此R7只能保持**自动验证通过、Human验收失败**。candidate `1e24fd1`已冻结，父`systemic-flow`回到同一差异表的`audit`阶段；三项完成复现与根因聚类前不改产品代码。
+
+## 5. 状态
 
 - **accepted**：方案A及R1–R7边界已由`DEC-P5.1-SYSTEMIC-REPAIR-001`授权。
 - **persisted**：R1–R7实现链、R7门禁、双视口收据/截图、性能与本收据已落盘。
 - **verified**：R7自动、production主路径、test-hooks辅助和独立复核在WSL范围内PASS。
-- **awaiting Human**：Human仍需在实际设备上整体验收Loading、入口、平滑度、train/NPC/smoke、roof/footsteps、地图HUD/导航/对话与整体视觉密度；未签字前工作项不关闭。
+- **Human未通过**：实际设备整体验收报告垃圾堆不可通行、开头停顿、火车离场玩家穿模；工作项不关闭并回到systemic audit。
 - **尚未解决**：Human硬件trace未取得；CV/Contact/Technologies完整内容、顶部全菜单/mobile quick-actions parity、particles3/69360、111秒序列及其他UNKNOWN不属于R1–R7自动关闭项。

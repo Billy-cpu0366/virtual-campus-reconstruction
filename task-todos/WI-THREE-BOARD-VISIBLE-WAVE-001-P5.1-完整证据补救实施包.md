@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: awaiting-human-integrated-visual-acceptance
+status: human-rejected-audit-reopened
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -102,7 +102,7 @@ updated: 2026-08-23
 
 **完整检查**：typecheck、全测试、production/test-hooks build、现有browser gates、新正常路径视觉/性能门禁、状态一致性、CRLF-aware diff、独立验证。全部通过后才进入Human整体验收。
 
-**R7收据（auto verified / awaiting Human）**：gate提交`1e24fd1`；1920×1080慢网与375×667正常网络均在单一无hooks production session完成Loading、0/1/3/5/8/17秒入口、真人Memo6、Visited、sprayer、factory roof与footsteps。56文件/312测试、双build、production/test-hooks全部门禁、性能、状态一致性和独立终审PASS。详见[R7收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R7-收据.md)。当前只等待Human整体验收，不自动关闭。
+**R7收据（auto verified / Human rejected）**：gate提交`1e24fd1`；双视口production、312测试与全部自动门禁PASS，但Human实际验收报告垃圾堆不可通行、开头停顿、火车离场玩家穿模。详见[R7收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R7-收据.md)。candidate已冻结，父流程回到同一差异表审计，不自动关闭、不先补丁。
 
 ## 停止条件
 
