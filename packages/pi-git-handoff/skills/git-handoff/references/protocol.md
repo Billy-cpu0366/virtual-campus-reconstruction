@@ -18,7 +18,8 @@ The project-level JSON adapter passed to the executor is the only source for:
 - project identity and required package version;
 - sandbox and external repository paths;
 - canonical remote and base ref;
-- delivery and target branch templates;
+- a delivery ref template (full ref or branch fragment) and target branch
+  templates;
 - outbox and external staging paths;
 - external replay checks; local readiness checks remain in the project workflow
   consumed by `verification-delivery`;

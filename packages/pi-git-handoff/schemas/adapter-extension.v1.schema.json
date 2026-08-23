@@ -62,13 +62,14 @@
           "$ref": "#/$defs/branch-name"
         },
         "delivery-template": {
-          "$ref": "#/$defs/ref-template"
+          "$ref": "#/$defs/ref-template",
+          "description": "A full refs/... template or a branch template normalized under refs/heads."
         },
         "targets": {
           "type": "object",
           "minProperties": 1,
           "additionalProperties": {
-            "$ref": "#/$defs/ref-template"
+            "$ref": "#/$defs/branch-template"
           },
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9-]{0,31}$"
@@ -167,6 +168,10 @@
     "ref-template": {
       "type": "string",
       "pattern": "^[A-Za-z0-9._/-]*\\{delivery-id\\}[A-Za-z0-9._/-]*$"
+    },
+    "branch-template": {
+      "type": "string",
+      "pattern": "^(?!refs/)[A-Za-z0-9._/-]*\\{delivery-id\\}[A-Za-z0-9._/-]*$"
     },
     "check-list": {
       "type": "array",

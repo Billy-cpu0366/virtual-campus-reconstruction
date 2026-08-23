@@ -10,8 +10,8 @@ verifying and pushing the exact result with versioned receipts.
 |---|---|
 | Human direction | design and executor implementation accepted |
 | Design persistence | persisted in `683ea17` |
-| Executor persistence | persisted by the containing result commit |
-| Local validation | verified: 15 tests, real offline bundle, state consistency, independent review |
+| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 full-ref fix by the containing result commit |
+| Local validation | verified: 17 tests, real offline bundle, state consistency, independent review |
 | Prepare implementation | implemented; sandbox-local operations only |
 | External verify/push implementation | implemented; WSL tests use a fake Git runner |
 | Global or project installation | not authorized |
@@ -78,7 +78,8 @@ from its `extensions.git-handoff` namespace:
 
 - sandbox and external repository paths;
 - canonical remote identity;
-- canonical base, local delivery ref template, and allowed target templates;
+- canonical base, local delivery ref template (full ref or branch fragment), and
+  allowed target branch templates;
 - sandbox outbox and external staging paths;
 - external replay check commands; local readiness checks remain owned by
   `verification-delivery` and the project workflow adapter;

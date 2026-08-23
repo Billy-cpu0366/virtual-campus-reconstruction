@@ -1,0 +1,60 @@
+{
+  "schema-version": 1,
+  "required-package-version": "0.1.0-alpha.3",
+  "project-id": "virtual-campus-reconstruction",
+  "repositories": {
+    "sandbox-root": ".",
+    "external-root": "D:/复盘/虚拟校园项目重构",
+    "remote-name": "origin",
+    "canonical-remote": "https://github.com/Billy-cpu0366/virtual-campus-reconstruction.git"
+  },
+  "refs": {
+    "canonical-base": "refs/pi-handoff/canonical/main",
+    "remote-base": "main",
+    "delivery-template": "refs/pi-handoff/delivery/{delivery-id}",
+    "targets": {
+      "wip": "wip/{delivery-id}",
+      "review": "delivery/{delivery-id}"
+    }
+  },
+  "transport": {
+    "sandbox-outbox": ".pi/handoff/outbox",
+    "external-staging": "C:/Users/inertnet/.pi/agent/github-handoff-staging/virtual-campus-reconstruction"
+  },
+  "checks": {
+    "external": [
+      {
+        "id": "state-consistency",
+        "argv": ["python", "scripts/check-state-consistency.py"],
+        "timeout-seconds": 120
+      },
+      {
+        "id": "typecheck",
+        "argv": ["npm", "run", "typecheck"],
+        "timeout-seconds": 1200
+      },
+      {
+        "id": "test",
+        "argv": ["npm", "test"],
+        "timeout-seconds": 1200
+      },
+      {
+        "id": "build",
+        "argv": ["npm", "run", "build"],
+        "timeout-seconds": 1200
+      }
+    ]
+  },
+  "policy": {
+    "require-clean-worktree": true,
+    "require-exact-base": true,
+    "allow-force-push": false,
+    "allow-direct-base-push": false,
+    "protected-paths": [
+      ".git/**",
+      ".env",
+      "migration-history/**",
+      "sample/original-public-build/mirror/**"
+    ]
+  }
+}

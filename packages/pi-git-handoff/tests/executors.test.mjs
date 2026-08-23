@@ -12,6 +12,7 @@ import {
   assertDisjointPaths,
   assertUnprotected,
   defaultGit,
+  errorResult,
   loadAdapter,
   prepareDelivery,
   pushVerified,
@@ -171,6 +172,12 @@ test("adapter validation rejects version mismatch and unknown keys", () => {
     () => validateAdapter({ ...adapter, unexpected: true }),
     (error) => error instanceof HandoffError && error.code === "INVALID_ADAPTER",
   );
+  const targetAsFullRef = adapterFor("/tmp/project", "/tmp/external", "/tmp/staging");
+  targetAsFullRef.refs.targets.review = "refs/heads/handoff/{delivery-id}";
+  assert.throws(
+    () => validateAdapter(targetAsFullRef),
+    (error) => error instanceof HandoffError && error.code === "INVALID_ADAPTER",
+  );
 });
 
 test("target templates, protected paths, and staging paths are deterministic", () => {
@@ -212,6 +219,66 @@ test("prepare creates immutable artifact and no remote Git operations", async ()
     }),
     (error) => error instanceof HandoffError && error.code === "OUTBOX_EXISTS",
   );
+});
+
+test("prepare preserves a full delivery ref template exactly", async () => {
+  const runtime = await runtimeDirectory("full-delivery-ref");
+  const projectRoot = path.join(runtime, "project");
+  const externalRoot = path.join(runtime, "external");
+  const externalStaging = path.join(runtime, "staging");
+  await mkdir(projectRoot, { recursive: true });
+  await mkdir(externalRoot, { recursive: true });
+  const adapter = adapterFor(projectRoot, externalRoot, externalStaging);
+  adapter.refs["delivery-template"] = "refs/pi-handoff/delivery/{delivery-id}";
+  const adapterPath = path.join(projectRoot, "git-handoff.json");
+  await writeFile(adapterPath, `${JSON.stringify(adapter, null, 2)}\n`, "utf8");
+  const operations = [];
+  await prepareDelivery({
+    adapterPath,
+    profile: "review",
+    projectRoot,
+    deliveryId: "example-full-ref-0001",
+    authorityRef: "DEC-EXAMPLE-001",
+  }, {
+    git: createPrepareGit(projectRoot, operations),
+  });
+  const updateRef = operations.find((args) => args[0] === "update-ref");
+  assert.equal(updateRef[1], "refs/pi-handoff/delivery/example-full-ref-0001");
+});
+
+test("prepare classifies a missing canonical ref as stopped", async () => {
+  const runtime = await runtimeDirectory("missing-canonical-ref");
+  const projectRoot = path.join(runtime, "project");
+  const externalRoot = path.join(runtime, "external");
+  const externalStaging = path.join(runtime, "staging");
+  await mkdir(projectRoot, { recursive: true });
+  await mkdir(externalRoot, { recursive: true });
+  const adapter = adapterFor(projectRoot, externalRoot, externalStaging);
+  const adapterPath = path.join(projectRoot, "git-handoff.json");
+  await writeFile(adapterPath, `${JSON.stringify(adapter, null, 2)}\n`, "utf8");
+  let observed;
+  await assert.rejects(
+    prepareDelivery({
+      adapterPath,
+      profile: "review",
+      projectRoot,
+      deliveryId: "example-missing-base-0001",
+      authorityRef: "DEC-EXAMPLE-001",
+    }, {
+      git: async (repo, args, options) => {
+        if (args[0] === "rev-parse" && args[1] === BASE_REF) {
+          return processResult(args, { code: 128, stderr: "unknown revision" });
+        }
+        return createPrepareGit(projectRoot, [])(repo, args, options);
+      },
+    }),
+    (error) => {
+      observed = error;
+      return error instanceof HandoffError;
+    },
+  );
+  assert.equal(errorResult(observed).state, "stopped");
+  assert.equal(observed.code, "CANONICAL_BASE_MISSING");
 });
 
 test("external verification binds adapter, artifact, Human token, and remote result", async () => {

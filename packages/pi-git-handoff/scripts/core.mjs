@@ -12,7 +12,7 @@ import {
 import path from "node:path";
 
 export const PACKAGE_NAME = "pi-git-handoff";
-export const PACKAGE_VERSION = "0.1.0-alpha.2";
+export const PACKAGE_VERSION = "0.1.0-alpha.3";
 export const PROTOCOL_VERSION = "0.1";
 
 export class HandoffError extends Error {
@@ -98,7 +98,7 @@ export function validateAdapter(adapter) {
   stop(!isObject(refs.targets) || Object.keys(refs.targets).length === 0, "INVALID_ADAPTER", "adapter.refs.targets must contain at least one profile");
   for (const [profile, template] of Object.entries(refs.targets)) {
     assertString(profile, "adapter.refs.targets profile", PROFILE_ID);
-    assertTemplate(template, `adapter.refs.targets.${profile}`);
+    assertTargetTemplate(template, `adapter.refs.targets.${profile}`);
   }
 
   const transport = adapter.transport;
@@ -137,6 +137,16 @@ function assertTemplate(value, location) {
   stop((value.match(/\{delivery-id\}/g) || []).length !== 1, "INVALID_ADAPTER", `${location} must contain {delivery-id} exactly once`);
   const probe = value.replace("{delivery-id}", "delivery-id");
   assertString(probe, location, BRANCH);
+}
+
+function assertTargetTemplate(value, location) {
+  assertTemplate(value, location);
+  stop(value.startsWith("refs/"), "INVALID_ADAPTER", `${location} target template must be a branch name, not a full ref`);
+}
+
+function renderDeliveryRef(template, deliveryId) {
+  const rendered = renderTemplate(template, deliveryId);
+  return rendered.startsWith("refs/") ? rendered : `refs/heads/${rendered}`;
 }
 
 function validateChecks(checks, location) {
@@ -687,21 +697,25 @@ export async function prepareDelivery(options, dependencies = {}) {
   const commit = cleanOutput((await git(projectRoot, ["rev-parse", "HEAD"])).stdout);
   const tree = cleanOutput((await git(projectRoot, ["rev-parse", "HEAD^{tree}"])).stdout);
   const baseRef = adapter.refs["canonical-base"];
-  const baseCommit = cleanOutput((await git(projectRoot, ["rev-parse", baseRef])).stdout);
-  const baseTree = cleanOutput((await git(projectRoot, ["rev-parse", `${baseRef}^{tree}`])).stdout);
+  const baseCommitResult = await git(projectRoot, ["rev-parse", baseRef], { acceptCodes: [0, 128] });
+  stop(baseCommitResult.code !== 0, "CANONICAL_BASE_MISSING", `canonical base ref does not exist: ${baseRef}`);
+  const baseCommit = cleanOutput(baseCommitResult.stdout);
+  const baseTreeResult = await git(projectRoot, ["rev-parse", `${baseRef}^{tree}`], { acceptCodes: [0, 128] });
+  stop(baseTreeResult.code !== 0, "CANONICAL_BASE_INVALID", `canonical base has no readable tree: ${baseRef}`);
+  const baseTree = cleanOutput(baseTreeResult.stdout);
   assertString(commit, "HEAD", GIT_OID);
   assertString(tree, "HEAD tree", GIT_OID);
   assertString(baseCommit, "canonical base", GIT_OID);
   assertString(baseTree, "canonical base tree", GIT_OID);
-  await git(projectRoot, ["merge-base", "--is-ancestor", baseCommit, commit]);
+  const ancestry = await git(projectRoot, ["merge-base", "--is-ancestor", baseCommit, commit], { acceptCodes: [0, 1] });
+  stop(ancestry.code !== 0, "CANONICAL_BASE_NOT_ANCESTOR", "canonical base is not an ancestor of the delivery commit");
 
   const profile = options.profile;
   stop(typeof options.authorityRef !== "string" || options.authorityRef.length === 0, "DELIVERY_READINESS_REQUIRED", "prepare requires an authority reference from verification-delivery");
   stop(!(profile in adapter.refs.targets), "UNKNOWN_PROFILE", `adapter has no target profile ${profile}`);
   const deliveryId = options.deliveryId ?? makeDeliveryId(adapter["project-id"], now, commit);
   assertString(deliveryId, "delivery-id", DELIVERY_ID);
-  const deliveryBranch = renderTemplate(adapter.refs["delivery-template"], deliveryId);
-  const deliveryRef = `refs/heads/${deliveryBranch}`;
+  const deliveryRef = renderDeliveryRef(adapter.refs["delivery-template"], deliveryId);
   const targetBranch = renderTemplate(adapter.refs.targets[profile], deliveryId);
   stop(targetBranch === adapter.refs["remote-base"], "PROTECTED_BASE_TARGET", "target branch cannot equal remote base");
   await git(projectRoot, ["check-ref-format", deliveryRef]);
@@ -894,7 +908,7 @@ export async function verifyExternal(options, dependencies = {}) {
   stop(manifest["project-id"] !== adapter["project-id"] || manifest["canonical-remote"] !== adapter.repositories["canonical-remote"], "PROJECT_IDENTITY_MISMATCH", "artifact project identity differs from adapter");
   stop(!(manifest.profile in adapter.refs.targets), "TARGET_MISMATCH", "manifest profile is absent from adapter");
   stop(manifest["target-branch"] !== renderTemplate(adapter.refs.targets[manifest.profile], manifest["delivery-id"]), "TARGET_MISMATCH", "manifest target is not adapter-derived");
-  const expectedDeliveryRef = `refs/heads/${renderTemplate(adapter.refs["delivery-template"], manifest["delivery-id"])}`;
+  const expectedDeliveryRef = renderDeliveryRef(adapter.refs["delivery-template"], manifest["delivery-id"]);
   stop(manifest.delivery.ref !== expectedDeliveryRef, "DELIVERY_REF_MISMATCH", "manifest delivery ref is not adapter-derived");
   stop(manifest["target-branch"] === adapter.refs["remote-base"], "PROTECTED_BASE_TARGET", "target branch cannot equal remote base");
   stop(sha256(await readFile(path.join(artifactRoot, "delivery.bundle"))) !== manifest.bundle.sha256, "BUNDLE_HASH_MISMATCH", "bundle hash differs from manifest");

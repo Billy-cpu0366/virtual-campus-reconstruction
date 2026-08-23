@@ -4,7 +4,7 @@ type: delivery-protocol
 status: accepted
 persistence: persisted
 maturity: unverified
-updated: 2026-08-21
+updated: 2026-08-23
 ---
 
 # GitHub 交付中转协议 v1
@@ -38,6 +38,7 @@ Human：审查后确认推送
 - WSL 交付出口：`.pi/handoff/outbox/<delivery-id>/`。
 - WSL 基线入口：`.pi/handoff/inbox/<sync-id>/`。
 - Windows 中转区：`C:\Users\inertnet\.pi\agent\github-handoff\<project>\<delivery-id>\`。
+- alpha.3 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；外部隔离 staging 与中转区分离，固定为 `C:\Users\inertnet\.pi\agent\github-handoff-staging\virtual-campus-reconstruction`。
 - `main` 必须保持 clean 并只跟随 `origin/main`；不在 `main` 上开发、commit 或直接 push。
 - 不执行 `reset`、`clean`、覆盖、擅自 `pull`、force-push；不自动创建/合并 PR。
 - `task_plan.md` 仍是项目动态状态唯一权威；handoff 包只负责运输和收据，不建立第二套项目状态。
@@ -80,19 +81,20 @@ WSL 完成有界工作后：
 4. 基于共同 canonical 历史生成 Git bundle，而不是普通补丁。
 5. 生成不可变 outbox；内容变化必须使用新 delivery-id，不覆盖旧包。
 
-标准 outbox：
+alpha.3 标准 outbox：
 
 ```text
 .pi/handoff/outbox/<delivery-id>/
 ├── delivery.bundle
-├── manifest.json
-├── checks.json
+├── manifest.v1.json
 ├── files.txt
+├── prepare-receipt.v1.json
+├── logs/
 ├── SHA256SUMS
 └── README.md
 ```
 
-`manifest.json` 至少包含：项目、canonical remote、canonical base commit/tree、delivery commit/tree、允许文件、排除范围、Human Gate、push/PR/merge 授权和未解决风险。
+`manifest.v1.json` 与 prepare receipt 按 `packages/pi-git-handoff/schemas/` 校验，至少绑定 adapter SHA-256、canonical base commit/tree、delivery ref/commit/tree、目标分支、实际文件、Human readiness authority 和未授权 push 边界。检查结果不由 `prepare` 执行；本地 readiness 仍由 `verification-delivery` 证明，Windows 隔离 staging 再执行 adapter 的 external checks。
 
 ## 6. Windows 接管与验证
 
@@ -106,13 +108,13 @@ Human 对外部 Pi 只需说：
 
 1. 主动把 outbox 拉到 Windows 中转区并验证所有 SHA-256。
 2. 核对正式路径、origin、main、dirty 和 fetch 后基线。
-3. 从声明基线创建 `delivery/<delivery-id>` 和仓库外 worktree。
+3. 只有正式仓库 clean、adapter 字节一致且 canonical base 精确匹配后，才允许 alpha.3 external executor 在仓库外 staging 导入 bundle；首次历史对齐仍按第 3 节单独完成，不能让 executor 自动处理 dirty 或分叉。
 4. 从 bundle 导入明确 ref；禁止用不明 patch 猜测应用。
 5. 比较实际文件清单、commit/tree 和 manifest。
-6. 重跑正式仓库适用检查。
-7. 第二层 Gate：展示正式仓库实际 diff、检查、风险和目标远端；Human 确认前不得创建新的 Windows reconciliation/delivery commit，也不得 push/PR/merge。bundle 内已存在的 WSL 本地 commit 只作待审输入。
-8. Human 说“确认推送”后，若正式仓库无需新提交则只 push 已验证 delivery ref；若 reconciliation 产生新提交，则按已展示内容创建后只 push 指定 delivery 分支。
-9. push 后核对远端 commit、tree 和分支指向，生成交付收据。
+6. 在隔离 staging 重跑 adapter external checks。
+7. 第二层 Gate：展示正式仓库实际 diff、检查、风险、目标远端和 executor 生成的精确 confirmation token；Human 确认前不得 push/PR/merge。bundle 内已存在的 WSL 本地 commit 只作待审输入。
+8. Human 接受该次精确 Preview 后，只把已验证 commit push 到 adapter profile 派生的非保护分支。
+9. push 成功后重新读取远端 ref，核对 commit/tree 并生成版本化 push receipt。
 
 ## 7. 自动纠偏与停止条件
 
@@ -134,23 +136,36 @@ Human 对外部 Pi 只需说：
 
 ## 8. 交付收据
 
-成功后 `delivery-receipt.json` 至少记录：
+alpha.3 按以下不可变证据链记录：
 
-- delivery-id；
-- 正式仓库路径与 remote；
-- canonical base、本地 delivery 和远端 commit/tree；
-- 实际文件清单；
-- 检查结果；
-- Human Gate 原文；
-- push 分支和远端核对；
-- PR/merge 状态；
-- 未解决风险。
+```text
+prepare-receipt.v1.json
+  -> verify-receipt.v1.json
+  -> push-receipt.v1.json
+```
 
-项目权威文档只吸收已接受、可复核的最终收据。
+收据至少绑定 delivery-id、adapter/artifact 哈希、canonical base、delivery commit/tree、实际文件、检查结果、Human Gate authority、push 目标和远端核对；失败或停止使用新 attempt，不覆盖旧收据。项目权威文档只吸收已接受、可复核的最终收据。
 
 ## 9. 当前成熟度
 
 - `accepted`：Human 于 2026-08-21 回复“ok”，接受 Git bundle 双向中转架构、正式 main 保护，以及 WSL 本地预览与 Windows 正式仓库最终预览两层 Gate。
 - `persisted`：本协议、决定记录和工作项状态已由提交 `0a105dc` 进入项目仓库。
-- `unverified`：尚未完成 Windows 正式仓库审计、首次 reconciliation、bundle 往返和真实远端 push。
+- `adapter-accepted`：Human 于 2026-08-23 接受 `03-执行层/git-handoff.adapter.v1.json` 的路径、refs、profiles、检查和固定 STOP；本行所在结果提交负责落盘。
+- `local-static-verified`：alpha.3 adapter runtime 解析、17 项 Package 测试、outbox ignore、状态一致性、diff 检查与最终独立复核 PASS；未运行 adapter commands 或真实外部流程。
+- `unverified`：尚未完成 Windows 正式仓库审计、首次 reconciliation、canonical bundle 入站、alpha.3 真实往返和远端 push。
 - 只有首次完整交付收据通过后，v1 才能标为 `verified` 并候选安装到 Windows 全局 Pi workflow。
+
+## 10. alpha.3 Adapter 预演与固定 STOP
+
+当前 adapter 是稳定映射，不记录当前工作项、阶段或 Human Gate。`task_plan.md` 仍是动态状态唯一权威，也不新增 `.ai-workflow/project.yaml`。
+
+预演顺序：
+
+1. 只做 schema/runtime 读取，确认 package 版本、路径格式、remote、refs、checks 和 policy 可被 alpha.3 接受；不得自动执行 checks。
+2. 确认 `.pi/handoff/outbox` 被 Git ignore，Windows 中转 artifact 与 external staging 不重叠。
+3. 当前 WSL 没有 `refs/pi-handoff/canonical/main`，因此首次 Windows 审计和 canonical bundle 入站完成前，`prepare` 必须 STOP；不得把当前 `master` 猜成 canonical base。
+4. `WI-GITHUB-HANDOFF-V1-001` 记录的 Windows dirty、main 分叉和 fetch 后身份仍未解决；adapter 不提供 reset、clean、pull、rebase、自动 reconciliation 或旁路。
+5. 只有一个已提交、clean、通过 `verification-delivery` 且 Human 接受的成果，才能选择 `wip` 或 `review` profile 生成新 delivery-id。
+6. 本轮只落盘 adapter 与预演合同，不运行 prepare、external checks、fetch、push、PR 或 merge。
+
+Windows 路径存在性、实际 `origin`、凭据、Git object format 和 checks 可执行性保持 `UNKNOWN`，只能在后续单独授权的外部只读 Gate 中验证。

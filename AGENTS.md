@@ -55,6 +55,7 @@ Human提出不满意、修改、Bug或验收失败时，AI在写代码前必须�
 | 初步技术分析 | `sample/analysis/` |
 | 采集与验证工具 | `sample/tools/` |
 | 跨项目 Git 中转 Package 设计 | `packages/pi-git-handoff/AGENTS.md`、`packages/pi-git-handoff/README.md` |
+| 本项目 Git 中转 adapter | `03-执行层/git-handoff.adapter.v1.json`、`03-执行层/GitHub交付中转协议.md` |
 
 同一结论只维护一处。`sample/`保存证据，`03-执行层/`保存经过评审的当前工程知识，二者不得混用。
 

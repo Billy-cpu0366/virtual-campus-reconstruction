@@ -7,8 +7,9 @@ This directory is the machine entry for the independent cross-project
 
 - Design decision: accepted under `DEC-PI-GIT-HANDOFF-DESIGN-001`.
 - Executor authorization: accepted under `DEC-PI-GIT-HANDOFF-EXECUTORS-001`.
-- Persistence: executor implementation is persisted by the containing result commit.
-- Verification: local-verified by 15 automated tests, real offline Git bundle,
+- Persistence: alpha.2 is persisted in `c6eee9f`; the alpha.3 full-ref fix is
+  persisted by the containing project-adapter result commit.
+- Verification: local-verified by 17 automated tests, real offline Git bundle,
   project state consistency, and independent review; Windows/GitHub remains
   remote-unverified.
 - Execution: `prepare` and `verify-push` exist, but real external use still requires

@@ -3,7 +3,7 @@ work-item: WI-GITHUB-HANDOFF-V1-001
 status: active-wip-snapshot-preparation
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
-updated: 2026-08-21
+updated: 2026-08-23
 protocol-commit: 0a105dc
 ---
 
@@ -30,6 +30,18 @@ Human要求立即同步当前进度。当前交付只允许推远端WIP分支：
 - 未执行 fetch、复制、应用、测试、commit 或 push。
 
 以上只作为待复核输入；fetch 后哈希、分叉和 dirty 明细仍为 `UNKNOWN`。
+
+## alpha.3 Adapter 接入
+
+Human 于 2026-08-23 接受把独立 `pi-git-handoff` 接入本项目；落盘前因完整 delivery ref 回归修复，versioned 合同晋升为 alpha.3，范围仅为 adapter 与预演合同：
+
+- 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；
+- `refs/pi-handoff/canonical/main` 是固定 WSL canonical ref，但当前尚不存在；
+- profiles 只定义 `wip/<delivery-id>` 与 `delivery/<delivery-id>`，不授权实际 push；
+- 外部检查固定为状态一致性、typecheck、测试和 build；
+- 本轮不运行 prepare、external checks、fetch 或 push，不改变本卡当前阶段和下一 Gate。
+
+adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才能用于真实 handoff；它不得自动处理已知 Windows dirty 或 main 分叉。alpha.3 静态接入已通过 runtime 解析、17 项 Package 测试、outbox ignore、状态一致性与独立复核，但仍是 `remote-unverified`。
 
 ## 允许
 

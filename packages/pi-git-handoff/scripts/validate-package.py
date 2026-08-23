@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_VERSION = "0.1.0-alpha.2"
+PACKAGE_VERSION = "0.1.0-alpha.3"
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 
 EXPECTED_FILES = {
