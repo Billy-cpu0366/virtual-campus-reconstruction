@@ -142,6 +142,32 @@ describe("M1 runtime particle asset contract", () => {
       expect(sha256(source)).toBe(asset.sha256);
       expect(sha256(runtime)).toBe(asset.sha256);
     }
+
+    const mapUiAssets = [
+      {
+        sourceRelative: "maps/mini-map.webp",
+        targetRelative: "assets/maps/mini-map.webp",
+        sha256: "2355cde9d660a0d97b74dc6487d8eaa6347f7a96e5c26270b5c91bd8058a7efd",
+      },
+      {
+        sourceRelative: "maps/big-map.webp",
+        targetRelative: "assets/maps/big-map.webp",
+        sha256: "f0e90a994ddb7a16242239f2d7fb94f630c7bbae5eb200b30fce70dda71bba8d",
+      },
+      {
+        sourceRelative: "images/ui/map-holder-mini3.webp",
+        targetRelative: "assets/images/ui/map-holder-mini3.webp",
+        sha256: "5dedcf1cbf713d52ca4624a2c50813d98119c98bb0f8d215174f9dd9fbd52a07",
+      },
+    ] as const;
+    for (const asset of mapUiAssets) {
+      const source = resolve(SOURCE_MAPS, "..", asset.sourceRelative);
+      const runtime = resolve(ROOT, "public", asset.targetRelative);
+      expect(existsSync(source)).toBe(true);
+      expect(existsSync(runtime)).toBe(true);
+      expect(sha256(source)).toBe(asset.sha256);
+      expect(sha256(runtime)).toBe(asset.sha256);
+    }
     expect(() =>
       execFileSync(process.execPath, ["scripts/check-runtime-assets.mjs"], {
         cwd: ROOT,

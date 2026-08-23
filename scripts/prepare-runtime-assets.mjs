@@ -23,6 +23,9 @@ const FILES = [
   ["sprites/player.webp", "sprites/player.webp"],
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],
+  ["maps/mini-map.webp", "assets/maps/mini-map.webp"],
+  ["maps/big-map.webp", "assets/maps/big-map.webp"],
+  ["images/ui/map-holder-mini3.webp", "assets/images/ui/map-holder-mini3.webp"],
   ["js/phaser.min.js", "vendor/phaser.min.js"],
   ["maps/chunks/master.json", "maps/chunks/master.json"],
   ...Array.from({ length: 25 }, (_, index) => [

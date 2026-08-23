@@ -62,9 +62,11 @@ import {
 } from "../src/camera/index.js";
 import { FACTORY_SMOKE_CONFIG } from "../src/fx/index.js";
 import {
+  type ContentMenuId,
   type GameUiPort,
   type GameplayControlLeaseToken,
 } from "../src/content/contract.js";
+import { isVisibleContentMenuId } from "../src/content/index.js";
 import { InteractRuntime } from "../src/interact/index.js";
 import {
   DomModalGameUi,
@@ -103,6 +105,12 @@ import {
   PhaserFootstepRuntime,
   type PhaserFootstepSceneLike,
 } from "./PhaserFootstepRuntime.js";
+import {
+  PhaserCampusMapRuntime,
+  type CampusMapElementLike,
+  type CampusMapMarker,
+  type CampusMapMarkerView,
+} from "./PhaserCampusMapRuntime.js";
 import {
   ProductEntryRuntime,
   type ProductEntryGuideTarget,
@@ -165,6 +173,32 @@ const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
   { markerId: "memo5", menuId: "memo5", x: 1808, y: 624 },
   { markerId: "memo6", menuId: "memo6", x: 496, y: 176 },
 ]);
+const CONTENT_MARKER_LABELS: Readonly<Record<ContentMenuId, string>> =
+  Object.freeze({
+    about: "About me",
+    cv: "Resume(CV)",
+    projects: "Projects",
+    contact: "Contact",
+    tech: "Technologies",
+    memo1: "Memo #1",
+    memo2: "Memo #2",
+    memo3: "Memo #3",
+    memo4: "Memo #4",
+    memo5: "Memo #5",
+    memo6: "Memo #6",
+  });
+const CAMPUS_MAP_MARKERS: readonly CampusMapMarker[] = Object.freeze(
+  CONTENT_MARKERS.map((marker) =>
+    Object.freeze({
+      ...marker,
+      label: CONTENT_MARKER_LABELS[marker.menuId],
+      kind: marker.menuId.startsWith("memo")
+        ? "vortex" as const
+        : "sunburn" as const,
+      enabled: isVisibleContentMenuId(marker.menuId),
+    }),
+  ),
+);
 const CAMERA_TEST_HOOK_START_OPTIONS: CameraRuntimeStartOptions = Object.freeze({
   sequence: CAMERA_SEQUENCE.map((point) =>
     Object.freeze({
@@ -251,6 +285,9 @@ export interface CampusSceneShutdownReceipt {
   readonly smokeEmitterActive: boolean;
   readonly footstepActiveCount: number;
   readonly factoryRoofTweenActive: boolean;
+  readonly mapHudHidden: boolean;
+  readonly mapRootHidden: boolean;
+  readonly mapLeaseActive: boolean;
   readonly sideFailures: readonly string[];
   readonly physicsColliderCount: number | null;
 }
@@ -286,6 +323,9 @@ export class CampusScene extends Phaser.Scene {
   private sprayerRuntime: PhaserSprayerRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private footstepRuntime: PhaserFootstepRuntime | undefined;
+  private mapRuntime: PhaserCampusMapRuntime | undefined;
+  private mapLeaseToken: GameplayControlLeaseToken | undefined;
+  private nextMapResidenceNumber = 1;
   private factoryRoofInside: boolean | undefined;
   private factoryRoofTween:
     | { stop?(): unknown; remove?(): unknown }
@@ -449,6 +489,7 @@ export class CampusScene extends Phaser.Scene {
     this.createPlayerAndInput();
     this.createCamera(CAMERA_BOUNDS);
     this.createContentFoundation();
+    this.createMapFoundation();
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
     window.addEventListener("blur", this.handleWindowBlur);
@@ -540,7 +581,10 @@ export class CampusScene extends Phaser.Scene {
       if (result.status === "failed" && !this.sceneDestroyed) {
         this.entryCallbacks.onError?.(result.error);
       }
-      if (result.status === "completed") this.maybeStartCameraTestTour();
+      if (result.status === "completed") {
+        this.mapRuntime?.setHudEnabled(true);
+        this.maybeStartCameraTestTour();
+      }
     });
     return run;
   }
@@ -738,6 +782,7 @@ export class CampusScene extends Phaser.Scene {
       focusRing: "3px solid #facc15",
     });
     const ui = new AppGameUiBridge(modalUi, (visible) => {
+      this.mapRuntime?.setContentModalVisible(visible);
       this.entryCallbacks.onModalVisibility?.(visible);
     });
     const lease = new GameplayControlLeaseRuntime({
@@ -776,6 +821,98 @@ export class CampusScene extends Phaser.Scene {
     this.zoneRuntime = zone;
   }
 
+  private createMapFoundation(): void {
+    const requiredMapElement = (id: string): CampusMapElementLike => {
+      const element = document.getElementById(id);
+      if (element === null) throw new Error(`missing campus map element: #${id}`);
+      return element as unknown as CampusMapElementLike;
+    };
+    const markerViews = (attribute: string): readonly CampusMapMarkerView[] =>
+      CAMPUS_MAP_MARKERS.map((marker) => {
+        const element = document.querySelector(
+          `[${attribute}="${marker.markerId}"]`,
+        );
+        if (element === null) {
+          throw new Error(`missing campus map marker: ${attribute}=${marker.markerId}`);
+        }
+        return Object.freeze({
+          markerId: marker.markerId,
+          element: element as unknown as CampusMapElementLike,
+        });
+      });
+    const runtime = new PhaserCampusMapRuntime({
+      worldWidth: CAMERA_BOUNDS.width,
+      worldHeight: CAMERA_BOUNDS.height,
+      markers: CAMPUS_MAP_MARKERS,
+      elements: {
+        hud: requiredMapElement("campus-map-hud"),
+        openButton: requiredMapElement("campus-map-open"),
+        root: requiredMapElement("campus-map-root"),
+        backdrop: requiredMapElement("campus-map-backdrop"),
+        dialog: requiredMapElement("campus-map-dialog"),
+        closeButton: requiredMapElement("campus-map-close"),
+        miniPlayer: requiredMapElement("campus-mini-map-player"),
+        bigPlayer: requiredMapElement("campus-big-map-player"),
+        miniMarkers: markerViews("data-mini-map-marker"),
+        bigMarkers: markerViews("data-big-map-marker"),
+      },
+      onOpen: () => this.acquireMapControlLease(),
+      onClose: () => this.releaseMapControlLease(),
+      onSelect: (marker) => this.openContentFromMap(marker),
+    });
+    runtime.update(
+      { x: this.player.x, y: this.player.y },
+      this.zoneRuntime?.visitedMarkerIds ?? [],
+    );
+    this.mapRuntime = runtime;
+  }
+
+  private acquireMapControlLease(): boolean {
+    if (
+      this.sceneDestroyed ||
+      this.mapLeaseToken !== undefined ||
+      this.interactRuntime?.active !== undefined
+    ) {
+      return false;
+    }
+    const acquired = this.contentLeaseRuntime?.acquire("map-open");
+    if (acquired?.ok !== true) return false;
+    this.mapLeaseToken = acquired.token;
+    this.entryCallbacks.onModalVisibility?.(true);
+    return true;
+  }
+
+  private releaseMapControlLease(): void {
+    const token = this.mapLeaseToken;
+    if (token === undefined) return;
+    const released = this.contentLeaseRuntime?.release(token);
+    if (
+      released?.ok === true ||
+      released?.reason === "unknown-token" ||
+      released?.reason === "stale-token"
+    ) {
+      this.mapLeaseToken = undefined;
+    } else {
+      this.recordSideFailure(`map-lease:${released?.reason ?? "missing-runtime"}`);
+    }
+    this.entryCallbacks.onModalVisibility?.(false);
+  }
+
+  private openContentFromMap(marker: CampusMapMarker): void {
+    if (this.sceneDestroyed || !marker.enabled) return;
+    const residenceId = `map-residence-${this.nextMapResidenceNumber}`;
+    this.nextMapResidenceNumber += 1;
+    const result = this.interactRuntime?.handleResidenceEvent({
+      markerId: marker.markerId,
+      menuId: marker.menuId,
+      residenceId,
+      phase: "enter",
+    });
+    if (result !== "shown" && result !== "already-visible") {
+      this.recordSideFailure(`map-content:${marker.markerId}:${result ?? "missing"}`);
+    }
+  }
+
   private contentZoneSnapshot(): ZoneSnapshot {
     const camera = this.cameras.main;
     const zoom = Number.isFinite(camera.zoom) && camera.zoom > 0
@@ -798,6 +935,10 @@ export class CampusScene extends Phaser.Scene {
   private updateContentZones(): void {
     if (this.sceneDestroyed) return;
     this.zoneRuntime?.tick(this.contentZoneSnapshot());
+    this.mapRuntime?.update(
+      { x: this.player.x, y: this.player.y },
+      this.zoneRuntime?.visitedMarkerIds ?? [],
+    );
   }
 
   private contentDebugSnapshot(): unknown {
@@ -810,6 +951,7 @@ export class CampusScene extends Phaser.Scene {
       pendingReleases: this.interactRuntime?.pendingReleaseCount ?? 0,
       visited: this.zoneRuntime?.visitedMarkerIds ?? [],
       activeResidenceCount: this.zoneRuntime?.activeResidenceCount ?? 0,
+      map: this.mapRuntime?.snapshot ?? null,
       leases: this.contentLeaseRuntime?.activeLeaseCount ?? 0,
       controlsDisabled: this.contentLeaseRuntime?.isDisabled ?? false,
       playerControlEnabled: this.playerRuntime?.control.enabled ?? false,
@@ -911,9 +1053,11 @@ export class CampusScene extends Phaser.Scene {
     this.cameraRuntime = undefined;
     this.pendingCameraViewport = undefined;
 
+    this.mapRuntime?.destroy();
     this.zoneRuntime?.destroy();
     this.interactRuntime?.destroy();
     this.contentLeaseRuntime?.shutdown();
+    this.mapRuntime = undefined;
     this.zoneRuntime = undefined;
     this.interactRuntime = undefined;
     this.contentUi = undefined;
@@ -954,6 +1098,9 @@ export class CampusScene extends Phaser.Scene {
       smokeEmitterActive: this.smokeRuntime?.hasEmitter ?? false,
       footstepActiveCount: this.footstepRuntime?.activeCount ?? 0,
       factoryRoofTweenActive: this.factoryRoofTween !== undefined,
+      mapHudHidden: document.getElementById("campus-map-hud")?.hidden ?? true,
+      mapRootHidden: document.getElementById("campus-map-root")?.hidden ?? true,
+      mapLeaseActive: this.mapLeaseToken !== undefined,
       sideFailures: Object.freeze([...this.sideFailures]),
       physicsColliderCount,
     });

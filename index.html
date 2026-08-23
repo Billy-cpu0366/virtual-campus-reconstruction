@@ -166,6 +166,9 @@
 
       #app-play:focus-visible,
       #app-retry:focus-visible,
+      #campus-map-open:focus-visible,
+      #campus-map-close:focus-visible,
+      .campus-big-map-marker:focus-visible,
       #content-close:focus-visible,
       #content-modal a:focus-visible {
         outline: 3px solid #facc15;
@@ -182,10 +185,258 @@
         color: #fecaca;
       }
 
+      #campus-map-hud {
+        position: fixed;
+        left: max(4px, env(safe-area-inset-left));
+        bottom: max(0px, env(safe-area-inset-bottom));
+        z-index: 6500;
+        width: 289px;
+        height: 205px;
+        pointer-events: auto;
+      }
+
+      #campus-map-open {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent url("/assets/images/ui/map-holder-mini3.webp") center / 100% 100% no-repeat;
+        image-rendering: pixelated;
+      }
+
+      #campus-mini-map-frame {
+        position: absolute;
+        left: 67px;
+        top: 43px;
+        width: 149px;
+        overflow: hidden;
+        border-radius: 4px;
+        line-height: 0;
+        box-shadow: inset 0 0 0 2px rgb(15 23 42 / 72%);
+      }
+
+      #campus-mini-map-frame > img,
+      #campus-big-map-frame > img {
+        display: block;
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+      }
+
+      #campus-mini-map-markers,
+      #campus-big-map-markers {
+        position: absolute;
+        inset: 0;
+      }
+
+      .campus-map-marker,
+      #campus-mini-map-player,
+      #campus-big-map-player {
+        position: absolute;
+        transform: translate(-50%, -50%);
+      }
+
+      .campus-map-marker {
+        border-radius: 50%;
+        background: #ff8800;
+        box-shadow: 0 0 0 1px #111827;
+      }
+
+      .campus-map-marker.map-marker-memo {
+        background: #ef4444;
+      }
+
+      .campus-map-marker.visited {
+        background: #fff;
+        box-shadow: 0 0 0 2px #16a34a;
+      }
+
+      .campus-map-marker.map-marker-disabled {
+        opacity: 0.58;
+        filter: grayscale(1);
+      }
+
+      .campus-mini-map-marker {
+        width: 7px;
+        height: 7px;
+      }
+
+      #campus-mini-map-player,
+      #campus-big-map-player {
+        z-index: 5;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgb(15 23 42 / 70%);
+        animation: campus-map-pulse 1.5s ease-out infinite;
+      }
+
+      #campus-mini-map-player {
+        width: 9px;
+        height: 9px;
+      }
+
+      @keyframes campus-map-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      #campus-map-root {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        font-family: ui-monospace, "Cascadia Mono", monospace;
+      }
+
+      #campus-map-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 8000;
+        border: 0;
+        padding: 0;
+        pointer-events: auto;
+        background: rgb(2 6 23 / 82%);
+      }
+
+      #campus-map-dialog {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 8001;
+        width: min(92vw, 720px);
+        max-height: min(92dvh, 780px);
+        box-sizing: border-box;
+        transform: translate(-50%, -50%);
+        overflow: auto;
+        border: 5px solid #111827;
+        padding: 28px 24px 22px;
+        pointer-events: auto;
+        color: #f8fafc;
+        background: #0f172a;
+        box-shadow: 10px 10px 0 rgb(0 0 0 / 55%);
+      }
+
+      #campus-map-dialog::before {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        border: 2px solid #334155;
+        pointer-events: none;
+      }
+
+      #campus-map-title {
+        margin: 0 44px 14px 0;
+        color: #facc15;
+        font-size: clamp(22px, 4vw, 34px);
+      }
+
+      #campus-map-close {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        z-index: 3;
+        border: 3px solid #f8fafc;
+        padding: 2px 9px;
+        color: #fff;
+        background: #dc2626;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      #campus-map-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        margin: 0 0 14px;
+        font-size: 13px;
+      }
+
+      .campus-map-legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .campus-map-legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ff8800;
+        box-shadow: 0 0 0 1px #fff;
+      }
+
+      .campus-map-legend-dot.memo { background: #ef4444; }
+      .campus-map-legend-dot.visited { background: #fff; box-shadow: 0 0 0 2px #16a34a; }
+
+      #campus-big-map-frame {
+        position: relative;
+        width: min(76vw, 62dvh, 560px);
+        margin: 0 auto;
+        overflow: hidden;
+        border: 4px solid #475569;
+        background: #020617;
+        box-shadow: inset 0 0 28px rgb(56 189 248 / 30%);
+      }
+
+      #campus-big-map-frame::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 3px,
+          rgb(15 23 42 / 14%) 4px
+        );
+      }
+
+      .campus-big-map-marker {
+        z-index: 3;
+        width: 13px;
+        height: 13px;
+        border: 1px solid #111827;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .campus-big-map-marker::after {
+        content: attr(aria-label);
+        position: absolute;
+        left: 10px;
+        top: -4px;
+        min-width: max-content;
+        padding: 1px 3px;
+        color: #f8fafc;
+        background: rgb(15 23 42 / 78%);
+        font: 9px/1.2 ui-monospace, monospace;
+        text-shadow: 1px 1px #000;
+      }
+
+      .campus-big-map-marker[data-big-map-marker="contact"]::after,
+      .campus-big-map-marker[data-big-map-marker="memo1"]::after,
+      .campus-big-map-marker[data-big-map-marker="memo3"]::after,
+      .campus-big-map-marker[data-big-map-marker="memo4"]::after,
+      .campus-big-map-marker[data-big-map-marker="memo5"]::after {
+        right: 10px;
+        left: auto;
+      }
+
+      .campus-big-map-marker:disabled {
+        cursor: not-allowed;
+      }
+
+      #campus-big-map-player {
+        width: 13px;
+        height: 13px;
+      }
+
       #content-guide {
         position: fixed;
         left: max(16px, env(safe-area-inset-left));
-        bottom: max(16px, env(safe-area-inset-bottom));
+        bottom: calc(max(8px, env(safe-area-inset-bottom)) + 205px);
         z-index: 7000;
         max-width: min(70vw, 520px);
         border-left: 4px solid #38bdf8;
@@ -207,6 +458,7 @@
       #content-backdrop {
         position: fixed;
         inset: 0;
+        z-index: 9998;
         border: 0;
         padding: 0;
         background: rgb(15 23 42 / 68%);
@@ -215,6 +467,7 @@
       #content-modal {
         position: fixed;
         top: 50%;
+        z-index: 9999;
         left: 50%;
         width: min(80vw, 896px);
         box-sizing: border-box;
@@ -298,6 +551,17 @@
           width: min(260px, 70vw);
         }
 
+        #campus-map-hud {
+          width: 209px;
+          height: 149px;
+        }
+
+        #campus-mini-map-frame {
+          left: 49px;
+          top: 32px;
+          width: 107px;
+        }
+
         #content-guide {
           right: max(16px, env(safe-area-inset-right));
           bottom: auto;
@@ -305,9 +569,35 @@
           max-width: none;
         }
 
+        #campus-map-dialog {
+          width: min(96vw, 720px);
+          padding: 24px 12px 16px;
+        }
+
+        #campus-big-map-frame {
+          width: min(88vw, 62dvh, 560px);
+        }
+
+        .campus-big-map-marker::after {
+          display: none;
+        }
+
         #content-modal {
           width: min(92vw, 896px);
           padding: 24px 16px 18px;
+        }
+      }
+
+      @media (max-width: 375px) {
+        #campus-map-hud {
+          width: 169px;
+          height: 120px;
+        }
+
+        #campus-mini-map-frame {
+          left: 41px;
+          top: 27px;
+          width: 84px;
         }
       }
     </style>
@@ -347,6 +637,56 @@
           <button id="app-retry" type="button" hidden>Retry</button>
         </section>
       </main>
+    </div>
+    <aside id="campus-map-hud" hidden aria-label="Campus map">
+      <button id="campus-map-open" type="button" aria-label="Open campus map">
+        <span id="campus-mini-map-frame" aria-hidden="true">
+          <img src="/assets/maps/mini-map.webp" alt="" width="175" height="156" />
+          <span id="campus-mini-map-markers">
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="about"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="cv"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="projects"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="contact"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="tech"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="memo1"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="memo2"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="memo3"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="memo4"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="memo5"></span>
+            <span class="campus-map-marker campus-mini-map-marker" data-mini-map-marker="memo6"></span>
+          </span>
+          <span id="campus-mini-map-player"></span>
+        </span>
+      </button>
+    </aside>
+    <div id="campus-map-root" hidden>
+      <button id="campus-map-backdrop" type="button" aria-label="Close campus map"></button>
+      <section id="campus-map-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="campus-map-title">
+        <button id="campus-map-close" type="button" aria-label="Close campus map">×</button>
+        <h1 id="campus-map-title">Campus Map</h1>
+        <div id="campus-map-legend" aria-label="Map legend">
+          <span class="campus-map-legend-item"><span class="campus-map-legend-dot"></span>Info</span>
+          <span class="campus-map-legend-item"><span class="campus-map-legend-dot memo"></span>Memo</span>
+          <span class="campus-map-legend-item"><span class="campus-map-legend-dot visited"></span>Visited</span>
+        </div>
+        <div id="campus-big-map-frame">
+          <img src="/assets/maps/big-map.webp" alt="Portfolio game map with navigation points" width="512" height="512" />
+          <div id="campus-big-map-markers">
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="about"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="cv" disabled></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="projects"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="contact" disabled></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="tech" disabled></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="memo1"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="memo2"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="memo3"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="memo4"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="memo5"></button>
+            <button type="button" class="campus-map-marker campus-big-map-marker" data-big-map-marker="memo6"></button>
+          </div>
+          <span id="campus-big-map-player"></span>
+        </div>
+      </section>
     </div>
     <aside id="content-guide" hidden aria-live="polite"></aside>
     <div id="content-ui-root" hidden aria-live="polite">

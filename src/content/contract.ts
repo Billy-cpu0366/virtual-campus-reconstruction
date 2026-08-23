@@ -136,6 +136,7 @@ export interface ContentResolverPort {
 
 export type GameplayControlLeaseReason =
   | "modal-open"
+  | "map-open"
   | "camera-tour"
   | "entry-transition";
 

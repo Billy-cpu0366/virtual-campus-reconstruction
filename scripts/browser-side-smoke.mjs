@@ -305,6 +305,9 @@ try {
     smokeEmitterActive: false,
     footstepActiveCount: 0,
     factoryRoofTweenActive: false,
+    mapHudHidden: true,
+    mapRootHidden: true,
+    mapLeaseActive: false,
     sideFailures: [],
     physicsColliderCount: 0,
   });

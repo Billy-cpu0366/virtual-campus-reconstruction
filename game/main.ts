@@ -177,6 +177,7 @@ function createSceneCallbacks(
     },
     onModalVisibility: (visible) => {
       if (!isCurrent(generation)) return;
+      guide.hidden = visible || guide.textContent === "";
       if (visible) appRuntime.openModal();
       else appRuntime.closeModal();
     },

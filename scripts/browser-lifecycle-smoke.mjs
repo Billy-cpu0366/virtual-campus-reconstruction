@@ -153,6 +153,9 @@ const result = {
     shutdownReceipt?.smokeEmitterActive === false &&
     shutdownReceipt?.footstepActiveCount === 0 &&
     shutdownReceipt?.factoryRoofTweenActive === false &&
+    shutdownReceipt?.mapHudHidden === true &&
+    shutdownReceipt?.mapRootHidden === true &&
+    shutdownReceipt?.mapLeaseActive === false &&
     shutdownReceipt?.physicsColliderCount === 0 &&
     shutdownReceipt?.sideFailures?.length === 0 &&
     events.exceptions.length === 0 &&

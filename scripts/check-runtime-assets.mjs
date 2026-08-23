@@ -20,6 +20,9 @@ const FILES = [
   ["sprites/player.webp", "sprites/player.webp"],
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],
+  ["maps/mini-map.webp", "assets/maps/mini-map.webp"],
+  ["maps/big-map.webp", "assets/maps/big-map.webp"],
+  ["images/ui/map-holder-mini3.webp", "assets/images/ui/map-holder-mini3.webp"],
   ["js/phaser.min.js", "vendor/phaser.min.js"],
 ];
 
@@ -186,6 +189,9 @@ for (const [sourceRelative, targetRelative] of FILES) {
   }
   if (statSync(source).size !== statSync(target).size) {
     errors.push(`size mismatch: ${sourceRelative} -> ${targetRelative}`);
+  }
+  if (sha256(source) !== sha256(target)) {
+    errors.push(`hash mismatch: ${sourceRelative} -> ${targetRelative}`);
   }
   if (sourceRelative === "maps/tileset-particles.png") {
     try {
