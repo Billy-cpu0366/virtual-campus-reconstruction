@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r2-entry-atomicity
+status: active-r3-visual-smoothing
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -51,6 +51,8 @@ updated: 2026-08-23
 **允许**：`game/CampusScene.ts`、camera/chunk/world scheduler/adapter、对应tests和browser evidence。
 
 **检查**：正常production 0/3/5/8/17秒截图无空洞/reveal；动态卸载仍工作，不以永久渲染25块替代；桌面/移动resize可重复。
+
+**R2收据（bounded verified）**：integration提交`00c38dd`；READY/ENTERING/cameraStable保持25块走廊完整渲染，入口后恢复15块动态target；scheduler queue+active idle、Scale FIT刷新、850ms网格揭示、299测试与全browser门禁PASS。详见[R2收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R2-收据.md)。
 
 ### R3 视觉平滑 / 性能证据
 

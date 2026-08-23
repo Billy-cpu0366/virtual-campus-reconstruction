@@ -1,0 +1,35 @@
+{
+  "desktop": {
+    "before": {
+      "x": 1,
+      "y": 0,
+      "width": 776.875,
+      "height": 437
+    },
+    "after": {
+      "x": 0,
+      "y": 0,
+      "width": 1920,
+      "height": 1080
+    },
+    "target": [
+      1920,
+      1080
+    ]
+  },
+  "mobile": {
+    "state": "READY",
+    "canvas": {
+      "x": 0,
+      "y": 228,
+      "width": 375,
+      "height": 210.9375
+    },
+    "play": {
+      "x": 112.5,
+      "y": 418.015625,
+      "width": 150,
+      "height": 53.59375
+    }
+  }
+}

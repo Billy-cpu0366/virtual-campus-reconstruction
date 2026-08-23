@@ -1,0 +1,17 @@
+{
+  "candidate": "00c38dd",
+  "logicalViewport": [480, 270],
+  "ready": { "lock": 25, "targets": 25, "rendered": 25, "cached": 25 },
+  "entering": { "lock": 25, "targets": 25, "rendered": 25, "cached": 25 },
+  "cameraStableAtApproximatelyMs": 3000,
+  "cameraStable": { "lock": 25, "targets": 25, "rendered": 25, "cached": 25 },
+  "playableAtApproximatelyMs": 5000,
+  "playableImmediate": { "lock": 0, "targets": 15, "rendered": 25, "cached": 25 },
+  "postRelease": {
+    "renderedSettledTo": 15,
+    "settledAfterApproximatelyMs": 2375,
+    "removalsWereOutsideTheFinalPlayerViewport": true
+  },
+  "finding": "The full entry corridor remains rendered through camera movement; dynamic targets resume after entry without permanently retaining all 25 chunks.",
+  "remainingRisk": "Background removal takes about 2.4 seconds after controls open and is carried into R3 performance work."
+}

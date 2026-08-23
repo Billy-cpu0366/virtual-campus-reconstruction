@@ -1,0 +1,136 @@
+{
+  "normalProductionPath": true,
+  "testHooks": false,
+  "viewport": [
+    1920,
+    1080
+  ],
+  "rows": [
+    {
+      "name": "ready-000",
+      "page": {
+        "state": "READY",
+        "gridOpacity": "0.75",
+        "gridAnimation": "campus-grid-reveal",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "name": "ready-200",
+      "page": {
+        "state": "READY",
+        "gridOpacity": "0.375",
+        "gridAnimation": "campus-grid-reveal",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "name": "ready-500",
+      "page": {
+        "state": "READY",
+        "gridOpacity": "0",
+        "gridAnimation": "campus-grid-reveal",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "name": "ready-900",
+      "page": {
+        "state": "READY",
+        "gridOpacity": "0",
+        "gridAnimation": "campus-grid-reveal",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+    },
+    {
+      "name": "entry-00",
+      "page": {
+        "state": "ENTERING_GAME",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "guide": ""
+      }
+    },
+    {
+      "name": "entry-03",
+      "page": {
+        "state": "ENTERING_GAME",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "guide": ""
+      }
+    },
+    {
+      "name": "entry-05",
+      "page": {
+        "state": "PLAYING",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "guide": "Explore MEMO6 · head west 36 tiles, then north 7"
+      }
+    },
+    {
+      "name": "entry-08",
+      "page": {
+        "state": "PLAYING",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "guide": "Explore MEMO6 · head west 36 tiles, then north 7"
+      }
+    },
+    {
+      "name": "entry-17",
+      "page": {
+        "state": "PLAYING",
+        "canvas": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "guide": "Explore MEMO6 · head west 36 tiles, then north 7"
+      }
+    }
+  ],
+  "events": {
+    "exceptions": [],
+    "failed": [],
+    "bad": []
+  }
+}
