@@ -10,12 +10,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-batch-r5-roof-footsteps
-current-gate: p5.1-r5-layer-consumer-evidence
+current-phase: p5.1-batch-r6-visual-completeness
+current-gate: p5.1-r6-visual-completeness-evidence
 gate-status: implementation-in-progress
 authorization-ref: DEC-P5.1-SYSTEMIC-REPAIR-001
 preauthorized-next-work-item: none
-next-phase: p5.1-batch-r6-visual-completeness
+next-phase: p5.1-batch-r7-complete-regression
 updated: 2026-08-23
 ---
 
@@ -24,7 +24,7 @@ updated: 2026-08-23
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：方案A连续实施中；R1–R4已完成并验证（R4 `da68d08`），当前进入R5 factory roof与confirmed footsteps。
+- **当前阶段**：方案A连续实施中；R1–R5已完成并验证（R5 `6c8c66d`），当前进入R6证据支持的HUD、导航、地图、对话与视觉密度。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
 - **当前授权**：按[完整证据补救实施包](task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-完整证据补救实施包.md)连续执行R1–R7；中间不为表面症状重复开Gate，全部回归后进入一次Human整体验收。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
@@ -60,7 +60,7 @@ updated: 2026-08-23
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；R1–R4 bounded verified，R4=`da68d08` | 连续实施R5–R7；当前接factory roof真实进入/离开tween与confirmed footsteps消费者 | 逐点打补丁；恢复111秒入口；猜particles3/69360；扩到其他roof；远端操作 | R1–R7全部完成后跑完整回归，再进入Human整体验收 |
+| 三板块可见成果并行波 | `systemic-failure`；R1–R5 bounded verified，R5=`6c8c66d` | 连续实施R6–R7；当前只接公开证据支持的HUD、导航、地图、对话与视觉密度 | 逐点打补丁；恢复111秒入口；猜particles3/69360或无证据消费者；远端操作 | R1–R7全部完成后跑完整回归，再进入Human整体验收 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -183,7 +183,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- R4本机有界结果：train/smoke真实进屏约10.62s/2.10s，train/玩家/sprayers同屏可辨识；train complete与sprayer trigger按顺序发布无teleport环境路线。R5只做factory roof与直接证据footsteps；`Q-LAYER-002/003`及particles3/69360继续UNKNOWN。
+- R5本机有界结果：factory矩形内两层roof按300ms Power2淡隐并对称恢复，concert不受影响；368个`GID=69345` marker驱动脚印，desktop/mobile production正常键盘路线与307测试PASS。R6只做公开证据支持的视觉完整性；`Q-LAYER-002/003`及particles3/69360继续UNKNOWN。
 
 ## 近期候选
 

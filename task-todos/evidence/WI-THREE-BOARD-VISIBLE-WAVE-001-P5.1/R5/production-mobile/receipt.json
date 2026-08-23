@@ -1,0 +1,292 @@
+{
+  "passed": true,
+  "url": "http://127.0.0.1:4237/?r5-final=mobile",
+  "label": "mobile",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "hooks": {
+    "debug": "undefined",
+    "collision": "undefined",
+    "lifecycle": "undefined"
+  },
+  "routeDurationMs": 24270,
+  "route": [
+    {
+      "direction": "left",
+      "target": 552,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 3901,
+      "position": {
+        "x": 546.6666666666698,
+        "y": 304
+      }
+    },
+    {
+      "direction": "down",
+      "target": 556,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1820,
+      "position": {
+        "x": 546.6666666666698,
+        "y": 556.0000000000003
+      }
+    },
+    {
+      "direction": "right",
+      "target": 680,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 970,
+      "position": {
+        "x": 682.000000000002,
+        "y": 556.0000000000003
+      }
+    },
+    {
+      "direction": "down",
+      "target": 616,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 434,
+      "position": {
+        "x": 682.000000000002,
+        "y": 616.6666666666665
+      }
+    },
+    {
+      "direction": "left",
+      "target": 668,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 166,
+      "position": {
+        "x": 666,
+        "y": 621.3333333333331
+      }
+    },
+    {
+      "direction": "down",
+      "target": 728,
+      "axis": "y",
+      "comparison": "gte",
+      "screenshotName": "roof-outside",
+      "durationMs": 806,
+      "position": {
+        "x": 666,
+        "y": 728.6666666666656
+      }
+    },
+    {
+      "direction": "down",
+      "target": 960,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1663,
+      "position": {
+        "x": 666,
+        "y": 966.6666666666637
+      }
+    },
+    {
+      "direction": "left",
+      "target": 640,
+      "axis": "x",
+      "comparison": "lte",
+      "screenshotName": "roof-inside",
+      "durationMs": 226,
+      "position": {
+        "x": 633.3333333333336,
+        "y": 966.6666666666637
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1080,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 864,
+      "position": {
+        "x": 633.3333333333336,
+        "y": 1087.999999999998
+      }
+    },
+    {
+      "direction": "right",
+      "target": 728,
+      "axis": "x",
+      "comparison": "gte",
+      "screenshotName": "roof-after",
+      "durationMs": 696,
+      "position": {
+        "x": 731.3333333333328,
+        "y": 1087.999999999998
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1200,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 857,
+      "position": {
+        "x": 731.3333333333328,
+        "y": 1204.6666666666665
+      }
+    },
+    {
+      "direction": "left",
+      "target": 712,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 213,
+      "position": {
+        "x": 703.333333333333,
+        "y": 1209.3333333333333
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1464,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 1869,
+      "position": {
+        "x": 703.333333333333,
+        "y": 1470.6666666666708
+      }
+    },
+    {
+      "direction": "right",
+      "target": 760,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 428,
+      "position": {
+        "x": 763.9999999999992,
+        "y": 1470.6666666666708
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1560,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 686,
+      "position": {
+        "x": 763.9999999999992,
+        "y": 1564.0000000000057
+      }
+    },
+    {
+      "direction": "left",
+      "target": 456,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 2274,
+      "position": {
+        "x": 446.6666666666673,
+        "y": 1568.6666666666724
+      }
+    },
+    {
+      "direction": "right",
+      "target": 464,
+      "axis": "x",
+      "comparison": "gte",
+      "durationMs": 163,
+      "position": {
+        "x": 470.00000000000074,
+        "y": 1568.6666666666724
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1640,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 528,
+      "position": {
+        "x": 470.00000000000074,
+        "y": 1643.3333333333403
+      }
+    },
+    {
+      "direction": "left",
+      "target": 236,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 1702,
+      "position": {
+        "x": 234,
+        "y": 1643.3333333333403
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1704,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 428,
+      "position": {
+        "x": 234,
+        "y": 1704.000000000008
+      }
+    },
+    {
+      "direction": "left",
+      "target": 216,
+      "axis": "x",
+      "comparison": "lte",
+      "durationMs": 162,
+      "position": {
+        "x": 210.6666666666667,
+        "y": 1704.000000000008
+      }
+    },
+    {
+      "direction": "down",
+      "target": 1824,
+      "axis": "y",
+      "comparison": "gte",
+      "durationMs": 898,
+      "position": {
+        "x": 210.6666666666667,
+        "y": 1830.00000000001
+      }
+    }
+  ],
+  "footprintMove": {
+    "direction": "right",
+    "target": 336,
+    "axis": "x",
+    "comparison": "gte",
+    "durationMs": 912,
+    "position": {
+      "x": 336.66666666666686,
+      "y": 1830.00000000001
+    }
+  },
+  "canvas": {
+    "width": 480,
+    "height": 270,
+    "cssWidth": 390,
+    "cssHeight": 219.375
+  },
+  "captures": {
+    "trace": [],
+    "roof-outside": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r5/final-production/mobile/mobile-roof-outside.png",
+    "roof-inside": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r5/final-production/mobile/mobile-roof-inside.png",
+    "roof-after": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r5/final-production/mobile/mobile-roof-after.png",
+    "footsteps": "/home/mizhou/pi-sandbox/workspace/.pi/audit-evidence/r5/final-production/mobile/mobile-footsteps.png"
+  },
+  "events": {
+    "console": [],
+    "exceptions": [],
+    "failedRequests": [],
+    "badResponses": []
+  }
+}

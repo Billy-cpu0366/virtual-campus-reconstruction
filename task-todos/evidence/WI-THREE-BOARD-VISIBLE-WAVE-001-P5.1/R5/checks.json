@@ -1,0 +1,30 @@
+{
+  "repairPackage": "P5.1-R5",
+  "verifiedAt": "2026-08-23T15:32:57+08:00",
+  "implementationCommit": "6c8c66d6961d1de4e86a12a969b07ddf9f955ac9",
+  "implementationTree": "c8b0cde3bfa7bee20f7bd8248f9edc26b4ecaa35",
+  "checks": {
+    "unitTests": "PASS: 55 files / 307 tests",
+    "typecheck": "PASS",
+    "runtimeAssets": "PASS",
+    "productionBuild": "PASS",
+    "testHooksBuild": "PASS",
+    "roofFootstepsTestHooks": "PASS: factory visible -> faded -> visible; concert alpha 1; 368 markers; >=5 footsteps; lifecycle zero",
+    "productionDesktop": "PASS: normal keyboard route, no test hooks, roof states and footsteps visually reviewed",
+    "productionMobile390x844": "PASS: normal keyboard route, no test hooks, roof states and footsteps visually reviewed",
+    "productionPerformance": "PASS: entry p95 16.8ms; movement p95 16.7ms; >34ms frames 0; LoAF 0; long tasks 0; maximum input handler delay 1ms",
+    "browserProduction": "PASS: smoke, runtime-safety, visible-entry, performance, roof-footsteps desktop/mobile",
+    "browserTestHooks": "PASS: roof-footsteps, lifecycle, side, entry, chunk, layer, camera, collision, mobile-input, content, visual-smoothing, app-retry",
+    "diffCheck": "PASS: explicit R5 paths",
+    "independentVerifier": "PASS: FACT boundaries, lifecycle, production hook isolation, renderer rename, typecheck, target tests, diff check"
+  },
+  "nonBlockingObservations": [
+    "A simultaneous desktop/mobile production load caused one desktop READY timeout; the unchanged desktop check passed when rerun alone without increasing its timeout.",
+    "The final camping route stop was moved from y=1832 to y=1824 within the same confirmed marker row to avoid sampling into an adjacent collision edge; both final viewports and test-hooks then passed."
+  ],
+  "boundaries": {
+    "particles3And69360": "UNKNOWN and not implemented",
+    "camera111Seconds": "not connected to production",
+    "humanVisualGate": "still required after R1-R7"
+  }
+}

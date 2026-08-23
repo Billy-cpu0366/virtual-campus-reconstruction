@@ -1,0 +1,78 @@
+{
+  "url": "http://127.0.0.1:4237/?r5-regression=performance",
+  "build": "production",
+  "hookTypes": {
+    "debug": "undefined",
+    "entry": "undefined"
+  },
+  "finalState": "PLAYING",
+  "entry": {
+    "durationMs": 5007,
+    "frameCount": 319,
+    "medianFrameMs": 16.699999999999818,
+    "p95FrameMs": 16.799999999999272,
+    "maximumFrameMs": 16.80000000000109,
+    "framesOver34Ms": 0,
+    "framesOver50Ms": 0,
+    "longAnimationFrames": [],
+    "longTasks": [],
+    "inputEvents": [],
+    "eventTiming": []
+  },
+  "movement": {
+    "frameCount": 259,
+    "medianFrameMs": 16.69999999999891,
+    "p95FrameMs": 16.700000000000728,
+    "maximumFrameMs": 16.80000000000109,
+    "framesOver34Ms": 0,
+    "framesOver50Ms": 0,
+    "longAnimationFrames": [],
+    "longTasks": [],
+    "inputEvents": [
+      {
+        "period": "movement",
+        "type": "keydown",
+        "key": "ArrowRight",
+        "eventTime": 10735.90000000596,
+        "handledAt": 10736.90000000596,
+        "delay": 1
+      },
+      {
+        "period": "movement",
+        "type": "keyup",
+        "key": "ArrowRight",
+        "eventTime": 14742.59999999404,
+        "handledAt": 14743.299999982119,
+        "delay": 0.699999988079071
+      }
+    ],
+    "eventTiming": [
+      {
+        "period": "movement",
+        "entryType": "event",
+        "name": "keydown",
+        "startTime": 10735.90000000596,
+        "duration": 16,
+        "processingStart": 10736.59999999404,
+        "processingEnd": 10737.199999988079,
+        "interactionId": 312
+      },
+      {
+        "period": "movement",
+        "entryType": "event",
+        "name": "keyup",
+        "startTime": 14742.59999999404,
+        "duration": 32,
+        "processingStart": 14743.09999999404,
+        "processingEnd": 14743.40000000596,
+        "interactionId": 312
+      }
+    ]
+  },
+  "maximumInputDelay": 1,
+  "runtimeEvents": {
+    "console": [],
+    "exceptions": []
+  },
+  "passed": true
+}

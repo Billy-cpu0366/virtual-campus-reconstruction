@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r5-roof-footsteps
+status: active-r6-visual-completeness
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -81,6 +81,8 @@ updated: 2026-08-23
 **允许**：SYS-LAYER/ZONE边界、renderer、player位置消费者、footsteps owner及tests。
 
 **检查**：其他roof不受影响；chunk移除/Retry/shutdown清理；368位置Oracle保持；particles3/69360不实现。
+
+**R5收据（bounded verified）**：integration提交`6c8c66d`；factory矩形内两层roof以300ms Power2淡隐并对称恢复，concert保持alpha 1；368个`GID=69345` marker驱动14px间距、depth450、alpha0.6脚印。55文件/307测试、两build、完整browser门禁、desktop/mobile production正常键盘路线及独立复核PASS。详见[R5收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R5-收据.md)。
 
 ### R6 证据支持的HUD、导航、地图、对话和视觉密度
 
