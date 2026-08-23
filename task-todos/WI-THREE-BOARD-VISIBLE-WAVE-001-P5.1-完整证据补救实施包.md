@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-batch-implement
-status: active-r1-app-loading
+status: active-r2-entry-atomicity
 decision: DEC-P5.1-SYSTEMIC-REPAIR-001
 candidate-baseline: 0fadf309963ba5d23c092ec049654791901f806e
 integration-owner: Main
@@ -41,6 +41,8 @@ updated: 2026-08-23
 **允许**：`index.html`、`src/game-ui/app-shell.ts`、必要`src/app/`、`game/main.ts`/Scene progress桥、运行资源准备脚本、对应tests与正常路径视觉审计脚本。
 
 **检查**：慢网0→100单调且100%不冒充world ready；桌面1920×1080和移动375×667壳不裁切、不拉伸；Retry/Error保持generation清理；production无debug hook。
+
+**R1收据（bounded verified）**：integration提交`ae2bf33`；53文件/298测试、typecheck、runtime assets、两build、production smoke/runtime-safety、test-hooks串行entry/app-retry/mobile-input、桌面/移动慢网截图与独立复核PASS。详见[R1收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-R1-收据.md)。最终Human视觉Gate仍未通过。
 
 ### R2 入口原子性 / viewport / chunk reveal
 

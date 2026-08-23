@@ -1,0 +1,161 @@
+{
+  "viewport": [
+    1920,
+    1080
+  ],
+  "throttle": {
+    "latencyMs": 120,
+    "downloadBytesPerSec": 102400
+  },
+  "rows": [
+    {
+      "elapsedMs": 125,
+      "state": null,
+      "text": "",
+      "loadingHidden": null,
+      "readyHidden": null,
+      "playRect": null,
+      "image": "00-null-none.png"
+    },
+    {
+      "elapsedMs": 288,
+      "state": "BOOT",
+      "text": "0%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "01-BOOT-0.png"
+    },
+    {
+      "elapsedMs": 3880,
+      "state": "LOADING",
+      "text": "0%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "02-LOADING-0.png"
+    },
+    {
+      "elapsedMs": 4079,
+      "state": "LOADING",
+      "text": "30%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "03-LOADING-30.png"
+    },
+    {
+      "elapsedMs": 4277,
+      "state": "LOADING",
+      "text": "41%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "04-LOADING-41.png"
+    },
+    {
+      "elapsedMs": 4458,
+      "state": "LOADING",
+      "text": "48%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "05-LOADING-48.png"
+    },
+    {
+      "elapsedMs": 4641,
+      "state": "LOADING",
+      "text": "60%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "06-LOADING-60.png"
+    },
+    {
+      "elapsedMs": 4824,
+      "state": "LOADING",
+      "text": "65%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "07-LOADING-65.png"
+    },
+    {
+      "elapsedMs": 10009,
+      "state": "LOADING",
+      "text": "72%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "08-LOADING-72.png"
+    },
+    {
+      "elapsedMs": 10200,
+      "state": "LOADING",
+      "text": "92%",
+      "loadingHidden": false,
+      "readyHidden": true,
+      "playRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "image": "09-LOADING-92.png"
+    },
+    {
+      "elapsedMs": 11596,
+      "state": "READY",
+      "text": "100%",
+      "loadingHidden": true,
+      "readyHidden": false,
+      "playRect": {
+        "x": 885,
+        "y": 667.203125,
+        "width": 150,
+        "height": 53.59375
+      },
+      "image": "10-READY-100.png"
+    }
+  ]
+}
