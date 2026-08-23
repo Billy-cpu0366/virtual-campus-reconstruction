@@ -101,6 +101,7 @@ export class AppRuntime {
     if (this.status !== "LOADING" || generation !== this.generation) {
       return false;
     }
+    this.progress = 1;
     this.status = "READY";
     this.emitChange();
     return true;

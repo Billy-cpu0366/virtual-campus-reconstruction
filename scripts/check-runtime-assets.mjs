@@ -18,6 +18,8 @@ const FILES = [
   ["maps/collisions-objects.png", "maps/collisions-objects.png"],
   ["maps/tileset-particles.png", "maps/tileset-particles.png"],
   ["sprites/player.webp", "sprites/player.webp"],
+  ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
+  ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],
   ["js/phaser.min.js", "vendor/phaser.min.js"],
 ];
 

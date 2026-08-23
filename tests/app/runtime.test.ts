@@ -65,6 +65,7 @@ describe("AppRuntime", () => {
     expect(runtime.reportProgress(1, 0.4)).toBe(true);
     expect(runtime.snapshot.progress).toBe(0.4);
     expect(runtime.markReady(1)).toBe(true);
+    expect(runtime.snapshot.progress).toBe(1);
     expect(runtime.play()).toBe(true);
     expect(runtime.play()).toBe(false);
     expect(runtime.snapshot.status).toBe("ENTERING_GAME");

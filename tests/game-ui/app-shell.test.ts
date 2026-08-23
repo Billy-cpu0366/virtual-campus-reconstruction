@@ -76,9 +76,11 @@ type FakeElements = {
 
 function makeElements(): FakeElements {
   return {
+    root: new FakeTarget(),
     loading: new FakeTarget(),
     progressBar: new FakeTarget(),
     progressText: new FakeTarget(),
+    ready: new FakeTarget(),
     play: new FakeTarget(),
     error: new FakeTarget(),
     errorText: new FakeTarget(),
@@ -128,6 +130,8 @@ describe("DomAppUi", () => {
     });
 
     ui.renderReady();
+    expect(elements.ready.hidden).toBe(false);
+    expect(elements.loading.hidden).toBe(true);
     elements.play.dispatch("click");
     ui.renderError("Try again");
     elements.retry.dispatch("click");
@@ -136,13 +140,15 @@ describe("DomAppUi", () => {
     expect(elements.play.style.outline).toContain("solid");
     expect(elements.retry.style.outline).toContain("solid");
 
-    expect(elements.loading.style.minHeight).toBe("100dvh");
-    expect(elements.loading.style.height).toBe("600px");
+    expect(elements.root.style.minHeight).toBe("100dvh");
+    expect(elements.root.style.height).toBe("600px");
+    expect(elements.loading.style.height).toBeUndefined();
+    expect(elements.play.style.height).toBeUndefined();
     viewport.resize(390, 844);
-    expect(elements.loading.style.height).toBe("844px");
-    expect(elements.loading.style.padding).toBe("16px");
+    expect(elements.root.style.height).toBe("844px");
+    expect(elements.root.style.padding).toBe("16px");
     viewport.resize(1024, 700);
-    expect(elements.loading.style.padding).toBe("24px");
+    expect(elements.root.style.padding).toBe("24px");
   });
 
   it("keeps optional image layout space and exposes a text fallback", () => {

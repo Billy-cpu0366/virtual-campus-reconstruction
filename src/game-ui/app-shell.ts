@@ -29,9 +29,11 @@ export interface DomAppOptionalImage {
 }
 
 export interface DomAppElements {
+  readonly root: DomAppTarget;
   readonly loading: DomAppTarget;
   readonly progressBar: DomAppTarget;
   readonly progressText: DomAppTarget;
+  readonly ready: DomAppTarget;
   readonly play: DomAppTarget;
   readonly error: DomAppTarget;
   readonly errorText: DomAppTarget;
@@ -208,6 +210,7 @@ export class DomAppUi {
     this.progress = ratio;
     this.view = "loading";
     hidden(this.elements.loading, false);
+    hidden(this.elements.ready, true);
     hidden(this.elements.play, true);
     hidden(this.elements.error, true);
     hidden(this.elements.retry, true);
@@ -220,6 +223,7 @@ export class DomAppUi {
     if (this.destroyed) return false;
     this.view = "ready";
     hidden(this.elements.loading, true);
+    hidden(this.elements.ready, false);
     hidden(this.elements.play, false);
     hidden(this.elements.error, true);
     hidden(this.elements.retry, true);
@@ -231,6 +235,7 @@ export class DomAppUi {
     if (this.destroyed) return false;
     this.view = "entering";
     hidden(this.elements.loading, true);
+    hidden(this.elements.ready, true);
     hidden(this.elements.play, true);
     hidden(this.elements.error, true);
     hidden(this.elements.retry, true);
@@ -241,6 +246,7 @@ export class DomAppUi {
     if (this.destroyed) return false;
     this.view = "playing";
     hidden(this.elements.loading, true);
+    hidden(this.elements.ready, true);
     hidden(this.elements.play, true);
     hidden(this.elements.error, true);
     hidden(this.elements.retry, true);
@@ -251,6 +257,7 @@ export class DomAppUi {
     if (this.destroyed) return false;
     this.view = "error";
     hidden(this.elements.loading, true);
+    hidden(this.elements.ready, true);
     hidden(this.elements.play, true);
     hidden(this.elements.error, false);
     hidden(this.elements.retry, false);
@@ -265,6 +272,7 @@ export class DomAppUi {
     this.view = "shutdown";
     this.removeListeners();
     hidden(this.elements.loading, true);
+    hidden(this.elements.ready, true);
     hidden(this.elements.play, true);
     hidden(this.elements.error, true);
     hidden(this.elements.retry, true);
@@ -319,26 +327,16 @@ export class DomAppUi {
     }
     if (!validSize(size.width) || !validSize(size.height)) return;
 
-    const targets = [
-      this.elements.loading,
-      this.elements.play,
-      this.elements.error,
-    ];
-    for (const target of targets) {
-      if (!hasTarget(target)) continue;
-      this.setStyle(target, "minHeight", "100dvh");
-      this.setStyle(target, "height", `${size.height}px`);
-      this.setStyle(
-        target,
-        "padding",
-        size.width <= MOBILE_WIDTH ? "16px" : "24px",
-      );
-      this.setStyle(
-        target,
-        "maxWidth",
-        "100vw",
-      );
-    }
+    const root = this.elements.root;
+    if (!hasTarget(root)) return;
+    this.setStyle(root, "minHeight", "100dvh");
+    this.setStyle(root, "height", `${size.height}px`);
+    this.setStyle(
+      root,
+      "padding",
+      size.width <= MOBILE_WIDTH ? "16px" : "24px",
+    );
+    this.setStyle(root, "maxWidth", "100vw");
   }
 
   private focusTarget(target: DomAppTarget | undefined): void {

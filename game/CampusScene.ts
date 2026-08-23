@@ -119,6 +119,11 @@ import {
 } from "./PhaserVirtualJoystick.js";
 
 const CHUNK_MASTER_URL = "/maps/chunks/master.json";
+const PHASER_ASSET_PROGRESS_WEIGHT = 0.72;
+const MASTER_READY_PROGRESS = 0.8;
+const WORLD_OWNER_READY_PROGRESS = 0.88;
+const INITIAL_TARGETS_STARTED_PROGRESS = 0.92;
+const INITIAL_TARGETS_READY_PROGRESS = 0.98;
 const CHUNK_UPDATE_INTERVAL_MS = 500;
 const CONTENT_UPDATE_INTERVAL_MS = 100;
 const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
@@ -300,7 +305,9 @@ export class CampusScene extends Phaser.Scene {
 
   preload(): void {
     this.load.on("progress", (progress: number) => {
-      this.entryCallbacks.onLoadProgress?.(progress);
+      this.entryCallbacks.onLoadProgress?.(
+        Math.max(0, Math.min(1, progress)) * PHASER_ASSET_PROGRESS_WEIGHT,
+      );
     });
     this.load.once("loaderror", (file: { readonly key?: unknown }) => {
       const key = typeof file?.key === "string" ? file.key : "required asset";
@@ -856,6 +863,7 @@ export class CampusScene extends Phaser.Scene {
     this.dataStore = store;
     const master = await store.loadMaster();
     if (this.sceneDestroyed) return;
+    this.entryCallbacks.onLoadProgress?.(MASTER_READY_PROGRESS);
 
     const spec = worldSpecFromMaster(master);
     this.worldSpec = spec;
@@ -923,6 +931,7 @@ export class CampusScene extends Phaser.Scene {
     this.coordinator = new ChunkCoordinator(store, worldResult.world, {
       scheduleMutation: this.mutationScheduler.schedule,
     });
+    this.entryCallbacks.onLoadProgress?.(WORLD_OWNER_READY_PROGRESS);
     if (this.testHooksEnabled) {
       const debugHook = (): unknown => ({
         state: this.coordinator?.state,
@@ -1027,8 +1036,10 @@ export class CampusScene extends Phaser.Scene {
         (window as any).__campusContentTest = contentTestHook;
       }
     }
+    this.entryCallbacks.onLoadProgress?.(INITIAL_TARGETS_STARTED_PROGRESS);
     await this.updateDynamicTargetsNow();
     if (this.sceneDestroyed || this.requiredLoadError !== undefined) return;
+    this.entryCallbacks.onLoadProgress?.(INITIAL_TARGETS_READY_PROGRESS);
     const failedChunks = this.coordinator?.state.failed ?? [];
     if (failedChunks.length > 0) {
       throw new Error(
@@ -1052,6 +1063,7 @@ export class CampusScene extends Phaser.Scene {
       );
     }
 
+    this.entryCallbacks.onLoadProgress?.(1);
     this.sceneReady = true;
     this.entryCallbacks.onReady?.();
   }

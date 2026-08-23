@@ -8,6 +8,7 @@ import {
 import {
   DomAppUi,
   type DomAppFocusPort,
+  type DomAppImageTarget,
   type DomAppTarget,
   type DomAppViewport,
 } from "../src/game-ui/index.js";
@@ -44,6 +45,10 @@ function requiredElement<T extends HTMLElement>(id: string): T {
 
 function asAppTarget(id: string): DomAppTarget {
   return requiredElement<HTMLElement>(id) as unknown as DomAppTarget;
+}
+
+function asAppImageTarget(id: string): DomAppImageTarget {
+  return requiredElement<HTMLImageElement>(id) as unknown as DomAppImageTarget;
 }
 
 const shell = requiredElement<HTMLElement>("app-shell");
@@ -87,9 +92,11 @@ const focus: DomAppFocusPort = {
 let appRuntime: AppRuntime;
 const appUi = new DomAppUi({
   elements: {
+    root: asAppTarget("app-shell"),
     loading: asAppTarget("app-loading"),
     progressBar: asAppTarget("app-progress-bar"),
     progressText: asAppTarget("app-progress-text"),
+    ready: asAppTarget("app-ready"),
     play: playButton as unknown as DomAppTarget,
     error: asAppTarget("app-error"),
     errorText: asAppTarget("app-error-text"),
@@ -97,6 +104,16 @@ const appUi = new DomAppUi({
   },
   viewport,
   focus,
+  optionalImages: [
+    {
+      image: asAppImageTarget("app-loading-image"),
+      fallbackAlt: "Peter Oravec portfolio loader unavailable",
+    },
+    {
+      image: asAppImageTarget("app-logo"),
+      fallbackAlt: "Peter Oravec portfolio logo unavailable",
+    },
+  ],
   onPlay: () => {
     appRuntime.play();
   },
