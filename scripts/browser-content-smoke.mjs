@@ -163,7 +163,9 @@ try {
     (debug) =>
       debug.side?.train?.state === "complete" &&
       debug.side?.trainHasSprite === false &&
-      debug.side?.trainColliderActive === false,
+      debug.side?.trainColliderActive === false &&
+      debug.side?.trainColliderCount === 0 &&
+      debug.side?.trainCollisionShapeCount === 0,
     "real train departure cleanup",
   );
 

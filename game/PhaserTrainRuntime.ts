@@ -6,7 +6,7 @@ import {
   TRAIN_START_X,
   TRAIN_Y,
   TrainRouteRuntime,
-  type TrainCollisionBand,
+  type TrainCollisionRect,
 } from "../src/route/index.js";
 
 export const TRAIN_RUNTIME_ASSET = Object.freeze({
@@ -110,14 +110,14 @@ function eventTime(args: readonly unknown[]): number {
 
 /** Dedicated Phaser owner for one public crowdTrain route. */
 export class PhaserTrainRuntime {
-  private readonly route = new TrainRouteRuntime();
+  private readonly route = new TrainRouteRuntime({ collisionScale: TRAIN_SCALE });
   private readonly blockingZone: PhaserTrainBlockingZonePort | undefined;
   private readonly onError: ((reason: string) => void) | undefined;
   private readonly connectCollision: PhaserTrainCollisionConnector | undefined;
   private readonly onComplete: (() => void) | undefined;
   private sprite: PhaserTrainSpriteLike | undefined;
-  private collisionShape: PhaserTrainCollisionShapeLike | undefined;
-  private collisionCleanup: PhaserTrainCollisionCleanup | undefined;
+  private collisionShapes: PhaserTrainCollisionShapeLike[] = [];
+  private collisionCleanups: PhaserTrainCollisionCleanup[] = [];
   private updateAttached = false;
   private shutdownState = false;
   private lastCells = "";
@@ -164,12 +164,7 @@ export class PhaserTrainRuntime {
         .setDepth(TRAIN_PRESENTATION_DEPTH)
         .setAlpha(1);
       this.sprite = sprite;
-      this.route.setCollisionWidth(
-        typeof sprite.displayWidth === "number" && sprite.displayWidth > 0
-          ? sprite.displayWidth
-          : 1,
-      );
-      this.createCollision(this.route.snapshot.collisionBand);
+      this.createCollisions(this.route.snapshot.collisionRects);
     } catch {
       this.route.cancel(nowMs);
       this.cleanupObjects();
@@ -187,7 +182,7 @@ export class PhaserTrainRuntime {
     const snapshot = this.route.tick(nowMs);
     this.sprite.x = snapshot.x;
     this.sprite.y = snapshot.y;
-    this.updateCollision(snapshot.collisionBand);
+    this.updateCollisions(snapshot.collisionRects);
     if (snapshot.state === "complete" || snapshot.state === "cancelled") {
       this.detachUpdate();
       if (snapshot.state === "complete") {
@@ -225,7 +220,11 @@ export class PhaserTrainRuntime {
   }
 
   get hasCollisionShape(): boolean {
-    return this.collisionShape !== undefined;
+    return this.collisionShapes.length > 0;
+  }
+
+  get collisionShapeCount(): number {
+    return this.collisionShapes.length;
   }
 
   get visualSnapshot() {
@@ -246,49 +245,61 @@ export class PhaserTrainRuntime {
     });
   }
 
-  private createCollision(band: TrainCollisionBand): void {
-    if (this.collisionShape !== undefined) return;
-    const shape = this.scene.add.rectangle(
-      band.centerX,
-      band.centerY,
-      band.width,
-      band.height,
-      0,
-      0,
-    );
-    this.scene.physics?.add?.existing(shape, true);
-    this.collisionShape = shape;
-    const cleanup = this.connectCollision?.(shape);
-    if (cleanup !== undefined && typeof cleanup !== "function") {
-      throw new TypeError("train collision connector did not return cleanup");
+  private createCollisions(rects: readonly TrainCollisionRect[]): void {
+    for (const rect of rects) {
+      const shape = this.scene.add.rectangle(
+        rect.centerX,
+        rect.centerY,
+        rect.width,
+        rect.height,
+        0,
+        0,
+      );
+      this.scene.physics?.add?.existing(shape, true);
+      this.collisionShapes.push(shape);
+      const cleanup = this.connectCollision?.(shape);
+      if (cleanup !== undefined && typeof cleanup !== "function") {
+        throw new TypeError("train collision connector did not return cleanup");
+      }
+      if (cleanup !== undefined) this.collisionCleanups.push(cleanup);
     }
-    this.collisionCleanup = cleanup;
-    this.updateCollision(band);
+    this.updateCollisions(rects);
   }
 
-  private updateCollision(band: TrainCollisionBand): void {
-    this.collisionShape?.setPosition(band.centerX, band.centerY).setSize(
-      band.width,
-      band.height,
-    );
-    this.collisionShape?.body?.setSize?.(band.width, band.height);
-    this.collisionShape?.body?.updateFromGameObject?.();
-    const cells = band.blockedCells.join("|");
+  private updateCollisions(rects: readonly TrainCollisionRect[]): void {
+    for (let index = 0; index < rects.length; index += 1) {
+      const rect = rects[index];
+      const shape = this.collisionShapes[index];
+      if (rect === undefined || shape === undefined) continue;
+      shape.setPosition(rect.centerX, rect.centerY).setSize(
+        rect.width,
+        rect.height,
+      );
+      shape.body?.setSize?.(rect.width, rect.height);
+      shape.body?.updateFromGameObject?.();
+    }
+    const blockedCells = new Set<string>();
+    for (const rect of rects) {
+      for (const cell of rect.blockedCells) blockedCells.add(cell);
+    }
+    const cells = [...blockedCells].sort().join("|");
     if (cells === this.lastCells) return;
     this.lastCells = cells;
-    this.blockingZone?.setTrainBlockingZone(band.blockedCells);
+    this.blockingZone?.setTrainBlockingZone(
+      cells.length === 0 ? [] : cells.split("|"),
+    );
   }
 
   private cleanupObjects(): void {
-    const cleanup = this.collisionCleanup;
-    this.collisionCleanup = undefined;
-    try {
-      cleanup?.();
-    } catch {
-      this.report("collision-cleanup-failed");
+    const cleanups = this.collisionCleanups.splice(0);
+    for (const cleanup of cleanups) {
+      try {
+        cleanup();
+      } catch {
+        this.report("collision-cleanup-failed");
+      }
     }
-    this.collisionShape?.destroy();
-    this.collisionShape = undefined;
+    for (const shape of this.collisionShapes.splice(0)) shape.destroy();
     this.sprite?.destroy();
     this.sprite = undefined;
     this.lastCells = "";

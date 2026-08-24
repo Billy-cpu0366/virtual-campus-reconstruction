@@ -7,12 +7,15 @@ export const TRAIN_HOLD_DURATION = 3_000;
 export const TRAIN_DEPARTURE_DURATION = 9_000;
 export const TRAIN_TILE_SIZE = 16;
 // Starts below the spawn player's foot body so an arriving train cannot begin with overlap.
-export const TRAIN_COLLISION_ROW = 27;
-// Covers the visible carriage height so the player cannot walk through a moving train.
-export const TRAIN_COLLISION_ROW_RADIUS = 5;
-export const TRAIN_COLLISION_CENTER_Y =
-  TRAIN_COLLISION_ROW * TRAIN_TILE_SIZE + TRAIN_TILE_SIZE / 2;
-export const TRAIN_DEFAULT_COLLISION_WIDTH = 1;
+export const TRAIN_COLLISION_TOP = 323;
+export const TRAIN_COLLISION_BOTTOM = 359;
+
+export const TRAIN_COLLISION_X_ZONES = Object.freeze([
+  Object.freeze({ left: 0, right: 365 }),
+  Object.freeze({ left: 360, right: 720 }),
+  Object.freeze({ left: 715, right: 1078 }),
+  Object.freeze({ left: 1073, right: 1435 }),
+]);
 
 export type TrainRouteState =
   | "idle"
@@ -23,15 +26,17 @@ export type TrainRouteState =
   | "cancelled"
   | "shutdown";
 
-export interface TrainCollisionBand {
+export interface TrainCollisionRect {
+  readonly localLeft: number;
+  readonly localRight: number;
   readonly left: number;
   readonly right: number;
+  readonly top: number;
+  readonly bottom: number;
   readonly centerX: number;
   readonly centerY: number;
   readonly width: number;
   readonly height: number;
-  readonly leftTile: number;
-  readonly rightTile: number;
   readonly blockedCells: readonly string[];
 }
 
@@ -39,13 +44,13 @@ export interface TrainRouteSnapshot {
   readonly state: TrainRouteState;
   readonly x: number;
   readonly y: number;
-  readonly collisionBand: TrainCollisionBand;
+  readonly collisionRects: readonly TrainCollisionRect[];
   readonly startedAt: number | null;
   readonly holdUntil: number | null;
 }
 
 export interface TrainRouteOptions {
-  readonly collisionWidth?: number;
+  readonly collisionScale?: number;
   readonly tileSize?: number;
 }
 
@@ -64,7 +69,7 @@ function clampProgress(value: number): number {
 
 /** Deterministic route owner for the public crowdTrain movement. */
 export class TrainRouteRuntime {
-  private collisionWidth: number;
+  private readonly collisionScale: number;
   private readonly tileSize: number;
   private stateState: TrainRouteState = "idle";
   private xState = TRAIN_START_X;
@@ -73,7 +78,10 @@ export class TrainRouteRuntime {
   private lastNow = 0;
 
   constructor(options: TrainRouteOptions = {}) {
-    this.collisionWidth = options.collisionWidth ?? TRAIN_DEFAULT_COLLISION_WIDTH;
+    this.collisionScale =
+      Number.isFinite(options.collisionScale) && options.collisionScale! > 0
+        ? options.collisionScale!
+        : 1;
     this.tileSize = options.tileSize ?? TRAIN_TILE_SIZE;
   }
 
@@ -85,52 +93,49 @@ export class TrainRouteRuntime {
     return this.stateState === "shutdown";
   }
 
-  setCollisionWidth(width: number): void {
-    if (Number.isFinite(width) && width > 0) this.collisionWidth = width;
-  }
-
   get snapshot(): TrainRouteSnapshot {
     return Object.freeze({
       state: this.stateState,
       x: this.xState,
       y: TRAIN_Y,
-      collisionBand: this.collisionBand,
+      collisionRects: this.collisionRects,
       startedAt: this.startedAtState ?? null,
       holdUntil: this.holdUntilState ?? null,
     });
   }
 
-  get collisionBand(): TrainCollisionBand {
-    const left = this.xState;
-    const right = this.xState + this.collisionWidth;
-    const leftTile = Math.floor(left / this.tileSize);
-    const rightTile = Math.floor(right / this.tileSize);
-    const rows: string[] = [];
-    for (
-      let tileX = leftTile;
-      tileX <= rightTile;
-      tileX += 1
-    ) {
-      for (
-        let tileY = TRAIN_COLLISION_ROW - TRAIN_COLLISION_ROW_RADIUS;
-        tileY <= TRAIN_COLLISION_ROW + TRAIN_COLLISION_ROW_RADIUS;
-        tileY += 1
-      ) {
-        rows.push(`${tileX},${tileY}`);
-      }
-    }
-    const height = (TRAIN_COLLISION_ROW_RADIUS * 2 + 1) * this.tileSize;
-    return Object.freeze({
-      left,
-      right,
-      centerX: left + this.collisionWidth / 2,
-      centerY: TRAIN_COLLISION_CENTER_Y,
-      width: this.collisionWidth,
-      height,
-      leftTile,
-      rightTile,
-      blockedCells: Object.freeze(rows),
-    });
+  get collisionRects(): readonly TrainCollisionRect[] {
+    return Object.freeze(
+      TRAIN_COLLISION_X_ZONES.map(({ left: localLeft, right: localRight }) => {
+        const left = this.xState + localLeft * this.collisionScale;
+        const right = this.xState + localRight * this.collisionScale;
+        const top = TRAIN_COLLISION_TOP;
+        const bottom = TRAIN_COLLISION_BOTTOM;
+        const leftTile = Math.floor(left / this.tileSize);
+        const rightTile = Math.floor((right - Number.EPSILON) / this.tileSize);
+        const topTile = Math.floor(top / this.tileSize);
+        const bottomTile = Math.floor((bottom - Number.EPSILON) / this.tileSize);
+        const blockedCells: string[] = [];
+        for (let tileX = leftTile; tileX <= rightTile; tileX += 1) {
+          for (let tileY = topTile; tileY <= bottomTile; tileY += 1) {
+            blockedCells.push(`${tileX},${tileY}`);
+          }
+        }
+        return Object.freeze({
+          localLeft,
+          localRight,
+          left,
+          right,
+          top,
+          bottom,
+          centerX: (left + right) / 2,
+          centerY: (top + bottom) / 2,
+          width: right - left,
+          height: bottom - top,
+          blockedCells: Object.freeze(blockedCells),
+        });
+      }),
+    );
   }
 
   start(nowMs: number): boolean {

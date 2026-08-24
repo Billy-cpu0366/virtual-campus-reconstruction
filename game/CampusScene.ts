@@ -282,6 +282,8 @@ export interface CampusSceneEntryCallbacks {
 
 export interface CampusSceneShutdownReceipt {
   readonly trainColliderActive: boolean;
+  readonly trainColliderCount: number;
+  readonly trainCollisionShapeCount: number;
   readonly trainBlockingCellCount: number;
   readonly trainSpriteActive: boolean;
   readonly trainCollisionShapeActive: boolean;
@@ -336,6 +338,7 @@ export class CampusScene extends Phaser.Scene {
   private factoryRoofTween: RoofTweenHandle | undefined;
   private concertRoofTween: RoofTweenHandle | undefined;
   private trainColliderActive = false;
+  private trainColliderCount = 0;
   private trainBlockingCells: readonly string[] = Object.freeze([]);
   private readonly sideFailures: string[] = [];
   private shutdownTask: Promise<CampusSceneShutdownReceipt> | undefined;
@@ -987,6 +990,8 @@ export class CampusScene extends Phaser.Scene {
       trainHasCollisionShape: this.trainRuntime?.hasCollisionShape ?? false,
       trainAdapter: this.entryTrainAdapter?.status ?? null,
       trainColliderActive: this.trainColliderActive,
+      trainColliderCount: this.trainColliderCount,
+      trainCollisionShapeCount: this.trainRuntime?.collisionShapeCount ?? 0,
       trainBlockingCellCount: this.trainBlockingCells.length,
       smoke: this.smokeRuntime?.snapshot ?? null,
       smokeVisual: this.smokeRuntime?.visualSnapshot ?? null,
@@ -1010,12 +1015,14 @@ export class CampusScene extends Phaser.Scene {
     if (collider === undefined) {
       throw new Error("train player collider creation failed");
     }
+    this.trainColliderCount += 1;
     this.trainColliderActive = true;
     let active = true;
     return () => {
       if (!active) return;
       active = false;
-      this.trainColliderActive = false;
+      this.trainColliderCount = Math.max(0, this.trainColliderCount - 1);
+      this.trainColliderActive = this.trainColliderCount > 0;
       collider.active = false;
       this.physics.world.removeCollider?.(collider);
       collider.destroy();
@@ -1088,6 +1095,8 @@ export class CampusScene extends Phaser.Scene {
       (this.physics?.world?.colliders as any)?.getActive?.().length ?? null;
     const receipt = Object.freeze({
       trainColliderActive: this.trainColliderActive,
+      trainColliderCount: this.trainColliderCount,
+      trainCollisionShapeCount: this.trainRuntime?.collisionShapeCount ?? 0,
       trainBlockingCellCount: this.trainBlockingCells.length,
       trainSpriteActive: this.trainRuntime?.hasSprite ?? false,
       trainCollisionShapeActive: this.trainRuntime?.hasCollisionShape ?? false,

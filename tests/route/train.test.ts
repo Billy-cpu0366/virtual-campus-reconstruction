@@ -4,7 +4,9 @@ import { playerDepth } from "../../src/layer/index.js";
 import { SPRAYER_CONFIGS, SPRAYER_TILE_SIZE } from "../../src/npc/index.js";
 import { SPAWN_Y } from "../../src/player/index.js";
 import {
-  TRAIN_COLLISION_ROW,
+  TRAIN_COLLISION_BOTTOM,
+  TRAIN_COLLISION_TOP,
+  TRAIN_COLLISION_X_ZONES,
   TRAIN_DEPARTURE_DURATION,
   TRAIN_END_X,
   TRAIN_ENTRY_DURATION,
@@ -142,7 +144,7 @@ function makeScene(textureAvailable = true) {
 
 describe("TrainRouteRuntime", () => {
   it("按5秒进场、3秒停留、9秒离场推进，并让碰撞带跟随", () => {
-    const runtime = new TrainRouteRuntime({ collisionWidth: 128 });
+    const runtime = new TrainRouteRuntime({ collisionScale: 1.025 });
     expect(runtime.start(0)).toBe(true);
     expect(runtime.snapshot).toMatchObject({ state: "arriving", x: TRAIN_START_X });
     expect(runtime.start(1)).toBe(false);
@@ -151,7 +153,15 @@ describe("TrainRouteRuntime", () => {
     expect(halfway.state).toBe("arriving");
     expect(halfway.x).toBeGreaterThan(TRAIN_END_X);
     expect(halfway.x).toBeLessThan(TRAIN_START_X);
-    expect(halfway.collisionBand.blockedCells).toContain(`${halfway.collisionBand.leftTile},${TRAIN_COLLISION_ROW}`);
+    expect(halfway.collisionRects).toHaveLength(TRAIN_COLLISION_X_ZONES.length);
+    expect(halfway.collisionRects[0]).toMatchObject({
+      localLeft: 0,
+      localRight: 365,
+      top: TRAIN_COLLISION_TOP,
+      bottom: TRAIN_COLLISION_BOTTOM,
+      centerY: 341,
+    });
+    expect(halfway.collisionRects.every((rect) => rect.blockedCells.length > 0)).toBe(true);
 
     expect(runtime.tick(TRAIN_ENTRY_DURATION).state).toBe("holding");
     expect(runtime.snapshot.x).toBe(TRAIN_END_X);
@@ -194,7 +204,7 @@ describe("PhaserTrainRuntime", () => {
     );
   });
 
-  it("创建单个火车和静态碰撞带，进出场时更新blocking zone并完整清理", () => {
+  it("创建4个独立火车碰撞矩形，随进出场移动并完整清理", () => {
     const fake = makeScene();
     const calls: Array<readonly string[] | null> = [];
     let completes = 0;
@@ -207,7 +217,8 @@ describe("PhaserTrainRuntime", () => {
     runtime.preload();
     expect(runtime.start(0)).toEqual({ ok: true });
     expect(fake.sprites).toHaveLength(1);
-    expect(fake.shapes).toHaveLength(1);
+    expect(fake.shapes).toHaveLength(4);
+    expect(runtime.collisionShapeCount).toBe(4);
     expect(fake.sprites[0]?.depth).toBe(TRAIN_PRESENTATION_DEPTH);
     expect(runtime.visualSnapshot).toMatchObject({
       width: 128,
@@ -217,11 +228,22 @@ describe("PhaserTrainRuntime", () => {
     expect(fake.events.count("update")).toBe(1);
     expect(calls.at(-1)).not.toBeNull();
 
-    const initialShapeX = fake.shapes[0]?.x;
+    const initialShapeX = fake.shapes.map((shape) => shape.x);
     fake.events.emit("update", 2_500);
-    expect(fake.shapes[0]?.x).not.toBe(initialShapeX);
-    expect(fake.shapes[0]?.body.width).toBe(runtime.snapshot.collisionBand.width);
-    expect(fake.shapes[0]?.body.height).toBe(runtime.snapshot.collisionBand.height);
+    expect(fake.shapes.map((shape) => shape.x)).not.toEqual(initialShapeX);
+    expect(fake.shapes).toEqual(
+      expect.arrayContaining(
+        runtime.snapshot.collisionRects.map((rect) =>
+          expect.objectContaining({
+            x: rect.centerX,
+            y: rect.centerY,
+            width: rect.width,
+            height: rect.height,
+          }),
+        ),
+      ),
+    );
+    expect(fake.shapes.every((shape) => shape.body.width > 0 && shape.body.height === 36)).toBe(true);
     expect(fake.sprites[0]?.x).toBe(runtime.snapshot.x);
     expect(runtime.start(2_501)).toEqual({ ok: false, reason: "already-running" });
 
@@ -260,11 +282,21 @@ describe("PhaserTrainRuntime", () => {
 
     expect(runtime.start(0)).toEqual({ ok: true });
     runtime.cancel(1_000);
-    expect(order.slice(-3)).toEqual(["collider", "shape", "zone"]);
-    expect(cleanupCalls).toBe(1);
+    expect(order.slice(-9)).toEqual([
+      "collider",
+      "collider",
+      "collider",
+      "collider",
+      "shape",
+      "shape",
+      "shape",
+      "shape",
+      "zone",
+    ]);
+    expect(cleanupCalls).toBe(4);
     runtime.cancel(1_001);
     runtime.shutdown(1_002);
-    expect(cleanupCalls).toBe(1);
+    expect(cleanupCalls).toBe(4);
   });
 
   it("资源失败不创建对象；cancel可重启，shutdown清理并永久拒绝", () => {
@@ -282,7 +314,8 @@ describe("PhaserTrainRuntime", () => {
     expect(runtime.start(0)).toEqual({ ok: true });
     runtime.cancel(1_000);
     expect(fake.sprites[0]?.destroyed).toBe(true);
-    expect(fake.shapes[0]?.destroyed).toBe(true);
+    expect(fake.shapes).toHaveLength(4);
+    expect(fake.shapes.every((shape) => shape.destroyed)).toBe(true);
     expect(runtime.start(2_000)).toEqual({ ok: true });
     runtime.shutdown(2_001);
     expect(fake.sprites.at(-1)?.destroyed).toBe(true);

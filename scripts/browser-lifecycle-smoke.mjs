@@ -146,6 +146,8 @@ const result = {
     after?.lifecycleHook === "undefined" &&
     after?.collisionHook === "undefined" &&
     shutdownReceipt?.trainColliderActive === false &&
+    shutdownReceipt?.trainColliderCount === 0 &&
+    shutdownReceipt?.trainCollisionShapeCount === 0 &&
     shutdownReceipt?.trainBlockingCellCount === 0 &&
     shutdownReceipt?.trainSpriteActive === false &&
     shutdownReceipt?.trainCollisionShapeActive === false &&

@@ -151,6 +151,8 @@ try {
   assert.equal(error.activeId, "app-retry");
   assert.equal(error.canvasCount, 0);
   assert.equal(error.hook.cleanup.receipt.trainColliderActive, false);
+  assert.equal(error.hook.cleanup.receipt.trainColliderCount, 0);
+  assert.equal(error.hook.cleanup.receipt.trainCollisionShapeCount, 0);
   assert.equal(error.hook.cleanup.receipt.trainBlockingCellCount, 0);
   assert.equal(error.hook.cleanup.receipt.physicsColliderCount, 0);
 

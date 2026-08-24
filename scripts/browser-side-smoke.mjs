@@ -8,6 +8,7 @@ const inputUrl =
   process.argv[2] ?? process.env.SMOKE_URL ?? "http://127.0.0.1:4175/";
 const smokeUrl = new URL(inputUrl);
 smokeUrl.searchParams.set("lifecycle-test", "1");
+smokeUrl.searchParams.set("collision-test", "1");
 smokeUrl.searchParams.set("side-smoke", String(Date.now()));
 const url = smokeUrl.toString();
 const timeoutMs = Number(process.env.SIDE_SMOKE_TIMEOUT_MS ?? 55000);
@@ -149,6 +150,45 @@ async function moveUntil(key, code, keyCode, predicate, label) {
   }
 }
 
+async function holdDirection(key, code, keyCode, durationMs) {
+  const before = await debug();
+  await command("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key,
+    code,
+    windowsVirtualKeyCode: keyCode,
+  });
+  const samples = [];
+  try {
+    const sampleCount = Math.max(1, Math.ceil(durationMs / 100));
+    for (let index = 0; index < sampleCount; index += 1) {
+      await sleep(100);
+      const snapshot = await debug();
+      if (snapshot !== null) samples.push(snapshot);
+    }
+  } finally {
+    await command("Input.dispatchKeyEvent", {
+      type: "keyUp",
+      key,
+      code,
+      windowsVirtualKeyCode: keyCode,
+    });
+  }
+  const after = await debug();
+  return {
+    before: before?.player ?? null,
+    after: after?.player ?? null,
+    blockedSamples: samples.filter((snapshot) => snapshot.body?.blocked?.down).length,
+  };
+}
+
+async function setPlayerPosition(x, y) {
+  await evaluate(
+    `window.__campusCollisionTest.setPlayerPosition(${x}, ${y})`,
+  );
+  await sleep(250);
+}
+
 async function moveToSprayers() {
   await moveUntil(
     "ArrowRight",
@@ -195,51 +235,93 @@ try {
   let holding;
   let complete;
   const routeStartedAt = Date.now();
-  while (Date.now() - routeStartedAt < 22000) {
+  const sampleTrain = (snapshot) => {
+    const viewport = {
+      left: snapshot.camera.scrollX,
+      right: snapshot.camera.scrollX + 480,
+      top: snapshot.camera.scrollY,
+      bottom: snapshot.camera.scrollY + 270,
+    };
+    samples.push({
+      elapsedMs: Date.now() - clickedAt,
+      state: snapshot.side.train?.state,
+      x: snapshot.side.train?.x,
+      collider: snapshot.side.trainColliderActive,
+      sprite: snapshot.side.trainHasSprite,
+      trainVisible: intersects(snapshot.side.trainVisual, viewport),
+      smokeVisible: intersects(snapshot.side.smokeVisual?.bounds, viewport),
+      smokeParticleCount: snapshot.side.smokeVisual?.aliveParticleCount ?? 0,
+      smokeState: snapshot.side.smoke?.state,
+      smokeGeneration: snapshot.side.smoke?.generation,
+    });
+  };
+  while (Date.now() - routeStartedAt < 9000 && holding === undefined) {
     const snapshot = await debug();
     if (snapshot !== null) {
-      const viewport = {
-        left: snapshot.camera.scrollX,
-        right: snapshot.camera.scrollX + 480,
-        top: snapshot.camera.scrollY,
-        bottom: snapshot.camera.scrollY + 270,
-      };
-      samples.push({
-        elapsedMs: Date.now() - clickedAt,
-        state: snapshot.side.train?.state,
-        x: snapshot.side.train?.x,
-        collider: snapshot.side.trainColliderActive,
-        sprite: snapshot.side.trainHasSprite,
-        trainVisible: intersects(snapshot.side.trainVisual, viewport),
-        smokeVisible: intersects(snapshot.side.smokeVisual?.bounds, viewport),
-        smokeParticleCount: snapshot.side.smokeVisual?.aliveParticleCount ?? 0,
-        smokeState: snapshot.side.smoke?.state,
-        smokeGeneration: snapshot.side.smoke?.generation,
-      });
-      if (snapshot.side.train?.state === "holding" && holding === undefined) {
-        holding = snapshot;
-      }
-      if (snapshot.side.train?.state === "complete") {
-        complete = snapshot;
-        break;
-      }
+      sampleTrain(snapshot);
+      if (snapshot.side.train?.state === "holding") holding = snapshot;
     }
     await sleep(50);
   }
   assert.ok(holding !== undefined, "real train never reached holding");
-  assert.ok(complete !== undefined, "real train never completed departure");
   const holdingElapsedMs = samples.find((sample) => sample.state === "holding")?.elapsedMs;
-  const completeElapsedMs = samples.find((sample) => sample.state === "complete")?.elapsedMs;
   assert.ok(holdingElapsedMs >= 4800 && holdingElapsedMs < 6500);
-  assert.ok(completeElapsedMs >= 16500 && completeElapsedMs < 19500);
   assert.equal(holding.side.trainHasSprite, true);
   assert.equal(holding.side.trainHasCollisionShape, true);
   assert.equal(holding.side.trainColliderActive, true);
+  assert.equal(holding.side.trainColliderCount, 4);
+  assert.equal(holding.side.trainCollisionShapeCount, 4);
   assert.ok(holding.side.trainBlockingCellCount > 0);
+
+  await setPlayerPosition(600, 280);
+  const holdingCrossing = await holdDirection(
+    "ArrowDown",
+    "ArrowDown",
+    40,
+    2000,
+  );
+  assert.ok(holdingCrossing.before !== null);
+  assert.ok(holdingCrossing.after !== null);
+  assert.ok(
+    holdingCrossing.after.y < 323,
+    `train collision crossed while holding: ${JSON.stringify(holdingCrossing)}`,
+  );
+  assert.ok(
+    holdingCrossing.blockedSamples > 0,
+    `train collision never blocked ArrowDown: ${JSON.stringify(holdingCrossing)}`,
+  );
+
+  while (Date.now() - routeStartedAt < 22000 && complete === undefined) {
+    const snapshot = await debug();
+    if (snapshot !== null) {
+      sampleTrain(snapshot);
+      if (snapshot.side.train?.state === "complete") complete = snapshot;
+    }
+    await sleep(50);
+  }
+  assert.ok(complete !== undefined, "real train never completed departure");
+  const completeElapsedMs = samples.find((sample) => sample.state === "complete")?.elapsedMs;
+  assert.ok(completeElapsedMs >= 16500 && completeElapsedMs < 19500);
   assert.equal(complete.side.trainHasSprite, false);
   assert.equal(complete.side.trainHasCollisionShape, false);
   assert.equal(complete.side.trainColliderActive, false);
+  assert.equal(complete.side.trainColliderCount, 0);
+  assert.equal(complete.side.trainCollisionShapeCount, 0);
   assert.equal(complete.side.trainBlockingCellCount, 0);
+
+  await setPlayerPosition(600, 280);
+  const departedCrossing = await holdDirection(
+    "ArrowDown",
+    "ArrowDown",
+    40,
+    1000,
+  );
+  assert.ok(departedCrossing.after !== null);
+  assert.ok(
+    departedCrossing.after.y > 359,
+    `train collision remained after departure: ${JSON.stringify(departedCrossing)}`,
+  );
+
   const smokeVisibleDurationMs = longestVisibleDuration(samples, "smokeVisible");
   const trainVisibleDurationMs = longestVisibleDuration(samples, "trainVisible");
   assert.ok(samples.some((sample) => sample.smokeState === "emitting"));
@@ -298,6 +380,8 @@ try {
   })()`);
   assert.deepEqual(lifecycle.receipt, {
     trainColliderActive: false,
+    trainColliderCount: 0,
+    trainCollisionShapeCount: 0,
     trainBlockingCellCount: 0,
     trainSpriteActive: false,
     trainCollisionShapeActive: false,
@@ -325,6 +409,8 @@ try {
     ready,
     holdingElapsedMs,
     completeElapsedMs,
+    holdingCrossing,
+    departedCrossing,
     smokeVisibleDurationMs,
     trainVisibleDurationMs,
     guideAfterTrain,
