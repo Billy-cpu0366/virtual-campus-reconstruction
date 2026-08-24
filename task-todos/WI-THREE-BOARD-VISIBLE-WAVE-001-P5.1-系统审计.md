@@ -192,11 +192,11 @@ C3前三项修复包，也不以此扩大本轮代码授权。
 - About、Projects、Memo1–6、mini/big map、sprayer、train、smoke、footsteps已有
   有界实现；完整度仍受8.2的明确缺口限制。
 
-### 8.5 C3 Intent Contract草案（proposed，待一次Human Plan Gate）
+### 8.5 C3 Intent Contract（accepted，`DEC-P5.1-C3-P0-SCOPE-001`）
 
 ```yaml
 intent-id: IC-P5.1-C3-001
-version: 0.1-proposed
+version: 1.0-accepted
 normal-path: normal production Play → 0-5秒入口 → party进入/内部/离开
 must-match:
   - C3-LOAD: Loading/开始游戏界面按同视口原站对照消除可见差异
@@ -214,7 +214,8 @@ oracle-map-required:
   - C3-ENTRY: Human设备normal-production 0-5秒连续录像或逐帧trace
   - C3-ROOF-PARTY: party进入/内部/离开normal-production连续证据
 acceptance-owner: Human
-human-gate: p5.1-c3-human-plan-gate → p5.1-c3-human-acceptance
+human-gate: p5.1-c3-preimplementation-evidence → p5.1-c3-human-acceptance
+accepted-signature: 接受P0范围 (Recommended)（2026-08-24）
 ```
 
 **防复发动作**：每条C3 criterion在修复包前必须有上述Oracle Map行；R1/R3/R5/C1+C2

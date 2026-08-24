@@ -3,17 +3,17 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-plan-gate
+correction-phase: batch-implement
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-c3-human-plan-gate
-current-gate: p5.1-c3-human-plan-gate
-gate-status: awaiting-human
-authorization-ref: DEC-P5.1-R7-REPAIR-001
+current-phase: p5.1-c3-preimplementation-evidence
+current-gate: p5.1-c3-evidence-completeness
+gate-status: audit-in-progress
+authorization-ref: DEC-P5.1-C3-P0-SCOPE-001
 preauthorized-next-work-item: none
 next-phase: p5.1-c3-batch-implement
 updated: 2026-08-24
@@ -24,7 +24,7 @@ updated: 2026-08-24
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：candidate=`54c0e29`再次被Human整体验收否决：入口仍有约2秒停滞/相机回切，Loading与原站差异大，party屋顶未淡隐。C3统一差异表已按全局`pi-project-workflow@0.1.0-beta.3`完成审计，现等待Human确认仅修前三项P0；HUD/内容/NPC/路线/玩家/图层/资源等完整度缺口已登记为后续deferred，不另做高成本模型批量试验。
+- **当前阶段**：Human已接受C3仅修Loading、约2秒入口转场与party屋顶；HUD/内容/NPC/路线/玩家/图层/资源等完整度缺口继续deferred。当前先收敛三项适配证据和单一有界实施包，不另做高成本模型批量试验或零散补丁。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
 - **当前授权**：按已安装Beta.3只读形成Intent Contract、Oracle Map、证据适配和失败复盘；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
@@ -60,7 +60,7 @@ updated: 2026-08-24
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；C1+C2自动PASS但Human再次FAIL，candidate=`54c0e29`冻结 | 展示C3 Intent Contract与Oracle Map；仅待Human确认前三项P0整体修复范围 | 继续零散补丁；自动代签；修改冻结candidate；远端操作 | Human接受C3整体修复方案后，建立单一有界实施包 |
+| 三板块可见成果并行波 | `systemic-failure`；Human已接受`DEC-P5.1-C3-P0-SCOPE-001`，candidate=`54c0e29`冻结 | 只读收敛Loading、入口转场、party屋顶的Oracle Map与实施包 | 继续零散补丁；自动代签；修改冻结candidate；远端操作 | 三项适配证据与单一实施包完成后，进入有界batch implementation |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
