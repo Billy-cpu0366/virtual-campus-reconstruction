@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-HANDOFF-V1-001
-status: active-wip-snapshot-mode-implementation
+status: active-wip-snapshot-external-preview-request-ready
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-23
@@ -17,7 +17,7 @@ protocol-commit: 0a105dc
 
 ## 当前阶段
 
-`wip-snapshot-mode-implementation`
+`wip-snapshot-external-preview-request-ready`
 
 Human 已转交 Windows 外部 Pi 的完整 `AUDIT-RESULT-V1`，原始结构化收据保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-RESULT-V1.md`，SHA-256 为 `21b76920f6a1928a608dc94226a4b9b341322fba090b64329d5fecfe75b262da`。该收据属于 `human-relayed / external-runtime-unverified-by-wsl`，不能冒充 WSL 独立验证。
 
@@ -25,7 +25,7 @@ Human 已转交 Windows 外部 Pi 的完整 `AUDIT-RESULT-V1`，原始结构化�
 
 WSL 本地对象核对保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WSL-CORRELATION-V1.md`：Windows local HEAD 对象缺失；reported origin/main 对象存在，但与当前 WSL HEAD 无共同 merge-base且根提交不同。因此不能直接 fast-forward、普通 merge或假定 Windows 18 个本地提交已被当前 WSL 吸收。
 
-Human 已明确当前只要求把 WSL 完整成果备份到新的非保护 WIP 分支，不要求可直接合并 `main`。因此 reconciliation 不再是当前前置；审计收据只证明 remote 身份和 Windows 正式工作树不得被触碰。alpha.4 snapshot profile 已通过28项本地测试、schema duplicate-key scan、真实离线bundle与最终独立安全终审；当前停在 delivery readiness / WIP outbox Gate。
+Human 已明确当前只要求把 WSL 完整成果备份到新的非保护 WIP 分支，不要求可直接合并 `main`。因此 reconciliation 不再是当前前置；审计收据只证明 remote 身份和 Windows 正式工作树不得被触碰。alpha.4 snapshot profile 已通过28项本地测试、schema duplicate-key scan、真实离线bundle与最终独立安全终审。当前 WSL delivery readiness 已通过 typecheck、32文件/168测试、build、临时preview browser smoke和状态一致性；prepare 已生成新的不可变 outbox，等待 Windows external Preview。
 
 ## alpha.3 初始 Adapter 接入历史
 
@@ -58,7 +58,21 @@ Human 于 2026-08-23 接受把独立 `pi-git-handoff` 接入本项目；落盘�
 
 ## 下一 Gate
 
-`verification-delivery` 先核对当前 WSL commit、clean 工作树、实际文件范围、历史 ignored outbox 不冲突和 WIP 边界；通过后，才可生成新的 snapshot outbox。根 `npm test` 曾误收集 `packages/pi-git-handoff/tests/` 的 Node test 和 `.pi/worktrees/` 副本，已通过 `vite.config.ts` 排除规则修复；typecheck、32文件/168测试、build与临时preview browser smoke均已通过。Windows external Preview 返回前不授权 push，Human token 前不得创建或更新远端分支。
+`verification-delivery` 已核对 current WSL commit、clean 工作树、实际文件范围、历史 ignored outbox 不冲突和 WIP 边界。根 `npm test` 曾误收集 `packages/pi-git-handoff/tests/` 的 Node test 和 `.pi/worktrees/` 副本，已通过 `vite.config.ts` 排除规则修复；typecheck、32文件/168测试、build与临时preview browser smoke均已通过。
+
+已准备 delivery：
+
+```text
+delivery-id: vc-wip-snapshot-20260823-01
+commit: e3c86dd3e4c5be49fa50bfadaaea7fa4e8b8f000
+tree: 63e074e5e43774274b7227c4401a68e55dba3774
+target: wip/vc-wip-snapshot-20260823-01
+history-mode: snapshot
+artifact-index-sha256: eda0bdef7a8f3ea7a501b1f9395d4af3c9bbe1e1f110920d2a9e63af7694f875
+outbox: .pi/handoff/outbox/vc-wip-snapshot-20260823-01/
+```
+
+bundle、所有 SHA256SUMS 和 prepare receipt 已本地 PASS；Windows external Preview 请求位于 `task-todos/WI-GITHUB-HANDOFF-V1-001-WIP-SNAPSHOT-PREVIEW-REQUEST.md`。请求、Preview 与 receipt 是 payload 冻结后产生的控制面记录，刻意不反写 delivery commit；payload 只以其冻结的 commit/tree 和 artifact hash 为准。Preview 返回前不授权 push，Human token 前不得创建或更新远端分支。
 
 ## 完成标准
 
