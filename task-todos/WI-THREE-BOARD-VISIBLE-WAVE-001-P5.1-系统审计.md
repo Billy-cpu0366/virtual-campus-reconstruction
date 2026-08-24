@@ -1,12 +1,12 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.1-systemic-audit
-status: repair-auto-verified-awaiting-repeat-human-acceptance
+status: c3-inventory-audit
 issue-class: systemic-failure
-candidate-commit: 1e24fd1e9e4cfa7e06ed8db0243b4f214364569c
-candidate-tree: 657101daa0419409ea046a3716badd9d6fd57a61
-authority: DEC-P5.1-SYSTEMIC-REPAIR-001
-updated: 2026-08-23
+candidate-commit: 54c0e29
+candidate-tree: UNKNOWN
+authority: DEC-P5.1-R7-REPAIR-001
+updated: 2026-08-24
 ---
 
 # P5.1 系统补救：完整差异审计与根因包
@@ -142,4 +142,80 @@ Human已选择**方案A：完整证据补救**。R1–R7已实施并完成自动
 
 Human在结构化Gate选择**`实施C1+C2 (Recommended)`**。方案状态从`proposed`转为`accepted`；实施授权为`DEC-P5.1-R7-REPAIR-001`。
 
-C1+C2已由integration `54c0e29`实现并完成自动/双视口production回归；量化结果见[C1+C2收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-C1-C2-收据.md)。当前只等待Human复验，不自动关闭D-PERF-02/D-TRAIN-02。
+C1+C2已由integration `54c0e29`实现并完成自动/双视口production回归；量化结果见[C1+C2收据](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-C1-C2-收据.md)。后续Human再次拒绝后，父流程仍在同一差异表C3 audit；不得用该收据自动关闭任何Human-owned行。
+
+## 8. C3：最新Human结果与完整度清单（2026-08-24）
+
+> **当前口径**：只以Human最新澄清判断“仍不对”。旧自动收据只能说明其
+> 记录的场景，不能把未覆盖的party、Loading或实际设备入口观感写成已修。
+> 本节与上方历史行共用同一父工作项和根因表，不拆成普通Bug。
+
+### 8.1 当前P0：Human仍判失败的三项
+
+| ID | Human结果/目标 | 现有证据与适配状态 | 根因候选 | 下一步（只读） |
+|---|---|---|---|---|
+| C3-LOAD | Loading/开始游戏界面仍与原站不对 | R1证明白壳/GIF/进度/Play已实现，但没有同视口原站/复刻逐元素视觉对照；对最新Human结论为`NOT OBSERVABLE` | RC-A：Human视觉Oracle与旧R1收据不匹配 | 建立同视口元素对照；FACT与重构DECISION分开 |
+| C3-ENTRY | Play后约2秒航拍切回主角时仍有可感知卡顿/跳变 | R3/C1+C2的WSL P95、rAF和固定截图不能观察Human设备0–5秒连续观感；对最新结论为`NOT OBSERVABLE` | RC-B：camera、cleanup、控制门、viewport与对象编排在同一可见窗口竞争 | 收集正常production的连续录像/逐帧trace，关联input、camera、player visual与mutation时序 |
+| C3-ROOF-PARTY | party建筑进入后屋顶未像实验室一样淡隐 | R5仅覆盖factory两层roof；没有party区域、roof组或消费者收据；对party结论为`NOT OBSERVABLE` | RC-C：roof消费者覆盖不完整 | 先定位party的区域→roof组归属；将淡隐/恢复登记为Human重构DECISION，不伪装成原站FACT |
+
+三项均为`Critical`，接受owner均为Human；在Human复验前不得标PASS或关闭。
+
+### 8.2 明确未复现的完整度缺口（非本轮P0修复授权）
+
+| ID | 缺口 | 当前状态 | 来源 |
+|---|---|---|---|
+| C3-UI | 顶部完整菜单与移动quick-actions | 明确未完成 | `03-执行层/04-独立件/02-游戏UI.md`、R6收据 |
+| C3-CONTENT | CV、Contact、Technologies正文 | 仅有禁用入口，明确未完成 | `04-内容层/作品集内容.md`、R6收据 |
+| C3-NPC | 除sprayer外的NPC、跨chunk长路线、intro复位 | 明确未完成 | `03-执行层/05-旁支/01-NPC.md` |
+| C3-ROUTE | cars路线与CrowdManager | 明确未完成 | `03-执行层/05-旁支/02-车辆与路线.md` |
+| C3-PLAYER | 沙滩换装、怪物、传送、Z粒子等玩家能力 | 明确未完成 | `03-执行层/02-玩法线/03-玩家.md` |
+| C3-LAYER | 特殊13层和其余已证实动态消费者 | 明确未完成 | `03-执行层/01-地图线/03-图层与遮挡.md` |
+| C3-ASSET | 两套Loader完整时序、HTTP cache、纹理生命周期 | 明确未完成 | `03-执行层/01-地图线/01-资源加载.md` |
+
+这些行保持`P1/P2 deferred`，用于防止把当前纵切片误报为完整复刻；不纳入
+C3前三项修复包，也不以此扩大本轮代码授权。
+
+### 8.3 UNKNOWN与禁止补猜项
+
+| ID | 未知/证据缺口 | 不能断言的原因 | 所需证据 |
+|---|---|---|---|
+| C3-U1 | party实际roof组与触发区域 | 现有直接证据只到factory/concert | party进入/离开公开运行证据或Bundle区域调用链 |
+| C3-U2 | C3-ENTRY的具体主因 | WSL未复现Human设备长帧，不能将现象归咎于单一cleanup | Human设备production时间线/LoAF/长帧与camera/mutation关联 |
+| C3-U3 | 原站Loading精确百分比与过渡算法 | 公开证据未证明插值/时序算法 | 原站逐帧证据或公开代码直接链 |
+| C3-U4 | particles3/69360消费者 | 仅有计数/空间关系，缺直接数据流 | Bundle marker→消费者读取/创建链 |
+| C3-U5 | 111秒序列是否为正常入口 | 当前明确为UNKNOWN且禁止接入 | 原站正常产品触发链 |
+
+### 8.4 已实现、不得重复报为当前失败
+
+- factory roof的300ms淡隐/恢复、30Hz物理不变的视觉插值、C1预算cleanup与train
+  世界深度均已有有界实现和自动证据；它们不自动关闭C3-ENTRY或C3-ROOF-PARTY。
+- About、Projects、Memo1–6、mini/big map、sprayer、train、smoke、footsteps已有
+  有界实现；完整度仍受8.2的明确缺口限制。
+
+### 8.5 C3 Intent Contract草案（proposed，待一次Human Plan Gate）
+
+```yaml
+intent-id: IC-P5.1-C3-001
+version: 0.1-proposed
+normal-path: normal production Play → 0-5秒入口 → party进入/内部/离开
+must-match:
+  - C3-LOAD: Loading/开始游戏界面按同视口原站对照消除可见差异
+  - C3-ENTRY: Play后约2秒航拍转主角时无可感知停滞或跳变
+  - C3-ROOF-PARTY: party进入、内部、离开时采用实验室式屋顶淡隐/恢复
+may-differ: 未被公开证据证明的Loading内部百分比算法；party技术区域实现
+out-of-scope: C3-UI/C3-CONTENT/C3-NPC/C3-ROUTE/C3-PLAYER/C3-LAYER/C3-ASSET；
+  particles3/69360；111秒序列；30FPS physics；train路线/scale/timing
+failure-signals:
+  - Human仍可见Loading构图/层级差异
+  - Human仍在约2秒转场感知冻结、跳变或相机突变
+  - party内部仍被屋顶遮挡，或离开后屋顶不恢复
+oracle-map-required:
+  - C3-LOAD: 同视口原站/复刻normal-production静态对照
+  - C3-ENTRY: Human设备normal-production 0-5秒连续录像或逐帧trace
+  - C3-ROOF-PARTY: party进入/内部/离开normal-production连续证据
+acceptance-owner: Human
+human-gate: p5.1-c3-human-plan-gate → p5.1-c3-human-acceptance
+```
+
+**防复发动作**：每条C3 criterion在修复包前必须有上述Oracle Map行；R1/R3/R5/C1+C2
+历史收据仅作诊断输入，不能作为C3完成收据。
