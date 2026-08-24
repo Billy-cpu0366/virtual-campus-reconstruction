@@ -1,3 +1,5 @@
+import { walkFrameStart, WALK_FRAMES_PER_DIRECTION } from "../src/player/appearance.js";
+import type { Direction } from "../src/input/index.js";
 import {
   SPRAYER_CONFIGS,
   SprayerGroupRuntime,
@@ -25,16 +27,20 @@ export const SPRAYER_RUNTIME_ASSETS = Object.freeze([
 ] as const);
 
 const SPRAY_ANIMATION = "npc-sprayer-spray";
-const RUNNING_DIRECTION_ANIMATION = {
-  north: "npc-sprayer-running-north",
-  south: "npc-sprayer-running-south",
-  east: "npc-sprayer-running-east",
-  west: "npc-sprayer-running-west",
-} as const;
+const RUNNING_DIRECTIONS: readonly Direction[] = [
+  "east", "north-east", "north-west", "north",
+  "south-east", "south-west", "south", "west",
+];
 
-function runningDirection(dx: number, dy: number): keyof typeof RUNNING_DIRECTION_ANIMATION {
-  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? "east" : "west";
-  return dy >= 0 ? "south" : "north";
+function runningAnimation(direction: Direction): string {
+  return `npc-sprayer-running-${direction}`;
+}
+
+function runningDirection(dx: number, dy: number): Direction {
+  const horizontal = dx === 0 ? "" : dx > 0 ? "east" : "west";
+  const vertical = dy === 0 ? "" : dy > 0 ? "south" : "north";
+  if (horizontal !== "" && vertical !== "") return `${vertical}-${horizontal}` as Direction;
+  return horizontal === "" ? vertical as Direction : horizontal as Direction;
 }
 const SPRAYER_PRESENTATION_DEPTH_BASE = 500;
 const SPRAYER_PRESENTATION_DEPTH_OFFSET_Y = 24;
@@ -188,11 +194,13 @@ export class PhaserSprayerRuntime {
       -1,
     );
     // The running sheet has eight direction rows of eight frames. Never loop all 64 frames.
-    // The first row is the front view; the third row is the rear view.
-    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.south, 0, 7, 6, -1);
-    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.east, 8, 15, 6, -1);
-    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.north, 16, 23, 6, -1);
-    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.west, 24, 31, 6, -1);
+    for (const direction of RUNNING_DIRECTIONS) {
+      const start = walkFrameStart(direction);
+      this.createAnimationIfAvailable(
+        "npc-sprayer-running", runningAnimation(direction),
+        start, start + WALK_FRAMES_PER_DIRECTION - 1, 6, -1,
+      );
+    }
   }
 
   start(nowMs: number): PhaserSprayerStartResult {
@@ -306,9 +314,9 @@ export class PhaserSprayerRuntime {
         // Playing a spritesheet animation selects its texture. Resetting the
         // texture every update would pin the animation to its first frame.
         sprite.anims?.play(
-          RUNNING_DIRECTION_ANIMATION[
+          runningAnimation(
             dx === 0 && dy === 0 ? "south" : runningDirection(dx, dy)
-          ],
+          ),
           true,
         );
       } else if (instance.sprayReady) {
