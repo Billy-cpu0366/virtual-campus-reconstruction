@@ -79,10 +79,14 @@
       }
 
       #app-panel {
-        position: relative;
+        position: fixed;
+        inset: 0;
         z-index: 1;
-        width: min(560px, 100%);
+        width: 100%;
+        height: 100%;
         box-sizing: border-box;
+        display: grid;
+        place-items: center;
         text-align: center;
       }
 
@@ -96,6 +100,26 @@
       }
 
       #app-loading,
+      #app-ready {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background: #fff;
+      }
+
+      #app-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        border: 0;
+        padding: clamp(18px, 5vw, 30px);
+        box-shadow: none;
+      }
+
       #app-error {
         margin: 0 auto;
         padding: clamp(18px, 5vw, 30px);
@@ -141,7 +165,8 @@
 
       #app-ready {
         display: grid;
-        justify-items: center;
+        place-items: center;
+        align-content: center;
         gap: 16px;
       }
 
