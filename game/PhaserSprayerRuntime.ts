@@ -304,12 +304,12 @@ export class PhaserSprayerRuntime {
       if (instance.state === "fleeing") {
         // Playing a spritesheet animation selects its texture. Resetting the
         // texture every update would pin the animation to its first frame.
-        if (dx !== 0 || dy !== 0) {
-          sprite.anims?.play(
-            RUNNING_DIRECTION_ANIMATION[runningDirection(dx, dy)],
-            true,
-          );
-        }
+        sprite.anims?.play(
+          RUNNING_DIRECTION_ANIMATION[
+            dx === 0 && dy === 0 ? "south" : runningDirection(dx, dy)
+          ],
+          true,
+        );
       } else if (instance.sprayReady) {
         sprite.setTexture("npc-sprayer");
         sprite.anims?.play(SPRAY_ANIMATION, true);
