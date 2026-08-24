@@ -31,6 +31,7 @@
     "browser:map-smoke": "node scripts/browser-map-smoke.mjs",
     "browser:map-production": "node scripts/browser-map-production.mjs",
     "browser:complete-production": "node scripts/browser-complete-production.mjs",
+    "browser:route-crowd-production": "node scripts/browser-route-crowd-production.mjs",
     "browser:performance-smoke": "node scripts/browser-performance-smoke.mjs",
     "browser:perf-baseline": "node scripts/browser-perf-baseline.mjs",
     "check:perf-baseline-evidence": "node scripts/check-perf-baseline-evidence.mjs",
