@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-WIP-SNAPSHOT-20260822-001
-status: local-validation-repair-local-committed
+status: independent-fix-branch-push-authorized
 work-item-type: delivery-snapshot
 authorization: DEC-WIP-SNAPSHOT-PUSH-001
 delivery-id: vc-wip-visible-p51-20260822-01
@@ -48,12 +48,13 @@ updated: 2026-08-24
 
 ## 2026-08-24 本地验证修复
 
-- **accepted**：Human 选择“先修验证再预览”并确认“开始”；仅允许在隔离分支 `fix/wip-snapshot-validation` 本地提交。
+- **accepted**：Human 选择“先修验证再预览”并确认“开始”；随后明确授权仅推送独立修复分支。
 - **persisted**：`DEC-WIP-SNAPSHOT-VALIDATION-001`、根 `task_plan.md` 与本卡同步记录本次边界。
-- **local-committed**：修复已提交到隔离分支；仍未推送，远端 WIP 保持原提交。
+- **local-committed**：修复已提交到隔离分支。
+- **push-authorized**：仅允许推送 `origin/fix/wip-snapshot-validation`；不得更新既有 WIP、创建 PR 或 merge。
 - **verified**：`git diff --check`、状态一致性、typecheck、53 文件/298 测试、production build 和 browser Smoke 均通过；browser Smoke 证实 READY、480×270 canvas、无异常/失败请求，运行资源和 25 个 chunk 请求均返回 200。
 - **范围**：只修改 `scripts/prepare-runtime-assets.mjs` 与 `scripts/check-runtime-assets.mjs`，以 `path.relative` 的跨平台判断替换 `${root}/` 前缀判断，同时保留目录逃逸拒绝。
-- **仍禁止**：push、PR、merge、更新 `main`；远端 `wip/visible-product-p5.1-20260822` 不变；P5 Human视觉FAIL 不变。
+- **仍禁止**：更新既有 WIP、PR、merge、更新 `main`；远端 `wip/visible-product-p5.1-20260822` 不变；P5 Human视觉FAIL 不变。
 
 ## 成功收据
 
