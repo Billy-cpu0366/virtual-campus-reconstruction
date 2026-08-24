@@ -43,6 +43,7 @@ export interface PhaserTrainCollisionShapeLike {
   setPosition(x: number, y: number): this;
   setSize(width: number, height: number): this;
   readonly body?: {
+    setSize?(width: number, height: number): unknown;
     updateFromGameObject?: () => void;
   };
   destroy(): void;
@@ -270,6 +271,7 @@ export class PhaserTrainRuntime {
       band.width,
       band.height,
     );
+    this.collisionShape?.body?.setSize?.(band.width, band.height);
     this.collisionShape?.body?.updateFromGameObject?.();
     const cells = band.blockedCells.join("|");
     if (cells === this.lastCells) return;

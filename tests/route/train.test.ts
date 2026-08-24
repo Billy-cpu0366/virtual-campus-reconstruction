@@ -87,7 +87,15 @@ class FakeShape implements PhaserTrainCollisionShapeLike {
   width = 0;
   height = 0;
   destroyed = false;
-  readonly body = { updateFromGameObject: () => undefined };
+  readonly body = {
+    width: 0,
+    height: 0,
+    setSize: (width: number, height: number) => {
+      this.body.width = width;
+      this.body.height = height;
+    },
+    updateFromGameObject: () => undefined,
+  };
 
   setPosition(x: number, y: number): this {
     this.x = x;
@@ -212,6 +220,8 @@ describe("PhaserTrainRuntime", () => {
     const initialShapeX = fake.shapes[0]?.x;
     fake.events.emit("update", 2_500);
     expect(fake.shapes[0]?.x).not.toBe(initialShapeX);
+    expect(fake.shapes[0]?.body.width).toBe(runtime.snapshot.collisionBand.width);
+    expect(fake.shapes[0]?.body.height).toBe(runtime.snapshot.collisionBand.height);
     expect(fake.sprites[0]?.x).toBe(runtime.snapshot.x);
     expect(runtime.start(2_501)).toEqual({ ok: false, reason: "already-running" });
 
