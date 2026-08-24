@@ -20,6 +20,7 @@ const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
   ["maps/collisions-objects.png", "maps/collisions-objects.png"],
   ["maps/tileset-particles.png", "maps/tileset-particles.png"],
+  ["maps/walls-layer.json", "maps/walls-layer.json"],
   ["sprites/player.webp", "sprites/player.webp"],
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],

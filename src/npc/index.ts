@@ -1,3 +1,5 @@
+export { GridRouteCrowdPathProvider } from "./gridPathProvider.js";
+
 export {
   ROUTE_CROWD_BASE_SPEED,
   ROUTE_CROWD_CONFIGS,
