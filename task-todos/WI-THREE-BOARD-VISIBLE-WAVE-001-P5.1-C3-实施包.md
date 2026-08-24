@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 repair-package: P5.1-C3
-status: accepted-implementation-in-progress
+status: automated-verified-awaiting-human-acceptance
 authorization: DEC-P5.1-C3-IMPLEMENT-001; DEC-P5.1-C3-CONTINUITY-001
 authority-inputs:
   - DEC-P5.1-C3-P0-SCOPE-001
@@ -74,4 +74,4 @@ updated: 2026-08-24
 
 ## Human Gate
 
-Human已回复`开始吧`（2026-08-24），接受本实施包并授权进入 `p5.1-c3-batch-implement`。最终视觉验收仍单独保留。
+Human先回复`开始吧`（2026-08-24），随后以`ok`接受连续镜头与可见Play背景修正。实现提交为`18ee2d1`、`a24b10b`、`1109137`；typecheck、315项测试、两种build、test-hooks entry smoke及production trace通过（相机约3099ms稳定、约5084ms开放控制）。最终视觉验收仍单独保留。
