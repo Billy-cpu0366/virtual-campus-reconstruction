@@ -151,9 +151,6 @@ const LOGICAL_VIEWPORT_WIDTH = 480;
 const LOGICAL_VIEWPORT_HEIGHT = 270;
 const ENTRY_CORRIDOR_SAMPLES = 6;
 const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
-const ENTRY_SMOKE_PREVIEW_DURATION_MS = 650;
-const ENTRY_SMOKE_PREVIEW_STAY_MS = 0;
-const ENTRY_SMOKE_RETURN_DURATION_MS = 2_350;
 const FACTORY_ROOF_BOUNDS = Object.freeze({
   left: 112,
   right: 640,
@@ -560,15 +557,6 @@ export class CampusScene extends Phaser.Scene {
             x: camera.scrollX + camera.width / (2 * zoom),
             y: camera.scrollY + camera.height / (2 * zoom),
           });
-        },
-        {
-          preview: {
-            x: FACTORY_SMOKE_CONFIG.x,
-            y: FACTORY_SMOKE_CONFIG.y,
-            duration: ENTRY_SMOKE_PREVIEW_DURATION_MS,
-            stayDuration: ENTRY_SMOKE_PREVIEW_STAY_MS,
-            returnDuration: ENTRY_SMOKE_RETURN_DURATION_MS,
-          },
         },
       ),
       train: trainAdapter,
