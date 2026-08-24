@@ -1,7 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 repair-package: P5.1-C3
-status: proposed-awaiting-human-plan-gate
+status: accepted-implementation-in-progress
+authorization: DEC-P5.1-C3-IMPLEMENT-001
 authority-inputs:
   - DEC-P5.1-C3-P0-SCOPE-001
   - DEC-P5.1-C3-LOCAL-ENTRY-ORACLE-001
@@ -73,4 +74,4 @@ updated: 2026-08-24
 
 ## Human Gate
 
-接受本实施包才允许进入 `p5.1-c3-batch-implement` 并修改产品代码。最终视觉验收仍单独保留。
+Human已回复`开始吧`（2026-08-24），接受本实施包并授权进入 `p5.1-c3-batch-implement`。最终视觉验收仍单独保留。

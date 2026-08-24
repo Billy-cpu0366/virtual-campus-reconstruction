@@ -10,10 +10,10 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-c3-preimplementation-evidence
-current-gate: p5.1-c3-evidence-completeness
-gate-status: evidence-complete-local-oracle; implementation-package-pending
-authorization-ref: DEC-P5.1-C3-P0-SCOPE-001; DEC-P5.1-C3-LOCAL-ENTRY-ORACLE-001
+current-phase: p5.1-c3-batch-implement
+current-gate: p5.1-c3-human-acceptance
+gate-status: implementation-in-progress
+authorization-ref: DEC-P5.1-C3-P0-SCOPE-001; DEC-P5.1-C3-LOCAL-ENTRY-ORACLE-001; DEC-P5.1-C3-IMPLEMENT-001
 preauthorized-next-work-item: none
 next-phase: p5.1-c3-batch-implement
 updated: 2026-08-24
