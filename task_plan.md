@@ -10,12 +10,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.4-05b-npc-inventory-human-grouping-gate
-current-gate: p5.4-05b-npc-grouping-human-acceptance
-gate-status: awaiting-human
+current-phase: p5.4-05c-sprayer-human-accepted
+current-gate: p5.4-05d-npc-batch-human-authorization
+gate-status: passed
 authorization-ref: DEC-P5.4-05A-TRAIN-ROUTE-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05c-sprayer-or-approved-05d-batch
+next-phase: p5.4-05d-evidenced-npc-batch-selection
 updated: 2026-08-24
 ---
 
