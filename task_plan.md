@@ -10,12 +10,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.1-c3-batch-implement
-current-gate: p5.1-c3-human-acceptance
-gate-status: implementation-in-progress
-authorization-ref: DEC-P5.1-C3-P0-SCOPE-001; DEC-P5.1-C3-LOCAL-ENTRY-ORACLE-001; DEC-P5.1-C3-IMPLEMENT-001
+current-phase: p5.1-c3-human-accepted
+current-gate: next-work-item-human-authorization
+gate-status: passed
+authorization-ref: DEC-P5.1-C3-P0-SCOPE-001; DEC-P5.1-C3-LOCAL-ENTRY-ORACLE-001; DEC-P5.1-C3-IMPLEMENT-001; DEC-P5.1-C3-CONTINUITY-001
 preauthorized-next-work-item: none
-next-phase: p5.1-c3-batch-implement
+next-phase: select-04-independent-work-item
 updated: 2026-08-24
 ---
 
@@ -24,7 +24,7 @@ updated: 2026-08-24
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：Human已接受C3仅修Loading、约2秒入口转场与party屋顶；HUD/内容/NPC/路线/玩家/图层/资源等完整度缺口继续deferred。按Human指示，AI已用WSL normal-production完成入口5.5秒/330帧连续录制，且完成Loading同视口原站Oracle与party合法进出路径；当前形成单一实施包前不写代码。WSL采样不替代最终Human视觉验收，不另做高成本模型批量试验或零散补丁。
+- **当前阶段**：Human已通过C3整图视觉清单：Loading/Play、直达主角入口、地图与分块、移动与碰撞、相机、火车/动态物、factory与party/concert屋顶均通过。C3实现候选位于独立integration worktree；本轮不把其作为`main`合并或远端交付。下一步需Human从04独立件选择新的有界工作项；HUD/内容/NPC/路线/玩家/图层/资源完整度缺口仍未自动授权。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
 - **当前授权**：按已安装Beta.3只读形成Intent Contract、Oracle Map、证据适配和失败复盘；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。

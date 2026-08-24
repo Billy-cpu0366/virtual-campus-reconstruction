@@ -1,8 +1,8 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
-status: active-p5.1-c3-human-rejection-audit
-phase: p5.1-c3-intent-evidence-workflow-retrospective
+status: active-next-work-item-selection
+phase: p5.1-c3-human-accepted
 authorization: DEC-P5.1-R7-REPAIR-001
 code-baseline: 54c0e2922ce3fc6b3ced78118db6b2b867b6eff7
 code-baseline-tree: 3b05f56ed58c0e0861eff3cbff6787ce93aa0290

@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 repair-package: P5.1-C3
-status: automated-verified-awaiting-human-acceptance
+status: human-visual-verified
 authorization: DEC-P5.1-C3-IMPLEMENT-001; DEC-P5.1-C3-CONTINUITY-001
 authority-inputs:
   - DEC-P5.1-C3-P0-SCOPE-001
@@ -74,4 +74,4 @@ updated: 2026-08-24
 
 ## Human Gate
 
-Human先回复`开始吧`（2026-08-24），随后以`ok`接受连续镜头与可见Play背景修正，并明确要求“从play画面直接一条线平滑移到主角视角”。`1109137`因仍保留烟雾中间目标而成为已替代候选；需按本包重实施并重验。最终视觉验收仍单独保留。
+Human先回复`开始吧`（2026-08-24），随后以`ok`接受连续镜头与可见Play背景修正，并明确要求“从play画面直接一条线平滑移到主角视角”。`1109137`因仍保留烟雾中间目标而成为已替代候选；最终实现`1a94a05`已重验。Human随后对Loading/Play、直达入口、整图/分块、移动/碰撞、相机、火车/动态物和factory/party屋顶回复“这些我都验收通过了”；C3 Human视觉验收通过。
