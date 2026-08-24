@@ -205,7 +205,7 @@ function gameConfig(scene: CampusScene): Phaser.Types.Core.GameConfig {
       },
     },
     scale: {
-      mode: Phaser.Scale.FIT,
+      mode: Phaser.Scale.ENVELOP,
       autoCenter: Phaser.Scale.CENTER_BOTH,
       width: LOGICAL_WORLD_WIDTH,
       height: LOGICAL_WORLD_HEIGHT,
