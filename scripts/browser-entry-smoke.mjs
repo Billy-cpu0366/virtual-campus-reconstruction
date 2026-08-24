@@ -147,7 +147,10 @@ try {
     }
     await sleep(25);
   }
-  assert.ok(ready !== undefined, "entry did not reach ready");
+  assert.ok(
+    ready !== undefined,
+    `entry did not reach ready: ${JSON.stringify({ lastSnapshot: await evaluate(snapshotExpression), events })}`,
+  );
   assert.ok(observedStates.has("LOADING"), "loading state was not observed");
   assert.equal(ready.entry.app.progress, 1);
   assert.equal(ready.entry.playHidden, false);

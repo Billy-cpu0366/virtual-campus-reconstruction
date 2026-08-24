@@ -39,6 +39,8 @@ export class PhaserRouteCrowdRuntime {
       ...(options.random === undefined ? {} : { random: options.random }),
     });
   }
+  get snapshot() { return this.core.snapshot; }
+  get spriteCount(): number { return this.sprites.size; }
   start(now: number): void { if (!this.shutdownState) { this.core.start(now, this.options.viewport()); this.sync(); } }
   update(now: number): void { if (!this.shutdownState) { this.core.tick(now, this.options.viewport()); this.sync(); } }
   shutdown(): void { this.shutdownState = true; this.core.shutdown(); for (const sprite of this.sprites.values()) sprite.destroy(); this.sprites.clear(); }

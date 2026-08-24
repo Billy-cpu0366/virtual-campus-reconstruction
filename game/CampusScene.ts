@@ -989,6 +989,8 @@ export class CampusScene extends Phaser.Scene {
       sprayer: this.sprayerRuntime?.snapshot ?? null,
       sprayerSpriteCount: this.sprayerRuntime?.spriteCount ?? 0,
       sprayerVisuals: this.sprayerRuntime?.visualSnapshots ?? [],
+      routeCrowd: this.routeCrowdRuntime?.snapshot ?? null,
+      routeCrowdSpriteCount: this.routeCrowdRuntime?.spriteCount ?? 0,
       train: this.trainRuntime?.snapshot ?? null,
       trainVisual: this.trainRuntime?.visualSnapshot ?? null,
       trainHasSprite: this.trainRuntime?.hasSprite ?? false,
@@ -1382,7 +1384,6 @@ export class CampusScene extends Phaser.Scene {
       pathProvider: new GridRouteCrowdPathProvider(wallData.grid),
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
     });
-    this.routeCrowdRuntime.start(this.time.now);
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(
@@ -1393,6 +1394,9 @@ export class CampusScene extends Phaser.Scene {
     this.entryCallbacks.onLoadProgress?.(1);
     this.sceneReady = true;
     this.entryCallbacks.onReady?.();
+    window.setTimeout(() => {
+      if (!this.sceneDestroyed) this.routeCrowdRuntime?.start(this.time.now);
+    }, 0);
   }
 
   private createEntryCameraRuntime(): PhaserCameraRuntime {
