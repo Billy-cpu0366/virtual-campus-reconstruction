@@ -22,8 +22,8 @@ NPC、喷泉粒子、缺失贴图和其他细节继续deferred。
 
 - 路线：`systemic-failure / systemic-flow`；
 - 阶段：`p5.1-c3-preimplementation-evidence`；
-- Gate：`p5.1-c3-evidence-completeness`，`blocked-awaiting-human-entry-evidence`；
-- 已完成本地入口trace、同视口Loading对照和party/concert合法进出调查；当前不写产品代码。仅缺Human实际设备0–5秒入口连续证据，取得后再形成单一实施包。
+- Gate：`p5.1-c3-evidence-completeness`，`evidence-complete-local-oracle`；
+- 已完成本地入口trace、同视口Loading对照和party/concert合法进出调查；Human已决定入口改由AI低扰动WSL production录制，收据为5.5秒/330帧。当前不写产品代码；下一步是形成单一实施包并交实施前Human Gate。
 
 ## 连续执行规则
 

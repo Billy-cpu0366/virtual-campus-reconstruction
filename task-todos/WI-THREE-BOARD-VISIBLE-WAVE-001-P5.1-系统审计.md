@@ -255,4 +255,8 @@ accepted-signature: 接受P0范围 (Recommended)（2026-08-24）
 | C3-ENTRY | `.pi/audit-evidence/p5.1/c3-local-entry/trace-r6/entry-trace.json`，1280×720 normal production | 相机约`2050ms`开始从预览位置回到玩家，约`3099ms`取得`cameraStable`，约`5078ms`进入PLAYING；本次rAF未采到>34ms帧。约2秒转场与Human描述时间吻合，当前产品编排是优先根因候选。 | CDP逐帧截图会扰动节奏，WSL无长帧不能反证Human设备观感；尚缺Human设备连续证据，不能决定是缩短停留、调整回程，还是处理设备竞争。 |
 | C3-ROOF-PARTY | 同一trace的`concert.before/inside/after`截图、坐标与roof状态 | 合法进入concert内部后屋顶仍为`visible/alpha=1`；`CampusScene`只有factory区域消费者，未调用concert淡隐。可修范围已收敛为“为已存在concert组补独立区域消费者与300ms复用tween”，不改roof组/图层策略。 | party的原站命名、原站精确区域与触发器未获公开直接证据；实施必须标为Human已接受目标下的DECISION。 |
 
-**实施前结论**：Loading与party两项已从`NOT OBSERVABLE`变为可定位差异；入口只完成WSL诊断，未满足Intent Contract要求的Human设备Oracle。因此不写产品代码、不把C3 Gate标PASS；下一步仅是取得该一条最小Human输入后，形成单一实施包。
+### 8.9 本地入口连续录制替代（accepted，2026-08-24）
+
+Human明确决定“你自己去录吧，我录的会出现一些不必要的干扰因素”。据此`DEC-P5.1-C3-LOCAL-ENTRY-ORACLE-001`允许AI以低扰动WSL normal-production录制替代原先要求的Human录制：`.pi/audit-evidence/p5.1/c3-local-entry/entry-screencast-r1/receipt.json`记录1280×720、`5515ms`、330个连续CDP screencast帧。该方法没有逐帧`captureScreenshot`调用，作为入口编排诊断比旧trace干扰更低。
+
+**实施前结论**：三条C3 Oracle Map均已具备本地实施诊断输入，`p5.1-c3-evidence-completeness`从`blocked-awaiting-human-entry-evidence`变为`evidence-complete-local-oracle`。这只解除“形成实施包”的证据阻塞，不把WSL表现写成Human硬件性能结论，也不自动授权产品代码；下一步是给Human展示一个单一有界实施包。
