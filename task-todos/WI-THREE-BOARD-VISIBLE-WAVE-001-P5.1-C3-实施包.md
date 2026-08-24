@@ -40,7 +40,7 @@ updated: 2026-08-24
 **文件**：`game/CampusScene.ts`、`tests/game/**`、入口连续画面脚本。
 
 1. 保持 3 秒总时长、5 秒 train/control 边界、30FPS physics、entry corridor 与动态 chunk 生命周期。
-2. 取消 smoke 预览的到点停留；在总3秒内以单条连续相机轨迹从烟雾预览回到玩家，不能出现“静止画面后重新启动”的可感知断点。
+2. 删除 smoke 预览中间目标；从 Play 时当前相机位置以单条连续相机轨迹直达玩家，总时长3秒，不能出现左拐右回或“静止画面后重新启动”的可感知断点。
 3. 不改变111秒序列、火车路线/scale/timing，也不将 WSL 的无长帧结果写为硬件性能结论。
 
 ### C3-C：party/concert roof 消费者
@@ -61,7 +61,7 @@ updated: 2026-08-24
 
 1. `npm run typecheck`、全量测试、production/test-hooks build；
 2. 1280×720 原站/复刻 Loading 与 Play 同视口截图，检查Loading全视口白屏、READY/Play可见游戏背景、真实进度与可点击 Play；
-3. normal-production 0–5 秒低扰动 screencast：从预览到玩家无静止再启动断点、3 秒前完成、5 秒前不开放控制；
+3. normal-production 0–5 秒低扰动 screencast：从Play当前视角直达玩家、无中间拐点或静止再启动断点、3 秒前完成、5 秒前不开放控制；
 4. normal-production 合法 party 外→内→离开：concert alpha `1→0→1`，factory 不受影响；再跑 factory 原路径以证明未回归；
 5. 既有 entry、app-retry、roof-footsteps、lifecycle、chunk、runtime-safety browser gates；
 6. 最终由 Human 复看 Loading、入口连贯性与 party 屋顶，未通过则回同一差异表。
@@ -74,4 +74,4 @@ updated: 2026-08-24
 
 ## Human Gate
 
-Human先回复`开始吧`（2026-08-24），随后以`ok`接受连续镜头与可见Play背景修正。实现提交为`18ee2d1`、`a24b10b`、`1109137`；typecheck、315项测试、两种build、test-hooks entry smoke及production trace通过（相机约3099ms稳定、约5084ms开放控制）。最终视觉验收仍单独保留。
+Human先回复`开始吧`（2026-08-24），随后以`ok`接受连续镜头与可见Play背景修正，并明确要求“从play画面直接一条线平滑移到主角视角”。`1109137`因仍保留烟雾中间目标而成为已替代候选；需按本包重实施并重验。最终视觉验收仍单独保留。
