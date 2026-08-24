@@ -16,7 +16,7 @@ gate-status: audit-in-progress
 authorization-ref: DEC-P5.1-R7-REPAIR-001
 preauthorized-next-work-item: none
 next-phase: p5.1-c3-human-plan-gate
-updated: 2026-08-23
+updated: 2026-08-24
 ---
 
 # 原站逆向重构计划
@@ -24,9 +24,9 @@ updated: 2026-08-23
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：candidate=`54c0e29`再次被Human整体验收否决：入口仍有约2秒停滞/相机回切，Loading与原站差异大，party屋顶未淡隐；其余贴图/NPC/喷泉粒子先登记不实施。父流程回到同一差异表audit，并先设计意图与证据门禁。
+- **当前阶段**：candidate=`54c0e29`再次被Human整体验收否决：入口仍有约2秒停滞/相机回切，Loading与原站差异大，party屋顶未淡隐；其余贴图/NPC/喷泉粒子先登记不实施。父流程回到同一差异表audit；全局`pi-project-workflow@0.1.0-beta.3`已安装，现按其意图与证据门禁完成真实审计，不另做高成本模型批量试验。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
-- **当前授权**：只读设计意图合同、证据适配、结构化询问和失败复盘门禁；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
+- **当前授权**：按已安装Beta.3只读形成Intent Contract、Oracle Map、证据适配和失败复盘；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -60,7 +60,7 @@ updated: 2026-08-23
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；C1+C2自动PASS但Human再次FAIL，candidate=`54c0e29`冻结 | 只读复盘意图合同、证据适配和前三项差异；第四项只登记 | 继续零散补丁；自动代签；修改冻结candidate；远端操作 | 先形成并审查工作流设计，再给前三项一个整体修复方案 |
+| 三板块可见成果并行波 | `systemic-failure`；C1+C2自动PASS但Human再次FAIL，candidate=`54c0e29`冻结 | 按已安装Beta.3只读复盘Intent Contract、Oracle Map、证据适配和前三项差异；第四项只登记 | 继续零散补丁；自动代签；修改冻结candidate；远端操作 | 先形成并审查前三项的整体修复方案，再交Human Gate |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -177,7 +177,7 @@ Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前产品阻塞仍为Human视觉FAIL；`54c0e29`在自动/双视口production PASS后仍出现入口停滞/相机回切、Loading偏差和party屋顶遗漏，已回到同一差异表audit。Human要求先完善意图与证据工作流；第四项贴图/NPC/喷泉粒子暂不实施。Human已报告WIP仓库完成推送，但WSL没有远端commit/tree收据，不能把远端状态标为verified。
+- 当前产品阻塞仍为Human视觉FAIL；`54c0e29`在自动/双视口production PASS后仍出现入口停滞/相机回切、Loading偏差和party屋顶遗漏，已回到同一差异表audit。意图与证据工作流已作为全局`pi-project-workflow@0.1.0-beta.3`安装；现待按其完成真实审计，第四项贴图/NPC/喷泉粒子暂不实施。Human已报告WIP仓库完成推送，但WSL没有远端commit/tree收据，不能把远端状态标为verified。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
