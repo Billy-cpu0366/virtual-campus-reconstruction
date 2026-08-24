@@ -230,4 +230,13 @@ accepted-signature: 接受P0范围 (Recommended)（2026-08-24）
 | C3-ROOF-PARTY | 公开地图/Bundle只确认factory与concert两组roof及300ms Power2淡隐；当前Scene只消费factory，renderer可消费任意group | Human称party是否等于concert；party精确边界和进入/离开行为 | party外/进入/内部/离开短视频或三帧截图，至少带viewport与可辨识入口；若可提供玩家世界坐标，落在concert `x=1632..2208,y=384..848`才可客观归属concert |
 
 **状态**：C3范围已接受，但三条Oracle Map均未满足，当前为`blocked-awaiting-evidence`。
+Human已选择**`提供最小参考 (Recommended)`**（2026-08-24）：先收集下列画面，再冻结实施包。
 不得以“先按concert做”“复用factory矩形”或“调整当前Loading看起来更像”绕过此块。
+
+最小输入清单：
+
+1. 原站与当前复刻同一viewport的Loading/100%/Play三态截图；
+2. 当前复刻点击Play后的0–5秒正常production录屏；
+3. 当前复刻party建筑外、刚进入、内部、离开后的截图或短视频；若可见，保留入口和玩家位置。
+
+这些输入只用于建立C3 Oracle Map和实施范围；不会作为Human最终视觉验收的替代。
