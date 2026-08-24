@@ -1,11 +1,11 @@
 ---
 work-item: WI-GITHUB-WIP-SNAPSHOT-20260822-001
-status: active-bundle-preparation
+status: local-validation-repair-accepted
 work-item-type: delivery-snapshot
 authorization: DEC-WIP-SNAPSHOT-PUSH-001
 delivery-id: vc-wip-visible-p51-20260822-01
 target-branch: wip/visible-product-p5.1-20260822
-updated: 2026-08-22
+updated: 2026-08-24
 ---
 
 # 当前可见产品进度 WIP 远端快照
@@ -45,6 +45,14 @@ updated: 2026-08-22
 - 把P5状态改成通过或把WIP称为完成版；
 - reset、clean、pull、force-push、覆盖正式仓库dirty内容；
 - remote不匹配、未知分叉、bundle/hash不符、测试失败后继续。
+
+## 2026-08-24 本地验证修复
+
+- **accepted**：Human 选择“先修验证再预览”并确认“开始”；仅允许在隔离分支 `fix/wip-snapshot-validation` 本地提交。
+- **persisted**：`DEC-WIP-SNAPSHOT-VALIDATION-001`、根 `task_plan.md` 与本卡同步记录本次边界。
+- **verified**：`git diff --check`、状态一致性、typecheck、53 文件/298 测试、production build 和 browser Smoke 均通过；browser Smoke 证实 READY、480×270 canvas、无异常/失败请求，运行资源和 25 个 chunk 请求均返回 200。
+- **范围**：只修改 `scripts/prepare-runtime-assets.mjs` 与 `scripts/check-runtime-assets.mjs`，以 `path.relative` 的跨平台判断替换 `${root}/` 前缀判断，同时保留目录逃逸拒绝。
+- **仍禁止**：push、PR、merge、更新 `main`；远端 `wip/visible-product-p5.1-20260822` 不变；P5 Human视觉FAIL 不变。
 
 ## 成功收据
 
