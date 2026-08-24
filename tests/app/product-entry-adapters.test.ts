@@ -45,7 +45,7 @@ describe("ProductEntryCameraAdapter", () => {
     expect(shutdowns).toBe(1);
   });
 
-  it("在3秒总时长内先预览factory smoke再回到玩家", async () => {
+  it("在3秒总时长内连续预览factory smoke再回到玩家", async () => {
     const starts: CameraRuntimeStartOptions[] = [];
     const adapter = new ProductEntryCameraAdapter(
       {
@@ -60,9 +60,9 @@ describe("ProductEntryCameraAdapter", () => {
         preview: {
           x: 808,
           y: 539.2,
-          duration: 200,
-          stayDuration: 1_750,
-          returnDuration: 1_050,
+          duration: 650,
+          stayDuration: 450,
+          returnDuration: 1_900,
         },
       },
     );
@@ -71,13 +71,13 @@ describe("ProductEntryCameraAdapter", () => {
     expect(starts).toEqual([
       {
         sequence: [
-          { x: 808, y: 539.2, duration: 200, stayDuration: 1_750 },
+          { x: 808, y: 539.2, duration: 650, stayDuration: 450 },
         ],
-        returnDuration: 1_050,
+        returnDuration: 1_900,
       },
     ]);
     expect(
-      200 + 1_750 + (starts[0]?.returnDuration ?? 0),
+      650 + 450 + (starts[0]?.returnDuration ?? 0),
     ).toBe(PRODUCT_ENTRY_CAMERA_DURATION_MS);
   });
 

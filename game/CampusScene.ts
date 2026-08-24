@@ -151,15 +151,22 @@ const LOGICAL_VIEWPORT_WIDTH = 480;
 const LOGICAL_VIEWPORT_HEIGHT = 270;
 const ENTRY_CORRIDOR_SAMPLES = 6;
 const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
-const ENTRY_SMOKE_PREVIEW_DURATION_MS = 200;
-const ENTRY_SMOKE_PREVIEW_STAY_MS = 1_750;
-const ENTRY_SMOKE_RETURN_DURATION_MS = 1_050;
+const ENTRY_SMOKE_PREVIEW_DURATION_MS = 650;
+const ENTRY_SMOKE_PREVIEW_STAY_MS = 450;
+const ENTRY_SMOKE_RETURN_DURATION_MS = 1_900;
 const FACTORY_ROOF_BOUNDS = Object.freeze({
   left: 112,
   right: 640,
   top: 736,
   bottom: 1_152,
 });
+const CONCERT_ROOF_BOUNDS = Object.freeze({
+  left: 1_632,
+  right: 2_208,
+  top: 384,
+  bottom: 848,
+});
+type RoofTweenHandle = { stop?(): unknown; remove?(): unknown };
 const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
   { markerId: "about", menuId: "about", x: 944, y: 768 },
   { markerId: "cv", menuId: "cv", x: 480, y: 1776 },
@@ -285,6 +292,7 @@ export interface CampusSceneShutdownReceipt {
   readonly smokeEmitterActive: boolean;
   readonly footstepActiveCount: number;
   readonly factoryRoofTweenActive: boolean;
+  readonly concertRoofTweenActive: boolean;
   readonly mapHudHidden: boolean;
   readonly mapRootHidden: boolean;
   readonly mapLeaseActive: boolean;
@@ -327,9 +335,9 @@ export class CampusScene extends Phaser.Scene {
   private mapLeaseToken: GameplayControlLeaseToken | undefined;
   private nextMapResidenceNumber = 1;
   private factoryRoofInside: boolean | undefined;
-  private factoryRoofTween:
-    | { stop?(): unknown; remove?(): unknown }
-    | undefined;
+  private concertRoofInside: boolean | undefined;
+  private factoryRoofTween: RoofTweenHandle | undefined;
+  private concertRoofTween: RoofTweenHandle | undefined;
   private trainColliderActive = false;
   private trainBlockingCells: readonly string[] = Object.freeze([]);
   private readonly sideFailures: string[] = [];
@@ -637,6 +645,7 @@ export class CampusScene extends Phaser.Scene {
 
     this.updatePlayerDepth();
     this.updateFactoryRoof();
+    this.updateConcertRoof();
     this.updateFootsteps();
     this.bridgeCheckFrames += 1;
     if (this.bridgeCheckFrames >= 3) {
@@ -1063,7 +1072,7 @@ export class CampusScene extends Phaser.Scene {
     this.contentUi = undefined;
     this.contentLeaseRuntime = undefined;
 
-    this.stopFactoryRoofTween();
+    this.stopRoofTweens();
     this.footstepRuntime?.shutdown();
     this.playerRuntime?.shutdown();
     this.playerVisualInterpolator?.shutdown();
@@ -1098,6 +1107,7 @@ export class CampusScene extends Phaser.Scene {
       smokeEmitterActive: this.smokeRuntime?.hasEmitter ?? false,
       footstepActiveCount: this.footstepRuntime?.activeCount ?? 0,
       factoryRoofTweenActive: this.factoryRoofTween !== undefined,
+      concertRoofTweenActive: this.concertRoofTween !== undefined,
       mapHudHidden: document.getElementById("campus-map-hud")?.hidden ?? true,
       mapRootHidden: document.getElementById("campus-map-root")?.hidden ?? true,
       mapLeaseActive: this.mapLeaseToken !== undefined,
@@ -1194,7 +1204,7 @@ export class CampusScene extends Phaser.Scene {
         onCollisionLayerCreated: this.handleCollisionLayerCreated,
         onCollisionLayerDestroyed: this.handleCollisionLayerDestroyed,
         onRoofStateApplied: (state, layers) => {
-          this.applyFactoryRoofTween(state, layers);
+          this.applyRoofTween(state, layers);
         },
       },
     );
@@ -1225,7 +1235,9 @@ export class CampusScene extends Phaser.Scene {
           concert: renderer.getRoofState("concert"),
           factory: renderer.getRoofState("factory"),
           factoryInside: this.factoryRoofInside ?? false,
+          concertInside: this.concertRoofInside ?? false,
           tweenActive: this.factoryRoofTween !== undefined,
+          concertTweenActive: this.concertRoofTween !== undefined,
           layerAlphas: Object.fromEntries(
             [...renderer.layers.entries()]
               .filter(([id]) =>
@@ -1687,16 +1699,36 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private updateFactoryRoof(): void {
+    this.updateRoofGroup("factory", FACTORY_ROOF_BOUNDS);
+  }
+
+  private updateConcertRoof(): void {
+    this.updateRoofGroup("concert", CONCERT_ROOF_BOUNDS);
+  }
+
+  private updateRoofGroup(
+    group: RoofGroupState["group"],
+    bounds: Readonly<{
+      readonly left: number;
+      readonly right: number;
+      readonly top: number;
+      readonly bottom: number;
+    }>,
+  ): void {
     const renderer = this.worldRenderer;
     if (renderer === undefined) return;
     const inside =
-      this.player.x >= FACTORY_ROOF_BOUNDS.left &&
-      this.player.x <= FACTORY_ROOF_BOUNDS.right &&
-      this.player.y >= FACTORY_ROOF_BOUNDS.top &&
-      this.player.y <= FACTORY_ROOF_BOUNDS.bottom;
-    if (inside === this.factoryRoofInside) return;
-    this.factoryRoofInside = inside;
-    renderer.setRoofState("factory", inside ? "faded" : "visible");
+      this.player.x >= bounds.left &&
+      this.player.x <= bounds.right &&
+      this.player.y >= bounds.top &&
+      this.player.y <= bounds.bottom;
+    const previous = group === "factory"
+      ? this.factoryRoofInside
+      : this.concertRoofInside;
+    if (inside === previous) return;
+    if (group === "factory") this.factoryRoofInside = inside;
+    else this.concertRoofInside = inside;
+    renderer.setRoofState(group, inside ? "faded" : "visible");
   }
 
   private updateFootsteps(): void {
@@ -1717,27 +1749,53 @@ export class CampusScene extends Phaser.Scene {
     );
   }
 
-  private applyFactoryRoofTween(
+  private applyRoofTween(
     state: RoofGroupState,
     layers: readonly TilemapLayerLike[],
   ): void {
-    this.stopFactoryRoofTween();
+    this.stopRoofTween(state.group);
     if (layers.length === 0) return;
-    this.factoryRoofTween = this.tweens.add({
+    let tween: RoofTweenHandle | undefined;
+    tween = this.tweens.add({
       targets: [...layers],
       alpha: state.alpha,
       duration: state.durationMs,
       ease: "Power2",
       onComplete: () => {
-        this.factoryRoofTween = undefined;
+        if (this.getRoofTween(state.group) === tween) {
+          this.setRoofTween(state.group, undefined);
+        }
       },
-    }) as { stop?(): unknown; remove?(): unknown };
+    }) as RoofTweenHandle;
+    this.setRoofTween(state.group, tween);
   }
 
-  private stopFactoryRoofTween(): void {
-    this.factoryRoofTween?.stop?.();
-    this.factoryRoofTween?.remove?.();
-    this.factoryRoofTween = undefined;
+  private getRoofTween(
+    group: RoofGroupState["group"],
+  ): RoofTweenHandle | undefined {
+    return group === "factory"
+      ? this.factoryRoofTween
+      : this.concertRoofTween;
+  }
+
+  private setRoofTween(
+    group: RoofGroupState["group"],
+    tween: RoofTweenHandle | undefined,
+  ): void {
+    if (group === "factory") this.factoryRoofTween = tween;
+    else this.concertRoofTween = tween;
+  }
+
+  private stopRoofTween(group: RoofGroupState["group"]): void {
+    const tween = this.getRoofTween(group);
+    tween?.stop?.();
+    tween?.remove?.();
+    this.setRoofTween(group, undefined);
+  }
+
+  private stopRoofTweens(): void {
+    this.stopRoofTween("factory");
+    this.stopRoofTween("concert");
   }
 
   private updateDynamicTargets(): void {

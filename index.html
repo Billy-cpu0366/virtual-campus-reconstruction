@@ -49,7 +49,7 @@
       }
 
       body[data-app-state="READY"] #app-shell {
-        background: rgb(255 255 255 / 10%);
+        background: #fff;
       }
 
       @keyframes campus-grid-reveal {
@@ -98,9 +98,12 @@
       #app-loading,
       #app-error {
         margin: 0 auto;
-        border: 4px solid #111827;
         padding: clamp(18px, 5vw, 30px);
         background: #fff;
+      }
+
+      #app-error {
+        border: 4px solid #111827;
         box-shadow: 8px 8px 0 rgb(17 24 39 / 24%);
       }
 

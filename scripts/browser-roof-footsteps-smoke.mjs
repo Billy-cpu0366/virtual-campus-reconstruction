@@ -276,6 +276,38 @@ try {
   assert.equal(roofAfter.roofStates.factory.alpha, 1);
   assert.equal(roofInside.roofStates.concert.alpha, 1);
   assert.equal(roofAfter.roofStates.concert.alpha, 1);
+
+  await evaluate(
+    "window.__campusCollisionTest.setPlayerPosition(1600, 600)",
+  );
+  await waitFor(
+    (snapshot) => snapshot.roofStates.concertInside === false,
+    "concert roof outside",
+  );
+  await evaluate(
+    "window.__campusCollisionTest.setPlayerPosition(1800, 600)",
+  );
+  await waitFor(
+    (snapshot) => snapshot.roofStates.concertInside === true,
+    "concert roof entry",
+  );
+  await sleep(350);
+  const concertInside = await debug();
+  await evaluate(
+    "window.__campusCollisionTest.setPlayerPosition(1600, 600)",
+  );
+  await waitFor(
+    (snapshot) => snapshot.roofStates.concertInside === false,
+    "concert roof exit",
+  );
+  await sleep(350);
+  const concertAfter = await debug();
+  assert.equal(concertInside.roofStates.concert.state, "faded");
+  assert.equal(concertInside.roofStates.concert.alpha, 0);
+  assert.equal(concertAfter.roofStates.concert.state, "visible");
+  assert.equal(concertAfter.roofStates.concert.alpha, 1);
+  assert.equal(concertInside.roofStates.factory.alpha, 1);
+  assert.equal(concertAfter.roofStates.factory.alpha, 1);
   assert.equal(footprintSnapshot.footsteps.surfaceMarkerCount, 368);
   assert.ok(footprintSnapshot.footsteps.activeCount >= 5);
   assert.ok(
@@ -290,6 +322,7 @@ try {
   );
   assert.equal(lifecycle.footstepActiveCount, 0);
   assert.equal(lifecycle.factoryRoofTweenActive, false);
+  assert.equal(lifecycle.concertRoofTweenActive, false);
   assert.deepEqual(events.console, []);
   assert.deepEqual(events.exceptions, []);
   assert.deepEqual(events.failedRequests, []);
@@ -302,6 +335,8 @@ try {
     beforeFootsteps: beforeFootsteps.footsteps,
     roofInside: roofInside.roofStates,
     roofAfter: roofAfter.roofStates,
+    concertInside: concertInside.roofStates,
+    concertAfter: concertAfter.roofStates,
     footprints: footprintSnapshot.footsteps,
     particles3Diagnostics: footprintSnapshot.particles3Diagnostics,
     lifecycle,
