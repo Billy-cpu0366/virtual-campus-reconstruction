@@ -239,7 +239,10 @@ describe("PhaserSprayerRuntime", () => {
     runtime.createAnimations();
     expect(fake.animations.created.map((animation) => animation.key)).toEqual([
       "npc-sprayer-spray",
-      "npc-sprayer-running-anim",
+      "npc-sprayer-running-north",
+      "npc-sprayer-running-east",
+      "npc-sprayer-running-south",
+      "npc-sprayer-running-west",
     ]);
 
     expect(runtime.start(clock.nowMs)).toEqual({ ok: true });

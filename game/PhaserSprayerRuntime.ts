@@ -25,7 +25,17 @@ export const SPRAYER_RUNTIME_ASSETS = Object.freeze([
 ] as const);
 
 const SPRAY_ANIMATION = "npc-sprayer-spray";
-const RUNNING_ANIMATION = "npc-sprayer-running-anim";
+const RUNNING_DIRECTION_ANIMATION = {
+  north: "npc-sprayer-running-north",
+  south: "npc-sprayer-running-south",
+  east: "npc-sprayer-running-east",
+  west: "npc-sprayer-running-west",
+} as const;
+
+function runningDirection(dx: number, dy: number): keyof typeof RUNNING_DIRECTION_ANIMATION {
+  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? "east" : "west";
+  return dy >= 0 ? "south" : "north";
+}
 const SPRAYER_PRESENTATION_DEPTH_BASE = 500;
 const SPRAYER_PRESENTATION_DEPTH_OFFSET_Y = 24;
 
@@ -177,14 +187,11 @@ export class PhaserSprayerRuntime {
       6,
       -1,
     );
-    this.createAnimationIfAvailable(
-      "npc-sprayer-running",
-      RUNNING_ANIMATION,
-      0,
-      63,
-      6,
-      -1,
-    );
+    // The running sheet has eight direction rows of eight frames. Never loop all 64 frames.
+    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.north, 0, 7, 6, -1);
+    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.east, 8, 15, 6, -1);
+    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.south, 16, 23, 6, -1);
+    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.west, 24, 31, 6, -1);
   }
 
   start(nowMs: number): PhaserSprayerStartResult {
@@ -289,12 +296,19 @@ export class PhaserSprayerRuntime {
         this.sprites.delete(instance.id);
         continue;
       }
+      const dx = instance.position.x - sprite.x;
+      const dy = instance.position.y - sprite.y;
       sprite.x = instance.position.x;
       sprite.y = instance.position.y;
       sprite.setDepth(sprayerPresentationDepth(instance.position.y));
       if (instance.state === "fleeing") {
         sprite.setTexture("npc-sprayer-running");
-        sprite.anims?.play(RUNNING_ANIMATION, true);
+        if (dx !== 0 || dy !== 0) {
+          sprite.anims?.play(
+            RUNNING_DIRECTION_ANIMATION[runningDirection(dx, dy)],
+            true,
+          );
+        }
       } else if (instance.sprayReady) {
         sprite.setTexture("npc-sprayer");
         sprite.anims?.play(SPRAY_ANIMATION, true);
