@@ -13,7 +13,7 @@ work-item-status: active-p5.1
 current-phase: p5.2-04a-map-navigation-automated-verified
 current-gate: p5.2-04a-human-visual-acceptance
 gate-status: awaiting-human-acceptance
-authorization-ref: DEC-P5.2-04A-MAP-NAVIGATION-001
+authorization-ref: DEC-P5.2-04A-MAP-NAVIGATION-001; DEC-P5.2-04A-FULL-BLEED-001
 preauthorized-next-work-item: none
 next-phase: p5.2-04a-human-visual-acceptance
 updated: 2026-08-24
@@ -24,7 +24,7 @@ updated: 2026-08-24
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：C3整图视觉清单已由Human通过，代码候选仍位于独立integration worktree，不作为`main`合并或远端交付。Human现已授权 P5.2 04-A：完成小地图→大地图→已核验内容→关闭恢复探索的地图导航闭环；只修既有 SYS-GAME-UI 接线与证据支持的差异。HUD顶部菜单、移动quick-actions、新内容、NPC/路线/FX、Entity及地图/入口边界继续不自动授权。
+- **当前阶段**：C3整图视觉清单已由Human通过，代码候选仍位于独立integration worktree，不作为`main`合并或远端交付。Human现已授权 P5.2 04-A：完成小地图→大地图→已核验内容→关闭恢复探索的地图导航闭环，并采用等比例裁切填满消除非16:9页面黑边。HUD顶部菜单、移动quick-actions、新内容、NPC/路线/FX、Entity及地图/入口边界继续不自动授权。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
 - **当前授权**：按已安装Beta.3只读形成Intent Contract、Oracle Map、证据适配和失败复盘；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。

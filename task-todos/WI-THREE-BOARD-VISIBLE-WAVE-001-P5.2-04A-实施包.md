@@ -19,12 +19,13 @@ updated: 2026-08-24
 2. 小地图能打开/关闭大地图；大地图显示玩家点、可用内容点与本轮 Visited 状态。
 3. 只允许由大地图打开已核验的 About、Projects、Memo 1–6；内容 modal 与大地图互斥。
 4. 内容关闭后恢复地图/探索，控制租约和 UI 状态无残留。
-5. 不新增内容或 UI 框架，只修现有 `PhaserCampusMapRuntime`、内容 modal 和必要样式/测试/浏览器收据。
+5. 以等比例 `ENVELOP` 裁切填满替代 `FIT`，消除非16:9页面黑边；允许超宽屏裁掉左右视野，不拉伸、不改相机世界逻辑。
+6. 不新增内容或 UI 框架，只修现有 `PhaserCampusMapRuntime`、内容 modal、缩放配置和必要样式/测试/浏览器收据。
 
 ## 明确不做
 
 - 顶部全菜单、移动 quick-actions、CV/Contact/Tech、新内容。
-- NPC、路线、FX、SYS-ENTITY、地图/相机/入口/Loading 与 C3 已验收行为。
+- 动态扩展视野或拉伸；NPC、路线、FX、SYS-ENTITY、地图/相机/入口/Loading 与 C3 已验收行为。
 - `sample/`、111 秒序列、30FPS 物理、train 路线/scale/timing、远端、PR、merge、main。
 
 ## 实施步骤
