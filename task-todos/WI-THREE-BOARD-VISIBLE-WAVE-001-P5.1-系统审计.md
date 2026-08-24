@@ -229,15 +229,14 @@ accepted-signature: 接受P0范围 (Recommended)（2026-08-24）
 | C3-ENTRY | 当前3秒camera结束即释放corridor lock；其后目标更新可与每rAF一次mutation交叠；控制仍等train arrival | Human约2秒卡顿是否由lock、mutation、camera/player交接或设备长帧造成 | 同路径normal-production 0–5秒连续画面与时间线：camera、lock、目标块、mutation、控制与长帧；WSL静态/P95不能关单 |
 | C3-ROOF-PARTY | 公开地图/Bundle只确认factory与concert两组roof及300ms Power2淡隐；当前Scene只消费factory，renderer可消费任意group | Human称party是否等于concert；party精确边界和进入/离开行为 | party外/进入/内部/离开短视频或三帧截图，至少带viewport与可辨识入口；若可提供玩家世界坐标，落在concert `x=1632..2208,y=384..848`才可客观归属concert |
 
-**状态**：C3范围已接受，但三条Oracle Map均未满足，当前为`blocked-awaiting-evidence`。
-Human已选择**`提供最小参考 (Recommended)`**（2026-08-24）：先收集下列画面，再冻结实施包。
-不得以“先按concert做”“复用factory矩形”或“调整当前Loading看起来更像”绕过此块。
+**状态（2026-08-24 本地复核后）**：C3-LOAD与C3-ROOF-PARTY已有同视口/正常production本地Oracle；C3-ENTRY仍缺Human实际设备的0–5秒连续证据，故整体仍为`blocked-awaiting-human-entry-evidence`，不得冻结实施包。
 
-最小输入清单：
+已满足的最小输入：
 
-1. 原站与当前复刻同一viewport的Loading/100%/Play三态截图；
-2. 当前复刻点击Play后的0–5秒正常production录屏；
-3. 当前复刻party建筑外、刚进入、内部、离开后的截图或短视频；若可见，保留入口和玩家位置。
+1. 原站与当前复刻同一1280×720 viewport的Loading/Play关键态截图和DOM收据；
+2. 当前复刻party建筑外、刚进入、内部、离开的production截图、合法步行坐标与roof状态。
+
+仍需的最小输入：当前复刻点击Play后的0–5秒**Human实际设备**normal-production录屏或逐帧trace；须能辨识约2秒转场。WSL trace只用于定位时序，不能代替该输入。
 
 这些输入只用于建立C3 Oracle Map和实施范围；不会作为Human最终视觉验收的替代。
 
@@ -246,4 +245,14 @@ Human已选择**`提供最小参考 (Recommended)`**（2026-08-24）：先收集
 - candidate在隔离worktree本地`build`后，以`1280×720`production预览采样：Loading约`5.76s`到READY；截图和receipt位于`.pi/audit-evidence/p5.1/c3-local-entry/`。
 - C3-ENTRY：点击Play后采到`0/1/3/5s`关键帧及连续采样。约`1.91s`前相机保持`(568,404)`；`2.03s`开始回移，至约`3.06s`为`(848,169)`并首次`cameraStable=true`。这与Human所述“约2秒跳变”时间吻合，说明相机时序是优先诊断对象；不能据此认定为唯一根因。
 - 连续采样的唯一>34ms rAF为点击后约`85ms`的`66.7ms`帧；PNG逐帧CDP截图本身扰动了100ms节奏，故此数字**不得**作为性能关单或根因证据。
-- C3-ROOF-PARTY：已到达公开concert bounds北侧并保存`trace-r3/concert-before.png`，但直线南行被真实碰撞阻塞，未进入内部；不得把该图、factory路径或concert名称当作party淡隐已验证。需先找出合法进入路线并完成外/内/离开连续采样。
+- C3-ROOF-PARTY：后续`trace-r6`已用合法步行路线完成concert外→内→离开：`(1638.7,392.7)`→`(1638.7,486.0)`→`(1638.7,350.7)`，三点均在normal production。concert roof在内部仍为`visible/alpha=1`，离开后同样为`visible/alpha=1`；源码唯一产品消费者是`updateFactoryRoof()`，只会在factory矩形内调用`setRoofState("factory", ...)`，没有concert调用。这是C3-ROOF-PARTY的confirmed candidate根因；“party=concert”是由Human所指右侧建筑与本次合法路径形成的重构适配，不能写成原站party触发FACT。
+
+### 8.8 C3本地Oracle结果（2026-08-24）
+
+| Criterion | 本地证据 | 已确认结论 | 保留边界 |
+|---|---|---|---|
+| C3-LOAD | `.pi/audit-evidence/p5.1/c3-local-entry/loading-oracle/original-receipt.json` 与 `replica-receipt.json`，同为1280×720 | 原站初始`#init-load`在全视口白色遮罩内；复刻初始即存在1280×720 canvas，Loading为560×454面板。原站Play态为全视口壳，复刻Play仅150×53.6按钮，构图层级存在直接可见差异。 | 原站本地快速加载未留下逐个1→100中间百分比；精确插值/时序继续UNKNOWN。 |
+| C3-ENTRY | `.pi/audit-evidence/p5.1/c3-local-entry/trace-r6/entry-trace.json`，1280×720 normal production | 相机约`2050ms`开始从预览位置回到玩家，约`3099ms`取得`cameraStable`，约`5078ms`进入PLAYING；本次rAF未采到>34ms帧。约2秒转场与Human描述时间吻合，当前产品编排是优先根因候选。 | CDP逐帧截图会扰动节奏，WSL无长帧不能反证Human设备观感；尚缺Human设备连续证据，不能决定是缩短停留、调整回程，还是处理设备竞争。 |
+| C3-ROOF-PARTY | 同一trace的`concert.before/inside/after`截图、坐标与roof状态 | 合法进入concert内部后屋顶仍为`visible/alpha=1`；`CampusScene`只有factory区域消费者，未调用concert淡隐。可修范围已收敛为“为已存在concert组补独立区域消费者与300ms复用tween”，不改roof组/图层策略。 | party的原站命名、原站精确区域与触发器未获公开直接证据；实施必须标为Human已接受目标下的DECISION。 |
+
+**实施前结论**：Loading与party两项已从`NOT OBSERVABLE`变为可定位差异；入口只完成WSL诊断，未满足Intent Contract要求的Human设备Oracle。因此不写产品代码、不把C3 Gate标PASS；下一步仅是取得该一条最小Human输入后，形成单一实施包。

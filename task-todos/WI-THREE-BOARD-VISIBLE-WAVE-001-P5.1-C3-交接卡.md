@@ -22,8 +22,8 @@ NPC、喷泉粒子、缺失贴图和其他细节继续deferred。
 
 - 路线：`systemic-failure / systemic-flow`；
 - 阶段：`p5.1-c3-preimplementation-evidence`；
-- Gate：`p5.1-c3-evidence-completeness`，`audit-in-progress`；
-- 当前不写产品代码；先完成三项可观察证据和单一实施包。
+- Gate：`p5.1-c3-evidence-completeness`，`blocked-awaiting-human-entry-evidence`；
+- 已完成本地入口trace、同视口Loading对照和party/concert合法进出调查；当前不写产品代码。仅缺Human实际设备0–5秒入口连续证据，取得后再形成单一实施包。
 
 ## 连续执行规则
 
@@ -35,8 +35,8 @@ NPC、喷泉粒子、缺失贴图和其他细节继续deferred。
 
 1. 完整读取根`AGENTS.md`、`03-执行层/README.md`、`03-执行层/00-总账.md`、根`决策记录.md`、`task_plan.md`；
 2. 读取当前P5任务卡及C3相关证据/实施包；
-3. 在不改代码前，连续完成：入口真实trace、原站/复刻同视口Loading对照、party合法进入/离开路径与屋顶图层调查；
-4. 将事实、未知和可修根因写入同一差异表，再形成一个有界实施包交Human Gate。
+3. 已完成：入口真实trace、原站/复刻同视口Loading对照、party/concert合法进入/离开路径与屋顶图层调查；详情统一写入`WI-THREE-BOARD-VISIBLE-WAVE-001-P5.1-系统审计.md` §8.8；
+4. 仅待Human实际设备0–5秒入口连续证据。收到后把事实、未知和可修根因收敛为一个有界实施包，交`p5.1-c3-evidence-completeness` Human Gate。
 
 ## 禁止
 
