@@ -240,3 +240,10 @@ Human已选择**`提供最小参考 (Recommended)`**（2026-08-24）：先收集
 3. 当前复刻party建筑外、刚进入、内部、离开后的截图或短视频；若可见，保留入口和玩家位置。
 
 这些输入只用于建立C3 Oracle Map和实施范围；不会作为Human最终视觉验收的替代。
+
+### 8.7 WSL本地生产采样（2026-08-24，diagnostic，不替代Human验收）
+
+- candidate在隔离worktree本地`build`后，以`1280×720`production预览采样：Loading约`5.76s`到READY；截图和receipt位于`.pi/audit-evidence/p5.1/c3-local-entry/`。
+- C3-ENTRY：点击Play后采到`0/1/3/5s`关键帧及连续采样。约`1.91s`前相机保持`(568,404)`；`2.03s`开始回移，至约`3.06s`为`(848,169)`并首次`cameraStable=true`。这与Human所述“约2秒跳变”时间吻合，说明相机时序是优先诊断对象；不能据此认定为唯一根因。
+- 连续采样的唯一>34ms rAF为点击后约`85ms`的`66.7ms`帧；PNG逐帧CDP截图本身扰动了100ms节奏，故此数字**不得**作为性能关单或根因证据。
+- C3-ROOF-PARTY：已到达公开concert bounds北侧并保存`trace-r3/concert-before.png`，但直线南行被真实碰撞阻塞，未进入内部；不得把该图、factory路径或concert名称当作party淡隐已验证。需先找出合法进入路线并完成外/内/离开连续采样。
