@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
+import { configDefaults } from "vitest/config";
 
 // src/ 与 game/ 遵循 NodeNext 约定，相对导入带 `.js` 后缀但磁盘上是 `.ts` 源文件；
 // 让 Vite 把 `./foo.js` 解析到 `./foo.ts`。
@@ -26,5 +27,12 @@ export default defineConfig({
   preview: {
     port: 4175,
     strictPort: true,
+  },
+  test: {
+    exclude: [
+      ...configDefaults.exclude,
+      "**/.pi/**",
+      "packages/pi-git-handoff/tests/**",
+    ],
   },
 });

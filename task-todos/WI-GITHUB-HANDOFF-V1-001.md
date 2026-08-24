@@ -58,7 +58,7 @@ Human 于 2026-08-23 接受把独立 `pi-git-handoff` 接入本项目；落盘�
 
 ## 下一 Gate
 
-`verification-delivery` 先核对当前 WSL commit、clean 工作树、实际文件范围、历史 ignored outbox 不冲突和 WIP 边界；通过后，才可生成新的 snapshot outbox。Windows external Preview 返回前不授权 push，Human token 前不得创建或更新远端分支。
+`verification-delivery` 先核对当前 WSL commit、clean 工作树、实际文件范围、历史 ignored outbox 不冲突和 WIP 边界；通过后，才可生成新的 snapshot outbox。根 `npm test` 曾误收集 `packages/pi-git-handoff/tests/` 的 Node test 和 `.pi/worktrees/` 副本，已通过 `vite.config.ts` 排除规则修复；typecheck、32文件/168测试、build与临时preview browser smoke均已通过。Windows external Preview 返回前不授权 push，Human token 前不得创建或更新远端分支。
 
 ## 完成标准
 
