@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -45,7 +47,7 @@ describe("ProductEntryCameraAdapter", () => {
     expect(shutdowns).toBe(1);
   });
 
-  it("在3秒总时长内连续预览factory smoke再回到玩家", async () => {
+  it("在3秒总时长内连续预览factory smoke直接回到玩家", async () => {
     const starts: CameraRuntimeStartOptions[] = [];
     const adapter = new ProductEntryCameraAdapter(
       {
@@ -61,8 +63,8 @@ describe("ProductEntryCameraAdapter", () => {
           x: 808,
           y: 539.2,
           duration: 650,
-          stayDuration: 450,
-          returnDuration: 1_900,
+          stayDuration: 0,
+          returnDuration: 2_350,
         },
       },
     );
@@ -71,13 +73,14 @@ describe("ProductEntryCameraAdapter", () => {
     expect(starts).toEqual([
       {
         sequence: [
-          { x: 808, y: 539.2, duration: 650, stayDuration: 450 },
+          { x: 808, y: 539.2, duration: 650, stayDuration: 0 },
         ],
-        returnDuration: 1_900,
+        returnDuration: 2_350,
       },
     ]);
+    expect(starts[0]?.sequence?.[0]?.stayDuration).toBe(0);
     expect(
-      650 + 450 + (starts[0]?.returnDuration ?? 0),
+      650 + (starts[0]?.returnDuration ?? 0),
     ).toBe(PRODUCT_ENTRY_CAMERA_DURATION_MS);
   });
 
@@ -96,6 +99,27 @@ describe("ProductEntryCameraAdapter", () => {
     await expect(adapter.settleOnPlayer()).rejects.toThrow(
       result.status === "failed" ? "camera failed" : "entry camera cancelled",
     );
+  });
+});
+
+describe("App presentation contract", () => {
+  it("keeps the Phaser canvas visible behind the READY overlay", () => {
+    const html = readFileSync(
+      new URL("../../index.html", import.meta.url),
+      "utf8",
+    );
+
+    expect(html).toMatch(
+      /body\[data-app-state="READY"\]\s+#app-shell\s*\{\s*background:\s*transparent;/,
+    );
+    expect(html).toMatch(
+      /body\[data-app-state="READY"\]\s+#app-ready\s*\{\s*background:\s*transparent;/,
+    );
+    expect(html).toMatch(
+      /#app-loading,\s+#app-ready\s*\{\s*position:\s*absolute;\s*inset:\s*0;/,
+    );
+    expect(html).toContain("#app canvas {");
+    expect(html).toContain('<div id="app" aria-label="Campus world"></div>');
   });
 });
 
