@@ -6,7 +6,8 @@ export const TRAIN_ENTRY_DURATION = 5_000;
 export const TRAIN_HOLD_DURATION = 3_000;
 export const TRAIN_DEPARTURE_DURATION = 9_000;
 export const TRAIN_TILE_SIZE = 16;
-export const TRAIN_COLLISION_ROW = 20;
+// Starts below the spawn player's foot body so an arriving train cannot begin with overlap.
+export const TRAIN_COLLISION_ROW = 27;
 // Covers the visible carriage height so the player cannot walk through a moving train.
 export const TRAIN_COLLISION_ROW_RADIUS = 5;
 export const TRAIN_COLLISION_CENTER_Y =
