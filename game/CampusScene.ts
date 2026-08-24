@@ -97,6 +97,8 @@ import {
   PhaserSprayerRuntime,
   type PhaserSprayerSceneLike,
 } from "./PhaserSprayerRuntime.js";
+import { PhaserRouteCrowdRuntime } from "./PhaserRouteCrowdRuntime.js";
+import { GridRouteCrowdPathProvider } from "../src/npc/index.js";
 import {
   PhaserFactorySmokeRuntime,
   type PhaserFactorySmokeSceneLike,
@@ -328,6 +330,7 @@ export class CampusScene extends Phaser.Scene {
   private entryResult: ProductEntryResult | undefined;
   private trainRuntime: PhaserTrainRuntime | undefined;
   private sprayerRuntime: PhaserSprayerRuntime | undefined;
+  private routeCrowdRuntime: PhaserRouteCrowdRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private footstepRuntime: PhaserFootstepRuntime | undefined;
   private mapRuntime: PhaserCampusMapRuntime | undefined;
@@ -485,6 +488,7 @@ export class CampusScene extends Phaser.Scene {
 
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
+    this.load.json("walls-layer", "/maps/walls-layer.json");
     this.load.image("tileset-particles", "/maps/tileset-particles.png");
     this.load.spritesheet("player", "/sprites/player.webp", {
       frameWidth: 48,
@@ -590,6 +594,7 @@ export class CampusScene extends Phaser.Scene {
 
   update(): void {
     if (this.sceneDestroyed) return;
+    this.routeCrowdRuntime?.update(this.time.now);
     if (document.visibilityState !== "visible") {
       this.stopPlayerMovement();
       return;
@@ -1046,6 +1051,7 @@ export class CampusScene extends Phaser.Scene {
 
     this.entryRuntime?.shutdown();
     this.sprayerRuntime?.shutdown();
+    this.routeCrowdRuntime?.shutdown();
     this.smokeRuntime?.shutdown();
     this.trainRuntime?.shutdown(this.time?.now);
     this.entryRuntime = undefined;
@@ -1369,6 +1375,14 @@ export class CampusScene extends Phaser.Scene {
         `sprayer runtime failed: ${sprayerStarted?.reason ?? "missing-owner"}`,
       );
     }
+    const wallData = this.cache.json.get("walls-layer") as { grid?: readonly (readonly number[])[] } | undefined;
+    if (wallData?.grid === undefined) throw new Error("route crowd walls grid unavailable");
+    this.routeCrowdRuntime = new PhaserRouteCrowdRuntime(
+      this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
+      pathProvider: new GridRouteCrowdPathProvider(wallData.grid),
+      viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
+    });
+    this.routeCrowdRuntime.start(this.time.now);
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(

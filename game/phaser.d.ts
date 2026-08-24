@@ -80,6 +80,7 @@ declare namespace Phaser {
     anims: any;
     input: any;
     cameras: any;
+    cache: any;
     events: any;
     game: any;
   }
