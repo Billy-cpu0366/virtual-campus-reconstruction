@@ -10,12 +10,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.2-04a-map-navigation-implement
+current-phase: p5.2-04a-map-navigation-automated-verified
 current-gate: p5.2-04a-human-visual-acceptance
-gate-status: implementation-in-progress
+gate-status: awaiting-human-acceptance
 authorization-ref: DEC-P5.2-04A-MAP-NAVIGATION-001
 preauthorized-next-work-item: none
-next-phase: p5.2-04a-map-navigation-implement
+next-phase: p5.2-04a-human-visual-acceptance
 updated: 2026-08-24
 ---
 

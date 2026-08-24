@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.2-04a-map-navigation
-status: accepted-implementation-authorized
+status: automated-verified-awaiting-human-acceptance
 authorization: DEC-P5.2-04A-MAP-NAVIGATION-001
 owner: Main
 updated: 2026-08-24
@@ -43,4 +43,4 @@ updated: 2026-08-24
 
 ## Human Gate
 
-Human 回复 `ok。开始吧`（2026-08-24），接受本包并授权实现。自动检查和 WSL 浏览器结果不替代最终视觉验收。
+Human 回复 `ok。开始吧`（2026-08-24），接受本包并授权实现。现有实现未发现需修复的产品差异：test-hooks map/content Smoke，以及 production 桌面与375×667路径均通过；后两者证明11点/3禁用点、玩家点更新、地图/内容互斥、关闭恢复和零浏览器错误。自动检查和 WSL 浏览器结果不替代最终视觉验收。
