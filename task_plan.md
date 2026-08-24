@@ -10,12 +10,12 @@ current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.3-03a-human-accepted
-current-gate: next-work-item-human-authorization
-gate-status: passed
-authorization-ref: DEC-P5.3-03A-WORLD-CONTENT-DISCOVERY-001
+current-phase: p5.4-05a-train-route-implement
+current-gate: p5.4-05a-human-visual-acceptance
+gate-status: implementation-in-progress
+authorization-ref: DEC-P5.4-05A-TRAIN-ROUTE-001
 preauthorized-next-work-item: none
-next-phase: select-next-visible-product-work-item
+next-phase: p5.4-05a-train-route-implement
 updated: 2026-08-24
 ---
 

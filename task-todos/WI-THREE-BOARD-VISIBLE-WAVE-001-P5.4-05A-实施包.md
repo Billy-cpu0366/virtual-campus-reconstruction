@@ -1,0 +1,32 @@
+---
+work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
+phase: p5.4-05a-train-route
+status: accepted-implementation-authorized
+authorization: DEC-P5.4-05A-TRAIN-ROUTE-001
+owner: Main
+updated: 2026-08-24
+---
+
+# P5.4 05-A 火车完整路线实施包
+
+## 目标
+
+验证并只在必要时修正 crowdTrain 的完整可见路径：5秒进场、到站、约3秒停留、9秒离场、碰撞带随动及所有运行对象清理。
+
+## 已接受范围
+
+- 以既有公开路线 `(2480,310)→(480,310)`、现有 scale 与 `5s+3s+9s` 时序为准；不改变这些事实。
+- 检查火车与玩家/NPC的遮挡、控制开放、碰撞带与离场清理。
+- 桌面与移动端 production 重放；只修能复现的视觉、生命周期或碰撞差异。
+
+## 禁止
+
+不加入乘客 CrowdManager、cars或其他路线；不改30FPS、C3入口/相机、地图、NPC/FX、sample、远端、PR、merge或main。
+
+## 验收
+
+火车进场至到站连续；玩家不被错误画在车厢前；控制只按既有5秒边界开放；离场后Sprite/collider/blocking zone为零，且不影响后续移动、内容、屋顶与地图路径。
+
+## Human Gate
+
+Human回复`ok。开始吧`（2026-08-24）接受本包并授权实施；自动检查不替代最终视觉验收。
