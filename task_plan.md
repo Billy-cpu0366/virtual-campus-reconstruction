@@ -24,7 +24,7 @@ updated: 2026-08-24
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：C3整图与 P5.2 04-A 均已由Human视觉通过。04-A确认小地图入口、地图面板标签、About/Projects/Memo内容打开和关闭恢复探索可用；代码候选仍位于独立integration worktree，不作为`main`合并或远端交付。下一步需Human选择新的有界可见成果；HUD顶部菜单、移动quick-actions、新内容、NPC/路线/FX、Entity及地图/入口边界继续不自动授权。
+- **当前阶段**：C3整图、P5.2 04-A 与 P5.3 03-A 均已由Human视觉通过；代码候选仍位于独立integration worktree，不作为`main`合并或远端交付。Human已接受后续顺序：05-A火车→05-B全量NPC盘点→05-C喷洒NPC→05-D其他有证据NPC→05-E烟雾→05-F联合验收，之后才是UI/内容补全与Entity审计；该路线图不自动授权05-A。
 - **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
 - **当前授权**：按已安装Beta.3只读形成Intent Contract、Oracle Map、证据适配和失败复盘；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
