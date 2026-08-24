@@ -5,12 +5,31 @@ import {
   type RouteCrowdViewport,
 } from "../src/npc/index.js";
 
-const CROWD_TEXTURES = [
+export const ROUTE_CROWD_TEXTURES = Object.freeze([
   "npc-man", "npc-man2", "npc-woman", "npc-woman2", "npc-woman3",
   "npc-woman4", "npc-woman5", "npc-woman6", "npc-woman7", "npc-woman8",
   "npc-man3", "npc-man4", "npc-man5", "npc-man6", "npc-man8",
   "npc-man9", "npc-man10",
-] as const;
+] as const);
+
+export interface PhaserRouteCrowdLoaderLike {
+  spritesheet(
+    key: string,
+    url: string,
+    config: { readonly frameWidth: number; readonly frameHeight: number },
+  ): unknown;
+}
+
+export function preloadRouteCrowdRuntimeAssets(
+  loader: PhaserRouteCrowdLoaderLike,
+): void {
+  for (const texture of ROUTE_CROWD_TEXTURES) {
+    loader.spritesheet(texture, `/sprites/${texture}.webp`, {
+      frameWidth: 48,
+      frameHeight: 48,
+    });
+  }
+}
 
 export interface PhaserRouteCrowdSpriteLike {
   x: number; y: number;
@@ -48,7 +67,11 @@ export class PhaserRouteCrowdRuntime {
     for (const [index, item] of this.core.snapshot.instances.entries()) {
       const prior = this.sprites.get(index);
       if (!item.materialized || item.destroyed) { prior?.destroy(); this.sprites.delete(index); continue; }
-      const sprite = prior ?? this.scene.add.sprite(item.position.x, item.position.y, CROWD_TEXTURES[index % CROWD_TEXTURES.length]!);
+      const sprite = prior ?? this.scene.add.sprite(
+        item.position.x,
+        item.position.y,
+        ROUTE_CROWD_TEXTURES[index % ROUTE_CROWD_TEXTURES.length]!,
+      );
       sprite.x = item.position.x; sprite.y = item.position.y; sprite.setDepth(500 + item.position.y * .1);
       this.sprites.set(index, sprite);
     }

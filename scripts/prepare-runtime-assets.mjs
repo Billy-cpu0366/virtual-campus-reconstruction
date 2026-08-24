@@ -15,6 +15,12 @@ const SOURCE_ROOT = resolve(
 const RUNTIME_ROOT = resolve(ROOT, "public");
 const SANITIZER = resolve(ROOT, "scripts/sanitize-runtime-maps.mjs");
 const CONTENT_MANIFEST = resolve(ROOT, "scripts/runtime-content-assets.json");
+const ROUTE_CROWD_TEXTURES = [
+  "npc-man", "npc-man2", "npc-woman", "npc-woman2", "npc-woman3",
+  "npc-woman4", "npc-woman5", "npc-woman6", "npc-woman7", "npc-woman8",
+  "npc-man3", "npc-man4", "npc-man5", "npc-man6", "npc-man8", "npc-man9",
+  "npc-man10",
+];
 
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
@@ -22,6 +28,10 @@ const FILES = [
   ["maps/tileset-particles.png", "maps/tileset-particles.png"],
   ["maps/walls-layer.json", "maps/walls-layer.json"],
   ["sprites/player.webp", "sprites/player.webp"],
+  ...ROUTE_CROWD_TEXTURES.map((name) => [
+    `sprites/${name}.webp`,
+    `sprites/${name}.webp`,
+  ]),
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],
   ["maps/mini-map.webp", "assets/maps/mini-map.webp"],

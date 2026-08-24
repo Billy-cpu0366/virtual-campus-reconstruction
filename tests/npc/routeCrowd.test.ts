@@ -79,7 +79,7 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.started).toBe(false);
   });
 
-  it("covers delay, moving, returning and gone for a round trip", () => {
+  it("covers delay, moving, returning and restart for a round trip", () => {
     const runtime = new RouteCrowdRuntime({
       configs: [testConfig()],
       baseSpeed: 48,
@@ -96,8 +96,12 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.snapshot.instances[0]?.state).toBe("returning");
     expect(runtime.snapshot.instances[0]?.position).toEqual({ x: 80, y: 48 });
     runtime.tick(2_100);
-    expect(runtime.snapshot.instances[0]?.state).toBe("gone");
-    expect(runtime.snapshot.instances[0]?.destroyed).toBe(true);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "delay",
+      generation: 1,
+      position: { x: 32, y: 48 },
+      destroyed: false,
+    });
   });
 
   it("deletes one-way routes or respawns them according to the contract", () => {
@@ -139,7 +143,7 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.snapshot.instances[0]).toMatchObject({
       state: "moving",
       materialized: false,
-      destroyed: true,
+      destroyed: false,
     });
 
     runtime.tick(250, { left: 0, top: 0, width: 100, height: 100 });
@@ -149,6 +153,33 @@ describe("RouteCrowdRuntime contract", () => {
       visible: true,
       position: { x: 44, y: 48 },
     });
+  });
+
+  it("walks every waypoint and applies injected delay and speed variation", () => {
+    const runtime = new RouteCrowdRuntime({
+      random: () => 0.5,
+      configs: [testConfig({
+        delay: { minMs: 100, maxMs: 300 },
+        speedVariation: { min: 0.5, max: 1.5 },
+      })],
+      baseSpeed: 48,
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 24, y: request.start.y },
+        { x: request.start.x + 24, y: request.start.y + 24 },
+      ],
+    });
+
+    runtime.start(0);
+    runtime.tick(199);
+    expect(runtime.snapshot.instances[0]?.position).toEqual({ x: 32, y: 48 });
+    runtime.tick(700);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "moving",
+      position: { x: 56, y: 48 },
+    });
+    runtime.tick(1_199);
+    expect(runtime.snapshot.instances[0]?.position.y).toBeGreaterThan(48);
   });
 
   it("cancel clears active instances, while shutdown prevents restart", () => {

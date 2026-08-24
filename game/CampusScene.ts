@@ -97,7 +97,10 @@ import {
   PhaserSprayerRuntime,
   type PhaserSprayerSceneLike,
 } from "./PhaserSprayerRuntime.js";
-import { PhaserRouteCrowdRuntime } from "./PhaserRouteCrowdRuntime.js";
+import {
+  PhaserRouteCrowdRuntime,
+  preloadRouteCrowdRuntimeAssets,
+} from "./PhaserRouteCrowdRuntime.js";
 import { GridRouteCrowdPathProvider } from "../src/npc/index.js";
 import {
   PhaserFactorySmokeRuntime,
@@ -485,6 +488,7 @@ export class CampusScene extends Phaser.Scene {
     this.sprayerRuntime.preload();
     this.trainRuntime.preload();
     this.smokeRuntime.preload();
+    preloadRouteCrowdRuntimeAssets(this.load);
 
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
