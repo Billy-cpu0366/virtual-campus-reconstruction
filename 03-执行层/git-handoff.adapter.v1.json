@@ -1,6 +1,6 @@
 {
   "schema-version": 1,
-  "required-package-version": "0.1.0-alpha.3",
+  "required-package-version": "0.1.0-alpha.4",
   "project-id": "virtual-campus-reconstruction",
   "repositories": {
     "sandbox-root": ".",
@@ -9,13 +9,13 @@
     "canonical-remote": "https://github.com/Billy-cpu0366/virtual-campus-reconstruction.git"
   },
   "refs": {
-    "canonical-base": "refs/pi-handoff/canonical/main",
+    "canonical-base": "refs/remotes/audit/main",
     "remote-base": "main",
     "delivery-template": "refs/pi-handoff/delivery/{delivery-id}",
     "targets": {
-      "wip": "wip/{delivery-id}",
-      "review": "delivery/{delivery-id}"
-    }
+      "wip": "wip/{delivery-id}"
+    },
+    "snapshot-profiles": ["wip"]
   },
   "transport": {
     "sandbox-outbox": ".pi/handoff/outbox",
@@ -52,9 +52,7 @@
     "allow-direct-base-push": false,
     "protected-paths": [
       ".git/**",
-      ".env",
-      "migration-history/**",
-      "sample/original-public-build/mirror/**"
+      ".env"
     ]
   }
 }

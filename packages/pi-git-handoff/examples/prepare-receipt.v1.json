@@ -9,7 +9,7 @@
   "created-at": "2026-08-23T00:01:00Z",
   "producer": {
     "package": "pi-git-handoff",
-    "version": "0.1.0-alpha.3",
+    "version": "0.1.0-alpha.4",
     "command": "prepare",
     "environment": "sandbox"
   },
@@ -17,6 +17,7 @@
   "manifest-sha256": "3333333333333333333333333333333333333333333333333333333333333333",
   "project-id": "example-project",
   "canonical-remote": "https://example.invalid/example/example-project.git",
+  "history-mode": "snapshot",
   "canonical-base": {
     "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
@@ -32,5 +33,7 @@
     "status": "not-required",
     "method": "explicit prepare invocation"
   },
-  "unresolved-risks": []
+  "unresolved-risks": [
+    "snapshot delivery is not directly mergeable into main"
+  ]
 }

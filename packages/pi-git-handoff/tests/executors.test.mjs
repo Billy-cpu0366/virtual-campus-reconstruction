@@ -17,6 +17,7 @@ import {
   prepareDelivery,
   pushVerified,
   renderTemplate,
+  sha256,
   validateAdapter,
   verifyExternal,
   verifyHashInventory,
@@ -53,7 +54,11 @@ function adapterFor(projectRoot, externalRoot, externalStaging) {
       "canonical-base": BASE_REF,
       "remote-base": "main",
       "delivery-template": "delivery/{delivery-id}",
-      targets: { review: "handoff/{delivery-id}" },
+      targets: {
+        review: "handoff/{delivery-id}",
+        wip: "wip/{delivery-id}",
+      },
+      "snapshot-profiles": [],
     },
     transport: {
       "sandbox-outbox": ".pi/handoff/outbox",
@@ -84,7 +89,7 @@ function processResult(argv, overrides = {}) {
   };
 }
 
-function createPrepareGit(projectRoot, operations) {
+function createPrepareGit(projectRoot, operations, { ancestorCode = 0 } = {}) {
   return async (_repo, args) => {
     operations.push(args);
     const joined = args.join(" ");
@@ -95,7 +100,8 @@ function createPrepareGit(projectRoot, operations) {
     if (joined === "rev-parse HEAD^{tree}") return processResult(args, { stdout: `${DELIVERY_TREE}\n` });
     if (joined === `rev-parse ${BASE_REF}`) return processResult(args, { stdout: `${BASE_COMMIT}\n` });
     if (joined === `rev-parse ${BASE_REF}^{tree}`) return processResult(args, { stdout: `${BASE_TREE}\n` });
-    if (args[0] === "merge-base" || args[0] === "check-ref-format" || args[0] === "update-ref" || args[0] === "check-ignore") return processResult(args);
+    if (args[0] === "merge-base") return processResult(args, { code: ancestorCode });
+    if (args[0] === "check-ref-format" || args[0] === "update-ref" || args[0] === "check-ignore") return processResult(args);
     if (args[0] === "show-ref") return processResult(args, { code: 1 });
     if (args[0] === "diff") return processResult(args, { stdout: "src/example.js\0" });
     if (args[0] === "bundle" && args[1] === "create") {
@@ -108,14 +114,16 @@ function createPrepareGit(projectRoot, operations) {
   };
 }
 
-function createExternalGit({ externalRoot, stageRoot, operations }) {
+function createExternalGit({ externalRoot, stageRoot, operations, externalStatus = "", targetInitiallyExists = false, targetAppearsAfterPreview = false }) {
   let pushed = false;
+  let targetAppeared = false;
+  let lsRemoteCount = 0;
   return async (repo, args) => {
     operations.push({ repo, args });
     const joined = args.join(" ");
     if (joined === "rev-parse --show-toplevel") return processResult(args, { stdout: `${externalRoot}\n` });
     if (joined === "config --get remote.upstream.url") return processResult(args, { stdout: `${REMOTE}\n` });
-    if (joined === "status --porcelain") return processResult(args);
+    if (joined === "status --porcelain") return processResult(args, { stdout: repo === externalRoot ? externalStatus : "" });
     if (joined === "fetch upstream --prune") return processResult(args);
     if (joined === "rev-parse refs/remotes/upstream/main") return processResult(args, { stdout: `${BASE_COMMIT}\n` });
     if (joined === "rev-parse refs/remotes/upstream/main^{tree}") return processResult(args, { stdout: `${BASE_TREE}\n` });
@@ -127,9 +135,23 @@ function createExternalGit({ externalRoot, stageRoot, operations }) {
     if (args[0] === "rev-parse" && args[1].startsWith("refs/pi-handoff/import/")) return processResult(args, { stdout: `${DELIVERY_COMMIT}\n` });
     if (args[0] === "diff") return processResult(args, { stdout: "src/example.js\0" });
     if (args[0] === "ls-remote") {
-      return processResult(args, { stdout: pushed ? `${DELIVERY_COMMIT}\t${args.at(-1)}\n` : "" });
+      lsRemoteCount += 1;
+      const targetExists = pushed || targetInitiallyExists || targetAppeared;
+      return processResult(args, { stdout: targetExists ? `${DELIVERY_COMMIT}\t${args.at(-1)}\n` : "" });
     }
     if (args[0] === "push") {
+      if (targetAppearsAfterPreview && lsRemoteCount === 2) {
+        targetAppeared = true;
+        const refspec = args.at(-1);
+        const targetRef = refspec.slice(refspec.indexOf(":") + 1);
+        const expectedLease = `--force-with-lease=${targetRef}:`;
+        const lease = args.find((value) => value.startsWith("--force-with-lease="));
+        if (lease !== expectedLease) throw new Error(`fake server expected ${expectedLease}`);
+        throw new HandoffError("COMMAND_FAILED", "remote rejected empty expected lease", {
+          argv: args,
+          code: 1,
+        });
+      }
       pushed = true;
       return processResult(args);
     }
@@ -137,7 +159,7 @@ function createExternalGit({ externalRoot, stageRoot, operations }) {
   };
 }
 
-async function prepareFixture(label = "fixture") {
+async function prepareFixture(label = "fixture", { profile = "review", ancestorCode = 0 } = {}) {
   const runtime = await runtimeDirectory(label);
   const projectRoot = path.join(runtime, "project");
   const externalRoot = path.join(runtime, "external");
@@ -145,20 +167,35 @@ async function prepareFixture(label = "fixture") {
   await mkdir(projectRoot, { recursive: true });
   await mkdir(externalRoot, { recursive: true });
   const adapter = adapterFor(projectRoot, externalRoot, externalStaging);
+  if (profile === "wip") adapter.refs["snapshot-profiles"] = ["wip"];
   const adapterPath = path.join(projectRoot, "git-handoff.json");
   await writeFile(adapterPath, `${JSON.stringify(adapter, null, 2)}\n`, "utf8");
   const operations = [];
   const result = await prepareDelivery({
     adapterPath,
-    profile: "review",
+    profile,
     projectRoot,
-    deliveryId: "example-delivery-0001",
+    deliveryId: profile === "review" ? "example-delivery-0001" : `example-${profile}-0001`,
     authorityRef: "DEC-EXAMPLE-001",
   }, {
     now: new Date("2026-08-23T00:00:00Z"),
-    git: createPrepareGit(projectRoot, operations),
+    git: createPrepareGit(projectRoot, operations, { ancestorCode }),
   });
   return { runtime, projectRoot, externalRoot, externalStaging, adapter, adapterPath, operations, result };
+}
+
+async function rewriteArtifactJson(fixture, filename, mutate) {
+  const filePath = path.join(fixture.result.directory, filename);
+  const value = JSON.parse(await readFile(filePath, "utf8"));
+  mutate(value);
+  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  const inventoryPath = path.join(fixture.result.directory, "SHA256SUMS");
+  const digest = sha256(await readFile(filePath));
+  const inventory = (await readFile(inventoryPath, "utf8"))
+    .split("\n")
+    .map((line) => line.endsWith(`  ${filename}`) ? `${digest}  ${filename}` : line)
+    .join("\n");
+  await writeFile(inventoryPath, inventory, "utf8");
 }
 
 test("adapter validation rejects version mismatch and unknown keys", () => {
@@ -176,6 +213,19 @@ test("adapter validation rejects version mismatch and unknown keys", () => {
   targetAsFullRef.refs.targets.review = "refs/heads/handoff/{delivery-id}";
   assert.throws(
     () => validateAdapter(targetAsFullRef),
+    (error) => error instanceof HandoffError && error.code === "INVALID_ADAPTER",
+  );
+});
+
+test("snapshot profiles are explicit and empty defaults to canonical", () => {
+  const adapter = adapterFor("/tmp/project", "/tmp/external", "/tmp/staging");
+  assert.deepEqual(adapter.refs["snapshot-profiles"], []);
+  assert.equal(validateAdapter(adapter), adapter);
+  adapter.refs["snapshot-profiles"] = ["wip"];
+  assert.equal(validateAdapter(adapter), adapter);
+  adapter.refs["snapshot-profiles"] = ["wip", "wip"];
+  assert.throws(
+    () => validateAdapter(adapter),
     (error) => error instanceof HandoffError && error.code === "INVALID_ADAPTER",
   );
 });
@@ -218,6 +268,25 @@ test("prepare creates immutable artifact and no remote Git operations", async ()
       git: createPrepareGit(fixture.projectRoot, []),
     }),
     (error) => error instanceof HandoffError && error.code === "OUTBOX_EXISTS",
+  );
+});
+
+test("snapshot prepare allows no common ancestor and records its risk", async () => {
+  const fixture = await prepareFixture("snapshot-no-ancestor", {
+    profile: "wip",
+    ancestorCode: 1,
+  });
+  assert.equal(fixture.result.manifest["history-mode"], "snapshot");
+  assert.deepEqual(fixture.result.manifest["unresolved-risks"], [
+    "snapshot delivery is not directly mergeable into main",
+  ]);
+  assert.equal(fixture.operations.filter((args) => args[0] === "merge-base").length, 0);
+});
+
+test("canonical prepare still rejects a base without ancestry", async () => {
+  await assert.rejects(
+    prepareFixture("canonical-no-ancestor", { ancestorCode: 1 }),
+    (error) => error instanceof HandoffError && error.code === "CANONICAL_BASE_NOT_ANCESTOR",
   );
 });
 
@@ -281,6 +350,160 @@ test("prepare classifies a missing canonical ref as stopped", async () => {
   assert.equal(observed.code, "CANONICAL_BASE_MISSING");
 });
 
+test("snapshot verification completes with a dirty Windows-style formal worktree", async () => {
+  const fixture = await prepareFixture("snapshot-dirty-external", { profile: "wip", ancestorCode: 1 });
+  const operations = [];
+  let checkCwd;
+  const git = createExternalGit({
+    externalRoot: fixture.externalRoot,
+    stageRoot: fixture.externalStaging,
+    operations,
+    externalStatus: " M src\\dirty-file.js\n",
+  });
+  const verification = await verifyExternal({
+    adapterPath: fixture.adapterPath,
+    artifactPath: fixture.result.directory,
+    attemptId: "attempt-snapshot-dirty-0001",
+  }, {
+    git,
+    processRunner: async (argv, options) => {
+      checkCwd = options.cwd;
+      return processResult(argv, { cwd: options.cwd });
+    },
+    testOnlyAllowWsl: true,
+  });
+  assert.equal(verification.preview.historyMode, "snapshot");
+  assert.equal(verification.preview.forcePush, false);
+  assert.equal(verification.preview.createOnly, true);
+  assert.equal(verification.verifyReceipt["history-mode"], "snapshot");
+  assert.deepEqual(verification.verifyReceipt["unresolved-risks"], [
+    "snapshot delivery is not directly mergeable into main",
+  ]);
+  assert.ok(checkCwd.startsWith(fixture.externalStaging));
+  assert.ok(verification.receiptDir.startsWith(fixture.externalStaging));
+  assert.equal(verification.preview.nonMergeMainRisk, "snapshot delivery is not directly mergeable into main");
+  assert.equal(verification.preview.targetBranch, "wip/example-wip-0001");
+  const formalForbidden = operations.filter(({ repo, args }) => repo === fixture.externalRoot && ["checkout", "add", "reset", "clean", "merge", "rebase"].includes(args[0]));
+  assert.deepEqual(formalForbidden, []);
+  assert.ok(operations.some(({ repo, args }) => repo === fixture.externalRoot && args.join(" ") === "status --porcelain"));
+});
+
+test("manifest history mode is adapter-derived", async () => {
+  const fixture = await prepareFixture("manifest-history-tamper", { profile: "wip" });
+  const manifestPath = path.join(fixture.result.directory, "manifest.v1.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest["history-mode"] = "canonical";
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  const inventoryPath = path.join(fixture.result.directory, "SHA256SUMS");
+  const manifestDigest = sha256(await readFile(manifestPath));
+  const inventory = (await readFile(inventoryPath, "utf8"))
+    .split("\n")
+    .map((line) => line.endsWith("  manifest.v1.json")
+      ? `${manifestDigest}  manifest.v1.json`
+      : line)
+    .join("\n");
+  await writeFile(inventoryPath, inventory, "utf8");
+  await assert.rejects(
+    verifyExternal({
+      adapterPath: fixture.adapterPath,
+      artifactPath: fixture.result.directory,
+      attemptId: "attempt-manifest-history-tamper-0001",
+    }, {
+      git: async () => { throw new Error("Git must not run after history-mode tamper"); },
+      processRunner: async () => { throw new Error("checks must not run after history-mode tamper"); },
+      testOnlyAllowWsl: true,
+    }),
+    (error) => error instanceof HandoffError && error.code === "HISTORY_MODE_MISMATCH",
+  );
+});
+
+test("prepare receipt history mode is bound to manifest", async () => {
+  const fixture = await prepareFixture("prepare-receipt-history-tamper", { profile: "wip" });
+  const receiptPath = path.join(fixture.result.directory, "prepare-receipt.v1.json");
+  const receipt = JSON.parse(await readFile(receiptPath, "utf8"));
+  receipt["history-mode"] = "canonical";
+  await writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
+  const inventoryPath = path.join(fixture.result.directory, "SHA256SUMS");
+  const receiptDigest = sha256(await readFile(receiptPath));
+  const inventory = (await readFile(inventoryPath, "utf8"))
+    .split("\n")
+    .map((line) => line.endsWith("  prepare-receipt.v1.json")
+      ? `${receiptDigest}  prepare-receipt.v1.json`
+      : line)
+    .join("\n");
+  await writeFile(inventoryPath, inventory, "utf8");
+  await assert.rejects(
+    verifyExternal({
+      adapterPath: fixture.adapterPath,
+      artifactPath: fixture.result.directory,
+      attemptId: "attempt-prepare-receipt-history-tamper-0001",
+    }, {
+      git: async () => { throw new Error("Git must not run after receipt tamper"); },
+      processRunner: async () => { throw new Error("checks must not run after receipt tamper"); },
+      testOnlyAllowWsl: true,
+    }),
+    (error) => error instanceof HandoffError && error.code === "INVALID_PREPARE_RECEIPT",
+  );
+});
+
+test("snapshot manifest runtime validation requires the fixed risk", async () => {
+  const fixture = await prepareFixture("snapshot-manifest-risk", { profile: "wip" });
+  await rewriteArtifactJson(fixture, "manifest.v1.json", (manifest) => {
+    manifest["history-mode"] = "snapshot";
+    manifest["unresolved-risks"] = [];
+  });
+  await assert.rejects(
+    verifyExternal({
+      adapterPath: fixture.adapterPath,
+      artifactPath: fixture.result.directory,
+      attemptId: "attempt-snapshot-manifest-risk-0001",
+    }, {
+      git: async () => { throw new Error("Git must not run for invalid manifest risk"); },
+      processRunner: async () => { throw new Error("checks must not run for invalid manifest risk"); },
+      testOnlyAllowWsl: true,
+    }),
+    (error) => error instanceof HandoffError && error.code === "INVALID_MANIFEST",
+  );
+});
+
+test("snapshot prepare receipt runtime validation requires the fixed risk", async () => {
+  const fixture = await prepareFixture("snapshot-receipt-risk", { profile: "wip" });
+  await rewriteArtifactJson(fixture, "prepare-receipt.v1.json", (receipt) => {
+    receipt["unresolved-risks"] = [];
+  });
+  await assert.rejects(
+    verifyExternal({
+      adapterPath: fixture.adapterPath,
+      artifactPath: fixture.result.directory,
+      attemptId: "attempt-snapshot-receipt-risk-0001",
+    }, {
+      git: async () => { throw new Error("Git must not run for invalid receipt risk"); },
+      processRunner: async () => { throw new Error("checks must not run for invalid receipt risk"); },
+      testOnlyAllowWsl: true,
+    }),
+    (error) => error instanceof HandoffError && error.code === "INVALID_RECEIPT",
+  );
+});
+
+test("prepare receipt unresolved risks must equal the manifest", async () => {
+  const fixture = await prepareFixture("snapshot-receipt-risk-mismatch", { profile: "wip" });
+  await rewriteArtifactJson(fixture, "prepare-receipt.v1.json", (receipt) => {
+    receipt["unresolved-risks"].push("additional unresolved risk");
+  });
+  await assert.rejects(
+    verifyExternal({
+      adapterPath: fixture.adapterPath,
+      artifactPath: fixture.result.directory,
+      attemptId: "attempt-snapshot-receipt-risk-mismatch-0001",
+    }, {
+      git: async () => { throw new Error("Git must not run for mismatched receipt risk"); },
+      processRunner: async () => { throw new Error("checks must not run for mismatched receipt risk"); },
+      testOnlyAllowWsl: true,
+    }),
+    (error) => error instanceof HandoffError && error.code === "INVALID_PREPARE_RECEIPT",
+  );
+});
+
 test("external verification binds adapter, artifact, Human token, and remote result", async () => {
   const fixture = await prepareFixture("external");
   const operations = [];
@@ -301,6 +524,7 @@ test("external verification binds adapter, artifact, Human token, and remote res
   });
   assert.equal(verification.state, "externally-verified");
   assert.equal(verification.preview.forcePush, false);
+  assert.equal(verification.preview.createOnly, false);
   assert.equal(verification.preview.directBasePush, false);
   await assert.rejects(
     pushVerified(verification, { confirmToken: "wrong-token" }, { git, testOnlyAllowWsl: true }),
@@ -325,6 +549,76 @@ test("external verification binds adapter, artifact, Human token, and remote res
     REMOTE,
     `${DELIVERY_COMMIT}:refs/heads/handoff/example-delivery-0001`,
   ]);
+});
+
+test("snapshot target must be absent at preview", async () => {
+  const fixture = await prepareFixture("snapshot-existing-target", { profile: "wip" });
+  const git = createExternalGit({
+    externalRoot: fixture.externalRoot,
+    stageRoot: fixture.externalStaging,
+    operations: [],
+    targetInitiallyExists: true,
+  });
+  await assert.rejects(
+    verifyExternal({
+      adapterPath: fixture.adapterPath,
+      artifactPath: fixture.result.directory,
+      attemptId: "attempt-snapshot-existing-0001",
+    }, { git, processRunner: async () => processResult([]), testOnlyAllowWsl: true }),
+    (error) => error instanceof HandoffError && error.code === "TARGET_REF_EXISTS",
+  );
+  const stopped = JSON.parse(await readFile(path.join(
+    fixture.externalStaging,
+    "example-wip-0001",
+    "attempt-snapshot-existing-0001",
+    "receipts",
+    "verify-receipt.v1.json",
+  ), "utf8"));
+  assert.equal(stopped.status, "STOPPED");
+  assert.ok(stopped["unresolved-risks"].includes(
+    "snapshot delivery is not directly mergeable into main",
+  ));
+});
+
+test("snapshot target race is rejected by the server-side empty lease", async () => {
+  const fixture = await prepareFixture("snapshot-target-race", { profile: "wip" });
+  const operations = [];
+  const git = createExternalGit({
+    externalRoot: fixture.externalRoot,
+    stageRoot: fixture.externalStaging,
+    operations,
+    targetAppearsAfterPreview: true,
+  });
+  const verification = await verifyExternal({
+    adapterPath: fixture.adapterPath,
+    artifactPath: fixture.result.directory,
+    attemptId: "attempt-snapshot-race-0001",
+  }, { git, processRunner: async () => processResult([]), testOnlyAllowWsl: true });
+  await assert.rejects(
+    pushVerified(verification, { confirmToken: verification.confirmationToken }, { git, testOnlyAllowWsl: true }),
+    (error) => error instanceof HandoffError && error.code === "COMMAND_FAILED",
+  );
+  const pushCalls = operations.filter(({ args }) => args[0] === "push");
+  assert.equal(pushCalls.length, 1);
+  assert.deepEqual(pushCalls[0].args, [
+    "push",
+    "--force-with-lease=refs/heads/wip/example-wip-0001:",
+    "--",
+    REMOTE,
+    `${DELIVERY_COMMIT}:refs/heads/wip/example-wip-0001`,
+  ]);
+  const stopped = JSON.parse(await readFile(path.join(
+    fixture.externalStaging,
+    "example-wip-0001",
+    "attempt-snapshot-race-0001",
+    "receipts",
+    "push-receipt.v1.json",
+  ), "utf8"));
+  assert.equal(stopped.status, "FAIL");
+  assert.equal(stopped["remote-result"], undefined);
+  assert.ok(stopped["unresolved-risks"].includes(
+    "snapshot delivery is not directly mergeable into main",
+  ));
 });
 
 test("forged verification context cannot reach push", async () => {

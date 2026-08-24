@@ -1,6 +1,6 @@
 ---
 work-item: WI-GITHUB-HANDOFF-V1-001
-status: active-reconciliation-plan-gate
+status: active-wip-snapshot-mode-implementation
 work-item-type: delivery-infrastructure
 authorization: DEC-GITHUB-HANDOFF-V1-001
 updated: 2026-08-23
@@ -13,11 +13,11 @@ protocol-commit: 0a105dc
 
 ## 目标
 
-完成 Windows 正式仓库一次性审计与历史对齐，建立 Git bundle 双向桥，并用地图+玩家+相机统一成果完成首次真实 delivery 分支 push 收据。
+把当前 WSL 已提交成果完整运输到 GitHub 全新非保护 WIP 分支并生成远端收据；Windows 正式仓库历史对齐保留为未来 main/PR 集成任务，不作为当前 WIP 备份前置。
 
 ## 当前阶段
 
-`reconciliation-plan-human-gate`
+`wip-snapshot-mode-implementation`
 
 Human 已转交 Windows 外部 Pi 的完整 `AUDIT-RESULT-V1`，原始结构化收据保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-RESULT-V1.md`，SHA-256 为 `21b76920f6a1928a608dc94226a4b9b341322fba090b64329d5fecfe75b262da`。该收据属于 `human-relayed / external-runtime-unverified-by-wsl`，不能冒充 WSL 独立验证。
 
@@ -25,19 +25,19 @@ Human 已转交 Windows 外部 Pi 的完整 `AUDIT-RESULT-V1`，原始结构化�
 
 WSL 本地对象核对保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WSL-CORRELATION-V1.md`：Windows local HEAD 对象缺失；reported origin/main 对象存在，但与当前 WSL HEAD 无共同 merge-base且根提交不同。因此不能直接 fast-forward、普通 merge或假定 Windows 18 个本地提交已被当前 WSL 吸收。
 
-此前 WIP 快照目标仍只允许非保护 WIP 分支，不代表产品通过；Human 接受 preservation/reconciliation 方案前，不恢复实际交付。
+Human 已明确当前只要求把 WSL 完整成果备份到新的非保护 WIP 分支，不要求可直接合并 `main`。因此 reconciliation 不再是当前前置；审计收据只证明 remote 身份和 Windows 正式工作树不得被触碰。alpha.4 snapshot profile 已通过28项本地测试、schema duplicate-key scan、真实离线bundle与最终独立安全终审；当前停在 delivery readiness / WIP outbox Gate。
 
-## alpha.3 Adapter 接入
+## alpha.3 初始 Adapter 接入历史
 
 Human 于 2026-08-23 接受把独立 `pi-git-handoff` 接入本项目；落盘前因完整 delivery ref 回归修复，versioned 合同晋升为 alpha.3，范围仅为 adapter 与预演合同：
 
 - 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；
-- `refs/pi-handoff/canonical/main` 是固定 WSL canonical ref，但当前尚不存在；
-- profiles 只定义 `wip/<delivery-id>` 与 `delivery/<delivery-id>`，不授权实际 push；
+- alpha.3 使用的 `refs/pi-handoff/canonical/main` 未建立，因此 canonical-only prepare 保持 STOP；
+- alpha.3 曾定义 `wip` 与 `review`；当前 alpha.4 adapter 只保留显式 `wip` snapshot profile，不授权 `review` 或实际 push；
 - 外部检查固定为状态一致性、typecheck、测试和 build；
 - 2026-08-23 adapter 落盘轮次未运行 prepare、external checks、fetch 或 push；该轮次已关闭。后续 `DEC-GITHUB-HANDOFF-WINDOWS-AUDIT-RESUME-001` 只对 Windows 只读审计新增一次 `fetch origin --prune` 授权，不开放其他外部动作。
 
-adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才能用于真实 handoff；它不得自动处理已知 Windows dirty 或 main 分叉。alpha.3 静态接入已通过 runtime 解析、17 项 Package 测试、outbox ignore、状态一致性与独立复核，但仍是 `remote-unverified`。
+上述 alpha.3 canonical-only 约束已由当前 snapshot 决定收窄：未来 integrated route 仍需历史对齐，但 alpha.4 WIP snapshot 只绑定 `refs/remotes/audit/main` 的审计身份并允许不相连历史。alpha.3 已通过17项测试；alpha.4 必须重新完整验证，不能继承其真实远端状态。
 
 ## 允许
 
@@ -58,15 +58,15 @@ adapter 只在首次审计、历史对齐和 canonical bundle 入站完成后才
 
 ## 下一 Gate
 
-Main 根据审计收据和 WSL 本地对象核对提出最小无损 preservation/reconciliation 方案；Human 接受后才生成下一份 Windows 执行包。未接受前，不授权复制 dirty、生成 bundle、写 WSL inbox、导入 refs、创建 worktree、merge、commit 或 push。
+`verification-delivery` 先核对当前 WSL commit、clean 工作树、实际文件范围、历史 ignored outbox 不冲突和 WIP 边界；通过后，才可生成新的 snapshot outbox。Windows external Preview 返回前不授权 push，Human token 前不得创建或更新远端分支。
 
 ## 完成标准
 
-1. dirty 内容有明确 Human 处置与可复核保存点；
-2. local/remote 分叉在隔离 reconciliation worktree 收敛并通过项目检查；
-3. WSL 与 Windows 共享 canonical Git 基线；
-4. 统一 delivery bundle 的 manifest/hash/文件范围通过；
-5. 正式仓库实际 diff 经 Human Preview；
-6. delivery 分支 push 后远端 commit/tree 核对；
-7. `delivery-receipt.json` 回写并通过独立复核；
-8. 协议状态从 `accepted-unverified` 晋升 `verified`。
+1. alpha.4 manifest 明确标记 `history-mode: snapshot` 和不可直接合并 main 风险；
+2. WSL prepare 只读取已确认的 remote-base identity，不要求其为 delivery 祖先；
+3. Windows 正式工作树 dirty 不被修改，外部导入与检查只发生在仓库外 staging；
+4. 目标 `wip/<delivery-id>` 在验证和 push 前均必须不存在；
+5. bundle、manifest、adapter/hash、文件范围和 external checks 通过；
+6. Human 接受精确 Preview/token 后才 push；
+7. push 后远端 commit/tree 精确核对并回写版本化 receipt；
+8. 结果只声明 WIP snapshot remote-verified，不声明 main 集成、PR 可合并或产品验收。

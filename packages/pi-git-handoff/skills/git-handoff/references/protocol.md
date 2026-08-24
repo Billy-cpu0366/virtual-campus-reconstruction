@@ -20,6 +20,8 @@ The project-level JSON adapter passed to the executor is the only source for:
 - canonical remote and base ref;
 - a delivery ref template (full ref or branch fragment) and target branch
   templates;
+- explicit `refs.snapshot-profiles`; an empty array means canonical mode,
+  while listed profiles use snapshot mode;
 - outbox and external staging paths;
 - external replay checks; local readiness checks remain in the project workflow
   consumed by `verification-delivery`;
@@ -41,6 +43,7 @@ Preconditions:
 3. the selected profile exists in the adapter;
 4. the worktree is clean when policy requires it;
 5. `HEAD` is a coherent local commit and satisfies the declared base policy;
+   canonical mode requires the base to be an ancestor; snapshot mode does not;
 6. actual changed paths do not intersect protected paths;
 7. the configured outbox is ignored by Git, so preparation cannot dirty the
    project.
@@ -76,6 +79,7 @@ The directory is immutable. A content or metadata change requires a new
 The external stage:
 
 1. validates package compatibility and adapter identity;
+   snapshot mode records `history-mode: snapshot` and the non-merge-main risk;
 2. validates every artifact hash and rejects missing or extra payload files;
 3. verifies the declared bundle ref, commit, tree, prerequisites, and object
    format;
@@ -84,8 +88,13 @@ The external stage:
 6. enforces canonical base and dirty-state policy;
 7. imports into an isolated staging repository or worktree;
 8. compares the exact changed-file set with the manifest and protected paths;
-9. reruns the adapter `external` checks;
-10. emits `verify-receipt.v1.json` even when the attempt stops or fails.
+   formal worktree cleanliness is skipped only for snapshot mode, while
+   path, remote, object format, refresh, and exact-base checks remain;
+9. requires a nonexistent snapshot target at preview and rechecks it before
+   push; a target race stops without pushing;
+10. keeps all import, checkout, checks, and receipts in external staging;
+11. reruns the adapter `external` checks;
+12. emits `verify-receipt.v1.json` even when the attempt stops or fails.
 
 Passing verification does not authorize push.
 

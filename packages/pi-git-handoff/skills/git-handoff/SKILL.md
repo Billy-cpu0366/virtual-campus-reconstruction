@@ -48,6 +48,10 @@ a prior receipt.
 The adapter is stable mapping and policy. Live work-item state and Human Gate
 status remain in the authority files named by the project workflow.
 
+`refs.snapshot-profiles` is explicit. An empty array selects canonical mode for
+all profiles; listed profiles select snapshot mode. Snapshot manifests and
+receipts carry the adapter-derived `history-mode`.
+
 ## Security boundary
 
 - Do not duplicate or weaken the environment security guard.
@@ -57,6 +61,10 @@ status remain in the authority files named by the project workflow.
   credential access, or host-path access.
 - External verification does not rewrite the canonical base, clean unrelated
   work, force-push, or update a protected base branch.
+- Snapshot preparation does not require the canonical base to be an ancestor;
+  canonical preparation retains that requirement. Snapshot verification may
+  observe a dirty formal worktree, but all import, checkout, checks, and
+  receipts occur in external staging only.
 - A blocked environment operation is a STOP result, not permission to bypass
   the guard through a script or alternate command.
 
@@ -75,4 +83,6 @@ Distinguish these states:
 
 Only `remote-verified` supports a claim that the exact delivery reached the
 remote. It does not imply PR, merge, base-branch inclusion, or product
-acceptance.
+acceptance. Snapshot preview and push require a nonexistent target ref; a
+race is a STOP and never a push. Preview displays `historyMode` and the
+non-merge-main risk.

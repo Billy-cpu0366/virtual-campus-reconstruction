@@ -7,13 +7,15 @@ This directory is the machine entry for the independent cross-project
 
 - Design decision: accepted under `DEC-PI-GIT-HANDOFF-DESIGN-001`.
 - Executor authorization: accepted under `DEC-PI-GIT-HANDOFF-EXECUTORS-001`.
-- Persistence: alpha.2 is persisted in `c6eee9f`; the alpha.3 full-ref fix is
-  persisted by the containing project-adapter result commit.
-- Verification: local-verified by 17 automated tests, real offline Git bundle,
-  project state consistency, and independent review; Windows/GitHub remains
-  remote-unverified.
-- Execution: `prepare` and `verify-push` exist, but real external use still requires
-  a project adapter, external authorization, and the Human push Gate.
+- Persistence: alpha.2 is persisted in `c6eee9f`; alpha.3 full-ref behavior is
+  persisted in `4c92f2d`. Alpha.4 snapshot/WIP behavior is persisted by the
+  containing result commit.
+- Verification: alpha.4 local-verified by 28 tests, schema duplicate-key scan,
+  real offline artifacts, package validation, and independent review;
+  Windows/GitHub remains remote-unverified.
+- Execution: `prepare` and `verify-push` exist. Snapshot mode requires an
+  explicit adapter profile, a fresh target ref, external staging, external
+  authorization, and the Human push Gate.
 
 ## Reading order
 

@@ -17,6 +17,7 @@
     "adapter-sha256",
     "project-id",
     "canonical-remote",
+    "history-mode",
     "checks",
     "unresolved-risks"
   ],
@@ -86,6 +87,9 @@
     "canonical-remote": {
       "type": "string",
       "minLength": 1
+    },
+    "history-mode": {
+      "enum": ["canonical", "snapshot"]
     },
     "canonical-base": {
       "$ref": "#/$defs/object-identity"
@@ -169,6 +173,24 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "history-mode": {
+            "const": "snapshot"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "unresolved-risks": {
+            "contains": {
+              "const": "snapshot delivery is not directly mergeable into main"
+            }
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {

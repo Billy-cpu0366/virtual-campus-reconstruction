@@ -1,6 +1,6 @@
 {
   "schema-version": 1,
-  "required-package-version": "0.1.0-alpha.3",
+  "required-package-version": "0.1.0-alpha.4",
   "project-id": "example-project",
   "repositories": {
     "sandbox-root": ".",
@@ -15,7 +15,8 @@
     "targets": {
       "review": "handoff/{delivery-id}",
       "wip": "wip/{delivery-id}"
-    }
+    },
+    "snapshot-profiles": ["wip"]
   },
   "transport": {
     "sandbox-outbox": ".pi/handoff/outbox",

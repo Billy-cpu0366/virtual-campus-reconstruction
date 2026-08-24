@@ -12,6 +12,7 @@
     "delivery-id",
     "created-at",
     "profile",
+    "history-mode",
     "project-id",
     "canonical-remote",
     "canonical-base",
@@ -45,6 +46,9 @@
     "profile": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "history-mode": {
+      "enum": ["canonical", "snapshot"]
     },
     "project-id": {
       "type": "string",
@@ -127,6 +131,26 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "history-mode": {
+            "const": "snapshot"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "unresolved-risks": {
+            "contains": {
+              "const": "snapshot delivery is not directly mergeable into main"
+            }
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "sha256": {
       "type": "string",

@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_VERSION = "0.1.0-alpha.3"
+PACKAGE_VERSION = "0.1.0-alpha.4"
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 
 EXPECTED_FILES = {
@@ -111,6 +111,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "additionalProperties",
     "allOf",
     "const",
+    "contains",
     "description",
     "enum",
     "format",
@@ -294,7 +295,7 @@ class Validator:
             else:
                 for name in sorted(properties):
                     self.inspect_schema(properties[name], location + "/properties/" + name)
-        for keyword in ("additionalProperties", "items", "propertyNames", "if", "then"):
+        for keyword in ("additionalProperties", "items", "contains", "propertyNames", "if", "then"):
             if keyword not in schema:
                 continue
             value = schema[keyword]
@@ -456,6 +457,13 @@ class Validator:
         if "items" in schema:
             for index, item in enumerate(instance):
                 self.validate_instance(item, schema["items"], root, f"{location}/{index}", report)
+        if "contains" in schema:
+            matches = any(
+                self.validate_instance(item, schema["contains"], root, f"{location}/{index}", False)
+                for index, item in enumerate(instance)
+            )
+            if not matches and report:
+                self.error(f"{location}/contains", "must contain at least one item matching schema")
 
     def validate_string(
         self, instance: str, schema: dict[str, Any], location: str, report: bool
@@ -542,6 +550,20 @@ class Validator:
             return " or ".join(str(item) for item in value)
         return str(value)
 
+    def check_snapshot_risk_contains_regression(
+        self, relative: str, schema: dict[str, Any], example: Any
+    ) -> None:
+        if not isinstance(example, dict):
+            return
+        candidate = json.loads(json.dumps(example))
+        candidate["history-mode"] = "snapshot"
+        candidate["unresolved-risks"] = []
+        probe = Validator()
+        probe.validate_instance(candidate, schema, schema, relative)
+        expected_path = "/unresolved-risks/contains"
+        if not any(expected_path in error for error in probe.errors):
+            self.error(relative, "snapshot risk contains regression: empty risks were accepted")
+
     def check_forbidden_content(self) -> None:
         for relative in sorted(GENERIC_SCAN_FILES):
             path = PACKAGE_ROOT / relative
@@ -587,6 +609,19 @@ def main() -> int:
         schema = schemas.get(schema_file)
         if schema is not None and instance is not None:
             validator.validate_instance(instance, schema, schema, example)
+
+    manifest_schema = schemas.get("schemas/manifest.v1.schema.json")
+    manifest_example = loaded.get("examples/manifest.v1.json")
+    if manifest_schema is not None and manifest_example is not None:
+        validator.check_snapshot_risk_contains_regression(
+            "examples/manifest.v1.json", manifest_schema, manifest_example
+        )
+    receipt_schema = schemas.get("schemas/receipt.v1.schema.json")
+    receipt_example = loaded.get("examples/verify-receipt.v1.json")
+    if receipt_schema is not None and receipt_example is not None:
+        validator.check_snapshot_risk_contains_regression(
+            "examples/verify-receipt.v1.json", receipt_schema, receipt_example
+        )
 
     validator.check_forbidden_content()
 

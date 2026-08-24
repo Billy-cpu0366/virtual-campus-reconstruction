@@ -10,8 +10,8 @@ verifying and pushing the exact result with versioned receipts.
 |---|---|
 | Human direction | design and executor implementation accepted |
 | Design persistence | persisted in `683ea17` |
-| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 full-ref fix by the containing result commit |
-| Local validation | verified: 17 tests, real offline bundle, state consistency, independent review |
+| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 in `4c92f2d`; alpha.4 snapshot/WIP by the containing result commit |
+| Local validation | alpha.4 verified: 28 tests, schema duplicate-key scan, real offline bundle, independent review; Windows/GitHub remains unverified |
 | Prepare implementation | implemented; sandbox-local operations only |
 | External verify/push implementation | implemented; WSL tests use a fake Git runner |
 | Global or project installation | not authorized |
@@ -80,6 +80,8 @@ from its `extensions.git-handoff` namespace:
 - canonical remote identity;
 - canonical base, local delivery ref template (full ref or branch fragment), and
   allowed target branch templates;
+- explicit `refs.snapshot-profiles`; an empty array means canonical mode for all
+  profiles, while listed profiles use disconnected-history snapshot mode;
 - sandbox outbox and external staging paths;
 - external replay check commands; local readiness checks remain owned by
   `verification-delivery` and the project workflow adapter;
@@ -88,6 +90,10 @@ from its `extensions.git-handoff` namespace:
 The generic Skill and future executors must reject a missing or incompatible
 adapter instead of guessing values. The adapter stores stable mappings and
 policy, never live phase, gate, or outcome values.
+
+Snapshot manifests and receipts record `history-mode: snapshot` and the
+non-merge-main risk. Snapshot preparation compares `base..delivery` without
+requiring ancestry; canonical preparation keeps the ancestor requirement.
 
 See `schemas/adapter-extension.v1.schema.json` and
 `examples/adapter-extension.v1.json`.
@@ -105,6 +111,12 @@ receipt. A retry gets a new attempt and receipt ID; it never overwrites a failed
 or stopped attempt.
 
 See `skills/git-handoff/references/protocol.md` for the complete state flow.
+
+For snapshot verification, the formal repository is used only for path,
+canonical remote, object format, remote refresh, and exact-base checks; its
+worktree may be dirty. Import, checkout, checks, and receipts run only in
+external staging. The snapshot target must be absent at preview and must be
+rechecked before push; a race stops without pushing.
 
 ## Explicit non-scope
 

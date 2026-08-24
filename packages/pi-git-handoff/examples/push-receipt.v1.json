@@ -9,7 +9,7 @@
   "created-at": "2026-08-23T00:03:00Z",
   "producer": {
     "package": "pi-git-handoff",
-    "version": "0.1.0-alpha.3",
+    "version": "0.1.0-alpha.4",
     "command": "verify-push",
     "environment": "external"
   },
@@ -19,6 +19,7 @@
   "previous-receipt-sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
   "project-id": "example-project",
   "canonical-remote": "https://example.invalid/example/example-project.git",
+  "history-mode": "snapshot",
   "canonical-base": {
     "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
@@ -28,7 +29,7 @@
     "tree": "dddddddddddddddddddddddddddddddddddddddd"
   },
   "remote-result": {
-    "branch": "handoff/example-20260823-a1b2c3d",
+    "branch": "wip/example-20260823-a1b2c3d",
     "commit": "cccccccccccccccccccccccccccccccccccccccc",
     "tree": "dddddddddddddddddddddddddddddddddddddddd",
     "verification": "remote-verified"
@@ -42,5 +43,7 @@
     "authority-ref": "DEC-EXAMPLE-PUSH-001",
     "quote": "confirm exact target"
   },
-  "unresolved-risks": []
+  "unresolved-risks": [
+    "snapshot delivery is not directly mergeable into main"
+  ]
 }

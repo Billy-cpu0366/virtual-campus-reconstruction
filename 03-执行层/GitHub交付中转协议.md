@@ -38,14 +38,14 @@ Human：审查后确认推送
 - WSL 交付出口：`.pi/handoff/outbox/<delivery-id>/`。
 - WSL 基线入口：`.pi/handoff/inbox/<sync-id>/`。
 - Windows 中转区：`C:\Users\inertnet\.pi\agent\github-handoff\<project>\<delivery-id>\`。
-- alpha.3 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；外部隔离 staging 与中转区分离，固定为 `C:\Users\inertnet\.pi\agent\github-handoff-staging\virtual-campus-reconstruction`。
+- alpha.4 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；外部隔离 staging 与中转区分离，固定为 `C:\Users\inertnet\.pi\agent\github-handoff-staging\virtual-campus-reconstruction`。
 - `main` 必须保持 clean 并只跟随 `origin/main`；不在 `main` 上开发、commit 或直接 push。
 - 不执行 `reset`、`clean`、覆盖、擅自 `pull`、force-push；不自动创建/合并 PR。
 - `task_plan.md` 仍是项目动态状态唯一权威；handoff 包只负责运输和收据，不建立第二套项目状态。
 
 ## 3. 一次性历史对齐
 
-当前 WSL 与 GitHub 尚未共享可靠交付基线，Windows 正式仓库又报告 dirty 和 main 分叉。因此 v1 首次启用必须先完成。Human 于 2026-08-23 恢复的第 1–4 步 Windows 只读审计授权已经消费；结果保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-RESULT-V1.md`。当前停在 reconciliation 方案 Human Gate，以下步骤仍是后续合同而非现行授权：
+当前 WSL 与 GitHub 尚未共享可靠交付基线，Windows 正式仓库又报告 dirty 和 main 分叉。因此 v1 首次启用必须先完成。Human 于 2026-08-23 恢复的第 1–4 步 Windows 只读审计授权已经消费；结果保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WINDOWS-AUDIT-RESULT-V1.md`。以下 reconciliation 步骤只适用于未来要接入 `main` 或形成普通可合并 PR 的 integrated route；按第 11 节执行的独立 WIP snapshot 不以此为前置：
 
 1. 外部 Pi 完整读取正式仓库 `AGENTS.md`。
 2. 只读核对路径、canonical `origin`、分支、dirty 文件。
@@ -81,7 +81,7 @@ WSL 完成有界工作后：
 4. 基于共同 canonical 历史生成 Git bundle，而不是普通补丁。
 5. 生成不可变 outbox；内容变化必须使用新 delivery-id，不覆盖旧包。
 
-alpha.3 标准 outbox：
+alpha.4 标准 outbox：
 
 ```text
 .pi/handoff/outbox/<delivery-id>/
@@ -108,7 +108,7 @@ Human 对外部 Pi 只需说：
 
 1. 主动把 outbox 拉到 Windows 中转区并验证所有 SHA-256。
 2. 核对正式路径、origin、main、dirty 和 fetch 后基线。
-3. 只有正式仓库 clean、adapter 字节一致且 canonical base 精确匹配后，才允许 alpha.3 external executor 在仓库外 staging 导入 bundle；首次历史对齐仍按第 3 节单独完成，不能让 executor 自动处理 dirty 或分叉。
+3. canonical/integrated profile 要求正式仓库 clean；snapshot profile 允许正式工作树保持 dirty，但仍要求 adapter 字节、canonical remote、object format 和 remote-base commit/tree 精确匹配，且所有 bundle 导入只在仓库外 staging。
 4. 从 bundle 导入明确 ref；禁止用不明 patch 猜测应用。
 5. 比较实际文件清单、commit/tree 和 manifest。
 6. 在隔离 staging 重跑 adapter external checks。
@@ -136,7 +136,7 @@ Human 对外部 Pi 只需说：
 
 ## 8. 交付收据
 
-alpha.3 按以下不可变证据链记录：
+alpha.4 按以下不可变证据链记录：
 
 ```text
 prepare-receipt.v1.json
@@ -151,23 +151,40 @@ prepare-receipt.v1.json
 - `accepted`：Human 于 2026-08-21 回复“ok”，接受 Git bundle 双向中转架构、正式 main 保护，以及 WSL 本地预览与 Windows 正式仓库最终预览两层 Gate。
 - `persisted`：本协议、决定记录和工作项状态已由提交 `0a105dc` 进入项目仓库。
 - `adapter-accepted`：Human 于 2026-08-23 接受 `03-执行层/git-handoff.adapter.v1.json` 的路径、refs、profiles、检查和固定 STOP；本行所在结果提交负责落盘。
-- `local-static-verified`：alpha.3 adapter runtime 解析、17 项 Package 测试、outbox ignore、状态一致性、diff 检查与最终独立复核 PASS；未运行 adapter commands 或真实外部流程。
+- `alpha.3-local-static-verified`：初始 canonical-only adapter 的17项 Package 测试、runtime解析和独立复核已完成，现作为历史基线。
 - `windows-audit-received`：Human 已转交完整 `AUDIT-RESULT-V1`；报告称 canonical remote 匹配、唯一一次 fetch 成功、local main ahead 18 / behind 4，并保留 3 个 tracked `.M` 与 1 个 untracked。该结果是 `human-relayed`，未由 WSL 独立复核外部运行时。
-- `reconciliation-plan-gate`：WSL 已证明 current HEAD 与 reported origin/main 无共同 merge-base，且缺少 Windows local HEAD 对象；必须先经 Human 接受 preservation 方案，不能直接 merge 或推送。
-- `unverified`：尚未完成 Windows 正式仓库审计、首次 reconciliation、canonical bundle 入站、alpha.3 真实往返和远端 push。
+- `reconciliation-deferred`：WSL 已证明 current HEAD 与 reported origin/main 无共同 merge-base，且缺少 Windows local HEAD 对象；未来 integrated route 仍必须单独处理，当前 WIP snapshot 不连接或改写这些历史。
+- `wip-snapshot-local-verified`：alpha.4 snapshot mode 已通过28项本地测试、schema duplicate-key scan、真实离线bundle与最终独立安全终审；尚未生成当前delivery outbox。
+- `unverified`：尚未完成当前 WSL 成果的 delivery readiness、alpha.4 snapshot outbox、Windows external Preview、Human token、真实 push 和远端 commit/tree 收据；未来 integrated route 的 reconciliation 仍单独未解决。
 - 只有首次完整交付收据通过后，v1 才能标为 `verified` 并候选安装到 Windows 全局 Pi workflow。
 
-## 10. alpha.3 Adapter 预演与固定 STOP
+## 10. alpha.3 初始 Adapter 预演历史（已关闭）
 
 当前 adapter 是稳定映射，不记录当前工作项、阶段或 Human Gate。`task_plan.md` 仍是动态状态唯一权威，也不新增 `.ai-workflow/project.yaml`。
 
 预演顺序：
 
-1. 只做 schema/runtime 读取，确认 package 版本、路径格式、remote、refs、checks 和 policy 可被 alpha.3 接受；不得自动执行 checks。
+1. 当时只做 schema/runtime 读取，确认 alpha.3 package、路径、remote、refs、checks 和 policy；未执行 checks。
 2. 确认 `.pi/handoff/outbox` 被 Git ignore，Windows 中转 artifact 与 external staging 不重叠。
-3. 当前 WSL 没有 `refs/pi-handoff/canonical/main`，因此首次 Windows 审计和 canonical bundle 入站完成前，`prepare` 必须 STOP；不得把当前 `master` 猜成 canonical base。
+3. alpha.3 canonical-only adapter 因缺少 `refs/pi-handoff/canonical/main` 必须 STOP；alpha.4 snapshot adapter 已改为绑定审计确认的 `refs/remotes/audit/main`，只跳过祖先要求，不跳过 exact base 身份。
 4. `WI-GITHUB-HANDOFF-V1-001` 记录的 Windows dirty、main 分叉和 fetch 后身份仍未解决；adapter 不提供 reset、clean、pull、rebase、自动 reconciliation 或旁路。
-5. 只有一个已提交、clean、通过 `verification-delivery` 且 Human 接受的成果，才能选择 `wip` 或 `review` profile 生成新 delivery-id。
+5. alpha.3 曾配置 `wip` 与 `review`；alpha.4 当前项目 adapter 只保留 `wip` snapshot profile，仍要求已提交、clean、通过 `verification-delivery` 和 Human 明确授权。
 6. 2026-08-23 adapter 落盘轮次只写 adapter 与预演合同，未运行 prepare、external checks、fetch、push、PR 或 merge；该轮次已关闭。
 
-Windows 路径存在性、实际 `origin`、凭据、Git object format 和 checks 可执行性保持 `UNKNOWN`。后续 `DEC-GITHUB-HANDOFF-WINDOWS-AUDIT-RESUME-001` 仅授权 Windows 只读审计执行一次 `fetch origin --prune` 来核对路径、origin 和历史；它不授权 prepare、verify-push、dirty 处理、reconciliation 或交付。
+Windows 路径存在性、实际 `origin`、凭据、Git object format 和 checks 可执行性最初保持 `UNKNOWN`；Human 转交的审计报告称路径与 origin 匹配且一次 fetch 成功，但这些外部运行事实仍是 `human-relayed`。该审计不授权 dirty 处理或 reconciliation；后续 WIP snapshot 的 external verify/push 由 `DEC-GITHUB-HANDOFF-WIP-SNAPSHOT-ROUTE-001` 和每次精确 Human token 单独控制。
+
+## 11. 独立 WIP Snapshot 路线
+
+此路线只用于把当前 WSL 已提交成果完整备份到 GitHub 全新 `wip/<delivery-id>` 分支。它不建立与 `main` 的共同祖先，不承诺普通 PR 可合并，也不吸收 Windows local main 的 18 个提交。
+
+固定合同：
+
+1. adapter 只开放显式 snapshot profile；manifest 必须记录 `history-mode: snapshot` 和“不可直接合并 main”风险。
+2. WSL 仍绑定审计确认的 remote-base commit/tree 以计算实际树差异和文件范围，但不要求该 base 是 delivery commit 的祖先。
+3. WSL 工作树必须 clean；`prepare` 不访问远端，只生成不可变 bundle/outbox。
+4. Windows 正式仓库只用于只读核对路径、object format 和 canonical remote；其 dirty 工作树不参与导入、检查或合并。
+5. external executor 可刷新 remote refs，但所有 bundle 导入、checkout、检查和 receipt 都在仓库外 staging 完成。
+6. snapshot 目标分支在 external Preview 和 push 前必须都不存在；存在即 STOP，禁止覆盖、快进更新或 force-push。
+7. Human 必须接受精确 delivery commit/tree、文件范围、checks、风险和 confirmation token 后才允许首次创建远端 WIP 分支。
+8. push 后重新读取精确远端 ref；只有 commit 匹配才标记 `remote-verified`。
+9. WIP receipt 不改变 `main`、PR、merge、Windows dirty、产品验收或未来 reconciliation 状态。

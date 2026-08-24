@@ -12,7 +12,7 @@ import {
 import path from "node:path";
 
 export const PACKAGE_NAME = "pi-git-handoff";
-export const PACKAGE_VERSION = "0.1.0-alpha.3";
+export const PACKAGE_VERSION = "0.1.0-alpha.4";
 export const PROTOCOL_VERSION = "0.1";
 
 export class HandoffError extends Error {
@@ -91,7 +91,7 @@ export function validateAdapter(adapter) {
   assertString(repositories["canonical-remote"], "adapter.repositories.canonical-remote", /^(?!-)(?![^:]+:\/\/[^/]*@)\S+$/);
 
   const refs = adapter.refs;
-  assertKeys(refs, ["canonical-base", "remote-base", "delivery-template", "targets"], ["canonical-base", "remote-base", "delivery-template", "targets"], "adapter.refs");
+  assertKeys(refs, ["canonical-base", "remote-base", "delivery-template", "targets", "snapshot-profiles"], ["canonical-base", "remote-base", "delivery-template", "targets", "snapshot-profiles"], "adapter.refs");
   assertString(refs["canonical-base"], "adapter.refs.canonical-base", GIT_REF);
   assertString(refs["remote-base"], "adapter.refs.remote-base", BRANCH);
   assertTemplate(refs["delivery-template"], "adapter.refs.delivery-template");
@@ -99,6 +99,14 @@ export function validateAdapter(adapter) {
   for (const [profile, template] of Object.entries(refs.targets)) {
     assertString(profile, "adapter.refs.targets profile", PROFILE_ID);
     assertTargetTemplate(template, `adapter.refs.targets.${profile}`);
+  }
+  stop(!Array.isArray(refs["snapshot-profiles"]), "INVALID_ADAPTER", "adapter.refs.snapshot-profiles must be an array");
+  const snapshotProfiles = new Set();
+  for (const profile of refs["snapshot-profiles"]) {
+    assertString(profile, "adapter.refs.snapshot-profiles item", PROFILE_ID);
+    stop(snapshotProfiles.has(profile), "INVALID_ADAPTER", `duplicate snapshot profile ${profile}`);
+    stop(!(profile in refs.targets), "INVALID_ADAPTER", `snapshot profile has no target: ${profile}`);
+    snapshotProfiles.add(profile);
   }
 
   const transport = adapter.transport;
@@ -143,6 +151,12 @@ function assertTargetTemplate(value, location) {
   assertTemplate(value, location);
   stop(value.startsWith("refs/"), "INVALID_ADAPTER", `${location} target template must be a branch name, not a full ref`);
 }
+
+function historyModeFor(adapter, profile) {
+  return adapter.refs["snapshot-profiles"].includes(profile) ? "snapshot" : "canonical";
+}
+
+const SNAPSHOT_NON_MERGE_MAIN_RISK = "snapshot delivery is not directly mergeable into main";
 
 function renderDeliveryRef(template, deliveryId) {
   const rendered = renderTemplate(template, deliveryId);
@@ -492,7 +506,7 @@ function validateIdentity(value, location, code, allowRef = false) {
 
 function validateManifest(manifest) {
   const code = "INVALID_MANIFEST";
-  const fields = ["schema-version", "protocol-version", "producer", "adapter-sha256", "delivery-id", "created-at", "profile", "project-id", "canonical-remote", "canonical-base", "delivery", "target-branch", "files", "excluded-paths", "bundle", "authorization", "unresolved-risks"];
+  const fields = ["schema-version", "protocol-version", "producer", "adapter-sha256", "delivery-id", "created-at", "profile", "history-mode", "project-id", "canonical-remote", "canonical-base", "delivery", "target-branch", "files", "excluded-paths", "bundle", "authorization", "unresolved-risks"];
   assertKeys(manifest, fields, fields, "manifest", code);
   stop(manifest["schema-version"] !== 1 || manifest["protocol-version"] !== PROTOCOL_VERSION, code, "unsupported manifest schema or protocol");
   assertKeys(manifest.producer, ["package", "version", "command"], ["package", "version", "command"], "manifest.producer", code);
@@ -501,6 +515,7 @@ function validateManifest(manifest) {
   assertString(manifest["delivery-id"], "manifest.delivery-id", DELIVERY_ID);
   validateTimestamp(manifest["created-at"], "manifest.created-at", code);
   assertString(manifest.profile, "manifest.profile", PROFILE_ID);
+  stop(!["canonical", "snapshot"].includes(manifest["history-mode"]), code, "manifest.history-mode must be canonical or snapshot");
   assertString(manifest["project-id"], "manifest.project-id", PROJECT_ID);
   assertString(manifest["canonical-remote"], "manifest.canonical-remote", /^(?!-)\S+$/);
   validateIdentity(manifest["canonical-base"], "manifest.canonical-base", code);
@@ -515,6 +530,7 @@ function validateManifest(manifest) {
   }
   manifest["excluded-paths"].forEach((value) => assertString(value, "manifest.excluded-paths item", RELATIVE_PATH));
   manifest["unresolved-risks"].forEach((value) => assertString(value, "manifest.unresolved-risks item"));
+  stop(manifest["history-mode"] === "snapshot" && !manifest["unresolved-risks"].includes(SNAPSHOT_NON_MERGE_MAIN_RISK), code, "snapshot manifest must include the non-merge-main risk");
   assertKeys(manifest.bundle, ["path", "sha256", "object-format", "verification"], ["path", "sha256", "object-format", "verification"], "manifest.bundle", code);
   stop(manifest.bundle.path !== "delivery.bundle" || manifest.bundle.verification !== "PASS", code, "manifest bundle contract mismatch");
   assertString(manifest.bundle.sha256, "manifest.bundle.sha256", SHA256);
@@ -527,7 +543,7 @@ function validateManifest(manifest) {
 
 function validateReceipt(receipt) {
   const code = "INVALID_RECEIPT";
-  const baseRequired = ["schema-version", "protocol-version", "receipt-id", "delivery-id", "attempt-id", "stage", "status", "created-at", "producer", "adapter-sha256", "project-id", "canonical-remote", "checks", "unresolved-risks"];
+  const baseRequired = ["schema-version", "protocol-version", "receipt-id", "delivery-id", "attempt-id", "stage", "status", "created-at", "producer", "adapter-sha256", "project-id", "canonical-remote", "history-mode", "checks", "unresolved-risks"];
   const evidenceFields = ["manifest-sha256", "canonical-base", "delivery", "files-sha256"];
   const required = receipt?.status === "PASS" || ["verify", "push"].includes(receipt?.stage) ? [...baseRequired, ...evidenceFields] : baseRequired;
   const allowed = [...baseRequired, ...evidenceFields, "artifact-index-sha256", "previous-receipt-sha256", "remote-result", "human-gate", "failure"];
@@ -550,9 +566,12 @@ function validateReceipt(receipt) {
   }
   assertString(receipt["project-id"], "receipt.project-id", PROJECT_ID);
   assertString(receipt["canonical-remote"], "receipt.canonical-remote", /^(?!-)\S+$/);
+  stop(!["canonical", "snapshot"].includes(receipt["history-mode"]), code, "receipt.history-mode must be canonical or snapshot");
   if (receipt["canonical-base"] !== undefined) validateIdentity(receipt["canonical-base"], "receipt.canonical-base", code);
   if (receipt.delivery !== undefined) validateIdentity(receipt.delivery, "receipt.delivery", code);
   stop(!Array.isArray(receipt.checks) || !Array.isArray(receipt["unresolved-risks"]), code, "receipt checks and risks must be arrays");
+  receipt["unresolved-risks"].forEach((value) => assertString(value, "receipt.unresolved-risks item"));
+  stop(receipt["history-mode"] === "snapshot" && !receipt["unresolved-risks"].includes(SNAPSHOT_NON_MERGE_MAIN_RISK), code, "snapshot receipt must include the non-merge-main risk");
   for (const [index, check] of receipt.checks.entries()) {
     assertKeys(check, ["id", "argv", "cwd", "exit-code", "duration-ms", "result", "log-sha256"], ["id", "argv", "cwd", "exit-code", "duration-ms", "result", "log-sha256"], `receipt.checks[${index}]`, code);
     assertString(check.id, `receipt.checks[${index}].id`, CHECK_ID);
@@ -562,7 +581,6 @@ function validateReceipt(receipt) {
     stop(!["PASS", "FAIL", "STOPPED"].includes(check.result), code, "receipt check result is invalid");
     assertString(check["log-sha256"], `receipt.checks[${index}].log-sha256`, SHA256);
   }
-  receipt["unresolved-risks"].forEach((value) => assertString(value, "receipt.unresolved-risks item"));
   if (receipt["human-gate"] !== undefined) {
     assertKeys(receipt["human-gate"], ["required", "status", "method"], ["required", "status", "method", "authority-ref", "quote"], "receipt.human-gate", code);
     assertBoolean(receipt["human-gate"].required, "receipt.human-gate.required");
@@ -586,9 +604,17 @@ function validateReceipt(receipt) {
 }
 
 function validatePrepareReceipt(receipt, manifest, manifestDigest) {
+  const code = "INVALID_PREPARE_RECEIPT";
   validateReceipt(receipt);
-  stop(receipt.stage !== "prepare" || receipt.status !== "PASS", "INVALID_PREPARE_RECEIPT", "prepare receipt is not PASS");
-  stop(receipt["delivery-id"] !== manifest["delivery-id"] || receipt["manifest-sha256"] !== manifestDigest, "INVALID_PREPARE_RECEIPT", "prepare receipt does not bind manifest");
+  stop(receipt.stage !== "prepare" || receipt.status !== "PASS", code, "prepare receipt is not PASS");
+  stop(receipt["delivery-id"] !== manifest["delivery-id"] || receipt["manifest-sha256"] !== manifestDigest, code, "prepare receipt does not bind manifest");
+  stop(receipt["adapter-sha256"] !== manifest["adapter-sha256"], code, "prepare receipt does not bind adapter");
+  stop(receipt["history-mode"] !== manifest["history-mode"], code, "prepare receipt does not bind history mode");
+  stop(receipt["project-id"] !== manifest["project-id"] || receipt["canonical-remote"] !== manifest["canonical-remote"], code, "prepare receipt does not bind project identity");
+  stop(JSON.stringify(receipt["canonical-base"]) !== JSON.stringify(manifest["canonical-base"]), code, "prepare receipt does not bind canonical base");
+  stop(JSON.stringify(receipt.delivery) !== JSON.stringify({ commit: manifest.delivery.commit, tree: manifest.delivery.tree }), code, "prepare receipt does not bind delivery");
+  stop(receipt["files-sha256"] !== sha256(`${manifest.files.join("\n")}\n`), code, "prepare receipt does not bind files");
+  stop(JSON.stringify(receipt["unresolved-risks"]) !== JSON.stringify(manifest["unresolved-risks"]), code, "prepare receipt does not bind unresolved risks");
   return receipt;
 }
 
@@ -604,7 +630,7 @@ function failureStatus(error) {
   return !(error instanceof HandoffError) || failedCodes.has(error.code) ? "FAIL" : "STOPPED";
 }
 
-function stoppedReceipt({ deliveryId, attemptId, stage, now, adapterDigest, adapter, error, checks = [], manifest, manifestDigest, inventoryDigest, previousReceiptDigest, baseCommit, baseTree, deliveryCommit, deliveryTree, files = [] }) {
+function stoppedReceipt({ deliveryId, attemptId, stage, now, adapterDigest, adapter, error, checks = [], manifest, manifestDigest, inventoryDigest, previousReceiptDigest, baseCommit, baseTree, deliveryCommit, deliveryTree, files = [], historyMode }) {
   const receipt = {
     "schema-version": 1,
     "protocol-version": PROTOCOL_VERSION,
@@ -623,9 +649,16 @@ function stoppedReceipt({ deliveryId, attemptId, stage, now, adapterDigest, adap
     "adapter-sha256": adapterDigest,
     "project-id": adapter["project-id"],
     "canonical-remote": adapter.repositories["canonical-remote"],
+    "history-mode": manifest?.["history-mode"] ?? historyMode,
     checks,
     failure: failureDetails(error),
-    "unresolved-risks": [error?.message ?? String(error)],
+    "unresolved-risks": [
+      ...(manifest?.["unresolved-risks"] ?? (historyMode === "snapshot" ? [SNAPSHOT_NON_MERGE_MAIN_RISK] : [])),
+      ...((error?.message ?? String(error)) === SNAPSHOT_NON_MERGE_MAIN_RISK
+        || (manifest?.["unresolved-risks"] ?? []).includes(error?.message ?? String(error))
+        ? []
+        : [error?.message ?? String(error)]),
+    ],
   };
   if (manifest) {
     receipt["manifest-sha256"] = manifestDigest;
@@ -662,6 +695,7 @@ function receiptBase({ deliveryId, attemptId, stage, status, now, adapterDigest,
     "adapter-sha256": adapterDigest,
     "manifest-sha256": manifestDigest,
     "project-id": adapter["project-id"],
+    "history-mode": manifest["history-mode"],
     "canonical-remote": adapter.repositories["canonical-remote"],
     "canonical-base": manifest["canonical-base"],
     delivery: {
@@ -670,7 +704,7 @@ function receiptBase({ deliveryId, attemptId, stage, status, now, adapterDigest,
     },
     "files-sha256": sha256(`${manifest.files.join("\n")}\n`),
     checks: [],
-    "unresolved-risks": [],
+    "unresolved-risks": [...manifest["unresolved-risks"]],
   };
   if (inventoryDigest) receipt["artifact-index-sha256"] = inventoryDigest;
   if (previousReceiptDigest) receipt["previous-receipt-sha256"] = previousReceiptDigest;
@@ -707,12 +741,15 @@ export async function prepareDelivery(options, dependencies = {}) {
   assertString(tree, "HEAD tree", GIT_OID);
   assertString(baseCommit, "canonical base", GIT_OID);
   assertString(baseTree, "canonical base tree", GIT_OID);
-  const ancestry = await git(projectRoot, ["merge-base", "--is-ancestor", baseCommit, commit], { acceptCodes: [0, 1] });
-  stop(ancestry.code !== 0, "CANONICAL_BASE_NOT_ANCESTOR", "canonical base is not an ancestor of the delivery commit");
 
   const profile = options.profile;
   stop(typeof options.authorityRef !== "string" || options.authorityRef.length === 0, "DELIVERY_READINESS_REQUIRED", "prepare requires an authority reference from verification-delivery");
   stop(!(profile in adapter.refs.targets), "UNKNOWN_PROFILE", `adapter has no target profile ${profile}`);
+  const historyMode = historyModeFor(adapter, profile);
+  if (historyMode === "canonical") {
+    const ancestry = await git(projectRoot, ["merge-base", "--is-ancestor", baseCommit, commit], { acceptCodes: [0, 1] });
+    stop(ancestry.code !== 0, "CANONICAL_BASE_NOT_ANCESTOR", "canonical base is not an ancestor of the delivery commit");
+  }
   const deliveryId = options.deliveryId ?? makeDeliveryId(adapter["project-id"], now, commit);
   assertString(deliveryId, "delivery-id", DELIVERY_ID);
   const deliveryRef = renderDeliveryRef(adapter.refs["delivery-template"], deliveryId);
@@ -771,6 +808,7 @@ export async function prepareDelivery(options, dependencies = {}) {
     "delivery-id": deliveryId,
     "created-at": now.toISOString(),
     profile,
+    "history-mode": historyMode,
     "project-id": adapter["project-id"],
     "canonical-remote": adapter.repositories["canonical-remote"],
     "canonical-base": { commit: baseCommit, tree: baseTree },
@@ -789,7 +827,7 @@ export async function prepareDelivery(options, dependencies = {}) {
       "push-authorized": false,
       "authority-ref": options.authorityRef,
     },
-    "unresolved-risks": [],
+    "unresolved-risks": historyMode === "snapshot" ? [SNAPSHOT_NON_MERGE_MAIN_RISK] : [],
   };
   validateManifest(manifest);
   const manifestText = jsonText(manifest);
@@ -839,6 +877,7 @@ export async function prepareDelivery(options, dependencies = {}) {
         deliveryCommit: commit,
         deliveryTree: tree,
         files,
+        historyMode,
       });
       await writeFile(path.join(partialDirectory, "prepare-receipt.v1.json"), jsonText(stopped), "utf8");
       await writeFile(path.join(partialDirectory, "README.md"), `# ${deliveryId} STOPPED\n\nPreparation stopped: ${stopped.failure.code}.\n`, "utf8");
@@ -861,7 +900,7 @@ function parseJson(bytes, code, label) {
 }
 
 function confirmationToken(inventoryDigest, manifest) {
-  return sha256(`${inventoryDigest}\n${manifest.delivery.commit}\n${manifest["target-branch"]}\n`).slice(0, 24);
+  return sha256(`${inventoryDigest}\n${manifest["history-mode"]}\n${manifest.delivery.commit}\n${manifest["target-branch"]}\n`).slice(0, 24);
 }
 
 function verifiedContextDigest(context) {
@@ -907,6 +946,9 @@ export async function verifyExternal(options, dependencies = {}) {
   stop(manifest["adapter-sha256"] !== adapterDigest, "ADAPTER_DIGEST_MISMATCH", "artifact was prepared with another adapter");
   stop(manifest["project-id"] !== adapter["project-id"] || manifest["canonical-remote"] !== adapter.repositories["canonical-remote"], "PROJECT_IDENTITY_MISMATCH", "artifact project identity differs from adapter");
   stop(!(manifest.profile in adapter.refs.targets), "TARGET_MISMATCH", "manifest profile is absent from adapter");
+  const expectedHistoryMode = historyModeFor(adapter, manifest.profile);
+  stop(manifest["history-mode"] !== expectedHistoryMode, "HISTORY_MODE_MISMATCH", "manifest history mode is not adapter-derived");
+  const historyMode = expectedHistoryMode;
   stop(manifest["target-branch"] !== renderTemplate(adapter.refs.targets[manifest.profile], manifest["delivery-id"]), "TARGET_MISMATCH", "manifest target is not adapter-derived");
   const expectedDeliveryRef = renderDeliveryRef(adapter.refs["delivery-template"], manifest["delivery-id"]);
   stop(manifest.delivery.ref !== expectedDeliveryRef, "DELIVERY_REF_MISMATCH", "manifest delivery ref is not adapter-derived");
@@ -932,7 +974,7 @@ export async function verifyExternal(options, dependencies = {}) {
   const remote = cleanOutput((await git(externalRoot, ["config", "--get", `remote.${remoteName}.url`])).stdout);
   stop(remote !== adapter.repositories["canonical-remote"], "REMOTE_IDENTITY_MISMATCH", "external remote identity differs from adapter");
   const status = (await git(externalRoot, ["status", "--porcelain"])).stdout;
-  stop(adapter.policy["require-clean-worktree"] && status.length > 0, "WORKTREE_DIRTY", "external canonical worktree must be clean");
+  stop(historyMode === "canonical" && adapter.policy["require-clean-worktree"] && status.length > 0, "WORKTREE_DIRTY", "external canonical worktree must be clean");
   const externalObjectFormat = cleanOutput((await git(externalRoot, ["rev-parse", "--show-object-format"])).stdout);
   stop(externalObjectFormat !== manifest.bundle["object-format"], "OBJECT_FORMAT_MISMATCH", "external repository object format differs from bundle manifest");
 
@@ -962,7 +1004,7 @@ export async function verifyExternal(options, dependencies = {}) {
     const externalBaseRef = `refs/remotes/${remoteName}/${adapter.refs["remote-base"]}`;
     const baseCommit = cleanOutput((await git(externalRoot, ["rev-parse", externalBaseRef])).stdout);
     const baseTree = cleanOutput((await git(externalRoot, ["rev-parse", `${externalBaseRef}^{tree}`])).stdout);
-    if (adapter.policy["require-exact-base"]) {
+    if (historyMode === "snapshot" || adapter.policy["require-exact-base"]) {
       stop(baseCommit !== manifest["canonical-base"].commit || baseTree !== manifest["canonical-base"].tree, "CANONICAL_BASE_MISMATCH", "external canonical base differs from manifest");
     }
     await git(repo, ["init", `--object-format=${manifest.bundle["object-format"]}`]);
@@ -976,6 +1018,15 @@ export async function verifyExternal(options, dependencies = {}) {
   const importedCommit = cleanOutput((await git(repo, ["rev-parse", importRef])).stdout);
   const importedTree = cleanOutput((await git(repo, ["rev-parse", `${importRef}^{tree}`])).stdout);
   stop(importedCommit !== manifest.delivery.commit || importedTree !== manifest.delivery.tree, "IMPORTED_OBJECT_MISMATCH", "imported bundle object differs from manifest");
+  const targetRef = `refs/heads/${manifest["target-branch"]}`;
+  const targetBeforeVerify = historyMode === "snapshot"
+    ? parseRemoteRef(
+      (await git(repo, ["ls-remote", "--heads", "--", adapter.repositories["canonical-remote"], targetRef])).stdout,
+      targetRef,
+      true,
+    )
+    : undefined;
+  stop(targetBeforeVerify, "TARGET_REF_EXISTS", "snapshot target branch already exists; refusing overwrite");
   await git(repo, ["checkout", "--detach", importedCommit]);
   const actualFiles = splitNullList((await git(repo, ["diff", "--name-only", "-z", `${baseCommit}..${importedCommit}`])).stdout);
   stop(JSON.stringify(actualFiles) !== JSON.stringify(declaredFiles), "FILE_SET_MISMATCH", "external Git diff differs from manifest");
@@ -1024,11 +1075,14 @@ export async function verifyExternal(options, dependencies = {}) {
       baseCommit,
       deliveryCommit: manifest.delivery.commit,
       deliveryTree: manifest.delivery.tree,
+      historyMode,
       targetBranch: manifest["target-branch"],
       files: declaredFiles,
       checks: checkResults.map(({ id, result }) => ({ id, result })),
       unresolvedRisks: manifest["unresolved-risks"],
+      nonMergeMainRisk: historyMode === "snapshot" ? SNAPSHOT_NON_MERGE_MAIN_RISK : undefined,
       forcePush: false,
+      createOnly: historyMode === "snapshot",
       directBasePush: false,
     },
   };
@@ -1093,12 +1147,17 @@ export async function pushVerified(verification, options = {}, dependencies = {}
   const targetRef = `refs/heads/${manifest["target-branch"]}`;
   const remoteBefore = await git(repo, ["ls-remote", "--heads", "--", remote, targetRef]);
   const beforeCommit = parseRemoteRef(remoteBefore.stdout, targetRef, true);
-  if (beforeCommit) {
+  if (manifest["history-mode"] === "snapshot") {
+    stop(beforeCommit, "TARGET_REF_EXISTS", "snapshot target branch appeared after preview; refusing push");
+  } else if (beforeCommit) {
     const priorRef = `refs/pi-handoff/prior/${manifest["delivery-id"]}`;
     await git(repo, ["fetch", remote, `${targetRef}:${priorRef}`]);
     await git(repo, ["merge-base", "--is-ancestor", beforeCommit, manifest.delivery.commit]);
   }
-  await git(repo, ["push", "--", remote, `${manifest.delivery.commit}:${targetRef}`]);
+  const pushArgs = manifest["history-mode"] === "snapshot"
+    ? ["push", `--force-with-lease=${targetRef}:`, "--", remote, `${manifest.delivery.commit}:${targetRef}`]
+    : ["push", "--", remote, `${manifest.delivery.commit}:${targetRef}`];
+  await git(repo, pushArgs);
   const remoteAfter = await git(repo, ["ls-remote", "--heads", "--", remote, targetRef]);
   const remoteCommit = parseRemoteRef(remoteAfter.stdout, targetRef, false);
   stop(remoteCommit !== manifest.delivery.commit, "REMOTE_VERIFICATION_FAILED", "remote commit differs after push");

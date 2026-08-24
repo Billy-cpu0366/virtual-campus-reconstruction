@@ -6,6 +6,8 @@
 - selected target profile is absent;
 - repository root, local commit, base ref, or tree cannot be proved;
 - required clean-worktree policy fails;
+- canonical mode cannot prove the base is an ancestor; snapshot mode does not
+  require this ancestry;
 - a changed path is protected or escapes the repository root;
 - the configured outbox is not ignored by Git;
 - delivery readiness from `verification-delivery` is absent or unresolved;
@@ -22,10 +24,13 @@ rewriting, cleaning, fetching, using host paths, or changing security policy.
 - manifest, adapter, package, ref, commit, tree, prerequisite, or object format
   disagree;
 - canonical repository path or remote identity differs from the adapter;
-- canonical base or dirty-state policy fails;
+- canonical base or dirty-state policy fails (snapshot mode skips only the
+  formal worktree-clean check);
+- snapshot target already exists at preview or appears before push;
 - import requires history guessing, conflict resolution, or destructive work;
 - actual files differ from the manifest or intersect protected paths;
 - an external check fails or the isolated checkout changes tracked files;
+- import, checkout, checks, or receipts would operate outside external staging;
 - target ref is the protected base branch or violates its adapter template.
 
 ## Push must stop

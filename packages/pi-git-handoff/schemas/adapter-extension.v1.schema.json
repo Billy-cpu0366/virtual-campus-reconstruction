@@ -53,7 +53,7 @@
     "refs": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["canonical-base", "remote-base", "delivery-template", "targets"],
+      "required": ["canonical-base", "remote-base", "delivery-template", "targets", "snapshot-profiles"],
       "properties": {
         "canonical-base": {
           "$ref": "#/$defs/git-ref"
@@ -74,6 +74,15 @@
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9-]{0,31}$"
           }
+        },
+        "snapshot-profiles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,31}$"
+          },
+          "uniqueItems": true,
+          "description": "Profiles using disconnected-history snapshot mode. Empty means canonical mode for every profile."
         }
       }
     },
