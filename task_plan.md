@@ -24,7 +24,7 @@ updated: 2026-08-22
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
 - **远端边界**：未授权push、PR、Windows同步；GitHub handoff继续暂停。
-- **本地验证修复**：Human 已接受仅在 `fix/wip-snapshot-validation` 提交 Windows 资源路径兼容修复；全量机器检查与 browser Smoke 已通过，仍不得推送或改变 P5 Human视觉FAIL。
+- **本地验证修复**：Human 已接受的 Windows 资源路径兼容修复已在 `fix/wip-snapshot-validation` 本地提交；全量机器检查与 browser Smoke 已通过，仍不得推送或改变 P5 Human视觉FAIL。
 
 ## 目标
 以已完成的`sample/`公开证据为基础，在`03-执行层/`维护文档先行的16张系统卡、总账和操作手册；先恢复原站系统知识，再由Human逐工作项授权正式`src/`实现。
