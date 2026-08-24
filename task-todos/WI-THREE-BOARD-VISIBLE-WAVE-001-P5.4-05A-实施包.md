@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.4-05a-train-route
-status: accepted-implementation-authorized
+status: collision-audit-in-progress
 authorization: DEC-P5.4-05A-TRAIN-ROUTE-001
 owner: Main
 updated: 2026-08-24
@@ -26,6 +26,10 @@ updated: 2026-08-24
 ## 验收
 
 火车进场至到站连续；玩家不被错误画在车厢前；控制只按既有5秒边界开放；离场后Sprite/collider/blocking zone为零，且不影响后续移动、内容、屋顶与地图路径。
+
+## 修正升级
+
+Human连续确认移动火车仍可被主角穿过；`3af774d`的body同步与`6dd4522`/`3670e31`的单矩形范围修正均未解决。停止单带补丁，升级为火车真实车厢几何审计；下一步必须提出多碰撞区方案并经过Human计划Gate。
 
 ## 当前基线
 
