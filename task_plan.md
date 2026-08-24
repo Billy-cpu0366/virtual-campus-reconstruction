@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: audit
+correction-phase: batch-implement
 classification-trigger: human-auto-conflict-and-multiple-related-omissions
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.4-05a-train-collision-audit
-current-gate: p5.4-05a-collision-plan-gate
-gate-status: audit-in-progress
+current-phase: p5.4-05a-train-multi-collider-implement
+current-gate: p5.4-05a-human-visual-acceptance
+gate-status: implementation-in-progress
 authorization-ref: DEC-P5.4-05A-TRAIN-ROUTE-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05a-train-collision-audit
+next-phase: p5.4-05a-train-multi-collider-implement
 updated: 2026-08-24
 ---
 

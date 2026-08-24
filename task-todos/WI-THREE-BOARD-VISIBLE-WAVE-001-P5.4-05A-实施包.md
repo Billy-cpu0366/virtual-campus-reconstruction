@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.4-05a-train-route
-status: collision-audit-in-progress
+status: accepted-multi-collider-implementation
 authorization: DEC-P5.4-05A-TRAIN-ROUTE-001
 owner: Main
 updated: 2026-08-24
@@ -30,6 +30,10 @@ updated: 2026-08-24
 ## 修正升级
 
 Human连续确认移动火车仍可被主角穿过；`3af774d`的body同步与`6dd4522`/`3670e31`的单矩形范围修正均未解决。停止单带补丁，升级为火车真实车厢几何审计；下一步必须提出多碰撞区方案并经过Human计划Gate。
+
+## 已接受多碰撞区修复
+
+Human回复`ok`（2026-08-24），接受审计建议：以4个随火车x同步的车厢下缘Rectangle替代单一带，局部区间为`0..365`、`360..720`、`715..1078`、`1073..1435`，共同`y=323..359`；相邻5px重叠。此为重构DECISION，不冒充原站碰撞FACT。
 
 ## 当前基线
 
