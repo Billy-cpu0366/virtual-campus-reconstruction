@@ -220,3 +220,14 @@ accepted-signature: 接受P0范围 (Recommended)（2026-08-24）
 
 **防复发动作**：每条C3 criterion在修复包前必须有上述Oracle Map行；R1/R3/R5/C1+C2
 历史收据仅作诊断输入，不能作为C3完成收据。
+
+### 8.6 实施前证据定位（2026-08-24，阻塞）
+
+| Criterion | 已确认定位 | 不可确认/不得猜 | 解锁实施的最小输入 |
+|---|---|---|---|
+| C3-LOAD | 原站固定全屏白底`#init-load`、GIF、进度条/整数文本、独立Play壳；当前72/80/88/92/98进度、120ms transition、850ms网格与边框阴影均为重构DECISION | 原站逐元素尺寸、间距、字体、网格细节、百分比插值和阶段时序 | 原站与复刻同一viewport的Loading/100%/Play三态对照；否则只可保持`NOT OBSERVABLE`，不改CSS/时序 |
+| C3-ENTRY | 当前3秒camera结束即释放corridor lock；其后目标更新可与每rAF一次mutation交叠；控制仍等train arrival | Human约2秒卡顿是否由lock、mutation、camera/player交接或设备长帧造成 | 同路径normal-production 0–5秒连续画面与时间线：camera、lock、目标块、mutation、控制与长帧；WSL静态/P95不能关单 |
+| C3-ROOF-PARTY | 公开地图/Bundle只确认factory与concert两组roof及300ms Power2淡隐；当前Scene只消费factory，renderer可消费任意group | Human称party是否等于concert；party精确边界和进入/离开行为 | party外/进入/内部/离开短视频或三帧截图，至少带viewport与可辨识入口；若可提供玩家世界坐标，落在concert `x=1632..2208,y=384..848`才可客观归属concert |
+
+**状态**：C3范围已接受，但三条Oracle Map均未满足，当前为`blocked-awaiting-evidence`。
+不得以“先按concert做”“复用factory矩形”或“调整当前Loading看起来更像”绕过此块。
