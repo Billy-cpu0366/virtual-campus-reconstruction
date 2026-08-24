@@ -190,8 +190,9 @@ export class PhaserSprayerRuntime {
     // The running sheet has eight direction rows of eight frames. Never loop all 64 frames.
     this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.north, 0, 7, 6, -1);
     this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.east, 8, 15, 6, -1);
-    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.south, 16, 23, 6, -1);
-    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.west, 24, 31, 6, -1);
+    // Row 3 is the rear view; row 4 is the front view (verified in production).
+    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.west, 16, 23, 6, -1);
+    this.createAnimationIfAvailable("npc-sprayer-running", RUNNING_DIRECTION_ANIMATION.south, 24, 31, 6, -1);
   }
 
   start(nowMs: number): PhaserSprayerStartResult {

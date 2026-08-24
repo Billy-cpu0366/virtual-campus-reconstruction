@@ -244,8 +244,8 @@ describe("PhaserSprayerRuntime", () => {
       "npc-sprayer-spray",
       "npc-sprayer-running-north",
       "npc-sprayer-running-east",
-      "npc-sprayer-running-south",
       "npc-sprayer-running-west",
+      "npc-sprayer-running-south",
     ]);
 
     expect(runtime.start(clock.nowMs)).toEqual({ ok: true });
