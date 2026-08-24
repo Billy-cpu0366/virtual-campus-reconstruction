@@ -93,6 +93,9 @@ class FakeSprite implements PhaserSprayerSpriteLike {
   readonly anims = {
     play: (key: string): unknown => {
       this.played.push(key);
+      if (key.startsWith("npc-sprayer-running-")) {
+        this.texture = "npc-sprayer-running";
+      }
       return {};
     },
   };

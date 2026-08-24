@@ -302,7 +302,8 @@ export class PhaserSprayerRuntime {
       sprite.y = instance.position.y;
       sprite.setDepth(sprayerPresentationDepth(instance.position.y));
       if (instance.state === "fleeing") {
-        sprite.setTexture("npc-sprayer-running");
+        // Playing a spritesheet animation selects its texture. Resetting the
+        // texture every update would pin the animation to its first frame.
         if (dx !== 0 || dy !== 0) {
           sprite.anims?.play(
             RUNNING_DIRECTION_ANIMATION[runningDirection(dx, dy)],
