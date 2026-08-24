@@ -1387,6 +1387,7 @@ export class CampusScene extends Phaser.Scene {
       this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
       pathProvider: new GridRouteCrowdPathProvider(wallData.grid),
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
+      scheduleNextUpdate: (callback) => this.events.once("update", callback),
     });
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {

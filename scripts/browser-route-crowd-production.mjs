@@ -130,12 +130,21 @@ async function crowdSnapshot() {
         configs: configs.map((config) => ({
           id: config.id,
           count: config.count,
-          tileCandidates: config.tileCandidates,
+          startTiles: config.startTiles,
+          endTiles: config.endTiles,
           delay: config.delay,
+          afterDelay: config.afterDelay,
+          movementSpeed: config.movementSpeed,
           speedVariation: config.speedVariation,
           goBack: config.goBack,
           deleteAfterComplete: config.deleteAfterComplete,
         })),
+        materializedByGroup: Object.fromEntries(configs.map((config) => [
+          config.id,
+          instances.filter((item) =>
+            item.id.startsWith(config.id + ":") && item.materialized,
+          ).length,
+        ])),
         instanceCount: instances.length,
         materializedCount: instances.filter((item) => item.materialized).length,
         visibleCount: instances.filter((item) => item.visible).length,
@@ -208,10 +217,21 @@ try {
   routeCrowdDiagnostics = { afterStart };
 
   const probes = [];
-  for (const tile of [{ x: 496, y: 1_296 }, { x: 1_168, y: 2_128 }]) {
+  for (const groupId of ["main-crowd", "concert_crowd", "crowd-train"]) {
+    const config = afterStart.configs.find((candidate) => candidate.id === groupId);
+    assert.ok(config, `missing required route group: ${groupId}`);
+    const tile = {
+      x: config.startTiles[0].x * 16 + 8,
+      y: config.startTiles[0].y * 16 + 8,
+    };
     assert.equal(await centerCameraOn(tile), true, "production camera probe failed");
     await sleep(250);
-    probes.push({ tile, snapshot: await crowdSnapshot(), screenshot: await capture(`crowd-${tile.x}-${tile.y}`) });
+    probes.push({
+      groupId,
+      tile,
+      snapshot: await crowdSnapshot(),
+      screenshot: await capture(`crowd-${groupId}`),
+    });
   }
 
   routeCrowdDiagnostics = { afterStart, probes };
@@ -219,8 +239,8 @@ try {
   assert.equal(new Set(afterStart.configIds).size, 9, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
   assert.ok(
-    probes.every((probe) => probe.snapshot?.spriteCount > 0),
-    "each public route-crowd probe must materialize production sprites",
+    probes.every((probe) => probe.snapshot?.materializedByGroup?.[probe.groupId] > 0),
+    "each required public route group must materialize in production",
   );
   assert.deepEqual(events.console, []);
   assert.deepEqual(events.exceptions, []);

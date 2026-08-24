@@ -10,9 +10,12 @@ import {
 const testConfig = (overrides: Partial<RouteCrowdConfig> = {}): RouteCrowdConfig => ({
   id: "test-crowd",
   count: 1,
-  tileCandidates: [{ x: 2, y: 3 }],
+  startTiles: [{ x: 2, y: 3 }],
+  endTiles: [{ x: 5, y: 3 }],
+  movementSpeed: 48,
   speedVariation: { min: 1, max: 1 },
   delay: { minMs: 100, maxMs: 100 },
+  afterDelay: { minMs: 100, maxMs: 100 },
   goBack: true,
   deleteAfterComplete: true,
   ...overrides,
@@ -30,15 +33,31 @@ describe("RouteCrowdRuntime contract", () => {
     expect(
       ROUTE_CROWD_CONFIGS.every(
         (config) =>
-          config.tileCandidates.length > 0 &&
+          config.startTiles.length > 0 &&
+          config.endTiles.length > 0 &&
           config.speedVariation.min <= config.speedVariation.max &&
           config.delay.minMs <= config.delay.maxMs &&
+          config.afterDelay.minMs <= config.afterDelay.maxMs &&
           typeof config.goBack === "boolean" &&
           typeof config.deleteAfterComplete === "boolean",
       ),
     ).toBe(true);
     expect(Object.isFrozen(ROUTE_CROWD_CONFIGS)).toBe(true);
     expect(Object.isFrozen(ROUTE_CROWD_CONFIGS[0])).toBe(true);
+    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "main-crowd"))
+      .toMatchObject({
+        startTiles: [{ x: 31, y: 81 }, { x: 32, y: 81 }, { x: 33, y: 81 }],
+        endTiles: [{ x: 73, y: 133 }],
+        movementSpeed: 45,
+        goBack: false,
+      });
+    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "crowd-train"))
+      .toMatchObject({
+        count: 10,
+        movementSpeed: 35,
+        delay: { minMs: 2_400, maxMs: 2_400 },
+        deleteAfterComplete: true,
+      });
   });
 
   it("replays the same creation and progression with an injected random source", () => {
@@ -77,6 +96,42 @@ describe("RouteCrowdRuntime contract", () => {
     expect(calls).toHaveLength(2);
     expect(runtime.snapshot.instances).toHaveLength(0);
     expect(runtime.started).toBe(false);
+  });
+
+  it("processes batched startup one at a time and reports final failures", () => {
+    const calls: RouteCrowdPathRequest[] = [];
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({ count: 5 })],
+      pathProvider: {
+        findPath: (request) => {
+          calls.push(request);
+          return calls.length === 3 ? null : pathFor(request);
+        },
+      },
+    });
+
+    expect(runtime.startBatched(0)).toMatchObject({
+      ok: true,
+      complete: false,
+      created: 1,
+      pathFailures: 0,
+    });
+    expect(calls).toHaveLength(1);
+    expect(runtime.snapshot.instances).toHaveLength(1);
+
+    let result = runtime.startBatched(0);
+    while (result.ok && !result.complete) {
+      result = runtime.startBatched(0);
+    }
+    expect(result).toEqual({
+      ok: true,
+      complete: true,
+      created: 4,
+      pathFailures: 1,
+    });
+    expect(calls).toHaveLength(5);
+    expect(runtime.snapshot.instances).toHaveLength(4);
+    expect(runtime.started).toBe(true);
   });
 
   it("covers delay, moving, returning and restart for a round trip", () => {
