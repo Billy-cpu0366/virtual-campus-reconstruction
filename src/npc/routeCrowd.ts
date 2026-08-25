@@ -1,4 +1,8 @@
-export type RouteCrowdState = "delay" | "moving" | "returning" | "gone";
+export type RouteCrowdState = "delay" | "moving" | "returning" | "waiting" | "gone";
+
+export type RouteCrowdFacing =
+  | "east" | "north-east" | "north-west" | "north"
+  | "south-east" | "south-west" | "south" | "west";
 
 export interface RouteCrowdTile {
   readonly x: number;
@@ -58,6 +62,7 @@ export interface RouteCrowdInstanceSnapshot {
   materialized: boolean;
   visible: boolean;
   destroyed: boolean;
+  facing: RouteCrowdFacing;
 }
 
 export interface RouteCrowdSnapshot {
@@ -82,6 +87,8 @@ export interface RouteCrowdRuntimeOptions {
   readonly configs?: readonly RouteCrowdConfig[];
   readonly pathProvider: RouteCrowdPathProviderLike;
   readonly baseSpeed?: number;
+  /** Returns true when the next world-position waypoint is temporarily occupied. */
+  readonly isBlocked?: (point: RouteCrowdTile) => boolean;
 }
 
 export const ROUTE_CROWD_BASE_SPEED = 48;
@@ -136,6 +143,7 @@ type Item = RouteCrowdInstanceSnapshot & {
   delayAt: number;
   speed: number;
   start: RouteCrowdTile;
+  waitingFrom: "moving" | "returning" | undefined;
 };
 
 type PendingStart = {
@@ -161,6 +169,24 @@ function randomDelayIn(
   random: () => number,
 ): number {
   return range.minMs + (range.maxMs - range.minMs) * random();
+}
+
+function facingForDelta(
+  deltaX: number,
+  deltaY: number,
+  fallback: RouteCrowdFacing,
+): RouteCrowdFacing {
+  const x = Math.sign(deltaX);
+  const y = Math.sign(deltaY);
+  if (x === 0 && y === 0) return fallback;
+  if (x > 0 && y === 0) return "east";
+  if (x > 0 && y < 0) return "north-east";
+  if (x < 0 && y < 0) return "north-west";
+  if (x === 0 && y < 0) return "north";
+  if (x > 0 && y > 0) return "south-east";
+  if (x < 0 && y > 0) return "south-west";
+  if (x === 0 && y > 0) return "south";
+  return "west";
 }
 
 function pointInViewport(point: RouteCrowdTile, viewport: RouteCrowdViewport): boolean {
@@ -206,7 +232,7 @@ export class RouteCrowdRuntime {
 
   get snapshot(): RouteCrowdSnapshot {
     return {
-      instances: this.items.map(({ config, forwardPath, path, waypointIndex, delayAt, speed, start, ...item }) => ({
+      instances: this.items.map(({ config, forwardPath, path, waypointIndex, delayAt, speed, start, waitingFrom, ...item }) => ({
         ...item,
       })),
     };
@@ -310,6 +336,7 @@ export class RouteCrowdRuntime {
         materialized: true,
         visible: true,
         destroyed: false,
+        facing: "south",
         config: pending.config,
         forwardPath: path,
         path,
@@ -320,6 +347,7 @@ export class RouteCrowdRuntime {
           random,
         ),
         start,
+        waitingFrom: undefined,
       });
       this.batchedCreated += 1;
       processed += 1;
@@ -355,16 +383,28 @@ export class RouteCrowdRuntime {
           item.state = "moving";
           continue;
         }
+        if (item.state === "waiting") {
+          const target = item.path[item.waypointIndex];
+          if (target === undefined || this.options.isBlocked?.(target) === true) break;
+          item.state = item.waitingFrom ?? "moving";
+          item.waitingFrom = undefined;
+          continue;
+        }
         if (item.state === "moving" || item.state === "returning") {
           const target = item.path[item.waypointIndex];
           if (target === undefined) {
             this.completePath(item, now);
             continue;
           }
-          const distance = Math.hypot(
-            target.x - item.position.x,
-            target.y - item.position.y,
-          );
+          if (this.options.isBlocked?.(target) === true) {
+            item.waitingFrom = item.state;
+            item.state = "waiting";
+            break;
+          }
+          const deltaX = target.x - item.position.x;
+          const deltaY = target.y - item.position.y;
+          item.facing = facingForDelta(deltaX, deltaY, item.facing);
+          const distance = Math.hypot(deltaX, deltaY);
           if (distance === 0) {
             item.waypointIndex += 1;
             continue;
@@ -433,6 +473,7 @@ export class RouteCrowdRuntime {
     item.position = item.start;
     item.path = item.forwardPath;
     item.waypointIndex = 1;
+    item.waitingFrom = undefined;
     item.delayAt = now + randomDelayIn(
       item.config.afterDelay,
       this.options.random ?? Math.random,

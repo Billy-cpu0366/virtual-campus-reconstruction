@@ -1386,6 +1386,9 @@ export class CampusScene extends Phaser.Scene {
     this.routeCrowdRuntime = new PhaserRouteCrowdRuntime(
       this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
       pathProvider: new GridRouteCrowdPathProvider(wallData.grid),
+      isBlocked: (point) => this.trainBlockingCells.includes(
+        `${Math.floor(point.x / 16)},${Math.floor(point.y / 16)}`,
+      ),
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
       scheduleNextUpdate: (callback) => this.events.once("update", callback),
     });

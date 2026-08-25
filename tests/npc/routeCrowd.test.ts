@@ -237,6 +237,36 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.snapshot.instances[0]?.position.y).toBeGreaterThan(48);
   });
 
+  it("waits before a dynamically blocked next waypoint and resumes with its facing", () => {
+    let blocked = true;
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({ delay: { minMs: 0, maxMs: 0 }, goBack: false, deleteAfterComplete: false })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 24, y: request.start.y },
+        { x: request.start.x + 48, y: request.start.y },
+      ],
+      isBlocked: (point) => blocked && point.x === 80,
+    });
+
+    runtime.start(0);
+    runtime.tick(600);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "waiting",
+      position: { x: 56, y: 48 },
+      facing: "east",
+    });
+    runtime.tick(1_000);
+    expect(runtime.snapshot.instances[0]?.state).toBe("waiting");
+    blocked = false;
+    runtime.tick(1_250);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "moving",
+      facing: "east",
+    });
+    expect(runtime.snapshot.instances[0]!.position.x).toBeGreaterThan(56);
+  });
+
   it("cancel clears active instances, while shutdown prevents restart", () => {
     const runtime = new RouteCrowdRuntime({
       configs: [testConfig()],

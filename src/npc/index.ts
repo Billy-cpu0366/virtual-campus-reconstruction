@@ -9,6 +9,7 @@ export {
 export type {
   RouteCrowdConfig,
   RouteCrowdDelayRange,
+  RouteCrowdFacing,
   RouteCrowdInstanceSnapshot,
   RouteCrowdPathPoint,
   RouteCrowdPathProvider,

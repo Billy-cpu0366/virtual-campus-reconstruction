@@ -39,6 +39,25 @@ describe("PhaserRouteCrowdRuntime",()=>{
   expect(sprites).toHaveLength(calls);
  });
 
+ it("plays the matching eight-direction walk animation",()=>{
+  const played:string[]=[];
+  const frames:number[]=[];
+  const created:string[]=[];
+  const sprite={x:0,y:0,setDepth:()=>sprite,setFrame:(frame:number)=>{frames.push(frame);return sprite},destroy:()=>undefined,anims:{play:(key:string)=>{played.push(key);return undefined},stop:()=>undefined}};
+  const runtime=new PhaserRouteCrowdRuntime({
+   add:{sprite:(x,y)=>{sprite.x=x;sprite.y=y;return sprite}},
+   anims:{generateFrameNumbers:(_key,range)=>[range.start,range.end],create:config=>{created.push(config.key);return config},exists:()=>false},
+  },{
+   pathProvider:{findPath:r=>[r.start,{x:r.start.x+24,y:r.start.y},{x:r.start.x+48,y:r.start.y}]},
+   viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
+  });
+  runtime.start(0);
+  runtime.update(600);
+  expect(created).toContain("route-crowd-npc-man-east");
+  expect(played).toContain("route-crowd-npc-man-east");
+  expect(frames.at(-1)).toBe(48);
+ });
+
  it("ignores stale startup callbacks after repeat or cancel",()=>{
   const callbacks:(()=>void)[]=[];
   let calls=0;
