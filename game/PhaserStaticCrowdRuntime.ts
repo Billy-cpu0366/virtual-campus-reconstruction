@@ -47,6 +47,7 @@ export class PhaserStaticCrowdRuntime {
   private shutdownState = false;
   private lookAroundStep = 0;
   private nextLookAroundAt = 0;
+  private lookAroundIds = new Set<string>();
 
   constructor(private readonly scene: PhaserStaticCrowdSceneLike, private readonly options: PhaserStaticCrowdRuntimeOptions) {
     this.core = new StaticCrowdRuntime({
@@ -72,6 +73,10 @@ export class PhaserStaticCrowdRuntime {
     if (lookAroundChanged) {
       this.lookAroundStep += 1;
       this.nextLookAroundAt = now + 1_000;
+      const candidates = [...this.sprites.keys()].sort();
+      const count = Math.min(2 + this.lookAroundStep % 3, candidates.length);
+      const start = candidates.length === 0 ? 0 : (this.lookAroundStep * 3) % candidates.length;
+      this.lookAroundIds = new Set(Array.from({ length: count }, (_, index) => candidates[(start + index) % candidates.length]!));
     }
     this.core.tick(this.options.viewport());
     this.sync(lookAroundChanged);
@@ -103,10 +108,10 @@ export class PhaserStaticCrowdRuntime {
         created += 1;
       }
       const readySprite = sprite!;
-      if (isNew || lookAroundChanged) {
+      if (isNew || (lookAroundChanged && this.lookAroundIds.has(item.id))) {
         const directions = ["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"] as const;
         const base = directions.indexOf(item.direction);
-        const direction = directions[(base + this.lookAroundStep + item.id.length) % directions.length]!;
+        const direction = isNew ? item.direction : directions[(base + this.lookAroundStep + item.id.length) % directions.length]!;
         readySprite.setFrame?.(walkFrameStart(direction));
       }
       this.sprites.set(item.id, readySprite);
