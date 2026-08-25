@@ -4,13 +4,13 @@ correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
 correction-phase: human-acceptance
-classification-trigger: human-accepted-route-crowd-lifecycle-and-static-npc-batch
+classification-trigger: human-accepted-source-backed-route-crowd-dispersion-and-residence
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.4-05d1-route-crowds-lifecycle-repair
+current-phase: p5.4-05d1-route-crowds-residence-repair
 current-gate: p5.4-05d1-human-visual-acceptance
 gate-status: awaiting-human-visual-acceptance
 authorization-ref: DEC-P5.4-05A-TRAIN-ROUTE-001; DEC-P5.4-05D1-ROUTE-CROWD-REPAIR-001
