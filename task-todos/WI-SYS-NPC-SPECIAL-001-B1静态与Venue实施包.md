@@ -20,7 +20,7 @@ updated: 2026-08-25
 
 - 25/21个公开region按polygon布点；配置数量和成功布点数量分开记录。
 - presentation按整个region bbox与camera worldView外扩100px激活/回收；region存活期间身份与位置稳定。
-- 保留公开方向池；每NPC拥有独立、可复放的look-around节奏，不用全局少量抽样代替owner机制。
+- 保留公开方向池；按公开机制每秒从可见且空闲NPC中选择2–4人，再按region类型概率执行look/move；被选中允许因公开概率no-op，不改写成每个NPC独立周期。
 - 无名region只使用ID，不补造地点名、精确人物或固定随机结果。
 
 ### Concert
@@ -67,7 +67,7 @@ Main独占并在接收后串行处理：
 ## 4. 实施步骤
 
 1. 固定region配置、polygon、count/spacing、方向与动作合同的失败测试。
-2. 修正static region生命周期与独立look-around状态。
+2. 修正static region生命周期与每秒2–4人选择、region概率及look/move状态。
 3. 分离concert presentation，补方向/动作和资源失败。
 4. 把protest从历史DECISION改回公开逐NPC循环与气泡生命周期。
 5. 补Phaser presentation、cull/recreate、shutdown和失败测试。
