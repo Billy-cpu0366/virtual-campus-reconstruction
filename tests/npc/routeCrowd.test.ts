@@ -18,6 +18,8 @@ const testConfig = (overrides: Partial<RouteCrowdConfig> = {}): RouteCrowdConfig
   afterDelay: { minMs: 100, maxMs: 100 },
   goBack: true,
   deleteAfterComplete: true,
+  randomPositions: false,
+  maxActiveInViewport: undefined,
   ...overrides,
 });
 
@@ -39,7 +41,10 @@ describe("RouteCrowdRuntime contract", () => {
           config.delay.minMs <= config.delay.maxMs &&
           config.afterDelay.minMs <= config.afterDelay.maxMs &&
           typeof config.goBack === "boolean" &&
-          typeof config.deleteAfterComplete === "boolean",
+          typeof config.deleteAfterComplete === "boolean" &&
+          typeof config.randomPositions === "boolean" &&
+          (config.maxActiveInViewport === undefined ||
+            config.maxActiveInViewport > 0),
       ),
     ).toBe(true);
     expect(Object.isFrozen(ROUTE_CROWD_CONFIGS)).toBe(true);
@@ -50,6 +55,8 @@ describe("RouteCrowdRuntime contract", () => {
         endTiles: [{ x: 73, y: 133 }],
         movementSpeed: 45,
         goBack: false,
+        randomPositions: true,
+        maxActiveInViewport: 25,
       });
     expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "crowd-train"))
       .toMatchObject({
@@ -57,7 +64,34 @@ describe("RouteCrowdRuntime contract", () => {
         movementSpeed: 35,
         delay: { minMs: 2_400, maxMs: 2_400 },
         deleteAfterComplete: true,
+        randomPositions: false,
+        maxActiveInViewport: 10,
       });
+    expect(
+      ROUTE_CROWD_CONFIGS
+        .filter((config) => config.id !== "crowd-train")
+        .every((config) => config.randomPositions),
+    ).toBe(true);
+    expect(
+      ROUTE_CROWD_CONFIGS
+        .filter((config) => config.maxActiveInViewport === undefined)
+        .map((config) => config.id),
+    ).toEqual(["walking-crowd", "outside_concert1"]);
+    expect(
+      Object.fromEntries(
+        ROUTE_CROWD_CONFIGS
+          .filter((config) => config.maxActiveInViewport !== undefined)
+          .map((config) => [config.id, config.maxActiveInViewport]),
+      ),
+    ).toEqual({
+      "main-crowd": 25,
+      "loop-crowd": 10,
+      drinkers: 5,
+      concert_crowd: 40,
+      "vertical-crowd": 20,
+      "vertical-crowd-reverse": 20,
+      "crowd-train": 10,
+    });
   });
 
   it("replays the same creation and progression with an injected random source", () => {
@@ -148,11 +182,21 @@ describe("RouteCrowdRuntime contract", () => {
     runtime.tick(100);
     expect(runtime.snapshot.instances[0]?.state).toBe("moving");
     runtime.tick(1_100);
-    expect(runtime.snapshot.instances[0]?.state).toBe("returning");
-    expect(runtime.snapshot.instances[0]?.position).toEqual({ x: 80, y: 48 });
-    runtime.tick(2_100);
     expect(runtime.snapshot.instances[0]).toMatchObject({
       state: "delay",
+      position: { x: 80, y: 48 },
+      destroyed: false,
+    });
+    runtime.tick(1_199);
+    expect(runtime.snapshot.instances[0]?.position).toEqual({ x: 80, y: 48 });
+    runtime.tick(1_200);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "returning",
+      position: { x: 80, y: 48 },
+    });
+    runtime.tick(2_300);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "moving",
       generation: 1,
       position: { x: 32, y: 48 },
       destroyed: false,
@@ -210,26 +254,88 @@ describe("RouteCrowdRuntime contract", () => {
     });
   });
 
-  it("freezes a visible point without advancing its path or changing facing", () => {
+  it("advances a visible point and updates its facing", () => {
     const runtime = new RouteCrowdRuntime({
       configs: [testConfig({ delay: { minMs: 0, maxMs: 0 }, goBack: false })],
       pathProvider: (request) => [
         request.start,
-        { x: request.start.x + 96, y: request.start.y },
+        { x: request.start.x + 192, y: request.start.y },
       ],
     });
-    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    const viewport = { left: 0, top: 0, width: 1_000, height: 1_000 };
     runtime.start(0, viewport);
     runtime.tick(1_000, viewport);
     expect(runtime.snapshot.instances[0]).toMatchObject({
-      position: { x: 32, y: 48 },
-      state: "delay",
-      facing: "south",
+      position: { x: 80, y: 48 },
+      state: "moving",
+      facing: "east",
       visible: true,
       materialized: true,
     });
-    runtime.tick(2_000, { left: 1_000, top: 1_000, width: 10, height: 10 });
+    runtime.tick(1_500, viewport);
+    expect(runtime.snapshot.instances[0]?.position.x).toBe(104);
+  });
+
+  it("starts random-position groups at reproducible, non-overlapping waypoints", () => {
+    const config = testConfig({
+      id: "dispersed",
+      count: 4,
+      delay: { minMs: 0, maxMs: 0 },
+      goBack: false,
+      deleteAfterComplete: false,
+      randomPositions: true,
+    });
+    const makeRuntime = () => new RouteCrowdRuntime({
+      random: () => 0.25,
+      configs: [config],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 16, y: request.start.y },
+        { x: request.start.x + 32, y: request.start.y },
+        { x: request.start.x + 48, y: request.start.y },
+        { x: request.start.x + 64, y: request.start.y },
+      ],
+    });
+    const first = makeRuntime();
+    const second = makeRuntime();
+    first.start(0);
+    second.start(0);
+    expect(first.snapshot).toEqual(second.snapshot);
+    const positions = first.snapshot.instances.map(({ position }) => `${position.x}:${position.y}`);
+    expect(new Set(positions).size).toBe(4);
+    expect(first.snapshot.instances.some(({ position }) => position.x > 32)).toBe(true);
+  });
+
+  it("keeps a random start before the terminal waypoint when a route can move", () => {
+    const runtime = new RouteCrowdRuntime({
+      random: () => 0,
+      configs: [testConfig({
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        randomPositions: true,
+      })],
+      pathProvider: pathFor,
+    });
+    runtime.start(0);
+    expect(runtime.snapshot.instances[0]?.position).toEqual({ x: 32, y: 48 });
+    runtime.tick(1_000);
     expect(runtime.snapshot.instances[0]?.position.x).toBeGreaterThan(32);
+  });
+
+  it("caps materialized instances per group without changing logical instances", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        count: 6,
+        maxActiveInViewport: 3,
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      pathProvider: pathFor,
+    });
+    runtime.start(0, { left: 0, top: 0, width: 1_000, height: 1_000 });
+    expect(runtime.snapshot.instances).toHaveLength(6);
+    expect(runtime.snapshot.instances.filter((item) => item.materialized)).toHaveLength(3);
   });
 
   it("walks every waypoint and applies injected delay and speed variation", () => {

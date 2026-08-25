@@ -42,11 +42,10 @@ describe("PhaserRouteCrowdRuntime",()=>{
   expect(sprites).toHaveLength(calls);
  });
 
- it("freezes the visible crowd at its last eight-direction frame",()=>{
+ it("advances visible crowds and plays their walking animation",()=>{
   const played:string[]=[];
-  const frames:number[]=[];
   const created:string[]=[];
-  const sprite={x:0,y:0,setDepth:()=>sprite,setFrame:(frame:number)=>{frames.push(frame);return sprite},destroy:()=>undefined,anims:{play:(key:string)=>{played.push(key);return undefined},stop:()=>undefined}};
+  const sprite={x:0,y:0,setDepth:()=>sprite,setFrame:(_frame:number)=>sprite,destroy:()=>undefined,anims:{play:(key:string)=>{played.push(key);return undefined},stop:()=>undefined}};
   const runtime=new PhaserRouteCrowdRuntime({
    add:{sprite:(x,y)=>{sprite.x=x;sprite.y=y;return sprite}},
    anims:{generateFrameNumbers:(_key,range)=>[range.start,range.end],create:config=>{created.push(config.key);return config},exists:()=>false},
@@ -55,10 +54,12 @@ describe("PhaserRouteCrowdRuntime",()=>{
    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
   });
   runtime.start(0);
+  const before=runtime.snapshot.instances.find(item=>item.id==="main-crowd:0")!;
   runtime.update(600);
-  expect(created).toEqual([]);
-  expect(played).toEqual([]);
-  expect(frames.at(-1)).toBe(48);
+  const after=runtime.snapshot.instances.find(item=>item.id==="main-crowd:0")!;
+  expect(after.position).not.toEqual(before.position);
+  expect(created.length).toBeGreaterThan(0);
+  expect(played.length).toBeGreaterThan(0);
  });
 
  it("materializes train passengers one per scheduled frame",()=>{

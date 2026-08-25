@@ -252,7 +252,6 @@ export class PhaserRouteCrowdRuntime {
         texture,
         item.facing,
         item.state === "moving" || item.state === "returning",
-        item.visible,
       );
       this.sprites.set(item.id, sprite);
     }
@@ -268,10 +267,9 @@ export class PhaserRouteCrowdRuntime {
     texture: string,
     facing: RouteCrowdFacing,
     moving: boolean,
-    frozenInViewport: boolean,
   ): void {
     const key = `route-crowd-${texture}-${facing}`;
-    if (moving && !frozenInViewport && this.ensureAnimation(texture, facing, key)) {
+    if (moving && this.ensureAnimation(texture, facing, key)) {
       sprite.anims?.play(key, true);
       return;
     }

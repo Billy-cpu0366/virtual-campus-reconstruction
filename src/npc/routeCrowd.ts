@@ -30,6 +30,8 @@ export interface RouteCrowdConfig {
   readonly afterDelay: RouteCrowdDelayRange;
   readonly goBack: boolean;
   readonly deleteAfterComplete: boolean;
+  readonly randomPositions: boolean;
+  readonly maxActiveInViewport: number | undefined;
 }
 
 export interface RouteCrowdPathRequest {
@@ -108,7 +110,9 @@ const group = (
   delay: RouteCrowdDelayRange,
   afterDelay: RouteCrowdDelayRange,
   goBack: boolean,
-  deleteAfterComplete = false,
+  deleteAfterComplete: boolean,
+  randomPositions: boolean,
+  maxActiveInViewport: number | undefined,
 ): RouteCrowdConfig => Object.freeze({
   id,
   count,
@@ -120,19 +124,21 @@ const group = (
   afterDelay: Object.freeze(afterDelay),
   goBack,
   deleteAfterComplete,
+  randomPositions,
+  maxActiveInViewport,
 });
 
 // FACT: `chunk-WMFY56ZM.js` byte 328000–332000 public crowd registration.
 export const ROUTE_CROWD_CONFIGS = Object.freeze([
-  group("main-crowd", 10, [[31, 81], [32, 81], [33, 81]], [[73, 133]], 45, .25, { minMs: 0, maxMs: 0 }, { minMs: 2_000, maxMs: 2_000 }, false),
-  group("loop-crowd", 10, [[55, 18], [62, 18]], [[21, 86], [55, 86], [112, 48], [116, 85]], 45, .2, { minMs: 0, maxMs: 0 }, { minMs: 1_000, maxMs: 1_000 }, true),
-  group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false),
-  group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false),
-  group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false),
-  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false),
-  group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false),
-  group("outside_concert1", 10, [[115, 109], [123, 110], [130, 108]], [[120, 114], [137, 106], [138, 96]], 35, .5, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false),
-  group("crowd-train", 10, Array.from({ length: 22 }, (_, index) => [63 + index, 19] as const), [[68, 121], [8, 100], [36, 117], [129, 108], [106, 46], [21, 86]], 35, .2, { minMs: 2_400, maxMs: 2_400 }, { minMs: 0, maxMs: 0 }, false, true),
+  group("main-crowd", 10, [[31, 81], [32, 81], [33, 81]], [[73, 133]], 45, .25, { minMs: 0, maxMs: 0 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 25),
+  group("loop-crowd", 10, [[55, 18], [62, 18]], [[21, 86], [55, 86], [112, 48], [116, 85]], 45, .2, { minMs: 0, maxMs: 0 }, { minMs: 1_000, maxMs: 1_000 }, true, false, true, 10),
+  group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false, false, true, 5),
+  group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 40),
+  group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20),
+  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20),
+  group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, undefined),
+  group("outside_concert1", 10, [[115, 109], [123, 110], [130, 108]], [[120, 114], [137, 106], [138, 96]], 35, .5, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, undefined),
+  group("crowd-train", 10, Array.from({ length: 22 }, (_, index) => [63 + index, 19] as const), [[68, 121], [8, 100], [36, 117], [129, 108], [106, 46], [21, 86]], 35, .2, { minMs: 2_400, maxMs: 2_400 }, { minMs: 0, maxMs: 0 }, false, true, false, 10),
 ]);
 
 type Item = RouteCrowdInstanceSnapshot & {
@@ -198,34 +204,17 @@ function pointInViewport(point: RouteCrowdTile, viewport: RouteCrowdViewport): b
   );
 }
 
-function viewportEntryProgress(
-  point: RouteCrowdTile,
-  target: RouteCrowdTile,
-  viewport: RouteCrowdViewport,
-): number | null {
-  const minX = viewport.left;
-  const maxX = viewport.left + viewport.width;
-  const minY = viewport.top;
-  const maxY = viewport.top + viewport.height;
-  const deltaX = target.x - point.x;
-  const deltaY = target.y - point.y;
-  let start = 0;
-  let end = 1;
-  for (const [value, delta, min, max] of [
-    [point.x, deltaX, minX, maxX],
-    [point.y, deltaY, minY, maxY],
-  ] as const) {
-    if (delta === 0) {
-      if (value < min || value > max) return null;
-      continue;
-    }
-    const first = (min - value) / delta;
-    const second = (max - value) / delta;
-    start = Math.max(start, Math.min(first, second));
-    end = Math.min(end, Math.max(first, second));
+function shuffledIndexes(length: number, random: () => number): number[] {
+  const indexes = Array.from({ length }, (_, index) => index);
+  for (let index = indexes.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(random() * (index + 1));
+    [indexes[index], indexes[swap]] = [indexes[swap]!, indexes[index]!];
   }
-  if (start > end || start > 1 || end < 0) return null;
-  return Math.max(0, start);
+  return indexes;
+}
+
+function pointKey(point: RouteCrowdTile): string {
+  return `${point.x}:${point.y}`;
 }
 
 /** Deterministic owner for one bounded, source-backed route-crowd batch. */
@@ -240,6 +229,7 @@ export class RouteCrowdRuntime {
   private batchedStartGeneration = 0;
   private batchedCreated = 0;
   private batchedPathFailures = 0;
+  private readonly occupiedStarts = new Map<string, Set<string>>();
 
   constructor(private readonly options: RouteCrowdRuntimeOptions) {}
 
@@ -297,6 +287,7 @@ export class RouteCrowdRuntime {
     this.batchedStartNow = now;
     this.batchedCreated = 0;
     this.batchedPathFailures = 0;
+    this.occupiedStarts.clear();
   }
 
   private processBatchedStart(
@@ -348,7 +339,19 @@ export class RouteCrowdRuntime {
         continue;
       }
 
-      const start = path[0]!;
+      const occupied = this.occupiedStarts.get(pending.config.id) ?? new Set<string>();
+      this.occupiedStarts.set(pending.config.id, occupied);
+      const waypointCount = path.length > 1 ? path.length - 1 : path.length;
+      const candidates = pending.config.randomPositions
+        ? shuffledIndexes(waypointCount, random)
+        : [0];
+      const startWaypointIndex = candidates.find((index) =>
+        !occupied.has(pointKey(path[index]!)),
+      ) ?? candidates[0]!;
+      const start = { ...path[startWaypointIndex]! };
+      const routePath = path.slice(startWaypointIndex);
+      occupied.add(pointKey(start));
+      const next = routePath[1];
       this.items.push({
         id: `${pending.config.id}:${pending.index}`,
         state: "delay",
@@ -357,10 +360,12 @@ export class RouteCrowdRuntime {
         materialized: true,
         visible: true,
         destroyed: false,
-        facing: "south",
+        facing: next === undefined
+          ? "south"
+          : facingForDelta(next.x - start.x, next.y - start.y, "south"),
         config: pending.config,
-        forwardPath: path,
-        path,
+        forwardPath: routePath,
+        path: routePath,
         waypointIndex: 1,
         delayAt: this.batchedStartNow + randomDelayIn(pending.config.delay, random),
         speed: (pending.config.movementSpeed ?? baseSpeed) * randomIn(
@@ -389,8 +394,6 @@ export class RouteCrowdRuntime {
     };
   }
 
-  // DECISION: a point inside the current Human viewport freezes at its last
-  // facing; invisible points advance only until they enter the viewport.
   tick(now: number, viewport?: RouteCrowdViewport): RouteCrowdSnapshot {
     if (this.pendingStarts !== undefined) return this.snapshot;
     const elapsedMs = Math.max(0, now - this.last);
@@ -400,14 +403,12 @@ export class RouteCrowdRuntime {
       if (this.pausedConfigIds.has(item.config.id)) continue;
       let remainingMs = elapsedMs;
       while (remainingMs > 0 && item.state !== "gone") {
-        if (viewport !== undefined && pointInViewport(item.position, viewport)) {
-          break;
-        }
         if (item.state === "delay") {
           if (now < item.delayAt) break;
           const tickStartedAt = now - remainingMs;
           remainingMs = Math.max(0, remainingMs - (item.delayAt - tickStartedAt));
-          item.state = "moving";
+          item.state = item.waitingFrom ?? "moving";
+          item.waitingFrom = undefined;
           continue;
         }
         if (item.state === "waiting") {
@@ -437,23 +438,6 @@ export class RouteCrowdRuntime {
             continue;
           }
           const availableDistance = item.speed * remainingMs / 1_000;
-          const entry = viewport === undefined
-            ? null
-            : viewportEntryProgress(item.position, target, viewport);
-          if (entry !== null && entry > 0 && entry <= 1) {
-            const distanceToEntry = distance * entry;
-            if (availableDistance >= distanceToEntry) {
-              item.position = {
-                x: item.position.x + deltaX * entry,
-                y: item.position.y + deltaY * entry,
-              };
-              remainingMs = Math.max(
-                0,
-                remainingMs - distanceToEntry / item.speed * 1_000,
-              );
-              break;
-            }
-          }
           if (availableDistance < distance) {
             const factor = availableDistance / distance;
             item.position = {
@@ -467,7 +451,7 @@ export class RouteCrowdRuntime {
           item.waypointIndex += 1;
           remainingMs -= distance / item.speed * 1_000;
           if (item.path[item.waypointIndex] === undefined) {
-            this.completePath(item, now);
+            this.completePath(item, now - remainingMs);
           }
         }
       }
@@ -492,6 +476,7 @@ export class RouteCrowdRuntime {
     this.begun = false;
     this.batchedCreated = 0;
     this.batchedPathFailures = 0;
+    this.occupiedStarts.clear();
     this.pausedConfigIds.clear();
     return this.snapshot;
   }
@@ -503,9 +488,14 @@ export class RouteCrowdRuntime {
 
   private completePath(item: Item, now: number): void {
     if (item.state === "moving" && item.config.goBack) {
-      item.state = "returning";
+      item.state = "delay";
       item.path = [...item.forwardPath].reverse();
       item.waypointIndex = 1;
+      item.waitingFrom = "returning";
+      item.delayAt = now + randomDelayIn(
+        item.config.afterDelay,
+        this.options.random ?? Math.random,
+      );
       return;
     }
     if (item.state === "returning") {
@@ -535,11 +525,16 @@ export class RouteCrowdRuntime {
 
   private applyView(viewport?: RouteCrowdViewport): void {
     if (viewport === undefined) return;
+    const activeByGroup = new Map<string, number>();
     for (const item of this.items) {
       const inViewport = pointInViewport(item.position, viewport);
-      item.materialized = item.state !== "gone" && inViewport;
+      const active = activeByGroup.get(item.config.id) ?? 0;
+      const cap = item.config.maxActiveInViewport;
+      const withinCap = cap === undefined || active < cap;
+      item.materialized = item.state !== "gone" && inViewport && withinCap;
       item.visible = item.materialized;
       item.destroyed = item.state === "gone";
+      if (item.materialized) activeByGroup.set(item.config.id, active + 1);
     }
   }
 }

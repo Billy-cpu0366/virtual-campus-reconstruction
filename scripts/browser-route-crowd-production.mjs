@@ -226,10 +226,12 @@ try {
   routeCrowdDiagnostics = { afterStart };
 
   const probes = [];
-  for (const [groupId, tile] of [
-    ["main-crowd", { x: 31 * 16 + 8, y: 81 * 16 + 8 }],
-    ["concert_crowd", { x: 105 * 16 + 8, y: 51 * 16 + 8 }],
-  ]) {
+  for (const groupId of ["main-crowd", "concert_crowd"]) {
+    const instance = afterStart.instances.find((item) =>
+      item.id.startsWith(`${groupId}:`),
+    );
+    assert.ok(instance, `${groupId} did not create a logical route`);
+    const tile = instance.position;
     assert.equal(await centerCameraOn(tile), true, "production camera probe failed");
     await sleep(250);
     probes.push({
@@ -240,25 +242,40 @@ try {
     });
   }
 
-  const freezeCandidateSnapshot = await crowdSnapshot();
-  const frozen = freezeCandidateSnapshot.instances.find((item) => item.visible);
-  assert.ok(frozen, "no visible crowd instance available for freeze probe");
-  const frozenBefore = { id: frozen.id, position: frozen.position, facing: frozen.facing };
-  await centerCameraOn(frozen.position);
+  const movementDeadline = Date.now() + 10_000;
+  let movingSnapshot;
+  while (Date.now() < movementDeadline) {
+    movingSnapshot = await crowdSnapshot();
+    if (movingSnapshot?.instances?.some((item) => item.visible && item.state === "moving")) break;
+    await sleep(50);
+  }
+  const moving = movingSnapshot?.instances?.find(
+    (item) => item.visible && item.state === "moving",
+  );
+  assert.ok(moving, "no visible moving crowd instance available for movement probe");
+  const movingBefore = { id: moving.id, position: moving.position, facing: moving.facing };
+  await centerCameraOn(moving.position);
   await sleep(500);
-  const frozenAfter = await crowdSnapshot();
-  const frozenItem = frozenAfter.instances.find((item) => item.id === frozenBefore.id);
-  assert.deepEqual(frozenItem?.position, frozenBefore.position, "visible crowd moved while frozen");
-  assert.equal(frozenItem?.facing, frozenBefore.facing, "visible crowd changed facing while frozen");
+  const movingAfter = await crowdSnapshot();
+  const movedItem = movingAfter.instances.find((item) => item.id === movingBefore.id);
+  assert.ok(movedItem, "visible crowd instance disappeared during movement probe");
+  assert.ok(
+    movedItem.position.x !== movingBefore.position.x || movedItem.position.y !== movingBefore.position.y,
+    "visible crowd logical position did not advance",
+  );
+  assert.notEqual(movedItem.facing, undefined, "visible crowd facing was not updated");
 
   await centerCameraOn({ x: 2_000, y: 2_000 });
   await sleep(500);
   const afterLeavingViewport = await crowdSnapshot();
-  const continued = afterLeavingViewport.instances.find((item) => item.id === frozenBefore.id);
-  assert.ok(continued, "frozen crowd instance disappeared from logical runtime");
+  const continued = afterLeavingViewport.instances.find((item) => item.id === movingBefore.id);
+  assert.ok(continued, "crowd instance disappeared from logical runtime");
   assert.ok(
-    continued.position.x !== frozenBefore.position.x || continued.position.y !== frozenBefore.position.y,
-    "crowd did not continue after leaving viewport",
+    continued.position.x !== movedItem.position.x ||
+      continued.position.y !== movedItem.position.y ||
+      continued.state !== movedItem.state ||
+      continued.generation !== movedItem.generation,
+    "crowd did not continue its route state after leaving viewport",
   );
 
   const staticProbes = [];
@@ -352,7 +369,35 @@ try {
   }
   assert.ok(recovered && !recovered.pausedGroups.includes("loop-crowd"), "loop-crowd did not resume after train left viewport");
 
-  routeCrowdDiagnostics = { afterStart, probes, frozenBefore, frozenAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, recovered };
+  const maxActiveByGroup = {
+    "main-crowd": 25,
+    "loop-crowd": 10,
+    drinkers: 5,
+    concert_crowd: 40,
+    "vertical-crowd": 20,
+    "vertical-crowd-reverse": 20,
+    "crowd-train": 10,
+  };
+  for (const [groupId, cap] of Object.entries(maxActiveByGroup)) {
+    assert.ok(
+      (afterStart.materializedByGroup[groupId] ?? 0) <= cap,
+      `${groupId} exceeded maxActiveInViewport`,
+    );
+  }
+  for (const groupId of [
+    "main-crowd",
+    "loop-crowd",
+    "drinkers",
+    "concert_crowd",
+    "vertical-crowd",
+    "vertical-crowd-reverse",
+  ]) {
+    const positions = afterStart.instances
+      .filter((item) => item.id.startsWith(`${groupId}:`))
+      .map((item) => `${item.position.x}:${item.position.y}`);
+    assert.ok(new Set(positions).size > 1, `${groupId} did not disperse starts`);
+  }
+  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, recovered, maxActiveByGroup };
   assert.equal(afterStart.configIds.length, 9, "exactly nine route groups are required");
   assert.equal(new Set(afterStart.configIds).size, 9, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
