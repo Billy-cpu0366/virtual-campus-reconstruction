@@ -45,6 +45,10 @@ describe("StaticCrowdRuntime", () => {
       }
     }
     const original = first.snapshot.instances.map((item) => item.position);
+    first.tick({ left: 1140, top: 260, width: 10, height: 10 });
+    expect(first.snapshot.instances.every((item) => item.materialized)).toBe(true);
+    first.tick({ left: 1035, top: 260, width: 10, height: 10 });
+    expect(first.snapshot.instances.every((item) => item.materialized)).toBe(true);
     first.tick({ left: 0, top: 0, width: 10, height: 10 });
     expect(first.snapshot.instances.every((item) => !item.materialized)).toBe(true);
     expect(first.snapshot.instances.map((item) => item.position)).toEqual(original);

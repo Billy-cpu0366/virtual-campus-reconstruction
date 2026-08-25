@@ -68,6 +68,7 @@ export interface RouteCrowdInstanceSnapshot {
   visible: boolean;
   destroyed: boolean;
   facing: RouteCrowdFacing;
+  alpha: number;
 }
 
 export interface RouteCrowdSnapshot {
@@ -200,13 +201,25 @@ function facingForDelta(
   return "west";
 }
 
-function pointInViewport(point: RouteCrowdTile, viewport: RouteCrowdViewport): boolean {
-  return (
-    point.x >= viewport.left &&
-    point.x <= viewport.left + viewport.width &&
-    point.y >= viewport.top &&
-    point.y <= viewport.top + viewport.height
-  );
+function pathBoundsIntersectViewport(
+  path: readonly RouteCrowdTile[],
+  viewport: RouteCrowdViewport,
+  margin = 100,
+): boolean {
+  let left = Infinity;
+  let top = Infinity;
+  let right = -Infinity;
+  let bottom = -Infinity;
+  for (const point of path) {
+    left = Math.min(left, point.x);
+    top = Math.min(top, point.y);
+    right = Math.max(right, point.x);
+    bottom = Math.max(bottom, point.y);
+  }
+  return left <= viewport.left + viewport.width + margin &&
+    right >= viewport.left - margin &&
+    top <= viewport.top + viewport.height + margin &&
+    bottom >= viewport.top - margin;
 }
 
 function shuffledIndexes(length: number, random: () => number): number[] {
@@ -370,6 +383,7 @@ export class RouteCrowdRuntime {
         facing: next === undefined
           ? "south"
           : facingForDelta(next.x - start.x, next.y - start.y, "south"),
+        alpha: 0,
         config: pending.config,
         forwardPath: routePath,
         path: routePath,
@@ -464,7 +478,7 @@ export class RouteCrowdRuntime {
       }
     }
 
-    this.applyView(viewport);
+    this.applyView(viewport, elapsedMs);
     return this.snapshot;
   }
 
@@ -511,7 +525,7 @@ export class RouteCrowdRuntime {
     }
     if (item.config.deleteAfterComplete) {
       item.state = "gone";
-      item.destroyed = true;
+      item.destroyed = false;
       return;
     }
     this.restart(item, now);
@@ -519,6 +533,7 @@ export class RouteCrowdRuntime {
 
   private restart(item: Item, now: number): void {
     item.state = "delay";
+    item.alpha = 0;
     item.generation += 1;
     item.position = item.start;
     item.path = item.forwardPath;
@@ -530,18 +545,23 @@ export class RouteCrowdRuntime {
     );
   }
 
-  private applyView(viewport?: RouteCrowdViewport): void {
+  private applyView(viewport?: RouteCrowdViewport, elapsedMs = 0): void {
     if (viewport === undefined) return;
     const activeByGroup = new Map<string, number>();
     for (const item of this.items) {
-      const inViewport = pointInViewport(item.position, viewport);
+      const pathActive = pathBoundsIntersectViewport(item.forwardPath, viewport);
       const active = activeByGroup.get(item.config.id) ?? 0;
       const cap = item.config.maxActiveInViewport;
       const withinCap = cap === undefined || active < cap;
-      item.materialized = item.state !== "gone" && inViewport && withinCap;
+      const shouldActivate = item.state !== "gone" && pathActive && withinCap;
+      const alphaDelta = 4 * Math.min(elapsedMs, 50) / 1_000;
+      item.alpha = shouldActivate
+        ? Math.min(1, item.alpha + alphaDelta)
+        : Math.max(0, item.alpha - alphaDelta);
+      item.materialized = shouldActivate || item.alpha > 0;
       item.visible = item.materialized;
-      item.destroyed = item.state === "gone";
-      if (item.materialized) activeByGroup.set(item.config.id, active + 1);
+      item.destroyed = item.state === "gone" && item.alpha === 0;
+      if (shouldActivate) activeByGroup.set(item.config.id, active + 1);
     }
   }
 }

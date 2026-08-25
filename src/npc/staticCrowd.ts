@@ -3953,17 +3953,6 @@ function makePlacements(
   return Object.freeze(placements);
 }
 
-function isMaterialized(
-  point: StaticCrowdPoint,
-  viewport: StaticCrowdViewport,
-  margin: number,
-): boolean {
-  return point.x >= viewport.left - margin &&
-    point.x <= viewport.left + viewport.width + margin &&
-    point.y >= viewport.top - margin &&
-    point.y <= viewport.top + viewport.height + margin;
-}
-
 /** Deterministic owner for the 46 source-backed static crowd regions. */
 export class StaticCrowdRuntime {
   private readonly regions: readonly StaticCrowdRegion[];
@@ -3972,6 +3961,7 @@ export class StaticCrowdRuntime {
   private readonly viewportMargin: number;
   private readonly maxPlacementAttemptsPerInstance: number;
   private placements: readonly Placement[] | undefined;
+  private readonly activeRegionIndexes = new Set<number>();
   private started = false;
   private dead = false;
   private current: StaticCrowdSnapshot = emptySnapshot();
@@ -4012,14 +4002,22 @@ export class StaticCrowdRuntime {
 
   tick(viewport: StaticCrowdViewport | undefined): StaticCrowdSnapshot {
     if (this.dead || !this.started || viewport === undefined) return this.current;
+    for (const region of this.regions) {
+      const regionBounds = boundsFor(region);
+      const margin = this.activeRegionIndexes.has(region.regionIndex)
+        ? this.viewportMargin + 100
+        : this.viewportMargin;
+      const intersects = regionBounds.left <= viewport.left + viewport.width + margin &&
+        regionBounds.left + regionBounds.width >= viewport.left - margin &&
+        regionBounds.top <= viewport.top + viewport.height + margin &&
+        regionBounds.top + regionBounds.height >= viewport.top - margin;
+      if (intersects) this.activeRegionIndexes.add(region.regionIndex);
+      else this.activeRegionIndexes.delete(region.regionIndex);
+    }
     const instances = Object.freeze(this.placements!.map((placement) =>
       freezeInstance({
         ...placement,
-        materialized: isMaterialized(
-          placement.position,
-          viewport,
-          this.viewportMargin,
-        ),
+        materialized: this.activeRegionIndexes.has(placement.regionIndex),
       }),
     ));
     const regions = Object.freeze(this.regions.map((region) => {
@@ -4037,6 +4035,7 @@ export class StaticCrowdRuntime {
 
   cancel(): StaticCrowdSnapshot {
     this.started = false;
+    this.activeRegionIndexes.clear();
     this.current = emptySnapshot();
     return this.current;
   }

@@ -58,6 +58,7 @@ export function preloadRouteCrowdRuntimeAssets(
 export interface PhaserRouteCrowdSpriteLike {
   x: number; y: number;
   setDepth(value: number): this;
+  setAlpha?(value: number): this;
   setFrame?(frame: number): this;
   readonly anims?: { play(key: string, ignoreIfPlaying?: boolean): unknown; stop?(): unknown };
   destroy(): void;
@@ -271,6 +272,7 @@ export class PhaserRouteCrowdRuntime {
       sprite.x = display.x;
       sprite.y = display.y;
       sprite.setDepth(500 + item.position.y * .1);
+      sprite.setAlpha?.(item.alpha);
       this.renderFacing(
         sprite,
         texture,

@@ -246,7 +246,7 @@ describe("RouteCrowdRuntime contract", () => {
       destroyed: false,
     });
 
-    runtime.tick(250, { left: 0, top: 0, width: 100, height: 100 });
+    runtime.tick(250, { left: 70, top: 40, width: 5, height: 20 });
     expect(runtime.snapshot.instances[0]).toMatchObject({
       state: "moving",
       materialized: true,
