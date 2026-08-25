@@ -110,6 +110,7 @@ export class PhaserVenueCrowdRuntime {
   }
 
   get spriteCount(): number { return this.sprites.size; }
+  get snapshot() { return this.core.snapshot; }
   get protestActionSnapshot(): readonly Readonly<ProtestActionState>[] {
     return Object.freeze([...this.protestStates.values()].map((state) =>
       Object.freeze({ ...state })));

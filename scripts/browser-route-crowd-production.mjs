@@ -164,6 +164,24 @@ async function staticNpcSnapshot() {
   }`);
 }
 
+async function staticCrowdSnapshot() {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const runtime = scene?.staticCrowdRuntime;
+      if (!runtime) continue;
+      return {
+        spriteCount: runtime.spriteCount ?? 0,
+        materializedIds: (runtime.snapshot?.instances ?? [])
+          .filter((item) => item.materialized)
+          .map((item) => item.id)
+          .sort(),
+      };
+    }
+    return null;
+  }`);
+}
+
 async function venueCrowdSnapshot() {
   return sceneCall(`function () {
     for (const game of this) {
@@ -172,6 +190,10 @@ async function venueCrowdSnapshot() {
       if (!runtime) continue;
       return {
         spriteCount: runtime.spriteCount ?? 0,
+        materializedIds: (runtime.snapshot?.instances ?? [])
+          .filter((item) => item.materialized)
+          .map((item) => item.id)
+          .sort(),
         protestStates: runtime.protestActionSnapshot ?? [],
       };
     }
@@ -350,6 +372,16 @@ try {
     "static NPC contract drifted",
   );
 
+  await centerCameraOn({ x: 1_160, y: 264 });
+  await sleep(1_000);
+  const staticRegionStableStart = await staticCrowdSnapshot();
+  await sleep(3_000);
+  const staticRegionStableEnd = await staticCrowdSnapshot();
+  assert.deepEqual(staticRegionStableEnd?.materializedIds, staticRegionStableStart?.materializedIds,
+    "static crowd IDs changed while the camera remained stationary");
+  assert.equal(staticRegionStableEnd?.spriteCount, staticRegionStableStart?.spriteCount,
+    "static crowd sprite count changed while the camera remained stationary");
+
   await centerCameraOn({ x: 2_000, y: 2_000 });
   await sleep(100);
   const staticAfterLeaving = await staticNpcSnapshot();
@@ -362,6 +394,10 @@ try {
     await sleep(250);
     protestSamples.push(await venueCrowdSnapshot());
   }
+  assert.deepEqual(protestSamples.at(-1)?.materializedIds, protestSamples[0]?.materializedIds,
+    "venue crowd IDs changed while the camera remained stationary");
+  assert.equal(protestSamples.at(-1)?.spriteCount, protestSamples[0]?.spriteCount,
+    "venue crowd sprite count changed while the camera remained stationary");
   const protestStates = protestSamples.at(-1)?.protestStates ?? [];
   const capableProtesters = protestStates.filter((state) => state.capable);
   const fixedProtesters = protestStates.filter((state) => !state.capable);
@@ -445,7 +481,7 @@ try {
       .filter((item) => item.id.startsWith(`${groupId}:`))
       .map((item) => `${item.position.x}:${item.position.y}`)).size > 1);
   assert.ok(hasDispersedGroup, "no public random-position group dispersed starts");
-  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, protestSamples, duringDeparture, trainTrajectories: Object.fromEntries(trainTrajectories), recovered, maxActiveByGroup };
+  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticRegionStableStart, staticRegionStableEnd, staticAfterLeaving, protestSamples, duringDeparture, trainTrajectories: Object.fromEntries(trainTrajectories), recovered, maxActiveByGroup };
   assert.equal(afterStart.configIds.length, 11, "exactly eleven normal and train route groups are required");
   assert.equal(new Set(afterStart.configIds).size, 11, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
