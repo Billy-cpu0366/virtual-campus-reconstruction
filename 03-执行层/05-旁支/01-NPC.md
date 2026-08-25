@@ -11,7 +11,7 @@ updated: 2026-08-23
 
 **P5.1 R4（bounded verified）**：`da68d08`保持四锚点、触发窗、300ms、速度140和路线FACT不变；sprayer presentation depth按`500+(y+24)*0.1`动态更新，train holding时四人可与player同屏辨识。train complete发布无teleport路径，真人键盘到约`(1280,416)`触发后切换factory提示；route完成与shutdown sprite/listener=0。
 
-**05-D-1 路线群众（自动验证通过，等待 Human 视觉验收）**：9组公开路线群众现消费17张48×48、64帧人物表的完整8方向走路动画；火车占用下一路径格时原地等待、保持朝向，火车离开后续走。该等待语义是 `DEC-P5.4-05D1-ROUTE-CROWD-REPAIR-001` 的重构决定，公开 Bundle 的精确避让算法仍为 UNKNOWN。
+**05-D-1 路线群众与常驻动作（自动验证通过，等待 Human 视觉验收）**：9组公开路线群众按17张48×48、64帧人物表播放8方向走路；列车离站才创建乘客并暂停/恢复`loop-crowd`；进入Human视口后保持朝向静止，离开后继续，火车占用下一格则等待。阅读、吃饭、舔猫三类公开静态动作 NPC 独立按视口创建/回收。`DEC-P5.4-05D1-LIFECYCLE-REPAIR-001` 已通过typecheck、335项测试、build、路线群众探针、完整production和性能回归；公开 Bundle 的精确可见暂停算法仍为 UNKNOWN。
 
 **仍未完成**：其余原站NPC、intro跨场景复位和完整跨chunk长路线语义；R4不等于完整SYS-NPC。
 

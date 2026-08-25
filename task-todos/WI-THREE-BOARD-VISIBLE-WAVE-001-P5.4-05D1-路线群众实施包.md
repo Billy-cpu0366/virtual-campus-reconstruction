@@ -34,6 +34,19 @@ updated: 2026-08-24
 - 火车动态占用路径下一 waypoint 对应格时，群众在当前格原地等待、保持最后朝向；占用解除后继续既有路径。
 - 不动态绕行、不销毁重生；公开 Bundle 尚未直接证实火车与群众的精确避让算法，上述为本轮重构 DECISION。
 
+## 生命周期重构合同（DECISION；Human 已接受）
+
+- 取消场景 ready 时对全部路线群众的一次性常驻创建；按公开 Bundle 的列车事件创建 `crowd-train`，并在其离站期间暂停/恢复 `loop-crowd`。
+- 路线群众以视口为边界管理显示和运行：进入 Human 可见视口后停在最后朝向；离开视口后才恢复路径推进。不得继续推进后再以跳变位置重建。
+- 已证实的阅读 `(72,53)`、吃饭 `(54,63)`、舔猫 `(12,106)` 作为独立静态动作 NPC 处理；不得混入 9 组路线群众或补猜其他地点/动作。
+- 每组最大活跃数及公开 Bundle 的精确缓存/销毁细节仍须按证据实现；未证实时保持 UNKNOWN。
+
+## 自动验证收据
+
+- 通过：`npm run typecheck`、`npm test`（335项）、`npm run build`、`npm run browser:route-crowd-production -- http://127.0.0.1:4237/`、`npm run browser:performance-smoke -- http://127.0.0.1:4237/`、`npm run browser:complete-production -- http://127.0.0.1:4237/`。
+- 性能修复：列车离站的10个乘客路径改为逐帧创建，消除首次发现的约72ms同步BFS长任务。
+- 未完成：Human视觉验收；自动结果不能代签。
+
 ## 证据
 
 `sample/original-public-build/mirror/chunk-WMFY56ZM.js`：`publicCrowdSprites` 约 byte 318344、组初始化约 328283、Crowd manager update/destroy 约 180000/193985、path 约194272、train passengers约445171。
