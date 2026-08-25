@@ -33,6 +33,17 @@ decision: DEC-P5.4-05D2-PUBLIC-CROWD-MODEL-001
 - 不猜无 ID region 的业务名称，不补造全局避让、未证实常驻地点或动作。
 - 不实现 water/fog、动物、ghost、cars，或未证实的完整 worker/teardown 算法。
 
+## 执行清单（Human 已接受）
+
+按公开 owner 分批完成，不再按视觉症状零散补丁。每一批都必须先完成：公开配置测试→核心行为测试→Phaser接线→指定区域 production probe；未完成四项不得开启下一批。
+
+1. 区域静态 crowd：46 个 `crowd/crowd_up` region（已实现，待纳入完整回归）。
+2. 路线/火车 crowd：完整 11 条正常路线、`bug-area` 随机游走、火车10人和 `loop-crowd` 协同。
+3. 专属场所 crowd：3 concert、1 protesters_rising、8 dancers。
+4. special：reading/eating/cat/4 sprayer 保持独立 owner，复核资源和生命周期。
+5. 统一回归：站台、餐车/店面、海滩/足球/虫区、concert/抗议/舞者、火车事件、相机创建回收、性能和完整 production。
+6. 最终一次 Human 整体视觉验收；自动结果不能代签。
+
 ## 验收
 
 - 结构：46 个静态 crowd region、11 条正常路线配置、火车10人配置、3 concert region、1 protesters_rising、8 dancer 和 special 配置均可被测试读取。
