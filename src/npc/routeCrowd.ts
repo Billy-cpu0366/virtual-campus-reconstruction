@@ -32,11 +32,14 @@ export interface RouteCrowdConfig {
   readonly deleteAfterComplete: boolean;
   readonly randomPositions: boolean;
   readonly maxActiveInViewport: number | undefined;
+  readonly pathRandomFactor?: number;
 }
 
 export interface RouteCrowdPathRequest {
   readonly start: RouteCrowdTile;
   readonly end: RouteCrowdTile;
+  readonly randomSeed?: number;
+  readonly randomFactor?: number;
 }
 
 export type RouteCrowdPathPoint = RouteCrowdTile;
@@ -326,6 +329,8 @@ export class RouteCrowdRuntime {
           x: endTile.x * ROUTE_CROWD_TILE_SIZE,
           y: endTile.y * ROUTE_CROWD_TILE_SIZE,
         },
+        randomSeed: startTile.x * 1_000 + startTile.y * 100 + endTile.x * 10 + endTile.y + pending.index * 7_919,
+        randomFactor: pending.config.pathRandomFactor ?? .8,
       });
       if (generation !== this.batchedStartGeneration || this.pendingStarts === undefined) {
         return {
