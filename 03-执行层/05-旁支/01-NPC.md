@@ -2,54 +2,97 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-updated: 2026-08-23
+audit-status: proposed-human-gate
+work-item: WI-SYS-NPC-SPECIAL-001
+updated: 2026-08-25
 ---
 
 # NPC 与环境实体（SYS-NPC）
 
 ## 👀 先看这里（人话总结，给 Human）
 
-**P5.1 R4（bounded verified）**：`da68d08`保持四锚点、触发窗、300ms、速度140和路线FACT不变；sprayer presentation depth按`500+(y+24)*0.1`动态更新，train holding时四人可与player同屏辨识。train complete发布无teleport路径，真人键盘到约`(1280,416)`触发后切换factory提示；route完成与shutdown sprite/listener=0。
+**当前结论候选**：SYS-NPC不是一个统一运行时，而是多类独立owner组成的家族：路线/事件群众、区域静态群众、venue人群、固定special、sprayer、encounter、ghost和moving-sprite。不同owner的激活、动作、视口、回收和失败路径有实质差异，不能再用一套“NPC出现/移动/消失”模型统一修补。
 
-**SYS-NPC专项已启动（只读审计）**：Human确认第三轮群众candidate即使通过357项测试、build、性能/完整/群众production，视觉上仍有很多毛病；`ef9f004`、`70aefe4`、`76beaf0`、`ea87512`状态为automated-verified / human-visual-rejected并冻结为失败对照。`DEC-SYS-NPC-SPECIAL-001`要求先核对完整owner、公开机制、当前代码覆盖与统一差异，重写本卡七格主体；Human接受机制与分批计划前不再改NPC代码。
+**当前状态**：Phase A只读审计已经形成[机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)，等待Human接受机制理解、差异表和分批顺序。第三轮candidate `ef9f004`→`70aefe4`→`76beaf0`→`ea87512`保持automated-verified / human-visual-rejected；不作为正确基线。
 
-**仍未完成**：本卡主体当前仍以sprayer为主，尚未成为完整SYS-NPC合同；ghost、rat attack、birds等公开候选未实施，intro跨场景复位和完整跨chunk路线语义仍UNKNOWN。专项入口：`task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md`。
+**当前硬边界**：本卡新增完整SYS-NPC候选内容，但在Human机制Gate前仍是`PROPOSED`，不授权修改代码。rat、ghost、birds正常入口，铁路合法性、完整shutdown和资源-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
-P1确认真实候选`npc-sprayer`：公开64×64喷洒资源、48×48跑步资源、四个锚点`(60,25)/(67,25)/(71,25)/(78,25)`及逃跑路线。idle NPC在玩家横向≤2 tile、纵向差0..2且intro完成时触发；最近者先跑，其余按距离每300ms启动，速度140。route完成或视口回收会销毁；NPC自身清tween/timer并退出active集合。
+- **FACT**：公开前端至少存在以下不同owner：
+  1. `CrowdManager`路线与事件人群：11组常规route、`crowd-train`、bug、hazmat；
+  2. `particle-trajectories.json`区域owner：`crowd=25`、`crowd_up=21`、`concert=3`、`protesters_rising=1`；
+  3. fixed special：reading、eating、cat licking；
+  4. sprayer×4、dancing×8、rat attack×40、ghost默认5、birds 5随机+1固定waypoint；
+  5. 只有资源而没有完整创建链/入口证据的scientist、monk、dog、DJ、helicopter等UNKNOWN对象。
+- **FACT**：资源存在、创建链存在、正常入口可达、当前实现、自动验证和Human视觉通过是六种不同状态，不能互相替代。
+- **FACT**：route按路径/事件运行；static与venue按整个region边界激活；sprayer和fixed special有专属触发；ghost、rat、birds不是普通CrowdManager配置。
+- **FACT**：公开随机位置、人物选择、朝向和路径顺序不是稳定精确坐标FACT；配置人数也不保证每次成功布点人数。
+- **INFERRED**：Human看到的单列、弹出/消失、动作单调等现象，主要与owner生命周期粒度、呈现状态机和自动probe偏斜有关；具体每个视觉症状仍需按owner固定路径重放。
+- **UNKNOWN**：rat完整触发/路径、ghost和birds正常产品入口、铁路禁站原站数据流、所有owner完整scene teardown、sprayer跨chunk路线和资源-only对象身份。
 
-UNKNOWN：intro标记的跨场景复位、长路线穿过未加载chunk、完整scene teardown。主报告：`task-todos/WI-VISIBLE-SIDE-WAVE-001-P1-调查报告.md`。
+主证据：`sample/original-public-build/mirror/chunk-WMFY56ZM.js`、`sample/original-public-build/mirror/assets/maps/particle-trajectories.json`、`sample/original-public-build/mirror/assets/maps/walls-layer.json`。完整定位与矩阵见[Phase A审计报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)。
 
 ## 2. 数据与约定
 
-- 四公开配置为本轮唯一NPC范围；不扩成行人/怪物/通用NPC。
-- 世界锚点属于场景特殊行为，不伪装成chunk tile owner。
-- 生命周期：idle/spraying→fleeing→completed/destroyed；destroy幂等。
-- Entity公共框架继续NO-GO。
+- **FACT**：`particle-trajectories.json`共有88个region；无名region只保留ID与polygon/bbox，不补造地点名。
+- **FACT**：路线配置分别声明start/end tiles、sprite pool、速度/变化、delay、one-way/loop/goBack/wander、最大活跃数和偏移；不能把所有路线压成单一数组。
+- **FACT**：静态/venue布点在polygon内随机采样并有最小间距；region存活期间身份与位置应稳定。
+- **DECISION候选**：每个owner合同至少记录`config/resource → activate/count → identity/randomness → path/action → lifecycle → interfaces → cleanup/failure → verification`八项。
+- **DECISION候选**：owner状态台账固定分开记录六状态；自动测试只证明测试内容，Human视觉另记。
+- **DECISION候选**：失败candidate固定为integration worktree clean HEAD `ea87512`，在新实施包接受前只读保留。
 
 ## 3. 怎么做
 
-旁支实现专属sprayer状态/适配器；world ready后按视口创建，entry control gate开放后允许触发。保留四锚点和300ms组行为；Main只接入owner，不复制NPC逻辑。
+> 以下是`PROPOSED`分批方案，Human机制Gate前不构成实现授权。
+
+1. **B0 证据与合同收口**：重放train正常离站；补rat、ghost、birds入口与生命周期；确认铁路/不可站策略和route worker直接链。
+2. **B1 static + venue**：分别恢复`crowd/crowd_up`、concert、protest的region生命周期、稳定身份、方向池和逐NPC动作。
+3. **B2 route + train + bug/hazmat**：冻结每组配置、候选路径、delay/goBack/wander、火车暂停恢复及呈现策略。
+4. **B3 sprayer + fixed special + dancing + rat**：保持专属owner；rat仅在B0证据足够后进入。
+5. **B4 ghost + birds**：只在正常入口和生命周期证据成立后实现。
+6. **B5 联合关闭**：完整正常路径、慢镜头边界、shutdown、性能和Human整体验收。
+
+每批先固定owner expected、失败/差异证据和允许文件，再做有界实现；Main负责共享入口、权威状态和最终集成。不得按截图中每个NPC建立零散补丁。
 
 ## 4. 失败怎么办
 
-纹理缺失返回可诊断失败，不换猜测资源；构造/route失败销毁已创建对象。shutdown取消随机delay、级联timer和route tween，清集合；重复进入不得重复实例。
+- 资源或配置缺失：返回可定位owner/config/key失败，不替换为猜测资源。
+- 路径失败：记录owner、config、起终点和失败原因；配置人数与成功路径人数分别记，不伪造NPC补数。
+- region失败：已创建presentation必须按owner对称回收；部分写入不能登记成功。
+- trigger/入口UNKNOWN：停止对应实现，保留UNKNOWN，不把测试hook或延迟构造接入production。
+- shutdown：每个owner清sprite、timer、tween、listener、path/region状态；重复shutdown幂等；最终收据必须覆盖route、bug、venue、dancing等当前缺口。
+- Human视觉失败：回到同一RC-NPC差异表和owner根因包，不重开症状式工作项，也不以更多测试数量代签。
 
-## 5. 接口接口
+## 5. 接口
 
-- 入←Main：world ready、playable/control gate、viewport、player position、shutdown。
-- 出→Main：visible count、flee state、destroy receipt和failure。
-- 不直接操作chunk cache、相机或玩家输入。
+- 入←Main：world ready、playable/control gate、viewport/worldView、player position/facing、train departure/leave/complete、walls/path grid、scene shutdown。
+- 入←资源/地图：公开sprite/animation、`particle-trajectories.json`、`walls-layer.json`、owner配置。
+- 出→Main：owner ready/failure、logical/materialized/visible count、trigger/complete/destroy receipt、shutdown receipt和必要的Human probe状态。
+- owner不得直接管理chunk cache、相机、玩家输入或其他owner；train事件只通过冻结事件接口连接route crowd。
+- `SYS-ENTITY`继续NO-GO：route/path、region、special、encounter、moving-sprite尚未显示稳定共同生命周期合同。
 
 ## 6. 怎样算做对
 
-入口终态至少一名sprayer可见；玩家向row25短移触发四人300ms级联逃跑；至少一人沿公开路线完成并销毁。重复进入/shutdown无残留tween/timer/实例；Human肉眼验收通过。
+每批至少同时满足：
+
+1. 配置与资源契约测试；
+2. owner核心状态/路径/动作测试；
+3. Phaser presentation与资源失败测试；
+4. 对应正常production区域/事件probe，而非仅test hook或对象计数；
+5. 慢相机边界和静止相机身份稳定验证；
+6. owner shutdown后sprite/timer/tween/listener归零收据；
+7. 该批owner级Human视觉通过。
+
+B5还需重放完整入口→地图→NPC区域→火车事件→scene shutdown路径，运行受影响全量回归和性能检查，再由Human整体视觉验收。任何自动PASS都不能单独把完整SYS-NPC晋升为`implemented/verified`。
 
 ## 7. 代码位置
 
-P2实现包：`task-todos/WI-VISIBLE-SIDE-WAVE-001-P2-实现包.md`；群众审计：`task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05D1-人群源码审计.md`。
+- **当前根基线**：根`master`尚无`src/npc/`、`tests/npc/`或NPC production probe。
+- **失败candidate（只读对照）**：`.pi/worktrees/visible-product-integration`，clean HEAD `ea87512`。
+- candidate core：`src/npc/sprayer.ts`、`routeCrowd.ts`、`gridPathProvider.ts`、`staticCrowd.ts`、`staticNpc.ts`、`venueCrowd.ts`、`venueCrowdRuntime.ts`、`bugCrowd.ts`、`dancingCrowd.ts`。
+- candidate presentation：`game/PhaserSprayerRuntime.ts`、`PhaserRouteCrowdRuntime.ts`、`PhaserStaticCrowdRuntime.ts`、`PhaserStaticNpcRuntime.ts`、`PhaserVenueCrowdRuntime.ts`、`PhaserBugCrowdRuntime.ts`、`PhaserDancingCrowdRuntime.ts`及`game/CampusScene.ts`。
+- candidate tests/probe：`tests/npc/**`、`scripts/browser-route-crowd-production.mjs`。
+- Phase A过程与差异主表：[SYS-NPC Phase A审计报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)。
 
-当前candidate：`src/npc/routeCrowd.ts`、`src/npc/gridPathProvider.ts`、`src/npc/staticCrowd.ts`、`src/npc/venueCrowdRuntime.ts`；presentation：`game/PhaserRouteCrowdRuntime.ts`、`game/PhaserStaticCrowdRuntime.ts`、`game/PhaserVenueCrowdRuntime.ts`；验证：`tests/npc/**`与`scripts/browser-route-crowd-production.mjs`。
-
-复用观察：route path与region lifecycle的触发、状态和回收语义仍不同，未发现第二个稳定共同合同，不提取通用Entity/crowd lifecycle框架；A*只保留既有`GridRouteCrowdPathProvider`这一真实多消费者能力。
+复用观察：多个真实owner已有不同机制，但当前根基线没有两个已集成且Human通过的owner显示稳定共同合同；不提取通用NPC/Entity框架。`GridRouteCrowdPathProvider`仅是candidate中被多个route配置消费的有界能力，是否进入根基线须后续集成Gate。

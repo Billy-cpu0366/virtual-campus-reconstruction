@@ -4,8 +4,8 @@ type: system-special-project
 system: SYS-NPC
 issue-class: systemic-failure
 active-route: systemic-flow
-status: audit-authorized
-phase: authority-and-mechanism-audit
+status: audit-complete-awaiting-human
+phase: mechanism-and-batch-plan-review
 decision: DEC-SYS-NPC-SPECIAL-001
 updated: 2026-08-25
 ---
@@ -31,7 +31,7 @@ updated: 2026-08-25
 4. 当前 integration candidate 代码与自动探针只证明“我们现在怎样实现”，不证明原站事实或产品正确。
 5. Human 视觉反馈决定重构产品是否可接受；与公开事实冲突时并列记录并经过 Human Gate，不改写 FACT。
 
-## Phase A：只读机制与覆盖审计（已授权）
+## Phase A：只读机制与覆盖审计（已完成，待Human Gate）
 
 ### A1. Owner 全量清单
 
@@ -76,15 +76,14 @@ updated: 2026-08-25
 
 ## Phase A 交付物与 Gate
 
-交付：
+已交付：
 
-- 完整 owner/覆盖矩阵；
-- 每 owner 机制表；
-- 公开 Bundle → 当前代码统一差异表；
-- 重写后的 SYS-NPC 卡候选；
-- 推荐实施批次、每批验收、成本与风险。
+- [Phase A机制与覆盖审计](WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)：完整owner/六状态矩阵、每owner机制表、公开Bundle→失败candidate统一差异表、RC-NPC-1..6根因聚类；
+- [SYS-NPC卡候选](../03-执行层/05-旁支/01-NPC.md)：七格已扩展为完整owner家族，明确FACT/INFERRED/DECISION/UNKNOWN；
+- 推荐`B0→B1→B2→B3→B4→B5`批次、每批验收、成本与风险；
+- candidate对照固定为`.pi/worktrees/visible-product-integration` clean HEAD `ea87512`；根`master`没有NPC实现，不把历史自动PASS冒充根基线。
 
-Human Gate：Human 接受机制理解、专项范围与分批顺序后，才能把状态切到 `implementation-authorized`。Phase A 不修改 `src/`、`game/`、测试或运行资源。
+Human Gate：Human 接受机制理解、专项范围与分批顺序后，才能进入下一授权阶段。Phase A 未修改 `src/`、`game/`、测试、运行资源或失败candidate。
 
 ## 后续阶段（仅 proposed，未授权）
 
@@ -103,7 +102,8 @@ Human Gate：Human 接受机制理解、专项范围与分批顺序后，才能�
 
 ## 当前入口
 
-- 正式系统卡：[`03-执行层/05-旁支/01-NPC.md`](../03-执行层/05-旁支/01-NPC.md)
+- 正式系统卡候选：[`03-执行层/05-旁支/01-NPC.md`](../03-执行层/05-旁支/01-NPC.md)
+- Phase A统一审计：[`SYS-NPC Phase A机制与覆盖审计`](WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)
 - 全量盘点：[`05-B NPC盘点报告`](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05B-NPC盘点报告.md)
 - 群众公开模型：[`05-D-2实施包`](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05D2-公开群众模型实施包.md)
 - 多轮失败审计：[`05-D-1人群源码审计`](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05D1-人群源码审计.md)
