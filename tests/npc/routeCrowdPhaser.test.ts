@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { ROUTE_CROWD_CONFIGS } from "../../src/npc/index.js";
-import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack } from "../../game/PhaserRouteCrowdRuntime.js";
+import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack, ROUTE_CROWD_VISUAL_OFFSETS } from "../../game/PhaserRouteCrowdRuntime.js";
 
 class Sprite { x:number; y:number; depth=0; destroyed=false; constructor(x:number,y:number){this.x=x;this.y=y} setDepth(v:number){this.depth=v;return this} destroy(){this.destroyed=true} }
 
 describe("PhaserRouteCrowdRuntime",()=>{
+ it("uses only source-backed route display offsets",()=>{
+  expect(ROUTE_CROWD_VISUAL_OFFSETS).toMatchObject({"main-crowd":16,"loop-crowd":8,drinkers:8,concert_crowd:10,beach_crowd_walk:8,"vertical-crowd":6,"vertical-crowd-reverse":6,"crowd-train":8});
+  expect(ROUTE_CROWD_VISUAL_OFFSETS["walking-crowd"] ?? 0).toBe(0);
+  expect(ROUTE_CROWD_VISUAL_OFFSETS["hazmat-crowd"] ?? 0).toBe(0);
+  expect(ROUTE_CROWD_VISUAL_OFFSETS.outside_concert1 ?? 0).toBe(0);
+ });
+
  it("keeps ordinary crowd displays off the track while preserving train passengers",()=>{
   expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 312).y).not.toBe(312);
   expect(keepOrdinaryCrowdOffTrack("crowd-train", 600, 312)).toEqual({x:600,y:312});

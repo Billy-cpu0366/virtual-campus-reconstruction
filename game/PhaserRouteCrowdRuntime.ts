@@ -25,10 +25,10 @@ export function keepOrdinaryCrowdOffTrack(groupId: string, x: number, y: number)
   return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
 }
 
-const ROUTE_CROWD_VISUAL_OFFSETS: Readonly<Record<string, number>> = Object.freeze({
+export const ROUTE_CROWD_VISUAL_OFFSETS: Readonly<Record<string, number>> = Object.freeze({
   "main-crowd": 16, "loop-crowd": 8, drinkers: 8, concert_crowd: 10,
-  beach_crowd_walk: 8, "vertical-crowd": 8, "vertical-crowd-reverse": 8,
-  "walking-crowd": 8, "hazmat-crowd": 8, outside_concert1: 8, "crowd-train": 8,
+  beach_crowd_walk: 8, "vertical-crowd": 6, "vertical-crowd-reverse": 6,
+  "crowd-train": 8,
 });
 
 const ROUTE_CROWD_SPECIAL_TEXTURES = Object.freeze({
