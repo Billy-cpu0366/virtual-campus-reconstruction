@@ -3,8 +3,8 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-acceptance
-classification-trigger: human-accepted-source-backed-route-crowd-dispersion-and-residence
+correction-phase: audit
+classification-trigger: human-visual-gate-failed-again-route-crowd-disappears-cohort-walking-and-missing-resident-scene-crowds
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
