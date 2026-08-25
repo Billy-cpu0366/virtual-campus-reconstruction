@@ -4,15 +4,15 @@ parent-batch: B0
 batch: B1
 systems: [SYS-NPC]
 type: bounded-implementation-package
-status: proposed-awaiting-human
-authorization: none
+status: approved
+authorization: DEC-SYS-NPC-B1-STATIC-VENUE-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
 ---
 
 # SYS-NPC B1 静态与 Venue 实施包（候选）
 
-> B1尚未授权。目标是先修公开机制已经足够、且不依赖六点相机序列入口的`crowd/crowd_up`、concert和protest；不夹带route、train、special、rat、ghost或birds。
+> Human已选择`授权B1实现 (Recommended)`。目标是只修公开机制已经足够、且不依赖六点相机序列入口的`crowd/crowd_up`、concert和protest；不夹带route、train、special、rat、ghost或birds。
 
 ## 1. 目标与 expected
 
@@ -84,7 +84,7 @@ Main独占并在接收后串行处理：
 
 ## 6. Human Gate
 
-自动回归通过后，先由Human分别验收：
+实施授权Gate已通过；自动回归通过后，仍由Human分别验收：
 
 1. 普通static和`crowd_up`区域自然出现/离开、方向与动作不过度同步；
 2. concert不是静态单一人物堆；

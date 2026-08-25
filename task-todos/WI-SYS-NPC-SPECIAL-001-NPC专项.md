@@ -4,9 +4,9 @@ type: system-special-project
 system: SYS-NPC
 issue-class: systemic-failure
 active-route: systemic-flow
-status: b0-complete-awaiting-b1-human
-phase: b1-static-venue-implementation-review
-decision: DEC-SYS-NPC-PHASE-A-001
+status: b1-implementation-authorized
+phase: b1-static-venue-implementation
+decision: DEC-SYS-NPC-B1-STATIC-VENUE-001
 updated: 2026-08-25
 ---
 
@@ -93,10 +93,10 @@ Human Gate结果：Human选择`接受并开始B0 (Recommended)`，已接受owner
 - FACT关闭`walls-layer`→Blob Worker→seeded 8向A*、成功路径限制实例数；candidate主线程A*/endpoint吸附/轨道显示位移明确为DECISION；
 - FACT关闭rat、ghost、birds的owner内部机制与创建链；三者正常产品入口继续受`Q-CAMERA-ENTRY-001`阻塞；
 - 铁路静态禁站/allowed mask和完整owner scene teardown继续UNKNOWN，登记`Q-NPC-RAIL-001`/`Q-NPC-TEARDOWN-001`；
-- B1 static+venue不受上述入口UNKNOWN阻塞，已形成[候选实施包](WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)，等待Human授权；
+- B1 static+venue不受上述入口UNKNOWN阻塞，[实施包](WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)已获Human授权；
 - 本轮未修改任何实现、测试、运行资源、`sample/`或失败candidate。
 
-## 后续阶段（B1-B5仅 proposed，未授权）
+## 后续阶段（B1已授权；B2-B5未授权）
 
 - Phase B：按 Human 接受的 owner 批次修复核心机制和 Phaser presentation；每批先失败证据，再最小实现与专项回归。
 - Phase C：固定场景重放与 owner 级 Human 视觉验收；不等全部 NPC 做完才首次验收。

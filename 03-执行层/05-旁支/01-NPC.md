@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: accepted-b0-complete
+audit-status: b1-implementation-authorized
 work-item: WI-SYS-NPC-SPECIAL-001
 updated: 2026-08-25
 ---
@@ -15,7 +15,7 @@ updated: 2026-08-25
 
 **当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。第三轮candidate `ef9f004`→`70aefe4`→`76beaf0`→`ea87512`保持automated-verified / human-visual-rejected；不作为正确基线。
 
-**当前硬边界**：当前等待Human审查[B1静态与Venue实施包](../../task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；B1-B5尚未授权代码，不建立通用NPC/Entity框架。
+**当前硬边界**：[B1静态与Venue实施包](../../task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)已获Human授权，只能修改static/venue owner与对应测试；Main独占共享接线与probe。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；B2-B5未授权，不建立通用NPC/Entity框架。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
@@ -47,10 +47,10 @@ updated: 2026-08-25
 
 ## 3. 怎么做
 
-> Human已接受以下分批顺序；B0已完成，B1实施包等待Human授权，B2-B5仍未授权。
+> Human已接受以下分批顺序；B0已完成，B1有界实现已授权，B2-B5仍未授权。
 
 1. **B0 证据与合同收口（完成）**：train正常入口和route worker已关闭；rat/ghost/birds owner内部机制已关闭；产品入口、铁路策略和完整teardown残余UNKNOWN已登记。
-2. **B1 static + venue（待授权）**：分别恢复`crowd/crowd_up`、concert、protest的region生命周期、稳定身份、方向池和逐NPC动作。
+2. **B1 static + venue（实施中）**：分别恢复`crowd/crowd_up`、concert、protest的region生命周期、稳定身份、方向池和逐NPC动作。
 3. **B2 route + train + bug/hazmat**：冻结每组配置、候选路径、delay/goBack/wander、火车暂停恢复及呈现策略。
 4. **B3 sprayer + fixed special + dancing + rat**：保持专属owner；rat仅在B0证据足够后进入。
 5. **B4 ghost + birds**：只在正常入口和生命周期证据成立后实现。

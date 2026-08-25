@@ -9,13 +9,13 @@ classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-NPC-SPECIAL-001
 work-item-level: system
 work-item-type: systemic-special-project
-work-item-status: active-human-gate
-current-phase: npc-special-b0-complete-b1-review
-current-gate: npc-special-b1-static-venue-authorization
-gate-status: awaiting-human
-authorization-ref: DEC-SYS-NPC-PHASE-A-001
+work-item-status: active-b1-implementation
+current-phase: npc-special-b1-static-venue-implementation
+current-gate: npc-special-b1-automated-regression
+gate-status: implementation-authorized
+authorization-ref: DEC-SYS-NPC-B1-STATIC-VENUE-001
 preauthorized-next-work-item: none
-next-phase: npc-special-b1-static-venue-implementation
+next-phase: npc-special-b1-human-visual-gate
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-NPC-SPECIAL-001`；Human已接受建立独立SYS-NPC专项，不再沿05-D-2按视觉症状追加补丁。
-- **当前阶段**：B0证据与合同收口已完成；train正常入口、公开route worker及rat/ghost/birds owner内部机制已关闭，残余UNKNOWN已登记；当前等待B1 static+venue实施授权。
-- **失败基线**：第三轮群众candidate `ef9f004`/`70aefe4`/`76beaf0`/`ea87512`虽自动回归通过，但Human确认仍有很多毛病；代码保留在clean integration worktree作为失败对照，不作为正确根基线或交付结论。
+- **当前阶段**：B0证据与合同收口已完成；Human已授权B1 static+venue有界实现，当前从clean `ea87512`创建隔离worktree并进入实现与自动回归。
+- **失败基线**：第三轮群众candidate `ef9f004`/`70aefe4`/`76beaf0`/`ea87512`虽自动回归通过，但Human确认仍有很多毛病；原integration worktree保持clean失败对照，不作为正确根基线或交付结论。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；原`WI-THREE-BOARD-VISIBLE-WAVE-001`不再是动态当前工作项，历史状态仍可追溯。
-- **当前授权**：只允许Human审查B0结果与B1实施包；B1-B5代码、`sample/`和失败candidate均未授权修改。
+- **当前授权**：B1实现窗口只修改static/venue owner和目标测试；Main独占`CampusScene`、共享production probe/package、权威状态与最终集成；B2-B5未授权。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：B1实施必须单独取得Human授权；自动检查后仍需static、concert、protest owner级视觉Gate，不能替代整体视觉验收。
+- **关闭门禁**：B1自动检查后仍需static、concert、protest owner级Human视觉Gate；通过不自动授权B2，也不能替代完整SYS-NPC整体视觉验收。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -61,7 +61,7 @@ updated: 2026-08-25
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| SYS-NPC完整专项 | `systemic-failure`；B0已完成，当前等待B1 static+venue实施授权 | 审查B0关闭项/残余UNKNOWN、B1范围、允许路径、自动/Human验收和风险 | 未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate；远端操作 | Human授权后在隔离worktree执行B1，不自动进入B2 |
+| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1 static+venue已授权并进入隔离实现 | 修改static/venue owner与目标测试；Main接线probe并完成自动回归 | route/train/special/rat/ghost/birds、`sample/`、地图/玩家/相机/30FPS/火车、远端；实现窗口改Main-owned文件 | 自动通过后进入static/concert/protest owner级Human视觉Gate，不自动进入B2 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -164,7 +164,7 @@ updated: 2026-08-25
 - FACT确认rat、ghost、birds的owner内部机制；三者正常产品入口仍受`Q-CAMERA-ENTRY-001`阻塞；
 - 新增`Q-NPC-RAIL-001`与`Q-NPC-TEARDOWN-001`。
 
-当前等待Human审查[B1静态与Venue实施包](task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)。B1-B5实现仍未授权。
+Human已授权[B1静态与Venue实施包](task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)。当前从clean `ea87512`创建隔离worktree `impl/npc-b1-static-venue`：实现窗口只改static/venue owner和目标测试，Main负责共享probe、自动回归与最终接收。B2-B5仍未授权。
 
 ## 已阻塞或暂停工作项
 
