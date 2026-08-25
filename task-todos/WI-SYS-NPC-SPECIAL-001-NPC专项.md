@@ -4,8 +4,8 @@ type: system-special-project
 system: SYS-NPC
 issue-class: systemic-failure
 active-route: systemic-flow
-status: b0-evidence-authorized
-phase: b0-evidence-and-contract
+status: b0-complete-awaiting-b1-human
+phase: b1-static-venue-implementation-review
 decision: DEC-SYS-NPC-PHASE-A-001
 updated: 2026-08-25
 ---
@@ -85,13 +85,16 @@ updated: 2026-08-25
 
 Human Gate结果：Human选择`接受并开始B0 (Recommended)`，已接受owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序，并仅授权B0只读补证。Phase A 未修改 `src/`、`game/`、测试、运行资源或失败candidate。
 
-## Phase A.1：B0证据与合同收口（已授权）
+## Phase A.1：B0证据与合同收口（已完成）
 
-- 重放或追查train正常离站调用链与10人配置的可观察关系；
-- 补rat触发/路径/完成、ghost正常入口、birds正常入口与销毁链；
-- 核对route worker/候选路径和铁路/不可站区域的数据流，区分FACT与重构DECISION；
-- 更新每owner六状态台账，证据不足继续保持UNKNOWN；
-- 只读公开证据和clean失败candidate，不修改任何实现、测试、运行资源或`sample/`。
+结果见[B0证据与合同收口](WI-SYS-NPC-SPECIAL-001-B0证据收口.md)：
+
+- FACT关闭train正常`startGame→crowdTrain→departTrain→spawnTrainPassengers`、count10目标合同、`loop-crowd`暂停恢复和清理链；
+- FACT关闭`walls-layer`→Blob Worker→seeded 8向A*、成功路径限制实例数；candidate主线程A*/endpoint吸附/轨道显示位移明确为DECISION；
+- FACT关闭rat、ghost、birds的owner内部机制与创建链；三者正常产品入口继续受`Q-CAMERA-ENTRY-001`阻塞；
+- 铁路静态禁站/allowed mask和完整owner scene teardown继续UNKNOWN，登记`Q-NPC-RAIL-001`/`Q-NPC-TEARDOWN-001`；
+- B1 static+venue不受上述入口UNKNOWN阻塞，已形成[候选实施包](WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)，等待Human授权；
+- 本轮未修改任何实现、测试、运行资源、`sample/`或失败candidate。
 
 ## 后续阶段（B1-B5仅 proposed，未授权）
 
@@ -112,6 +115,8 @@ Human Gate结果：Human选择`接受并开始B0 (Recommended)`，已接受owner
 
 - 正式系统卡候选：[`03-执行层/05-旁支/01-NPC.md`](../03-执行层/05-旁支/01-NPC.md)
 - Phase A统一审计：[`SYS-NPC Phase A机制与覆盖审计`](WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)
+- B0结果：[`B0证据与合同收口`](WI-SYS-NPC-SPECIAL-001-B0证据收口.md)
+- 下一Gate：[`B1静态与Venue实施包`](WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)
 - 全量盘点：[`05-B NPC盘点报告`](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05B-NPC盘点报告.md)
 - 群众公开模型：[`05-D-2实施包`](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05D2-公开群众模型实施包.md)
 - 多轮失败审计：[`05-D-1人群源码审计`](WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05D1-人群源码审计.md)

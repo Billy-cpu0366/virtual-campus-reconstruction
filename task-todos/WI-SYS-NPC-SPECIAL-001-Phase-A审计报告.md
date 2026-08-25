@@ -3,7 +3,7 @@ work-item: WI-SYS-NPC-SPECIAL-001
 type: audit-report
 system: SYS-NPC
 issue-class: systemic-failure
-status: accepted-b0-authorized
+status: accepted-b0-complete
 decision: DEC-SYS-NPC-PHASE-A-001
 public-evidence: sample/original-public-build/mirror/chunk-WMFY56ZM.js
 candidate-worktree: .pi/worktrees/visible-product-integration
@@ -22,6 +22,7 @@ updated: 2026-08-25
 - **candidate基线**：`.pi/worktrees/visible-product-integration`，分支`integration/visible-product-wave`，clean HEAD `ea87512`；候选链为`ef9f004 → 70aefe4 → 76beaf0 → ea87512`。
 - **当前根检出事实**：根`master`没有`src/npc/`、`tests/npc/`或NPC production probe；当前实现只存在于上述integration worktree，尚未汇入根基线。
 - **Human结果**：第三轮candidate虽有历史自动PASS记录，整体视觉仍为`human-visual-rejected`，不能作为正确基线。
+- **B0更新**：[证据与合同收口](WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已关闭train正常入口、公开route worker及rat/ghost/birds owner内部机制；铁路策略、三者正常产品入口和完整teardown仍保持UNKNOWN。
 
 六种状态必须分开：`资源存在`、`创建链存在`、`正常入口可达`、`当前candidate已实现`、`自动验证`、`Human视觉通过`。前两项不能推出后四项。
 
@@ -31,7 +32,7 @@ updated: 2026-08-25
 |---|---|---|---|---|---|---|
 | sprayer×4 | 有；`createNPCSpecials`及四配置 | intro/control条件仍有UNKNOWN | core+Phaser+Main | 单测有；无owner production probe | 未单独通过 | 专属owner；candidate全局创建与原站扩视口创建存在差异 |
 | 常规route crowd | 有；11组公开注册 | 场景初始化链有证据 | core+Phaser+Main | 单测+route probe，未逐组覆盖 | 整体失败 | 路线owner；candidate A*是重构实现，不等于原站worker等价 |
-| `crowd-train` | 有；离站10人、2400ms、count10 | 火车离站事件链有证据，正常页面逐秒行为仍待重放 | route子owner+Main火车事件 | 单测+route probe | Human曾观察约2人，与FACT count10冲突 | 保留FACT与观察冲突，B0先重放，不改写人数 |
+| `crowd-train` | 有；离站10人、2400ms、count10 | FACT：正常`startGame→crowdTrain→departTrain→spawnTrainPassengers` | route子owner+Main火车事件 | 单测+route probe | Human曾观察约2人，与FACT目标count10不等价 | 配置10为目标上限，实例受成功路径和帧时序限制；铁路策略仍UNKNOWN |
 | `crowd`/`crowd_up` | 有；25/21区域 | 场景初始化链有证据 | core+Phaser+Main | core单测；probe仅局部 | 整体失败 | 区域静态owner；配置人数不等于成功布点人数 |
 | concert | 有；3区域 | 场景初始化链有证据 | venue core+Phaser+Main | core单测；无concert专项probe | 整体失败 | candidate缺方向/舞动表现，不能与protest合并验收 |
 | `protesters_rising` | 有；1区域 | 场景初始化链有证据 | venue core+Phaser+Main | 单测+局部probe | 整体失败 | candidate“一部分动作”是DECISION，和公开逐NPC循环FACT不同 |
@@ -163,4 +164,4 @@ Human在结构化Gate选择`接受并开始B0 (Recommended)`，已接受：
 4. 每批owner级Human视觉，最后再做一次整体视觉；
 5. 保持不抽取通用NPC/Entity框架。
 
-当前仅授权B0只读证据与合同收口。仍未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate；B1-B5实现需后续独立授权。
+B0只读证据与合同收口已完成并落盘。当前B1静态与Venue实施包仍待Human授权；尚未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate，B2-B5同样未授权。

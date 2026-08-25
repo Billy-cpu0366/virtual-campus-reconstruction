@@ -9,13 +9,13 @@ classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-NPC-SPECIAL-001
 work-item-level: system
 work-item-type: systemic-special-project
-work-item-status: active-b0-evidence
-current-phase: npc-special-b0-evidence-contract
-current-gate: npc-special-b0-evidence-review
-gate-status: b0-evidence-authorized
+work-item-status: active-human-gate
+current-phase: npc-special-b0-complete-b1-review
+current-gate: npc-special-b1-static-venue-authorization
+gate-status: awaiting-human
 authorization-ref: DEC-SYS-NPC-PHASE-A-001
 preauthorized-next-work-item: none
-next-phase: npc-special-b0-evidence-review
+next-phase: npc-special-b1-static-venue-implementation
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-NPC-SPECIAL-001`；Human已接受建立独立SYS-NPC专项，不再沿05-D-2按视觉症状追加补丁。
-- **当前阶段**：Human已接受Phase A的完整owner/六状态矩阵、RC-NPC-1..6、SYS-NPC七格和`B0→B5`顺序；当前执行B0证据与合同收口。
+- **当前阶段**：B0证据与合同收口已完成；train正常入口、公开route worker及rat/ghost/birds owner内部机制已关闭，残余UNKNOWN已登记；当前等待B1 static+venue实施授权。
 - **失败基线**：第三轮群众candidate `ef9f004`/`70aefe4`/`76beaf0`/`ea87512`虽自动回归通过，但Human确认仍有很多毛病；代码保留在clean integration worktree作为失败对照，不作为正确根基线或交付结论。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；原`WI-THREE-BOARD-VISIBLE-WAVE-001`不再是动态当前工作项，历史状态仍可追溯。
-- **当前授权**：只读补train、rat、ghost、birds正常入口与生命周期、route worker和铁路策略直接证据；未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate。
+- **当前授权**：只允许Human审查B0结果与B1实施包；B1-B5代码、`sample/`和失败candidate均未授权修改。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：先过Human机制理解与分批计划Gate，再授权实现；自动检查不能替代任何owner级或整体视觉验收。
+- **关闭门禁**：B1实施必须单独取得Human授权；自动检查后仍需static、concert、protest owner级视觉Gate，不能替代整体视觉验收。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -61,7 +61,7 @@ updated: 2026-08-25
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| SYS-NPC完整专项 | `systemic-failure`；Human已接受Phase A机制与`B0→B5`顺序，当前为B0只读证据收口 | 核对train、rat、ghost、birds、route worker和铁路策略直接证据，更新六状态台账 | 修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate；补猜UNKNOWN；远端操作 | B0证据与残余UNKNOWN审查后，再决定B1实现授权 |
+| SYS-NPC完整专项 | `systemic-failure`；B0已完成，当前等待B1 static+venue实施授权 | 审查B0关闭项/残余UNKNOWN、B1范围、允许路径、自动/Human验收和风险 | 未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate；远端操作 | Human授权后在隔离worktree执行B1，不自动进入B2 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -155,16 +155,16 @@ updated: 2026-08-25
 
 ## 当前工作项
 
-当前 active 为[SYS-NPC专项](task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md)，父路线已通过`human-plan-gate`进入B0证据包。第三轮群众candidate `ef9f004`、`70aefe4`、`76beaf0`、`ea87512`继续冻结为代码与失败对照，不作为正确根基线。
+当前 active 为[SYS-NPC专项](task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md)。第三轮群众candidate `ef9f004`、`70aefe4`、`76beaf0`、`ea87512`继续冻结为代码与失败对照，不作为正确根基线。
 
-Human已接受：
+[B0证据与合同收口](task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成：
 
-- [机制与覆盖审计](task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的完整owner/六状态矩阵和RC-NPC-1..6；
-- [SYS-NPC七格](03-执行层/05-旁支/01-NPC.md)的owner家族边界；
-- `B0证据合同→B1静态/venue→B2路线/train→B3 special/rat→B4 ghost/birds→B5联合关闭`顺序；
-- 不建立通用NPC/Entity框架。
+- FACT确认正常`startGame→crowdTrain→departTrain→spawnTrainPassengers`、乘客目标10和`loop-crowd`暂停恢复；
+- FACT确认公开`walls-layer`→Blob Worker→seeded 8向A*；candidate主线程A*/endpoint吸附/轨道显示位移均为DECISION；
+- FACT确认rat、ghost、birds的owner内部机制；三者正常产品入口仍受`Q-CAMERA-ENTRY-001`阻塞；
+- 新增`Q-NPC-RAIL-001`与`Q-NPC-TEARDOWN-001`。
 
-当前只执行B0：补train正常离站、rat、ghost、birds、route worker和铁路/不可站策略直接证据。B1-B5实现仍未授权。
+当前等待Human审查[B1静态与Venue实施包](task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)。B1-B5实现仍未授权。
 
 ## 已阻塞或暂停工作项
 
