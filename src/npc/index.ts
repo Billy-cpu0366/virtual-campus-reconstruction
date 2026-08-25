@@ -79,6 +79,7 @@ export type {
   RouteCrowdPathProvider,
   RouteCrowdPathProviderLike,
   RouteCrowdPathRequest,
+  RouteCrowdPathResult,
   RouteCrowdRange,
   RouteCrowdRuntimeOptions,
   RouteCrowdSnapshot,

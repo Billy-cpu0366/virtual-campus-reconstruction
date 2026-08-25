@@ -21,6 +21,8 @@ const testConfig = (overrides: Partial<RouteCrowdConfig> = {}): RouteCrowdConfig
   randomPositions: false,
   maxActiveInViewport: undefined,
   ...overrides,
+  pathRandomFactor: overrides.pathRandomFactor ?? .8,
+  ignoreWalls: overrides.ignoreWalls ?? false,
 });
 
 const pathFor = (request: RouteCrowdPathRequest) => [
@@ -126,9 +128,9 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.start(0)).toEqual({
       ok: true,
       created: 0,
-      pathFailures: 2,
+      pathFailures: 1,
     });
-    expect(calls).toHaveLength(2);
+    expect(calls).toHaveLength(1);
     expect(runtime.snapshot.instances).toHaveLength(0);
     expect(runtime.started).toBe(false);
   });
@@ -136,7 +138,10 @@ describe("RouteCrowdRuntime contract", () => {
   it("processes batched startup one at a time and reports final failures", () => {
     const calls: RouteCrowdPathRequest[] = [];
     const runtime = new RouteCrowdRuntime({
-      configs: [testConfig({ count: 5 })],
+      configs: [testConfig({
+        count: 5,
+        startTiles: Array.from({ length: 5 }, (_, index) => ({ x: 2, y: 3 + index })),
+      })],
       pathProvider: {
         findPath: (request) => {
           calls.push(request);
@@ -148,11 +153,11 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.startBatched(0)).toMatchObject({
       ok: true,
       complete: false,
-      created: 1,
-      pathFailures: 0,
+      created: 3,
+      pathFailures: 1,
     });
-    expect(calls).toHaveLength(1);
-    expect(runtime.snapshot.instances).toHaveLength(1);
+    expect(calls).toHaveLength(4);
+    expect(runtime.snapshot.instances).toHaveLength(3);
 
     let result = runtime.startBatched(0);
     while (result.ok && !result.complete) {
@@ -285,6 +290,7 @@ describe("RouteCrowdRuntime contract", () => {
       goBack: false,
       deleteAfterComplete: false,
       randomPositions: true,
+      startTiles: Array.from({ length: 4 }, (_, index) => ({ x: 2, y: 3 + index })),
     });
     const makeRuntime = () => new RouteCrowdRuntime({
       random: () => 0.25,
@@ -331,6 +337,7 @@ describe("RouteCrowdRuntime contract", () => {
         delay: { minMs: 0, maxMs: 0 },
         goBack: false,
         deleteAfterComplete: false,
+        startTiles: Array.from({ length: 6 }, (_, index) => ({ x: 2, y: 3 + index })),
       })],
       pathProvider: pathFor,
     });

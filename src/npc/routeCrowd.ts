@@ -32,7 +32,8 @@ export interface RouteCrowdConfig {
   readonly deleteAfterComplete: boolean;
   readonly randomPositions: boolean;
   readonly maxActiveInViewport: number | undefined;
-  readonly pathRandomFactor?: number;
+  readonly pathRandomFactor: number;
+  readonly ignoreWalls: boolean;
 }
 
 export interface RouteCrowdPathRequest {
@@ -40,17 +41,21 @@ export interface RouteCrowdPathRequest {
   readonly end: RouteCrowdTile;
   readonly randomSeed?: number;
   readonly randomFactor?: number;
+  readonly ignoreWalls?: boolean;
+  readonly allowBlockedEndpoints?: boolean;
 }
 
 export type RouteCrowdPathPoint = RouteCrowdTile;
 
+export type RouteCrowdPathResult = readonly RouteCrowdPathPoint[] | null | undefined;
+
 export interface RouteCrowdPathProvider {
-  findPath(request: RouteCrowdPathRequest): readonly RouteCrowdPathPoint[] | null;
+  findPath(request: RouteCrowdPathRequest): RouteCrowdPathResult;
 }
 
 export type RouteCrowdPathProviderLike =
   | RouteCrowdPathProvider
-  | ((request: RouteCrowdPathRequest) => readonly RouteCrowdPathPoint[] | null);
+  | ((request: RouteCrowdPathRequest) => RouteCrowdPathResult);
 
 export interface RouteCrowdViewport {
   readonly left: number;
@@ -69,6 +74,7 @@ export interface RouteCrowdInstanceSnapshot {
   destroyed: boolean;
   facing: RouteCrowdFacing;
   alpha: number;
+  pathId: string;
 }
 
 export interface RouteCrowdSnapshot {
@@ -99,7 +105,7 @@ export interface RouteCrowdRuntimeOptions {
 
 export const ROUTE_CROWD_BASE_SPEED = 48;
 export const ROUTE_CROWD_TILE_SIZE = 16;
-export const ROUTE_CROWD_START_BATCH_SIZE = 1;
+export const ROUTE_CROWD_START_BATCH_SIZE = 4;
 
 const tiles = (values: readonly (readonly [number, number])[]) =>
   Object.freeze(values.map(([x, y]) => Object.freeze({ x, y })));
@@ -117,6 +123,8 @@ const group = (
   deleteAfterComplete: boolean,
   randomPositions: boolean,
   maxActiveInViewport: number | undefined,
+  pathRandomFactor = .8,
+  ignoreWalls = false,
 ): RouteCrowdConfig => Object.freeze({
   id,
   count,
@@ -130,18 +138,20 @@ const group = (
   deleteAfterComplete,
   randomPositions,
   maxActiveInViewport,
+  pathRandomFactor,
+  ignoreWalls,
 });
 
 // FACT: `chunk-WMFY56ZM.js` byte 328000–332000 public crowd registration.
 export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("main-crowd", 10, [[31, 81], [32, 81], [33, 81]], [[73, 133]], 45, .25, { minMs: 0, maxMs: 0 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 25),
   group("loop-crowd", 10, [[55, 18], [62, 18]], [[21, 86], [55, 86], [112, 48], [116, 85]], 45, .2, { minMs: 0, maxMs: 0 }, { minMs: 1_000, maxMs: 1_000 }, true, false, true, 10),
-  group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false, false, true, 5),
+  group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false, false, true, 5, 1),
   group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 40),
   group("beach_crowd_walk", 4, [[96, 119]], [[68, 134]], 35, .2, { minMs: 0, maxMs: 0 }, { minMs: 0, maxMs: 0 }, true, false, true, 4),
-  group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20),
-  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20),
-  group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, undefined),
+  group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20, 0, true),
+  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20, .2, true),
+  group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, undefined, 1),
   group("hazmat-crowd", 8, [[13, 126], [19, 124]], [[5, 133], [11, 132], [8, 131]], 45, .15, { minMs: 0, maxMs: 10_000 }, { minMs: 2_000, maxMs: 2_000 }, true, false, true, undefined),
   group("outside_concert1", 10, [[115, 109], [123, 110], [130, 108]], [[120, 114], [137, 106], [138, 96]], 35, .5, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, undefined),
   group("crowd-train", 10, Array.from({ length: 22 }, (_, index) => [63 + index, 19] as const), [[68, 121], [8, 100], [36, 117], [129, 108], [106, 46], [21, 86]], 35, .2, { minMs: 2_400, maxMs: 2_400 }, { minMs: 0, maxMs: 0 }, false, true, false, 10),
@@ -161,12 +171,14 @@ type Item = RouteCrowdInstanceSnapshot & {
 type PendingStart = {
   readonly config: RouteCrowdConfig;
   readonly index: number;
+  readonly startTile: RouteCrowdTile;
+  readonly endTile: RouteCrowdTile;
 };
 
 function pathOf(
   provider: RouteCrowdPathProviderLike,
   request: RouteCrowdPathRequest,
-): readonly RouteCrowdPathPoint[] | null {
+): RouteCrowdPathResult {
   return typeof provider === "function"
     ? provider(request)
     : provider.findPath(request);
@@ -248,6 +260,7 @@ export class RouteCrowdRuntime {
   private batchedCreated = 0;
   private batchedPathFailures = 0;
   private readonly occupiedStarts = new Map<string, Set<string>>();
+  private readonly createdByGroup = new Map<string, number>();
 
   constructor(private readonly options: RouteCrowdRuntimeOptions) {}
 
@@ -281,7 +294,7 @@ export class RouteCrowdRuntime {
     };
   }
 
-  /** Process at most one route creation for a frame-driven production start. */
+  /** Process a bounded group of incremental path steps per production frame. */
   startBatched(
     now: number,
     viewport?: RouteCrowdViewport,
@@ -294,10 +307,31 @@ export class RouteCrowdRuntime {
   private beginBatchedStart(now: number): void {
     this.batchedStartGeneration += 1;
     this.pendingStarts = [];
+    const random = this.options.random ?? Math.random;
     for (const config of this.options.configs ?? ROUTE_CROWD_CONFIGS) {
-      for (let index = 0; index < config.count; index += 1) {
-        this.pendingStarts.push({ config, index });
+      const startTiles = [...config.startTiles];
+      for (let index = startTiles.length - 1; index > 0; index -= 1) {
+        const swap = Math.floor(random() * (index + 1));
+        [startTiles[index], startTiles[swap]] = [startTiles[swap]!, startTiles[index]!];
       }
+      const candidateCount = Math.min(
+        config.count * 3,
+        startTiles.length * config.endTiles.length,
+      );
+      const candidates: PendingStart[] = Array.from(
+        { length: candidateCount },
+        (_, index) => ({
+          config,
+          index,
+          startTile: startTiles[index % startTiles.length]!,
+          endTile: config.endTiles[index % config.endTiles.length]!,
+        }),
+      );
+      for (let index = candidates.length - 1; index > 0; index -= 1) {
+        const swap = Math.floor(random() * (index + 1));
+        [candidates[index], candidates[swap]] = [candidates[swap]!, candidates[index]!];
+      }
+      this.pendingStarts.push(...candidates);
     }
     this.items = [];
     this.begun = false;
@@ -306,6 +340,7 @@ export class RouteCrowdRuntime {
     this.batchedCreated = 0;
     this.batchedPathFailures = 0;
     this.occupiedStarts.clear();
+    this.createdByGroup.clear();
   }
 
   private processBatchedStart(
@@ -327,12 +362,9 @@ export class RouteCrowdRuntime {
     let processed = 0;
     while (processed < batchSize && pendingStarts.length > 0) {
       const pending = pendingStarts.shift()!;
-      const startTile = pending.config.startTiles[
-        Math.floor(random() * pending.config.startTiles.length)
-      ]!;
-      const endTile = pending.config.endTiles[
-        Math.floor(random() * pending.config.endTiles.length)
-      ]!;
+      const createdForGroup = this.createdByGroup.get(pending.config.id) ?? 0;
+      const startTile = pending.startTile;
+      const endTile = pending.endTile;
       const path = pathOf(this.options.pathProvider, {
         start: {
           x: startTile.x * ROUTE_CROWD_TILE_SIZE,
@@ -343,7 +375,9 @@ export class RouteCrowdRuntime {
           y: endTile.y * ROUTE_CROWD_TILE_SIZE,
         },
         randomSeed: startTile.x * 1_000 + startTile.y * 100 + endTile.x * 10 + endTile.y + pending.index * 7_919,
-        randomFactor: pending.config.pathRandomFactor ?? .8,
+        randomFactor: pending.config.pathRandomFactor,
+        ignoreWalls: pending.config.ignoreWalls,
+        allowBlockedEndpoints: true,
       });
       if (generation !== this.batchedStartGeneration || this.pendingStarts === undefined) {
         return {
@@ -353,8 +387,17 @@ export class RouteCrowdRuntime {
           pathFailures: this.batchedPathFailures,
         };
       }
+      if (path === undefined) {
+        pendingStarts.unshift(pending);
+        processed += 1;
+        continue;
+      }
       if (path === null || path.length === 0) {
         this.batchedPathFailures += 1;
+        processed += 1;
+        continue;
+      }
+      if (createdForGroup >= pending.config.count) {
         processed += 1;
         continue;
       }
@@ -372,8 +415,9 @@ export class RouteCrowdRuntime {
       const routePath = path.slice(startWaypointIndex);
       occupied.add(pointKey(start));
       const next = routePath[1];
+      const pathId = `${startTile.x}_${startTile.y}_${endTile.x}_${endTile.y}_v${pending.index}`;
       this.items.push({
-        id: `${pending.config.id}:${pending.index}`,
+        id: `${pending.config.id}:${createdForGroup}`,
         state: "delay",
         position: start,
         generation: 0,
@@ -384,6 +428,7 @@ export class RouteCrowdRuntime {
           ? "south"
           : facingForDelta(next.x - start.x, next.y - start.y, "south"),
         alpha: 0,
+        pathId,
         config: pending.config,
         forwardPath: routePath,
         path: routePath,
@@ -396,6 +441,7 @@ export class RouteCrowdRuntime {
         start,
         waitingFrom: undefined,
       });
+      this.createdByGroup.set(pending.config.id, createdForGroup + 1);
       this.batchedCreated += 1;
       processed += 1;
     }
@@ -498,6 +544,7 @@ export class RouteCrowdRuntime {
     this.batchedCreated = 0;
     this.batchedPathFailures = 0;
     this.occupiedStarts.clear();
+    this.createdByGroup.clear();
     this.pausedConfigIds.clear();
     return this.snapshot;
   }

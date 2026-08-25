@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { GridRouteCrowdPathProvider } from "../../src/npc/gridPathProvider.js";
 
@@ -18,6 +19,43 @@ describe("GridRouteCrowdPathProvider", () => {
       ]);
     expect(provider.findPath({ start: { x: 8, y: 8 }, end: { x: 8, y: 24 } }))
       .toBeNull();
+  });
+
+  it("snaps only configured blocked endpoints to the nearest walkable tile", () => {
+    const provider = new GridRouteCrowdPathProvider([
+      [0, 0, 0],
+      [1, 1, 0],
+      [0, 0, 0],
+    ]);
+    const path = provider.findPath({
+      start: { x: 8, y: 24 },
+      end: { x: 40, y: 40 },
+      allowBlockedEndpoints: true,
+    });
+    expect(path?.[0]).toEqual({ x: 8, y: 8 });
+    expect(path?.every((point) => point.y !== 24 || point.x === 40)).toBe(true);
+  });
+
+  it("connects the configured main-crowd endpoints on the public wall grid", () => {
+    const wallData = JSON.parse(readFileSync(new URL(
+      "../../sample/original-public-build/mirror/assets/maps/walls-layer.json",
+      import.meta.url,
+    ), "utf8")) as { grid: number[][] };
+    const provider = new GridRouteCrowdPathProvider(wallData.grid);
+    for (const x of [31, 32, 33]) {
+      const request = {
+        start: { x: x * 16, y: 81 * 16 },
+        end: { x: 73 * 16, y: 133 * 16 },
+        randomSeed: x,
+        randomFactor: .8,
+        allowBlockedEndpoints: true,
+      };
+      let path = provider.findPath(request);
+      for (let step = 0; path === undefined && step < 100; step += 1) {
+        path = provider.findPath(request);
+      }
+      expect(path?.length).toBeGreaterThan(1);
+    }
   });
 
   it("uses a stable seed to select diverse equal-cost paths", () => {

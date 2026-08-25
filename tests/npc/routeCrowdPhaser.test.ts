@@ -39,17 +39,17 @@ describe("PhaserRouteCrowdRuntime",()=>{
   });
 
   runtime.start(0);
-  expect(calls).toBe(1);
-  expect(sprites).toHaveLength(1);
+  expect(calls).toBe(4);
+  expect(sprites).toHaveLength(4);
 
   let frames=1;
   const normalCount = ROUTE_CROWD_CONFIGS
    .filter((config) => config.id !== "crowd-train")
-   .reduce((sum, config) => sum + config.count, 0);
+   .reduce((sum, config) => sum + Math.min(config.count * 3, config.startTiles.length * config.endTiles.length), 0);
   while (callbacks.length > 0) {
    callbacks.shift()!();
    frames+=1;
-   expect(calls).toBe(Math.min(frames, normalCount));
+   expect(calls).toBe(Math.min(frames*4, normalCount));
   }
   expect(calls).toBe(normalCount);
   expect(sprites).toHaveLength(calls);
@@ -75,7 +75,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   expect(played.length).toBeGreaterThan(0);
  });
 
- it("materializes train passengers one per scheduled frame",()=>{
+ it("computes thirty train candidates and assigns ten unique paths",()=>{
   const callbacks:(()=>void)[]=[];
   let calls=0;
   const runtime=new PhaserRouteCrowdRuntime({add:{sprite:()=>new Sprite(0,0)}},{
@@ -84,9 +84,11 @@ describe("PhaserRouteCrowdRuntime",()=>{
    scheduleNextUpdate:callback=>callbacks.push(callback),
   });
   runtime.startTrain(0);
-  expect(calls).toBe(1);
+  expect(calls).toBe(4);
   while(callbacks.length>0) callbacks.shift()!();
-  expect(calls).toBe(10);
+  expect(calls).toBe(30);
+  expect(runtime.snapshot.instances).toHaveLength(10);
+  expect(new Set(runtime.snapshot.instances.map(item=>item.pathId)).size).toBe(10);
   expect(runtime.trainStarted).toBe(true);
  });
 
@@ -100,25 +102,25 @@ describe("PhaserRouteCrowdRuntime",()=>{
   });
 
   runtime.start(0);
-  expect(calls).toBe(1);
+  expect(calls).toBe(4);
   const staleAfterRepeat=callbacks.shift()!;
   runtime.start(1);
-  expect(calls).toBe(2);
+  expect(calls).toBe(8);
   staleAfterRepeat();
-  expect(calls).toBe(2);
+  expect(calls).toBe(8);
   callbacks.shift()!();
-  expect(calls).toBe(3);
+  expect(calls).toBe(12);
   runtime.cancel();
   const staleAfterCancel=callbacks.shift()!;
   staleAfterCancel();
-  expect(calls).toBe(3);
+  expect(calls).toBe(12);
   expect(runtime.spriteCount).toBe(0);
 
   runtime.start(2);
   const staleAfterShutdown=callbacks.shift()!;
   runtime.shutdown();
   staleAfterShutdown();
-  expect(calls).toBe(4);
+  expect(calls).toBe(16);
   expect(runtime.spriteCount).toBe(0);
  });
 });

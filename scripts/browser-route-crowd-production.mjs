@@ -353,13 +353,32 @@ try {
   while (Date.now() < departureDeadline) {
     duringDeparture = await crowdSnapshot();
     if (
-      duringDeparture?.trainActiveCount > 0 &&
+      duringDeparture?.trainStarted === true &&
+      duringDeparture.trainActiveCount === 10 &&
       duringDeparture.pausedGroups.includes("loop-crowd")
     ) break;
     await sleep(50);
   }
-  assert.ok(duringDeparture?.trainActiveCount > 0, "crowd-train spawned before train departure");
+  assert.equal(duringDeparture?.trainActiveCount, 10, "crowd-train did not complete ten-passenger startup");
   assert.ok(duringDeparture.pausedGroups.includes("loop-crowd"), "loop-crowd was not paused during departure");
+  const trainAtDeparture = duringDeparture.instances.filter((item) =>
+    item.id.startsWith("crowd-train:") && !item.destroyed,
+  );
+  assert.equal(trainAtDeparture.length, 10, "crowd-train must assign ten passengers");
+  assert.equal(new Set(trainAtDeparture.map((item) => item.pathId)).size, 10,
+    "crowd-train passengers must own unique path ids");
+  const trainTrajectories = new Map(trainAtDeparture.map((item) => [item.id, []]));
+  for (let sample = 0; sample < 10; sample += 1) {
+    await sleep(400);
+    const snapshot = await crowdSnapshot();
+    for (const item of snapshot.instances.filter((candidate) =>
+      candidate.id.startsWith("crowd-train:") && !candidate.destroyed,
+    )) {
+      trainTrajectories.get(item.id)?.push(`${Math.round(item.position.x)}:${Math.round(item.position.y)}`);
+    }
+  }
+  assert.ok(new Set([...trainTrajectories.values()].map((points) => points.join("|"))).size >= 6,
+    "crowd-train trajectories collapsed into a single queue");
   const recoveryDeadline = Date.now() + 30_000;
   let recovered;
   while (Date.now() < recoveryDeadline) {
@@ -390,7 +409,7 @@ try {
       .filter((item) => item.id.startsWith(`${groupId}:`))
       .map((item) => `${item.position.x}:${item.position.y}`)).size > 1);
   assert.ok(hasDispersedGroup, "no public random-position group dispersed starts");
-  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, recovered, maxActiveByGroup };
+  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, trainTrajectories: Object.fromEntries(trainTrajectories), recovered, maxActiveByGroup };
   assert.equal(afterStart.configIds.length, 11, "exactly eleven normal and train route groups are required");
   assert.equal(new Set(afterStart.configIds).size, 11, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
