@@ -1,6 +1,6 @@
 ---
 type: source-audit
-status: third-candidate-automated-verified-awaiting-human-visual
+status: third-candidate-human-rejected-superseded-by-npc-special
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 route: systemic-flow
 updated: 2026-08-25
@@ -123,6 +123,10 @@ C. 按 Bundle 的区域方向池初始化静态 crowd，并以1秒节拍做可�
 - 稳定性探针：`ea87512`；镜头静止3秒时static/venue materialized ID集合与spriteCount不变。
 - PASS：357项全量测试、`npm run build`、群众production、performance smoke、complete production；无exceptions/failed requests。
 - 尚未解决：Human整体视觉验收未签；自动结果不能关闭systemic route。
+
+### 第四次 Human 结论（human-visual-rejected，2026-08-25）
+
+Human确认“修了这么久依然有很多毛病”，并接受建立完整SYS-NPC专项。第三轮candidate冻结为失败对照，不再沿本审计按视觉症状追加修复；后续权威入口为`task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md`。本轮尚未提供完整缺陷清单，专项必须先核对所有owner机制和当前覆盖，不补猜具体新症状。
 
 ## 历史建议的整体修复包（已被第三轮审计替代）
 

@@ -1,12 +1,16 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.4-05d2-public-crowd-model
-status: accepted-implementation-authorized
+status: human-visual-rejected-superseded-by-npc-special
 updated: 2026-08-24
 decision: DEC-P5.4-05D2-PUBLIC-CROWD-MODEL-001
 ---
 
 # 05-D-2 公开群众模型实施包
+
+## 状态
+
+本实施包的第三轮candidate已automated-verified / human-visual-rejected，现由`WI-SYS-NPC-SPECIAL-001`接管。以下内容保留为已接受范围与历史实现依据，不再作为当前正确机制或继续补丁的授权入口。
 
 ## 目标
 

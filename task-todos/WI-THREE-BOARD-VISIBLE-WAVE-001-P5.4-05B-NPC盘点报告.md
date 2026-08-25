@@ -1,7 +1,7 @@
 ---
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 phase: p5.4-05b-npc-inventory
-status: investigation-complete-awaiting-human-grouping-gate
+status: historical-input-to-npc-special-audit
 updated: 2026-08-24
 ---
 
@@ -31,8 +31,8 @@ updated: 2026-08-24
 
 ## 当前覆盖差距
 
-现有 integration worktree 的 sprayer 专属实现只覆盖四个 sprayer；上表其他候选均未实施。车辆不纳入 NPC，后续仍属 SYS-ROUTE。
+本报告形成后，integration worktree已增加route/static/venue/bug/dancing/special等candidate，但第三轮整体Human视觉失败；具体覆盖和正确性必须由`WI-SYS-NPC-SPECIAL-001`重新逐owner审计。ghost、rat attack、birds仍未实施；车辆不纳入NPC，继续属于SYS-ROUTE。
 
-## 建议与 Human Gate
+## 后续入口
 
-推荐按 05-D-1 至 05-D-8 独立形成实施包，优先从常规路线群众开始；抗议者、ghost、鼠群与鸟类各自保留专属生命周期和验收。请确认：先进入 05-C 喷洒 NPC 可见复验/收口，还是先授权某个 05-D 批次；未确认前不写 NPC 代码。
+本盘点作为历史来源输入保留，不再单独决定05-D实施顺序。当前只读审计和后续Human Gate统一见`task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md`。

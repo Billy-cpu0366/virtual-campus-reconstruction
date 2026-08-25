@@ -11,9 +11,9 @@ updated: 2026-08-23
 
 **P5.1 R4（bounded verified）**：`da68d08`保持四锚点、触发窗、300ms、速度140和路线FACT不变；sprayer presentation depth按`500+(y+24)*0.1`动态更新，train holding时四人可与player同屏辨识。train complete发布无teleport路径，真人键盘到约`(1280,416)`触发后切换factory提示；route完成与shutdown sprite/listener=0。
 
-**05-D-2 第三轮群众 candidate（自动验证通过，等待 Human 视觉验收）**：静态/venue群众按region级在镜头外预热并滞后回收，route群众按path bounds激活与alpha生命周期，不再按NPC单点跨镜头边界直接创建/销毁。路线使用公开8向A*、octile heuristic、seeded随机边成本和候选路径池；火车保留10人、22起点、6终点与2400ms，30条候选为10人分配唯一pathId。Stop AI固定约三分之一为可动作子集，每次短动作后idle 2–6秒，同时最多2人动作；其余稳定站立。`ef9f004`、`70aefe4`、`76beaf0`、`ea87512`已通过357项测试、build、性能smoke、完整production及群众production（静止镜头ID/spriteCount稳定、火车至少6种轨迹签名、抗议动作有界）；自动结果不代替Human视觉验收。
+**SYS-NPC专项已启动（只读审计）**：Human确认第三轮群众candidate即使通过357项测试、build、性能/完整/群众production，视觉上仍有很多毛病；`ef9f004`、`70aefe4`、`76beaf0`、`ea87512`状态为automated-verified / human-visual-rejected并冻结为失败对照。`DEC-SYS-NPC-SPECIAL-001`要求先核对完整owner、公开机制、当前代码覆盖与统一差异，重写本卡七格主体；Human接受机制与分批计划前不再改NPC代码。
 
-**仍未完成**：其余原站NPC、intro跨场景复位和完整跨chunk长路线语义；R4不等于完整SYS-NPC。
+**仍未完成**：本卡主体当前仍以sprayer为主，尚未成为完整SYS-NPC合同；ghost、rat attack、birds等公开候选未实施，intro跨场景复位和完整跨chunk路线语义仍UNKNOWN。专项入口：`task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md`。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 

@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-acceptance
-classification-trigger: human-accepted-third-crowd-root-cause-replacement-plan
+correction-phase: audit
+classification-trigger: human-rejected-third-crowd-candidate-and-requested-full-npc-special
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
-current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
-work-item-level: program
-work-item-type: parallel-visible-product-wave
-work-item-status: active-p5.1
-current-phase: p5.4-05d2-third-crowd-human-acceptance
-current-gate: p5.4-05d2-human-visual-acceptance
-gate-status: awaiting-human-visual-acceptance
-authorization-ref: DEC-P5.4-05D2-CROWD-ROOT-CAUSE-001
+current-work-item: WI-SYS-NPC-SPECIAL-001
+work-item-level: system
+work-item-type: systemic-special-project
+work-item-status: active-audit
+current-phase: npc-special-authority-and-mechanism-audit
+current-gate: npc-special-mechanism-and-batch-plan
+gate-status: audit-authorized
+authorization-ref: DEC-SYS-NPC-SPECIAL-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05d2-completed-on-human-acceptance
+next-phase: npc-special-human-mechanism-gate
 updated: 2026-08-24
 ---
 
@@ -23,12 +23,12 @@ updated: 2026-08-24
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-THREE-BOARD-VISIBLE-WAVE-001`；03内容、04独立件、05旁支三个一级板块并行，Main另设产品入口/integration线。
-- **当前阶段**：C3整图、P5.2 04-A 与 P5.3 03-A 均已由Human视觉通过；代码候选仍位于独立integration worktree，不作为`main`合并或远端交付。Human已接受后续顺序：05-A火车→05-B全量NPC盘点→05-C喷洒NPC→05-D其他有证据NPC→05-E烟雾→05-F联合验收，之后才是UI/内容补全与Entity审计；该路线图不自动授权05-A。
-- **同步内容**：不可变delivery `0d552684`保留旧失败candidate=`0fadf309`；新补救从该clean代码基线连续实施，不改写旧outbox。Human报告WIP已推送，但WSL仍不补猜远端收据。
-- **当前授权**：按已安装Beta.3只读形成Intent Contract、Oracle Map、证据适配和失败复盘；不修改冻结candidate。垃圾堆walls、train路线/scale/timing、5秒控制、30 FPS及UNKNOWN边界均保持。
+- **当前工作项**：`WI-SYS-NPC-SPECIAL-001`；Human已接受建立独立SYS-NPC专项，不再沿05-D-2按视觉症状追加补丁。
+- **当前阶段**：第三轮群众candidate `ef9f004`/`70aefe4`/`76beaf0`/`ea87512`虽自动回归通过，但Human确认仍有很多毛病，视觉Gate失败；代码保留在integration worktree作为当前实现与失败对照，不作为正确基线或交付结论。
+- **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；原`WI-THREE-BOARD-VISIBLE-WAVE-001`不再是动态当前工作项，历史状态仍可追溯。
+- **当前授权**：只读核对完整NPC owner、公开机制、当前代码覆盖与统一差异，形成SYS-NPC权威卡候选和分批计划；未授权修改`src/`、`game/`、测试或运行资源。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：三个板块必须产生可见成果；自动检查不能替代Human视觉Gate，Human通过前不得关闭文档。
+- **关闭门禁**：先过Human机制理解与分批计划Gate，再授权实现；自动检查不能替代任何owner级或整体视觉验收。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
