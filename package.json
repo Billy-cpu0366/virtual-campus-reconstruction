@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:empty-final-recovery": "node scripts/test-empty-final-recovery.mjs",
     "prepare:runtime": "node scripts/prepare-runtime-assets.mjs",
     "check:runtime": "node scripts/check-runtime-assets.mjs",
     "browser:smoke": "node scripts/browser-smoke.mjs",
