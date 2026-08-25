@@ -1470,6 +1470,7 @@ export class CampusScene extends Phaser.Scene {
           width: this.cameras.main.worldView.width,
           height: this.cameras.main.worldView.height,
         }),
+        viewportMargin: 400,
         onError: (reason) => this.recordSideFailure(`static-crowd:${reason}`),
       },
     );
