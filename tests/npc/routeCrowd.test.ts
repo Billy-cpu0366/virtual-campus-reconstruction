@@ -210,6 +210,28 @@ describe("RouteCrowdRuntime contract", () => {
     });
   });
 
+  it("freezes a visible point without advancing its path or changing facing", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({ delay: { minMs: 0, maxMs: 0 }, goBack: false })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 96, y: request.start.y },
+      ],
+    });
+    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    runtime.start(0, viewport);
+    runtime.tick(1_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      position: { x: 32, y: 48 },
+      state: "delay",
+      facing: "south",
+      visible: true,
+      materialized: true,
+    });
+    runtime.tick(2_000, { left: 1_000, top: 1_000, width: 10, height: 10 });
+    expect(runtime.snapshot.instances[0]?.position.x).toBeGreaterThan(32);
+  });
+
   it("walks every waypoint and applies injected delay and speed variation", () => {
     const runtime = new RouteCrowdRuntime({
       random: () => 0.5,

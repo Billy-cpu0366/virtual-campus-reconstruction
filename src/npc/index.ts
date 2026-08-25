@@ -1,6 +1,22 @@
 export { GridRouteCrowdPathProvider } from "./gridPathProvider.js";
 
 export {
+  STATIC_NPC_CONFIGS,
+  STATIC_NPC_TILE_SIZE,
+  STATIC_NPC_VIEWPORT_MARGIN,
+  StaticNpcRuntime,
+} from "./staticNpc.js";
+export type {
+  StaticNpcConfig,
+  StaticNpcFrameDuration,
+  StaticNpcInstanceSnapshot,
+  StaticNpcPoint,
+  StaticNpcRuntimeOptions,
+  StaticNpcSnapshot,
+  StaticNpcViewport,
+} from "./staticNpc.js";
+
+export {
   ROUTE_CROWD_BASE_SPEED,
   ROUTE_CROWD_CONFIGS,
   ROUTE_CROWD_TILE_SIZE,

@@ -21,6 +21,9 @@ const ROUTE_CROWD_TEXTURES = [
   "npc-man3", "npc-man4", "npc-man5", "npc-man6", "npc-man8", "npc-man9",
   "npc-man10",
 ];
+const STATIC_NPC_TEXTURES = [
+  "npc-special-reading", "npc-special-eating", "npc-cat-licking",
+];
 
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
@@ -31,6 +34,10 @@ const FILES = [
   ...ROUTE_CROWD_TEXTURES.map((name) => [
     `sprites/${name}.webp`,
     `sprites/${name}.webp`,
+  ]),
+  ...STATIC_NPC_TEXTURES.map((name) => [
+    `sprites/special/${name}.webp`,
+    `sprites/special/${name}.webp`,
   ]),
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],

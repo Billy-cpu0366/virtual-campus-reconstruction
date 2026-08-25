@@ -30,16 +30,19 @@ describe("PhaserRouteCrowdRuntime",()=>{
   expect(sprites).toHaveLength(1);
 
   let frames=1;
+  const normalCount = ROUTE_CROWD_CONFIGS
+   .filter((config) => config.id !== "crowd-train")
+   .reduce((sum, config) => sum + config.count, 0);
   while (callbacks.length > 0) {
    callbacks.shift()!();
    frames+=1;
-   expect(calls).toBe(Math.min(frames, ROUTE_CROWD_CONFIGS.reduce((sum, config)=>sum+config.count,0)));
+   expect(calls).toBe(Math.min(frames, normalCount));
   }
-  expect(calls).toBe(ROUTE_CROWD_CONFIGS.reduce((sum, config)=>sum+config.count,0));
+  expect(calls).toBe(normalCount);
   expect(sprites).toHaveLength(calls);
  });
 
- it("plays the matching eight-direction walk animation",()=>{
+ it("freezes the visible crowd at its last eight-direction frame",()=>{
   const played:string[]=[];
   const frames:number[]=[];
   const created:string[]=[];
@@ -53,9 +56,24 @@ describe("PhaserRouteCrowdRuntime",()=>{
   });
   runtime.start(0);
   runtime.update(600);
-  expect(created).toContain("route-crowd-npc-man-east");
-  expect(played).toContain("route-crowd-npc-man-east");
+  expect(created).toEqual([]);
+  expect(played).toEqual([]);
   expect(frames.at(-1)).toBe(48);
+ });
+
+ it("materializes train passengers one per scheduled frame",()=>{
+  const callbacks:(()=>void)[]=[];
+  let calls=0;
+  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:()=>new Sprite(0,0)}},{
+   pathProvider:{findPath:r=>{calls+=1;return [r.start,{x:r.start.x+32,y:r.start.y}]}},
+   viewport:()=>({left:0,top:0,width:2240,height:2240}),
+   scheduleNextUpdate:callback=>callbacks.push(callback),
+  });
+  runtime.startTrain(0);
+  expect(calls).toBe(1);
+  while(callbacks.length>0) callbacks.shift()!();
+  expect(calls).toBe(10);
+  expect(runtime.trainStarted).toBe(true);
  });
 
  it("ignores stale startup callbacks after repeat or cancel",()=>{

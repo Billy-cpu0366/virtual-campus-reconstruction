@@ -257,6 +257,25 @@ describe("PhaserTrainRuntime", () => {
     expect(runtime.visualSnapshot).toBeNull();
   });
 
+  it("只通知既有路线的离站和离开视口，不改变进出场时序", () => {
+    const fake = makeScene();
+    let departures = 0;
+    let leaves = 0;
+    const runtime = new PhaserTrainRuntime(fake.scene, {
+      viewport: () => ({ left: 400, width: 100 }),
+      onDeparture: () => { departures += 1; },
+      onLeaveViewport: () => { leaves += 1; },
+    });
+    expect(runtime.start(0)).toEqual({ ok: true });
+    fake.events.emit("update", TRAIN_ENTRY_DURATION + TRAIN_HOLD_DURATION);
+    expect(runtime.snapshot.state).toBe("departing");
+    expect(departures).toBe(1);
+    expect(leaves).toBe(0);
+    fake.events.emit("update", 14_000);
+    expect(leaves).toBe(1);
+    expect(runtime.snapshot.state).toBe("departing");
+  });
+
   it("teardown先清player collider，再清shape/sprite/blocking zone", () => {
     const fake = makeScene();
     const order: string[] = [];

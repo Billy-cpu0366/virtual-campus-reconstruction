@@ -62,31 +62,64 @@ export interface PhaserRouteCrowdRuntimeOptions {
   readonly scheduleNextUpdate?: (callback: () => void) => void;
 }
 
-/** Presentation owner for the already-tested route-crowd CORE. */
+/** Presentation owner for route crowds with viewport-bounded sprites. */
 export class PhaserRouteCrowdRuntime {
   private readonly core: RouteCrowdRuntime;
-  private readonly sprites = new Map<number, PhaserRouteCrowdSpriteLike>();
+  private readonly trainCore: RouteCrowdRuntime;
+  private readonly sprites = new Map<string, PhaserRouteCrowdSpriteLike>();
   private shutdownState = false;
   private readonly createdAnimations = new Set<string>();
   private startupActive = false;
   private startupGeneration = 0;
-  constructor(private readonly scene: PhaserRouteCrowdSceneLike,
-    private readonly options: PhaserRouteCrowdRuntimeOptions) {
-    this.core = new RouteCrowdRuntime({
-      configs: ROUTE_CROWD_CONFIGS,
+  private trainStartupActive = false;
+  private trainStartupGeneration = 0;
+
+  constructor(
+    private readonly scene: PhaserRouteCrowdSceneLike,
+    private readonly options: PhaserRouteCrowdRuntimeOptions,
+  ) {
+    const normalConfigs = ROUTE_CROWD_CONFIGS.filter(
+      (config) => config.id !== "crowd-train",
+    );
+    const runtimeOptions = {
       pathProvider: options.pathProvider,
       ...(options.isBlocked === undefined ? {} : { isBlocked: options.isBlocked }),
       ...(options.random === undefined ? {} : { random: options.random }),
+    };
+    this.core = new RouteCrowdRuntime({ configs: normalConfigs, ...runtimeOptions });
+    this.trainCore = new RouteCrowdRuntime({
+      configs: ROUTE_CROWD_CONFIGS.filter((config) => config.id === "crowd-train"),
+      ...runtimeOptions,
     });
   }
-  get snapshot() { return this.core.snapshot; }
+
+  get snapshot() {
+    return {
+      instances: Object.freeze([
+        ...this.core.snapshot.instances,
+        ...this.trainCore.snapshot.instances,
+      ]),
+    };
+  }
+
+  get configIds(): readonly string[] {
+    return ROUTE_CROWD_CONFIGS.map((config) => config.id);
+  }
+
   get spriteCount(): number { return this.sprites.size; }
+  get started(): boolean { return this.core.started; }
+  get trainStarted(): boolean { return this.trainCore.started; }
+  get pausedGroups(): readonly string[] { return this.core.pausedGroups; }
+
   start(now: number): void {
     if (this.shutdownState) return;
     this.startupGeneration += 1;
+    this.trainStartupGeneration += 1;
     const generation = this.startupGeneration;
     this.startupActive = true;
+    this.trainStartupActive = false;
     this.core.cancel();
+    this.trainCore.cancel();
     this.destroySprites();
     const schedule = this.options.scheduleNextUpdate;
     if (schedule === undefined) {
@@ -117,46 +150,116 @@ export class PhaserRouteCrowdRuntime {
     };
     runBatch();
   }
+
+  /** Create crowd-train passengers only on the train departure notification. */
+  startTrain(now: number): void {
+    if (
+      this.shutdownState ||
+      this.startupActive ||
+      this.trainStartupActive ||
+      this.trainCore.started
+    ) return;
+    const schedule = this.options.scheduleNextUpdate;
+    if (schedule === undefined) {
+      this.trainCore.start(now, this.options.viewport());
+      this.sync();
+      return;
+    }
+    this.trainStartupGeneration += 1;
+    const generation = this.trainStartupGeneration;
+    this.trainStartupActive = true;
+    const runBatch = (): void => {
+      if (
+        this.shutdownState ||
+        !this.trainStartupActive ||
+        generation !== this.trainStartupGeneration
+      ) return;
+      const result = this.trainCore.startBatched(now, this.options.viewport());
+      if (
+        this.shutdownState ||
+        !this.trainStartupActive ||
+        generation !== this.trainStartupGeneration
+      ) return;
+      this.sync();
+      if (!result.ok || result.complete) {
+        this.trainStartupActive = false;
+        return;
+      }
+      schedule(runBatch);
+    };
+    runBatch();
+  }
+
+  pauseGroup(id: string): void {
+    this.core.pauseGroup(id);
+  }
+
+  resumeGroup(id: string): void {
+    this.core.resumeGroup(id);
+  }
+
   update(now: number): void {
     if (this.shutdownState || this.startupActive) return;
     this.core.tick(now, this.options.viewport());
+    this.trainCore.tick(now, this.options.viewport());
     this.sync();
   }
+
   cancel(): void {
     if (this.shutdownState) return;
     this.startupGeneration += 1;
+    this.trainStartupGeneration += 1;
     this.startupActive = false;
+    this.trainStartupActive = false;
     this.core.cancel();
-    for (const sprite of this.sprites.values()) sprite.destroy();
-    this.sprites.clear();
+    this.trainCore.cancel();
+    this.destroySprites();
   }
+
   shutdown(): void {
     this.shutdownState = true;
     this.startupGeneration += 1;
+    this.trainStartupGeneration += 1;
     this.startupActive = false;
+    this.trainStartupActive = false;
     this.core.shutdown();
-    for (const sprite of this.sprites.values()) sprite.destroy();
-    this.sprites.clear();
+    this.trainCore.shutdown();
+    this.destroySprites();
   }
+
   private sync(): void {
-    const activeIndexes = new Set<number>();
-    for (const [index, item] of this.core.snapshot.instances.entries()) {
-      activeIndexes.add(index);
-      const prior = this.sprites.get(index);
-      if (!item.materialized || item.destroyed) { prior?.destroy(); this.sprites.delete(index); continue; }
+    const allInstances = this.snapshot.instances;
+    const activeIds = new Set<string>();
+    for (const [index, item] of allInstances.entries()) {
+      activeIds.add(item.id);
+      const prior = this.sprites.get(item.id);
+      if (!item.materialized || item.destroyed) {
+        prior?.destroy();
+        this.sprites.delete(item.id);
+        continue;
+      }
+      const texture = ROUTE_CROWD_TEXTURES[index % ROUTE_CROWD_TEXTURES.length]!;
       const sprite = prior ?? this.scene.add.sprite(
         item.position.x,
         item.position.y,
-        ROUTE_CROWD_TEXTURES[index % ROUTE_CROWD_TEXTURES.length]!,
+        texture,
       );
-      sprite.x = item.position.x; sprite.y = item.position.y; sprite.setDepth(500 + item.position.y * .1);
-      this.renderFacing(sprite, ROUTE_CROWD_TEXTURES[index % ROUTE_CROWD_TEXTURES.length]!, item.facing, item.state === "moving" || item.state === "returning");
-      this.sprites.set(index, sprite);
+      sprite.x = item.position.x;
+      sprite.y = item.position.y;
+      sprite.setDepth(500 + item.position.y * .1);
+      this.renderFacing(
+        sprite,
+        texture,
+        item.facing,
+        item.state === "moving" || item.state === "returning",
+        item.visible,
+      );
+      this.sprites.set(item.id, sprite);
     }
-    for (const [index, sprite] of this.sprites) {
-      if (activeIndexes.has(index)) continue;
+    for (const [id, sprite] of this.sprites) {
+      if (activeIds.has(id)) continue;
       sprite.destroy();
-      this.sprites.delete(index);
+      this.sprites.delete(id);
     }
   }
 
@@ -165,9 +268,10 @@ export class PhaserRouteCrowdRuntime {
     texture: string,
     facing: RouteCrowdFacing,
     moving: boolean,
+    frozenInViewport: boolean,
   ): void {
     const key = `route-crowd-${texture}-${facing}`;
-    if (moving && this.ensureAnimation(texture, facing, key)) {
+    if (moving && !frozenInViewport && this.ensureAnimation(texture, facing, key)) {
       sprite.anims?.play(key, true);
       return;
     }

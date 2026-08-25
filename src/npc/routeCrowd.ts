@@ -198,18 +198,34 @@ function pointInViewport(point: RouteCrowdTile, viewport: RouteCrowdViewport): b
   );
 }
 
-function pathIntersectsViewport(
-  path: readonly RouteCrowdTile[],
+function viewportEntryProgress(
+  point: RouteCrowdTile,
+  target: RouteCrowdTile,
   viewport: RouteCrowdViewport,
-): boolean {
-  const xs = path.map((point) => point.x);
-  const ys = path.map((point) => point.y);
-  return (
-    Math.max(...xs) >= viewport.left &&
-    Math.min(...xs) <= viewport.left + viewport.width &&
-    Math.max(...ys) >= viewport.top &&
-    Math.min(...ys) <= viewport.top + viewport.height
-  );
+): number | null {
+  const minX = viewport.left;
+  const maxX = viewport.left + viewport.width;
+  const minY = viewport.top;
+  const maxY = viewport.top + viewport.height;
+  const deltaX = target.x - point.x;
+  const deltaY = target.y - point.y;
+  let start = 0;
+  let end = 1;
+  for (const [value, delta, min, max] of [
+    [point.x, deltaX, minX, maxX],
+    [point.y, deltaY, minY, maxY],
+  ] as const) {
+    if (delta === 0) {
+      if (value < min || value > max) return null;
+      continue;
+    }
+    const first = (min - value) / delta;
+    const second = (max - value) / delta;
+    start = Math.max(start, Math.min(first, second));
+    end = Math.min(end, Math.max(first, second));
+  }
+  if (start > end || start > 1 || end < 0) return null;
+  return Math.max(0, start);
 }
 
 /** Deterministic owner for one bounded, source-backed route-crowd batch. */
@@ -218,6 +234,7 @@ export class RouteCrowdRuntime {
   private dead = false;
   private begun = false;
   private last = 0;
+  private readonly pausedConfigIds = new Set<string>();
   private pendingStarts: PendingStart[] | undefined;
   private batchedStartNow = 0;
   private batchedStartGeneration = 0;
@@ -228,6 +245,10 @@ export class RouteCrowdRuntime {
 
   get started(): boolean {
     return this.begun;
+  }
+
+  get pausedGroups(): readonly string[] {
+    return Object.freeze([...this.pausedConfigIds].sort());
   }
 
   get snapshot(): RouteCrowdSnapshot {
@@ -368,14 +389,20 @@ export class RouteCrowdRuntime {
     };
   }
 
+  // DECISION: a point inside the current Human viewport freezes at its last
+  // facing; invisible points advance only until they enter the viewport.
   tick(now: number, viewport?: RouteCrowdViewport): RouteCrowdSnapshot {
     if (this.pendingStarts !== undefined) return this.snapshot;
     const elapsedMs = Math.max(0, now - this.last);
     this.last = now;
 
     for (const item of this.items) {
+      if (this.pausedConfigIds.has(item.config.id)) continue;
       let remainingMs = elapsedMs;
       while (remainingMs > 0 && item.state !== "gone") {
+        if (viewport !== undefined && pointInViewport(item.position, viewport)) {
+          break;
+        }
         if (item.state === "delay") {
           if (now < item.delayAt) break;
           const tickStartedAt = now - remainingMs;
@@ -410,6 +437,23 @@ export class RouteCrowdRuntime {
             continue;
           }
           const availableDistance = item.speed * remainingMs / 1_000;
+          const entry = viewport === undefined
+            ? null
+            : viewportEntryProgress(item.position, target, viewport);
+          if (entry !== null && entry > 0 && entry <= 1) {
+            const distanceToEntry = distance * entry;
+            if (availableDistance >= distanceToEntry) {
+              item.position = {
+                x: item.position.x + deltaX * entry,
+                y: item.position.y + deltaY * entry,
+              };
+              remainingMs = Math.max(
+                0,
+                remainingMs - distanceToEntry / item.speed * 1_000,
+              );
+              break;
+            }
+          }
           if (availableDistance < distance) {
             const factor = availableDistance / distance;
             item.position = {
@@ -433,6 +477,14 @@ export class RouteCrowdRuntime {
     return this.snapshot;
   }
 
+  pauseGroup(id: string): void {
+    if (!this.dead) this.pausedConfigIds.add(id);
+  }
+
+  resumeGroup(id: string): void {
+    this.pausedConfigIds.delete(id);
+  }
+
   cancel(): RouteCrowdSnapshot {
     this.batchedStartGeneration += 1;
     this.pendingStarts = undefined;
@@ -440,6 +492,7 @@ export class RouteCrowdRuntime {
     this.begun = false;
     this.batchedCreated = 0;
     this.batchedPathFailures = 0;
+    this.pausedConfigIds.clear();
     return this.snapshot;
   }
 
@@ -483,9 +536,9 @@ export class RouteCrowdRuntime {
   private applyView(viewport?: RouteCrowdViewport): void {
     if (viewport === undefined) return;
     for (const item of this.items) {
-      const intersects = pathIntersectsViewport(item.path, viewport);
-      item.materialized = item.state !== "gone" && intersects;
-      item.visible = item.materialized && pointInViewport(item.position, viewport);
+      const inViewport = pointInViewport(item.position, viewport);
+      item.materialized = item.state !== "gone" && inViewport;
+      item.visible = item.materialized;
       item.destroyed = item.state === "gone";
     }
   }

@@ -80,6 +80,11 @@ export interface PhaserTrainBlockingZonePort {
   setTrainBlockingZone(cells: readonly string[] | null): void;
 }
 
+export interface PhaserTrainViewport {
+  readonly left: number;
+  readonly width: number;
+}
+
 export type PhaserTrainCollisionCleanup = () => void;
 export type PhaserTrainCollisionConnector = (
   shape: PhaserTrainCollisionShapeLike,
@@ -88,6 +93,11 @@ export type PhaserTrainCollisionConnector = (
 export interface PhaserTrainRuntimeOptions {
   readonly blockingZone?: PhaserTrainBlockingZonePort;
   readonly connectCollision?: PhaserTrainCollisionConnector;
+  readonly viewport?: () => PhaserTrainViewport | undefined;
+  /** DECISION: emitted once when the existing route enters departure. */
+  readonly onDeparture?: () => void;
+  /** DECISION: emitted when the train leaves the current viewport or completes. */
+  readonly onLeaveViewport?: () => void;
   readonly onComplete?: () => void;
   readonly onError?: (reason: string) => void;
 }
@@ -115,6 +125,12 @@ export class PhaserTrainRuntime {
   private readonly onError: ((reason: string) => void) | undefined;
   private readonly connectCollision: PhaserTrainCollisionConnector | undefined;
   private readonly onComplete: (() => void) | undefined;
+  private readonly onDeparture: (() => void) | undefined;
+  private readonly onLeaveViewport: (() => void) | undefined;
+  private readonly viewport: (() => PhaserTrainViewport | undefined) | undefined;
+  private departureNotified = false;
+  private departureWasInViewport = false;
+  private leaveViewportNotified = false;
   private sprite: PhaserTrainSpriteLike | undefined;
   private collisionShapes: PhaserTrainCollisionShapeLike[] = [];
   private collisionCleanups: PhaserTrainCollisionCleanup[] = [];
@@ -137,6 +153,9 @@ export class PhaserTrainRuntime {
     this.blockingZone = options.blockingZone;
     this.connectCollision = options.connectCollision;
     this.onComplete = options.onComplete;
+    this.onDeparture = options.onDeparture;
+    this.onLeaveViewport = options.onLeaveViewport;
+    this.viewport = options.viewport;
     this.onError = options.onError;
   }
 
@@ -156,6 +175,9 @@ export class PhaserTrainRuntime {
       return { ok: false, reason: "already-running" };
     }
 
+    this.departureNotified = false;
+    this.departureWasInViewport = false;
+    this.leaveViewportNotified = false;
     try {
       const sprite = this.scene.add.sprite(TRAIN_START_X, TRAIN_Y, TRAIN_RUNTIME_ASSET.key);
       sprite
@@ -183,7 +205,27 @@ export class PhaserTrainRuntime {
     this.sprite.x = snapshot.x;
     this.sprite.y = snapshot.y;
     this.updateCollisions(snapshot.collisionRects);
+    if (snapshot.state === "departing" && !this.departureNotified) {
+      this.departureNotified = true;
+      this.notify(this.onDeparture);
+    }
+    if (snapshot.state === "departing" && this.isInsideViewport()) {
+      this.departureWasInViewport = true;
+    }
+    if (
+      snapshot.state === "departing" &&
+      this.departureWasInViewport &&
+      !this.leaveViewportNotified &&
+      this.isOutsideViewport()
+    ) {
+      this.leaveViewportNotified = true;
+      this.notify(this.onLeaveViewport);
+    }
     if (snapshot.state === "complete" || snapshot.state === "cancelled") {
+      if (snapshot.state === "complete" && !this.leaveViewportNotified) {
+        this.leaveViewportNotified = true;
+        this.notify(this.onLeaveViewport);
+      }
       this.detachUpdate();
       if (snapshot.state === "complete") {
         try {
@@ -318,6 +360,26 @@ export class PhaserTrainRuntime {
     this.scene.events.off("update", this.handleUpdate, this);
     this.scene.events.off("shutdown", this.handleShutdown, this);
     this.updateAttached = false;
+  }
+
+  private isInsideViewport(): boolean {
+    const viewport = this.viewport?.();
+    if (viewport === undefined || this.sprite === undefined) return false;
+    const width = this.sprite.displayWidth ?? 0;
+    return this.sprite.x + width >= viewport.left &&
+      this.sprite.x <= viewport.left + viewport.width;
+  }
+
+  private isOutsideViewport(): boolean {
+    return !this.isInsideViewport() && this.viewport?.() !== undefined;
+  }
+
+  private notify(callback: (() => void) | undefined): void {
+    try {
+      callback?.();
+    } catch {
+      this.report("lifecycle-observer-failed");
+    }
   }
 
   private report(reason: string): void {

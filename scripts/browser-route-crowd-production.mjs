@@ -122,33 +122,42 @@ async function crowdSnapshot() {
       const runtime = scene?.routeCrowdRuntime;
       if (!runtime) continue;
       const instances = runtime.snapshot?.instances ?? [];
-      const configs = runtime.core?.options?.configs ?? [];
       return {
-        started: runtime.core?.started ?? false,
+        started: runtime.started ?? false,
+        trainStarted: runtime.trainStarted ?? false,
+        pausedGroups: runtime.pausedGroups ?? [],
         spriteCount: runtime.spriteCount ?? 0,
-        configIds: configs.map((config) => config.id),
-        configs: configs.map((config) => ({
-          id: config.id,
-          count: config.count,
-          startTiles: config.startTiles,
-          endTiles: config.endTiles,
-          delay: config.delay,
-          afterDelay: config.afterDelay,
-          movementSpeed: config.movementSpeed,
-          speedVariation: config.speedVariation,
-          goBack: config.goBack,
-          deleteAfterComplete: config.deleteAfterComplete,
-        })),
-        materializedByGroup: Object.fromEntries(configs.map((config) => [
-          config.id,
+        configIds: runtime.configIds ?? [],
+        materializedByGroup: Object.fromEntries((runtime.configIds ?? []).map((id) => [
+          id,
           instances.filter((item) =>
-            item.id.startsWith(config.id + ":") && item.materialized,
+            item.id.startsWith(id + ":") && item.materialized,
           ).length,
         ])),
         instanceCount: instances.length,
         materializedCount: instances.filter((item) => item.materialized).length,
         visibleCount: instances.filter((item) => item.visible).length,
         destroyedCount: instances.filter((item) => item.destroyed).length,
+        trainActiveCount: instances.filter((item) =>
+          item.id.startsWith("crowd-train:") && !item.destroyed,
+        ).length,
+        instances,
+      };
+    }
+    return null;
+  }`);
+}
+
+async function staticNpcSnapshot() {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const runtime = scene?.staticNpcRuntime;
+      if (!runtime) continue;
+      return {
+        spriteCount: runtime.spriteCount ?? 0,
+        instances: runtime.snapshot?.instances ?? [],
+        configs: runtime.configs ?? [],
       };
     }
     return null;
@@ -217,13 +226,10 @@ try {
   routeCrowdDiagnostics = { afterStart };
 
   const probes = [];
-  for (const groupId of ["main-crowd", "concert_crowd", "crowd-train"]) {
-    const config = afterStart.configs.find((candidate) => candidate.id === groupId);
-    assert.ok(config, `missing required route group: ${groupId}`);
-    const tile = {
-      x: config.startTiles[0].x * 16 + 8,
-      y: config.startTiles[0].y * 16 + 8,
-    };
+  for (const [groupId, tile] of [
+    ["main-crowd", { x: 31 * 16 + 8, y: 81 * 16 + 8 }],
+    ["concert_crowd", { x: 105 * 16 + 8, y: 51 * 16 + 8 }],
+  ]) {
     assert.equal(await centerCameraOn(tile), true, "production camera probe failed");
     await sleep(250);
     probes.push({
@@ -234,13 +240,126 @@ try {
     });
   }
 
-  routeCrowdDiagnostics = { afterStart, probes };
+  const freezeCandidateSnapshot = await crowdSnapshot();
+  const frozen = freezeCandidateSnapshot.instances.find((item) => item.visible);
+  assert.ok(frozen, "no visible crowd instance available for freeze probe");
+  const frozenBefore = { id: frozen.id, position: frozen.position, facing: frozen.facing };
+  await centerCameraOn(frozen.position);
+  await sleep(500);
+  const frozenAfter = await crowdSnapshot();
+  const frozenItem = frozenAfter.instances.find((item) => item.id === frozenBefore.id);
+  assert.deepEqual(frozenItem?.position, frozenBefore.position, "visible crowd moved while frozen");
+  assert.equal(frozenItem?.facing, frozenBefore.facing, "visible crowd changed facing while frozen");
+
+  await centerCameraOn({ x: 2_000, y: 2_000 });
+  await sleep(500);
+  const afterLeavingViewport = await crowdSnapshot();
+  const continued = afterLeavingViewport.instances.find((item) => item.id === frozenBefore.id);
+  assert.ok(continued, "frozen crowd instance disappeared from logical runtime");
+  assert.ok(
+    continued.position.x !== frozenBefore.position.x || continued.position.y !== frozenBefore.position.y,
+    "crowd did not continue after leaving viewport",
+  );
+
+  const staticProbes = [];
+  for (const [id, tile] of [
+    ["special-reading", { x: 72 * 16, y: 53 * 16 }],
+    ["special-eating", { x: 54 * 16, y: 63 * 16 }],
+    ["cat-licking", { x: 12 * 16, y: 106 * 16 }],
+  ]) {
+    assert.equal(await centerCameraOn(tile), true, "static NPC camera probe failed");
+    await sleep(100);
+    const snapshot = await staticNpcSnapshot();
+    staticProbes.push({ id, tile, snapshot });
+    assert.ok(
+      snapshot?.instances.find((item) => item.id === id)?.materialized,
+      `${id} did not materialize near its viewport`,
+    );
+  }
+  assert.deepEqual(
+    staticProbes[0].snapshot.configs.map((config) => ({
+      id: config.id,
+      spriteKey: config.spriteKey,
+      tileX: config.tileX,
+      tileY: config.tileY,
+      scale: config.scale,
+      frameRate: config.frameRate,
+      frameDurations: config.frameDurations ?? [],
+    })),
+    [
+      {
+        id: "special-reading",
+        spriteKey: "npc-special-reading",
+        tileX: 72,
+        tileY: 53,
+        scale: 0.9,
+        frameRate: 3,
+        frameDurations: [{ frame: 1, duration: 2_000 }, { frame: 9, duration: 3_000 }],
+      },
+      {
+        id: "special-eating",
+        spriteKey: "npc-special-eating",
+        tileX: 54,
+        tileY: 63,
+        scale: 0.73,
+        frameRate: 4,
+        frameDurations: [],
+      },
+      {
+        id: "cat-licking",
+        spriteKey: "npc-cat-licking",
+        tileX: 12,
+        tileY: 106,
+        scale: 1,
+        frameRate: 6,
+        frameDurations: [{ frame: 0, duration: 3_000 }],
+      },
+    ],
+    "static NPC contract drifted",
+  );
+
+  await centerCameraOn({ x: 2_000, y: 2_000 });
+  await sleep(100);
+  const staticAfterLeaving = await staticNpcSnapshot();
+  assert.equal(staticAfterLeaving?.spriteCount, 0, "static NPC sprites leaked outside viewport");
+
+  await centerCameraOn({ x: 480, y: 310 });
+  await evaluate("document.querySelector('#app-play')?.click()");
+  await waitFor(
+    "document.body?.dataset.appState",
+    (state) => state === "PLAYING",
+    "PLAYING",
+    15_000,
+  );
+  const departureDeadline = Date.now() + 30_000;
+  let duringDeparture;
+  while (Date.now() < departureDeadline) {
+    duringDeparture = await crowdSnapshot();
+    if (
+      duringDeparture?.trainActiveCount > 0 &&
+      duringDeparture.pausedGroups.includes("loop-crowd")
+    ) break;
+    await sleep(50);
+  }
+  assert.ok(duringDeparture?.trainActiveCount > 0, "crowd-train spawned before train departure");
+  assert.ok(duringDeparture.pausedGroups.includes("loop-crowd"), "loop-crowd was not paused during departure");
+  const recoveryDeadline = Date.now() + 30_000;
+  let recovered;
+  while (Date.now() < recoveryDeadline) {
+    recovered = await crowdSnapshot();
+    if (!recovered.pausedGroups.includes("loop-crowd")) break;
+    await sleep(50);
+  }
+  assert.ok(recovered && !recovered.pausedGroups.includes("loop-crowd"), "loop-crowd did not resume after train left viewport");
+
+  routeCrowdDiagnostics = { afterStart, probes, frozenBefore, frozenAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, recovered };
   assert.equal(afterStart.configIds.length, 9, "exactly nine route groups are required");
   assert.equal(new Set(afterStart.configIds).size, 9, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
+  assert.equal(afterStart.trainActiveCount, 0, "crowd-train must not exist before departure");
   assert.ok(
     probes.every((probe) => probe.snapshot?.materializedByGroup?.[probe.groupId] > 0),
-    "each required public route group must materialize in production",
+    "each required visible route group must materialize in production",
   );
   assert.deepEqual(events.console, []);
   assert.deepEqual(events.exceptions, []);
