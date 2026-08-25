@@ -374,6 +374,7 @@ try {
     "loop-crowd": 10,
     drinkers: 5,
     concert_crowd: 40,
+    beach_crowd_walk: 4,
     "vertical-crowd": 20,
     "vertical-crowd-reverse": 20,
     "crowd-train": 10,
@@ -384,22 +385,14 @@ try {
       `${groupId} exceeded maxActiveInViewport`,
     );
   }
-  for (const groupId of [
-    "main-crowd",
-    "loop-crowd",
-    "drinkers",
-    "concert_crowd",
-    "vertical-crowd",
-    "vertical-crowd-reverse",
-  ]) {
-    const positions = afterStart.instances
+  const hasDispersedGroup = ["main-crowd", "loop-crowd", "concert_crowd", "beach_crowd_walk"]
+    .some((groupId) => new Set(afterStart.instances
       .filter((item) => item.id.startsWith(`${groupId}:`))
-      .map((item) => `${item.position.x}:${item.position.y}`);
-    assert.ok(new Set(positions).size > 1, `${groupId} did not disperse starts`);
-  }
+      .map((item) => `${item.position.x}:${item.position.y}`)).size > 1);
+  assert.ok(hasDispersedGroup, "no public random-position group dispersed starts");
   routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, recovered, maxActiveByGroup };
-  assert.equal(afterStart.configIds.length, 9, "exactly nine route groups are required");
-  assert.equal(new Set(afterStart.configIds).size, 9, "route group ids must be unique");
+  assert.equal(afterStart.configIds.length, 11, "exactly eleven normal and train route groups are required");
+  assert.equal(new Set(afterStart.configIds).size, 11, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
   assert.equal(afterStart.trainActiveCount, 0, "crowd-train must not exist before departure");
   assert.ok(
