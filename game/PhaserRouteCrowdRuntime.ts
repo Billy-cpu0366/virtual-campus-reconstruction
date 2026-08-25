@@ -19,6 +19,11 @@ export const ROUTE_CROWD_TEXTURES = Object.freeze([
   "npc-man9", "npc-man10",
 ] as const);
 
+const ROUTE_CROWD_SPECIAL_TEXTURES = Object.freeze({
+  beach_crowd_walk: ["npc-man-beach", "npc-man-beach2", "npc-woman-beach", "npc-woman-beach2"],
+  "hazmat-crowd": ["npc-hazmat-suit"],
+} as const);
+
 export interface PhaserRouteCrowdLoaderLike {
   spritesheet(
     key: string,
@@ -30,7 +35,7 @@ export interface PhaserRouteCrowdLoaderLike {
 export function preloadRouteCrowdRuntimeAssets(
   loader: PhaserRouteCrowdLoaderLike,
 ): void {
-  for (const texture of ROUTE_CROWD_TEXTURES) {
+  for (const texture of [...ROUTE_CROWD_TEXTURES, ...Object.values(ROUTE_CROWD_SPECIAL_TEXTURES).flat()]) {
     loader.spritesheet(texture, `/sprites/${texture}.webp`, {
       frameWidth: 48,
       frameHeight: 48,
@@ -238,7 +243,9 @@ export class PhaserRouteCrowdRuntime {
         this.sprites.delete(item.id);
         continue;
       }
-      const texture = ROUTE_CROWD_TEXTURES[index % ROUTE_CROWD_TEXTURES.length]!;
+      const groupId = item.id.split(":", 1)[0]!;
+      const textures = ROUTE_CROWD_SPECIAL_TEXTURES[groupId as keyof typeof ROUTE_CROWD_SPECIAL_TEXTURES] ?? ROUTE_CROWD_TEXTURES;
+      const texture = textures[index % textures.length]!;
       const sprite = prior ?? this.scene.add.sprite(
         item.position.x,
         item.position.y,

@@ -29,8 +29,8 @@ const pathFor = (request: RouteCrowdPathRequest) => [
 ];
 
 describe("RouteCrowdRuntime contract", () => {
-  it("publishes nine frozen groups with the required deterministic fields", () => {
-    expect(ROUTE_CROWD_CONFIGS).toHaveLength(9);
+  it("publishes the source-backed frozen groups with the required deterministic fields", () => {
+    expect(ROUTE_CROWD_CONFIGS).toHaveLength(11);
     expect(ROUTE_CROWD_CONFIGS.every((config) => config.count > 0)).toBe(true);
     expect(
       ROUTE_CROWD_CONFIGS.every(
@@ -76,7 +76,7 @@ describe("RouteCrowdRuntime contract", () => {
       ROUTE_CROWD_CONFIGS
         .filter((config) => config.maxActiveInViewport === undefined)
         .map((config) => config.id),
-    ).toEqual(["walking-crowd", "outside_concert1"]);
+    ).toEqual(["walking-crowd", "hazmat-crowd", "outside_concert1"]);
     expect(
       Object.fromEntries(
         ROUTE_CROWD_CONFIGS
@@ -88,6 +88,7 @@ describe("RouteCrowdRuntime contract", () => {
       "loop-crowd": 10,
       drinkers: 5,
       concert_crowd: 40,
+      beach_crowd_walk: 4,
       "vertical-crowd": 20,
       "vertical-crowd-reverse": 20,
       "crowd-train": 10,

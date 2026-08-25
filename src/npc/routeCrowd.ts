@@ -134,9 +134,11 @@ export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("loop-crowd", 10, [[55, 18], [62, 18]], [[21, 86], [55, 86], [112, 48], [116, 85]], 45, .2, { minMs: 0, maxMs: 0 }, { minMs: 1_000, maxMs: 1_000 }, true, false, true, 10),
   group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false, false, true, 5),
   group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 40),
+  group("beach_crowd_walk", 4, [[96, 119]], [[68, 134]], 35, .2, { minMs: 0, maxMs: 0 }, { minMs: 0, maxMs: 0 }, true, false, true, 4),
   group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20),
   group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20),
   group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, undefined),
+  group("hazmat-crowd", 8, [[13, 126], [19, 124]], [[5, 133], [11, 132], [8, 131]], 45, .15, { minMs: 0, maxMs: 10_000 }, { minMs: 2_000, maxMs: 2_000 }, true, false, true, undefined),
   group("outside_concert1", 10, [[115, 109], [123, 110], [130, 108]], [[120, 114], [137, 106], [138, 96]], 35, .5, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, undefined),
   group("crowd-train", 10, Array.from({ length: 22 }, (_, index) => [63 + index, 19] as const), [[68, 121], [8, 100], [36, 117], [129, 108], [106, 46], [21, 86]], 35, .2, { minMs: 2_400, maxMs: 2_400 }, { minMs: 0, maxMs: 0 }, false, true, false, 10),
 ]);

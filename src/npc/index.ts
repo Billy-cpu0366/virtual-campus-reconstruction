@@ -1,4 +1,46 @@
 export { GridRouteCrowdPathProvider } from "./gridPathProvider.js";
+export {
+  BUG_CROWD_CONFIG,
+  BUG_CROWD_CONFIGS,
+  BUG_CROWD_TILE_SIZE,
+  BugCrowdRuntime,
+} from "./bugCrowd.js";
+export type {
+  BugCrowdConfig,
+  BugCrowdInstanceSnapshot,
+  BugCrowdMode,
+  BugCrowdPoint,
+  BugCrowdRange,
+  BugCrowdRuntimeOptions,
+  BugCrowdSnapshot,
+  BugCrowdState,
+  BugCrowdViewport,
+} from "./bugCrowd.js";
+
+export {
+  STATIC_CROWD_FACTOR,
+  STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE,
+  STATIC_CROWD_MIN_SPACING,
+  STATIC_CROWD_REGIONS,
+  STATIC_CROWD_SPRITE_POOLS,
+  STATIC_CROWD_UP_FACTOR,
+  STATIC_CROWD_VIEWPORT_MARGIN,
+  StaticCrowdRuntime,
+  staticCrowdRequestedCount,
+} from "./staticCrowd.js";
+export type {
+  StaticCrowdCategory,
+  StaticCrowdDirection,
+  StaticCrowdInstanceSnapshot,
+  StaticCrowdPoint,
+  StaticCrowdRegion,
+  StaticCrowdRegionSnapshot,
+  StaticCrowdRegionType,
+  StaticCrowdRuntimeOptions,
+  StaticCrowdSnapshot,
+  StaticCrowdSpritePools,
+  StaticCrowdViewport,
+} from "./staticCrowd.js";
 
 export {
   STATIC_NPC_CONFIGS,

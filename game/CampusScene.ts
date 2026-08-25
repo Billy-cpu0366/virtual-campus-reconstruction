@@ -105,6 +105,11 @@ import {
   PhaserStaticNpcRuntime,
   preloadStaticNpcRuntimeAssets,
 } from "./PhaserStaticNpcRuntime.js";
+import {
+  PhaserStaticCrowdRuntime,
+  preloadStaticCrowdRuntimeAssets,
+} from "./PhaserStaticCrowdRuntime.js";
+import { PhaserBugCrowdRuntime, preloadBugCrowdRuntimeAssets } from "./PhaserBugCrowdRuntime.js";
 import { GridRouteCrowdPathProvider } from "../src/npc/index.js";
 import {
   PhaserFactorySmokeRuntime,
@@ -298,6 +303,7 @@ export interface CampusSceneShutdownReceipt {
   readonly trainCollisionShapeActive: boolean;
   readonly sprayerSpriteCount: number;
   readonly staticNpcSpriteCount: number;
+  readonly staticCrowdSpriteCount: number;
   readonly smokeEmitterActive: boolean;
   readonly footstepActiveCount: number;
   readonly factoryRoofTweenActive: boolean;
@@ -340,6 +346,8 @@ export class CampusScene extends Phaser.Scene {
   private sprayerRuntime: PhaserSprayerRuntime | undefined;
   private routeCrowdRuntime: PhaserRouteCrowdRuntime | undefined;
   private staticNpcRuntime: PhaserStaticNpcRuntime | undefined;
+  private staticCrowdRuntime: PhaserStaticCrowdRuntime | undefined;
+  private bugCrowdRuntime: PhaserBugCrowdRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private footstepRuntime: PhaserFootstepRuntime | undefined;
   private mapRuntime: PhaserCampusMapRuntime | undefined;
@@ -506,6 +514,8 @@ export class CampusScene extends Phaser.Scene {
     this.smokeRuntime.preload();
     preloadRouteCrowdRuntimeAssets(this.load);
     preloadStaticNpcRuntimeAssets(this.load);
+    preloadStaticCrowdRuntimeAssets(this.load);
+    preloadBugCrowdRuntimeAssets(this.load);
 
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
@@ -617,6 +627,8 @@ export class CampusScene extends Phaser.Scene {
     if (this.sceneDestroyed) return;
     this.routeCrowdRuntime?.update(this.time.now);
     this.staticNpcRuntime?.update();
+    this.staticCrowdRuntime?.update();
+    this.bugCrowdRuntime?.update(this.time.now);
     if (document.visibilityState !== "visible") {
       this.stopPlayerMovement();
       return;
@@ -1018,6 +1030,8 @@ export class CampusScene extends Phaser.Scene {
       routeCrowdSpriteCount: this.routeCrowdRuntime?.spriteCount ?? 0,
       staticNpc: this.staticNpcRuntime?.snapshot ?? null,
       staticNpcSpriteCount: this.staticNpcRuntime?.spriteCount ?? 0,
+      staticCrowd: this.staticCrowdRuntime?.snapshot ?? null,
+      staticCrowdSpriteCount: this.staticCrowdRuntime?.spriteCount ?? 0,
       train: this.trainRuntime?.snapshot ?? null,
       trainVisual: this.trainRuntime?.visualSnapshot ?? null,
       trainHasSprite: this.trainRuntime?.hasSprite ?? false,
@@ -1082,6 +1096,8 @@ export class CampusScene extends Phaser.Scene {
     this.sprayerRuntime?.shutdown();
     this.routeCrowdRuntime?.shutdown();
     this.staticNpcRuntime?.shutdown();
+    this.staticCrowdRuntime?.shutdown();
+    this.bugCrowdRuntime?.shutdown();
     this.smokeRuntime?.shutdown();
     this.trainRuntime?.shutdown(this.time?.now);
     this.entryRuntime = undefined;
@@ -1138,6 +1154,7 @@ export class CampusScene extends Phaser.Scene {
       trainCollisionShapeActive: this.trainRuntime?.hasCollisionShape ?? false,
       sprayerSpriteCount: this.sprayerRuntime?.spriteCount ?? 0,
       staticNpcSpriteCount: this.staticNpcRuntime?.spriteCount ?? 0,
+      staticCrowdSpriteCount: this.staticCrowdRuntime?.spriteCount ?? 0,
       smokeEmitterActive: this.smokeRuntime?.hasEmitter ?? false,
       footstepActiveCount: this.footstepRuntime?.activeCount ?? 0,
       factoryRoofTweenActive: this.factoryRoofTween !== undefined,
@@ -1150,6 +1167,8 @@ export class CampusScene extends Phaser.Scene {
     });
     this.sprayerRuntime = undefined;
     this.staticNpcRuntime = undefined;
+    this.staticCrowdRuntime = undefined;
+    this.bugCrowdRuntime = undefined;
     this.smokeRuntime = undefined;
     this.trainRuntime = undefined;
     return receipt;
@@ -1430,10 +1449,30 @@ export class CampusScene extends Phaser.Scene {
         onError: (reason) => this.recordSideFailure(`static-npc:${reason}`),
       },
     );
+    this.staticCrowdRuntime = new PhaserStaticCrowdRuntime(
+      this as unknown as import("./PhaserStaticCrowdRuntime.js").PhaserStaticCrowdSceneLike,
+      {
+        viewport: () => ({
+          left: this.cameras.main.worldView.x,
+          top: this.cameras.main.worldView.y,
+          width: this.cameras.main.worldView.width,
+          height: this.cameras.main.worldView.height,
+        }),
+        onError: (reason) => this.recordSideFailure(`static-crowd:${reason}`),
+      },
+    );
     const staticNpcStarted = this.staticNpcRuntime.start();
     if (!staticNpcStarted.ok) {
       this.recordSideFailure(`static-npc:${staticNpcStarted.reason}`);
     }
+    if (!this.staticCrowdRuntime.start()) {
+      this.recordSideFailure("static-crowd:start-failed");
+    }
+    this.bugCrowdRuntime = new PhaserBugCrowdRuntime(
+      this as unknown as import("./PhaserBugCrowdRuntime.js").PhaserBugCrowdSceneLike,
+      { pathProvider: new GridRouteCrowdPathProvider(wallData.grid), viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
+    );
+    if (!this.bugCrowdRuntime.start(this.time.now)) this.recordSideFailure("bug-crowd:start-failed");
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(
