@@ -44,6 +44,12 @@ decision: DEC-P5.4-05D2-PUBLIC-CROWD-MODEL-001
 5. 统一回归：站台、餐车/店面、海滩/足球/虫区、concert/抗议/舞者、火车事件、相机创建回收、性能和完整 production。
 6. 最终一次 Human 整体视觉验收；自动结果不能代签。
 
+## 自动验证收据
+
+- PASS：`npm test`（350项）、`npm run build`、`npm run browser:route-crowd-production -- http://127.0.0.1:4237/`、`npm run browser:performance-smoke -- http://127.0.0.1:4237/`、`npm run browser:complete-production -- http://127.0.0.1:4237/`。
+- 性能修复：venue crowd sprite 每帧最多创建16个；修复入口阶段约53ms长动画帧，性能 smoke PASS。
+- 待完成：Human整体视觉验收；自动结果不能代签。
+
 ## 验收
 
 - 结构：46 个静态 crowd region、11 条正常路线配置、火车10人配置、3 concert region、1 protesters_rising、8 dancer 和 special 配置均可被测试读取。

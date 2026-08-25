@@ -3,8 +3,8 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: batch-implement
-classification-trigger: human-accepted-public-bundle-crowd-model-after-complete-source-audit
+correction-phase: human-acceptance
+classification-trigger: public-crowd-owner-batches-implemented-and-automated-regression-passed
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
