@@ -68,18 +68,22 @@ if (!input) {
     const nearbyToolFailure = prior.slice(0, 4).some((candidate) => candidate.role === "toolResult" && candidate.toolError);
     const requestedContinuation = lastUser !== undefined && continuePattern.test(lastUser.text);
     const userHadToContinue = nextUser !== undefined && continuePattern.test(nextUser.text);
-    if (!requestedContinuation && !userHadToContinue && !nearbyToolFailure) continue;
+    const emptyFinal = event.text.trim().length === 0;
+    if (!emptyFinal && !requestedContinuation && !userHadToContinue && !nearbyToolFailure) continue;
     findings.push({
       assistantEntry: event.index,
       timestamp: event.timestamp,
       requestedContinuation,
       userHadToContinue,
       nearbyToolFailure,
-      classification: userHadToContinue
-        ? "premature-stop-candidate"
-        : nearbyToolFailure
-          ? "tool-failure-stop-candidate"
-          : "continuation-rule-stop-candidate",
+      emptyFinal,
+      classification: emptyFinal
+        ? "empty-final-stop"
+        : userHadToContinue
+          ? "premature-stop-candidate"
+          : nearbyToolFailure
+            ? "tool-failure-stop-candidate"
+            : "continuation-rule-stop-candidate",
       evidence: {
         priorUser: lastUser?.text ?? null,
         assistantText: event.text,
