@@ -1,7 +1,10 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
+const EXTENSION_VERSION = "1.1.0";
+
 type Entry = {
   id?: string;
+  type?: string;
   message?: { role?: string; content?: unknown; stopReason?: string };
 };
 
@@ -29,10 +32,20 @@ function hasToolCall(content: unknown): boolean {
 export default function (pi: ExtensionAPI) {
   const recovered = new Set<string>();
 
+  pi.registerCommand("empty-final-recovery-status", {
+    description: "Confirm that the empty-final recovery guard is loaded",
+    handler: async (_args, ctx) => {
+      ctx.ui.notify(
+        `Empty-final recovery guard v${EXTENSION_VERSION} is loaded.`,
+        "info",
+      );
+    },
+  });
+
   pi.on("agent_settled", async (_event, ctx) => {
     const branch = ctx.sessionManager.getBranch() as Entry[];
     const last = branch.at(-1);
-    const message = last?.message;
+    const message = last?.type === "message" ? last.message : undefined;
     if (
       message?.role !== "assistant" ||
       message.stopReason !== "stop" ||
