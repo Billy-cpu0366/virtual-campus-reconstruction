@@ -1,8 +1,212 @@
 import { VenueCrowdRuntime } from "../src/npc/index.js";
-import { ANIMATION_FRAME_RATE, WALK_FRAMES_PER_DIRECTION, walkFrameStart } from "../src/player/index.js";
-type View={left:number;top:number;width:number;height:number};
-type Sprite={x:number;y:number;setDepth(n:number):unknown;setFrame?(n:number):unknown;anims?:{play(k:string,b?:boolean):unknown;stop?():unknown};destroy():void};
-const DIRECTIONS=["east","north-east","north-west","north","south-east","south-west","south","west"] as const;
-export function preloadVenueCrowdRuntimeAssets(l:{spritesheet(k:string,u:string,c:{frameWidth:number;frameHeight:number}):unknown}){l.spritesheet("npc_protester_rising","/sprites/npc_protester_rising.webp",{frameWidth:48,frameHeight:48});}
-export interface PhaserVenueCrowdSceneLike { readonly add:{sprite(x:number,y:number,key:string):Sprite}; readonly textures:{exists(k:string):boolean};readonly anims?:{exists?(k:string):boolean;create(x:{key:string;frames:readonly unknown[];frameRate:number;repeat:number}):unknown;generateFrameNumbers(k:string,r:{start:number;end:number}):readonly unknown[]}; }
-export class PhaserVenueCrowdRuntime{private readonly core=new VenueCrowdRuntime();private sprites=new Map<string,Sprite>();private dead=false;private startedAt=0;constructor(private readonly scene:PhaserVenueCrowdSceneLike,private readonly viewport:()=>View|undefined){}start(){if(this.dead||!this.scene.textures.exists("npc_protester_rising"))return false;this.startedAt=Date.now();this.core.start(this.viewport());this.sync();return true;}update(){if(this.dead)return;this.core.tick(this.viewport());this.sync();}shutdown(){this.dead=true;this.core.shutdown();for(const s of this.sprites.values())s.destroy();this.sprites.clear();}get spriteCount(){return this.sprites.size;}private sync(){const ids=new Set<string>();let created=0;for(const i of this.core.snapshot.instances){if(!i.materialized)continue;ids.add(i.id);let s=this.sprites.get(i.id);const protest=i.regionId.startsWith("protesters_rising");if(s===undefined){if(created>=16)continue;const key=protest?"npc_protester_rising":"npc-man";s=this.scene.add.sprite(i.position.x,i.position.y,key);if(protest){const direction=DIRECTIONS[Number(i.id.split(":").at(-1))%DIRECTIONS.length]!;const animation=`npc-protester-rising-walk-${direction}`;const start=walkFrameStart(direction);if(!this.scene.anims?.exists?.(animation))this.scene.anims?.create({key:animation,frames:this.scene.anims.generateFrameNumbers(key,{start,end:start+WALK_FRAMES_PER_DIRECTION-1}),frameRate:ANIMATION_FRAME_RATE,repeat:Math.floor(Number(i.id.split(":").at(-1))%3)});s.setFrame?.(start);if(Number(i.id.split(":").at(-1))%3===0)s.anims?.play(animation,true);}created++;}s.x=i.position.x;s.y=i.position.y;s.setDepth(500+i.position.y*.1);this.sprites.set(i.id,s);}for(const [id,s]of this.sprites)if(!ids.has(id)){s.destroy();this.sprites.delete(id);}}}
+import {
+  ANIMATION_FRAME_RATE,
+  WALK_FRAMES_PER_DIRECTION,
+  walkFrameStart,
+} from "../src/player/index.js";
+
+type View = { left: number; top: number; width: number; height: number };
+type Direction =
+  | "east" | "north-east" | "north-west" | "north"
+  | "south-east" | "south-west" | "south" | "west";
+type Sprite = {
+  x: number;
+  y: number;
+  setDepth(value: number): unknown;
+  setFrame?(frame: number): unknown;
+  anims?: {
+    play(key: string, ignoreIfPlaying?: boolean): unknown;
+    stop?(): unknown;
+  };
+  destroy(): void;
+};
+type ProtestActionState = {
+  readonly id: string;
+  readonly capable: boolean;
+  phase: "idle" | "acting";
+  directionIndex: number;
+  actionCount: number;
+  nextChangeAt: number;
+};
+
+const DIRECTIONS: readonly Direction[] = [
+  "east", "north-east", "north-west", "north",
+  "south-east", "south-west", "south", "west",
+];
+const ACTION_DURATION_MS = WALK_FRAMES_PER_DIRECTION / ANIMATION_FRAME_RATE * 1_000;
+
+const stableHash = (value: string): number =>
+  [...value].reduce((hash, character) =>
+    (hash * 31 + character.charCodeAt(0)) >>> 0, 0);
+
+export function preloadVenueCrowdRuntimeAssets(loader: {
+  spritesheet(
+    key: string,
+    url: string,
+    config: { frameWidth: number; frameHeight: number },
+  ): unknown;
+}): void {
+  loader.spritesheet(
+    "npc_protester_rising",
+    "/sprites/npc_protester_rising.webp",
+    { frameWidth: 48, frameHeight: 48 },
+  );
+}
+
+export interface PhaserVenueCrowdSceneLike {
+  readonly add: { sprite(x: number, y: number, key: string): Sprite };
+  readonly textures: { exists(key: string): boolean };
+  readonly anims?: {
+    exists?(key: string): boolean;
+    create(config: {
+      key: string;
+      frames: readonly unknown[];
+      frameRate: number;
+      repeat: number;
+    }): unknown;
+    generateFrameNumbers(
+      key: string,
+      range: { start: number; end: number },
+    ): readonly unknown[];
+  };
+}
+
+/** Venue presentation with region culling and independent protest action state. */
+export class PhaserVenueCrowdRuntime {
+  private readonly core = new VenueCrowdRuntime();
+  private readonly sprites = new Map<string, Sprite>();
+  private readonly protestStates = new Map<string, ProtestActionState>();
+  private readonly createdAnimations = new Set<string>();
+  private dead = false;
+  private startedAt = 0;
+
+  constructor(
+    private readonly scene: PhaserVenueCrowdSceneLike,
+    private readonly viewport: () => View | undefined,
+    private readonly now: () => number = Date.now,
+  ) {}
+
+  start(): boolean {
+    if (this.dead || !this.scene.textures.exists("npc_protester_rising")) return false;
+    this.startedAt = this.now();
+    this.core.start(this.viewport());
+    this.sync(this.startedAt);
+    return true;
+  }
+
+  update(): void {
+    if (this.dead) return;
+    const now = this.now();
+    this.core.tick(this.viewport());
+    this.sync(now);
+  }
+
+  shutdown(): void {
+    this.dead = true;
+    this.core.shutdown();
+    for (const sprite of this.sprites.values()) sprite.destroy();
+    this.sprites.clear();
+    this.protestStates.clear();
+  }
+
+  get spriteCount(): number { return this.sprites.size; }
+  get protestActionSnapshot(): readonly Readonly<ProtestActionState>[] {
+    return Object.freeze([...this.protestStates.values()].map((state) =>
+      Object.freeze({ ...state })));
+  }
+
+  private sync(now: number): void {
+    const activeIds = new Set<string>();
+    let created = 0;
+    for (const instance of this.core.snapshot.instances) {
+      if (!instance.materialized) continue;
+      activeIds.add(instance.id);
+      let sprite = this.sprites.get(instance.id);
+      const protest = instance.regionId.startsWith("protesters_rising");
+      if (sprite === undefined) {
+        if (created >= 16) continue;
+        const texture = protest ? "npc_protester_rising" : "npc-man";
+        sprite = this.scene.add.sprite(instance.position.x, instance.position.y, texture);
+        created += 1;
+        if (protest) this.initializeProtester(instance.id, sprite);
+      }
+      sprite.x = instance.position.x;
+      sprite.y = instance.position.y;
+      sprite.setDepth(500 + instance.position.y * .1);
+      if (protest) this.updateProtester(instance.id, sprite, now);
+      this.sprites.set(instance.id, sprite);
+    }
+    for (const [id, sprite] of this.sprites) {
+      if (activeIds.has(id)) continue;
+      sprite.destroy();
+      this.sprites.delete(id);
+      const state = this.protestStates.get(id);
+      if (state !== undefined) {
+        state.phase = "idle";
+        state.nextChangeAt = now + this.idleDelay(id, state.actionCount);
+      }
+    }
+  }
+
+  private initializeProtester(id: string, sprite: Sprite): void {
+    const index = Number(id.split(":").at(-1)) || 0;
+    const state = this.protestStates.get(id) ?? {
+      id,
+      capable: index % 3 === 0,
+      phase: "idle" as const,
+      directionIndex: index % DIRECTIONS.length,
+      actionCount: 0,
+      nextChangeAt: this.startedAt + stableHash(id) % 2_001,
+    };
+    this.protestStates.set(id, state);
+    sprite.anims?.stop?.();
+    sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!));
+  }
+
+  private updateProtester(id: string, sprite: Sprite, now: number): void {
+    const state = this.protestStates.get(id);
+    if (state === undefined || !state.capable || now < state.nextChangeAt) return;
+    if (state.phase === "acting") {
+      state.phase = "idle";
+      sprite.anims?.stop?.();
+      sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!));
+      state.nextChangeAt = now + this.idleDelay(id, state.actionCount);
+      return;
+    }
+    const actingCount = [...this.protestStates.values()].filter((candidate) =>
+      candidate.phase === "acting").length;
+    if (actingCount >= 2) {
+      state.nextChangeAt = now + 500 + stableHash(`${id}:defer:${state.actionCount}`) % 501;
+      return;
+    }
+    state.phase = "acting";
+    state.actionCount += 1;
+    state.directionIndex = (
+      state.directionIndex + 1 + stableHash(`${id}:${state.actionCount}`) % 7
+    ) % DIRECTIONS.length;
+    const direction = DIRECTIONS[state.directionIndex]!;
+    const animation = `npc-protester-rising-action-${direction}`;
+    this.ensureAnimation(direction, animation);
+    sprite.anims?.play(animation, false);
+    state.nextChangeAt = now + ACTION_DURATION_MS;
+  }
+
+  private idleDelay(id: string, actionCount: number): number {
+    return 2_000 + stableHash(`${id}:idle:${actionCount}`) % 4_001;
+  }
+
+  private ensureAnimation(direction: Direction, key: string): void {
+    if (this.createdAnimations.has(key) || this.scene.anims?.exists?.(key)) return;
+    const start = walkFrameStart(direction);
+    this.scene.anims?.create({
+      key,
+      frames: this.scene.anims.generateFrameNumbers(
+        "npc_protester_rising",
+        { start, end: start + WALK_FRAMES_PER_DIRECTION - 1 },
+      ),
+      frameRate: ANIMATION_FRAME_RATE,
+      repeat: 0,
+    });
+    this.createdAnimations.add(key);
+  }
+}

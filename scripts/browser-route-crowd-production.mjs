@@ -164,6 +164,21 @@ async function staticNpcSnapshot() {
   }`);
 }
 
+async function venueCrowdSnapshot() {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const runtime = scene?.venueCrowdRuntime;
+      if (!runtime) continue;
+      return {
+        spriteCount: runtime.spriteCount ?? 0,
+        protestStates: runtime.protestActionSnapshot ?? [],
+      };
+    }
+    return null;
+  }`);
+}
+
 async function centerCameraOn(tile) {
   return sceneCall(`function () {
     for (const game of this) {
@@ -340,6 +355,27 @@ try {
   const staticAfterLeaving = await staticNpcSnapshot();
   assert.equal(staticAfterLeaving?.spriteCount, 0, "static NPC sprites leaked outside viewport");
 
+  await centerCameraOn({ x: 1_800, y: 1_200 });
+  await sleep(1_000);
+  const protestSamples = [];
+  for (let sample = 0; sample < 20; sample += 1) {
+    await sleep(250);
+    protestSamples.push(await venueCrowdSnapshot());
+  }
+  const protestStates = protestSamples.at(-1)?.protestStates ?? [];
+  const capableProtesters = protestStates.filter((state) => state.capable);
+  const fixedProtesters = protestStates.filter((state) => !state.capable);
+  assert.ok(capableProtesters.length > 0 && capableProtesters.length < protestStates.length,
+    "protest action subset is not bounded");
+  assert.ok(protestSamples.every((sample) =>
+    sample.protestStates.filter((state) => state.phase === "acting").length <= 2),
+  "more than two protesters acted concurrently");
+  assert.ok(protestSamples.some((sample) =>
+    sample.protestStates.some((state) => state.actionCount > 0)),
+  "no finite protest action occurred during the production sample");
+  assert.ok(fixedProtesters.every((state) => state.actionCount === 0),
+    "fixed protesters unexpectedly animated");
+
   await centerCameraOn({ x: 480, y: 310 });
   await evaluate("document.querySelector('#app-play')?.click()");
   await waitFor(
@@ -409,7 +445,7 @@ try {
       .filter((item) => item.id.startsWith(`${groupId}:`))
       .map((item) => `${item.position.x}:${item.position.y}`)).size > 1);
   assert.ok(hasDispersedGroup, "no public random-position group dispersed starts");
-  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, duringDeparture, trainTrajectories: Object.fromEntries(trainTrajectories), recovered, maxActiveByGroup };
+  routeCrowdDiagnostics = { afterStart, probes, movingBefore, movingAfter, afterLeavingViewport, staticProbes, staticAfterLeaving, protestSamples, duringDeparture, trainTrajectories: Object.fromEntries(trainTrajectories), recovered, maxActiveByGroup };
   assert.equal(afterStart.configIds.length, 11, "exactly eleven normal and train route groups are required");
   assert.equal(new Set(afterStart.configIds).size, 11, "route group ids must be unique");
   assert.ok(afterStart.instanceCount > 0, "no route crowd path could start");
