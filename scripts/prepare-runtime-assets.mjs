@@ -26,8 +26,9 @@ const STATIC_NPC_TEXTURES = [
 ];
 const STATIC_CROWD_TEXTURES = [
   "npc-man-beach", "npc-man-beach2", "npc-woman-beach", "npc-woman-beach2",
-  "npc_footballer_blue", "npc_footballer_red", "npc-hazmat-suit", "npc-bug",
+  "npc_footballer_blue", "npc_footballer_red", "npc-hazmat-suit", "npc-bug", "npc_protester_rising",
 ];
+const DANCING_CROWD_TEXTURES = ["npc-dancing-down", "npc-dancing-left", "npc-dancing-right", "npc-dancing-up"];
 
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
@@ -46,6 +47,10 @@ const FILES = [
   ...STATIC_CROWD_TEXTURES.map((name) => [
     `sprites/${name}.webp`,
     `sprites/${name}.webp`,
+  ]),
+  ...DANCING_CROWD_TEXTURES.map((name) => [
+    `sprites/special/${name}.webp`,
+    `sprites/special/${name}.webp`,
   ]),
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],

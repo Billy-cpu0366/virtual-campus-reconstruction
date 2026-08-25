@@ -1,4 +1,10 @@
 export { GridRouteCrowdPathProvider } from "./gridPathProvider.js";
+export { DANCING_CROWD_CONFIG, DancingCrowdRuntime } from "./dancingCrowd.js";
+export type { DancingCrowdInstance, DancingDirection } from "./dancingCrowd.js";
+export { VENUE_CROWD_REGIONS } from "./venueCrowd.js";
+export type { VenuePoint, VenueRegion } from "./venueCrowd.js";
+export { VenueCrowdRuntime } from "./venueCrowdRuntime.js";
+export type { VenueCrowdInstance, VenueCrowdSnapshot } from "./venueCrowdRuntime.js";
 export {
   BUG_CROWD_CONFIG,
   BUG_CROWD_CONFIGS,

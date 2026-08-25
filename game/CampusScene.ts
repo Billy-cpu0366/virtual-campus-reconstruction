@@ -110,6 +110,8 @@ import {
   preloadStaticCrowdRuntimeAssets,
 } from "./PhaserStaticCrowdRuntime.js";
 import { PhaserBugCrowdRuntime, preloadBugCrowdRuntimeAssets } from "./PhaserBugCrowdRuntime.js";
+import { PhaserVenueCrowdRuntime, preloadVenueCrowdRuntimeAssets } from "./PhaserVenueCrowdRuntime.js";
+import { PhaserDancingCrowdRuntime, preloadDancingCrowdRuntimeAssets } from "./PhaserDancingCrowdRuntime.js";
 import { GridRouteCrowdPathProvider } from "../src/npc/index.js";
 import {
   PhaserFactorySmokeRuntime,
@@ -348,6 +350,8 @@ export class CampusScene extends Phaser.Scene {
   private staticNpcRuntime: PhaserStaticNpcRuntime | undefined;
   private staticCrowdRuntime: PhaserStaticCrowdRuntime | undefined;
   private bugCrowdRuntime: PhaserBugCrowdRuntime | undefined;
+  private venueCrowdRuntime: PhaserVenueCrowdRuntime | undefined;
+  private dancingCrowdRuntime: PhaserDancingCrowdRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private footstepRuntime: PhaserFootstepRuntime | undefined;
   private mapRuntime: PhaserCampusMapRuntime | undefined;
@@ -516,6 +520,8 @@ export class CampusScene extends Phaser.Scene {
     preloadStaticNpcRuntimeAssets(this.load);
     preloadStaticCrowdRuntimeAssets(this.load);
     preloadBugCrowdRuntimeAssets(this.load);
+    preloadVenueCrowdRuntimeAssets(this.load);
+    preloadDancingCrowdRuntimeAssets(this.load);
 
     this.load.image("exterior", "/maps/exterior-final.webp");
     this.load.image("collisions-objects", "/maps/collisions-objects.png");
@@ -629,6 +635,8 @@ export class CampusScene extends Phaser.Scene {
     this.staticNpcRuntime?.update();
     this.staticCrowdRuntime?.update();
     this.bugCrowdRuntime?.update(this.time.now);
+    this.venueCrowdRuntime?.update();
+    this.dancingCrowdRuntime?.update();
     if (document.visibilityState !== "visible") {
       this.stopPlayerMovement();
       return;
@@ -1098,6 +1106,8 @@ export class CampusScene extends Phaser.Scene {
     this.staticNpcRuntime?.shutdown();
     this.staticCrowdRuntime?.shutdown();
     this.bugCrowdRuntime?.shutdown();
+    this.venueCrowdRuntime?.shutdown();
+    this.dancingCrowdRuntime?.shutdown();
     this.smokeRuntime?.shutdown();
     this.trainRuntime?.shutdown(this.time?.now);
     this.entryRuntime = undefined;
@@ -1169,6 +1179,8 @@ export class CampusScene extends Phaser.Scene {
     this.staticNpcRuntime = undefined;
     this.staticCrowdRuntime = undefined;
     this.bugCrowdRuntime = undefined;
+    this.venueCrowdRuntime = undefined;
+    this.dancingCrowdRuntime = undefined;
     this.smokeRuntime = undefined;
     this.trainRuntime = undefined;
     return receipt;
@@ -1473,6 +1485,10 @@ export class CampusScene extends Phaser.Scene {
       { pathProvider: new GridRouteCrowdPathProvider(wallData.grid), viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
     );
     if (!this.bugCrowdRuntime.start(this.time.now)) this.recordSideFailure("bug-crowd:start-failed");
+    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
+    if (!this.venueCrowdRuntime.start()) this.recordSideFailure("venue-crowd:start-failed");
+    this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
+    if (!this.dancingCrowdRuntime.start()) this.recordSideFailure("dancing-crowd:start-failed");
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(
