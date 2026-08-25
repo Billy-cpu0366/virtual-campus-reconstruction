@@ -76,7 +76,46 @@ B. 将公开 `visualOffset` 加入 RouteCrowdConfig 与 Phaser presentation；�
 
 C. 按 Bundle 的区域方向池初始化静态 crowd，并以1秒节拍做可复放 look-around；只对已有普通 spritesheet 应用公开 walk 首帧/已证实 idle，不猜新动作。
 
-## 建议的整体修复包（等待 Human Gate）
+## 第三轮 Human 视觉失败根因审计（proposed，2026-08-25）
+
+### 差异表
+
+| 差异 | 公开证据 | 当前实现 | 已确认根因 |
+|---|---|---|---|
+| 镜头内 NPC 产生/消失 | 静态/抗议 owner 按**整个 region bounds**与扩展100px视口相交来整区创建/回收（Bundle约 byte 560743、565791）；路线 owner 按 path bounds 激活并用 alpha fade，不按单点严格镜头框切 sprite（约 byte 180700） | route 按单点严格视口切 `materialized`（`src/npc/routeCrowd.ts:533`）；venue 按单点切换（`src/npc/venueCrowdRuntime.ts:8`）；创建预算可延迟到对象已进镜头后 | 把公开的区域/路径级生命周期错误实现成单点级；“加大margin”没有修正 owner 语义 |
+| 火车乘客仍单轨排队 | 每组先生成 `min(npcCount×3,start×end)` 条 seed + `pathRandomFactor` A* 路径，打乱路径池后每 NPC 独占一条；`crowd-train` 因而有30条候选供10人选择（约 byte 178660、194634） | 每 NPC 独立调用一次 BFS；所谓随机化只是打乱 BFS 邻居，未实现 A* 随机边成本，也没有路径池/唯一分配（`src/npc/routeCrowd.ts:323`） | 上一轮只模拟了“随机”，没有复刻公开多路径算法；不同路径在长走廊快速收敛 |
+| Stop AI 动作连续 | 公开 protesters 每人初始延迟0–2秒；单次动画重复0–2次；完成后停500–2000ms再换方向（约 byte 567000） | 按方向共享 animation key，并在创建时让固定三分之一直接播放；没有每 NPC 的 idle/active 状态与定时器（`game/PhaserVenueCrowdRuntime.ts:8`） | 把每 NPC 异步循环压成共享 Phaser 动画配置，无法表达独立停顿；也未实现 Human 要求的“仅部分 NPC 具备动作” |
+
+### 一次性替换计划（等待 Human 接受）
+
+#### A. 生命周期 owner 替换
+
+1. 静态 crowd、concert、protest 改为 region-level 状态：region 进入预热框时整区准备，离开更大的回收框才销毁；不再按每个点的镜头内外切换。
+2. 为兼顾性能与无闪现，采用两级边界：外圈提前分帧准备，进入公开100px扩展框前必须全部 ready；离开更大回收框才销毁。这是重构性能决定，不冒充原站 FACT。
+3. route crowd 保持全量逻辑模拟，按公开 path-bounds 激活与 alpha fade；取消单点严格视口 `materialized`。
+4. 验证：镜头静止10秒时静态/venue可见ID集合不增减；慢速跨 region 边缘时，任何创建/销毁只能发生在屏幕外；路线 NPC 只允许从屏幕边缘自然进出或按公开完成态淡出。
+
+#### B. 火车与路线真实多路径
+
+1. 用公开 worker 的8向 A*：octile heuristic、seeded random edge cost、禁止墙角斜穿、阻挡起终点拒绝；替换随机 BFS。
+2. 为每组预计算公开数量的候选路径并保存 pathId；打乱后为 NPC 一人分配一条，不在实例创建时重复随机求同一路径。
+3. `crowd-train` 保留10人、22个起点、6个终点、2400ms延迟、`randomPositions:false`；只修路径池与分配，不改火车路线/时序。
+4. 验证：火车10人 pathId 唯一；候选池为30；录制离站前5秒轨迹，不能全部拥有相同 waypoint 序列或重合为单列；所有 waypoint 必须可走且不斜穿阻挡角。
+
+#### C. Protest 每 NPC 动作状态机
+
+1. 按 Human 目标固定约三分之一为 action-capable，其余保持正脸/侧脸静止；这是重构决定，不是公开 FACT。
+2. action-capable NPC 使用独立状态机：初始错峰、一次短动作、2–6秒 idle、再随机触发；禁止共享 repeat 配置驱动连续动作。
+3. region 离开预热/回收边界时取消定时器，返回时恢复稳定身份与状态，不能重复叠加循环。
+4. 验证：任意2秒窗口内只有少数抗议者动作；同一 NPC 必须存在可观测 idle 间隔；静止子集始终不播放动作。
+
+### 代价与风险
+
+- 精确 A* 路径池比当前 BFS 更耗启动计算，必须按帧批量并重新过性能 smoke。
+- region-level 生命周期会增加屏幕外 sprite 数量，需要外圈预热与回收滞后平衡内存；不能再靠镜头内补生节省创建成本。
+- “仅约三分之一抗议者会动作、idle 2–6秒”来自 Human 视觉目标，若接受后登记为 DECISION；公开原站本身是所有 protesters 都有带停顿的循环。
+
+## 历史建议的整体修复包（已被第三轮审计替代）
 
 A. **人口生命周期**：按 region polygon 生成 seeded、最小间距的静态群众；视口只管理 sprite，不停止其逻辑。范围包括所有 46 个 `crowd`/`crowd_up` region，不建立通用 Entity 框架。
 
