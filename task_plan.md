@@ -16,7 +16,7 @@ gate-status: audit-authorized
 authorization-ref: DEC-SYS-NPC-SPECIAL-001
 preauthorized-next-work-item: none
 next-phase: npc-special-human-mechanism-gate
-updated: 2026-08-24
+updated: 2026-08-25
 ---
 
 # 原站逆向重构计划
@@ -38,7 +38,7 @@ updated: 2026-08-24
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计已由Human接受、验证并关闭；执行层16卡与历史归档迁移已验证关闭，当前恢复5场景视觉证据的Human结论审查。
+- 世界装配与图层详细设计、执行层16卡迁移及历史归档均已验证关闭；当前进入SYS-NPC专项，只读审计完整owner、公开机制、当前代码覆盖与统一差异。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -60,7 +60,7 @@ updated: 2026-08-24
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| 三板块可见成果并行波 | `systemic-failure`；Human已接受`DEC-P5.1-C3-P0-SCOPE-001`，candidate=`54c0e29`冻结 | 用本地production补充Loading、入口与party诊断；仍须以可观察Oracle冻结实施包 | 继续零散补丁；自动代签；修改冻结candidate；远端操作 | 三项适配证据与单一实施包完成后，进入有界batch implementation |
+| SYS-NPC完整专项 | `systemic-failure`；Human已接受`DEC-SYS-NPC-SPECIAL-001`，第三轮群众candidate为automated-verified / human-visual-rejected | 只读核对完整NPC owner、公开机制、当前代码覆盖和统一差异；形成权威卡候选与分批计划 | 修改`src/`、`game/`、测试或运行资源；继续按视觉症状零散补丁；删除失败candidate；远端操作 | Human接受机制理解、专项范围和分批顺序后，另行授权有界实现 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -154,30 +154,22 @@ updated: 2026-08-24
 
 ## 当前工作项
 
-当前 active 为[三板块可见成果并行波](task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001.md)。P1四报告已并入root；当前按[P2统一设计](task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001-P2-统一设计.md)冻结实现：
+当前 active 为[SYS-NPC专项](task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md)，父路线保持`systemic-flow / audit`。第三轮群众candidate `ef9f004`、`70aefe4`、`76beaf0`、`ea87512`虽通过自动回归，但Human视觉验收失败，已冻结为当前代码与失败对照，不作为正确基线。
 
-- [03内容线P2实现包](task-todos/WI-VISIBLE-CONTENT-WAVE-001-P2-实现包.md)
-- [04独立件P2实现包](task-todos/WI-VISIBLE-INDEPENDENT-WAVE-001-P2-实现包.md)
-- [05旁支P2实现包](task-todos/WI-VISIBLE-SIDE-WAVE-001-P2-实现包.md)
-- [Main产品入口P2实现与集成包](task-todos/WI-VISIBLE-PRODUCT-INTEGRATION-001-P2-实现包.md)
+当前只执行Phase A只读机制与覆盖审计：
 
-Human已接受3秒相机+5秒火车、480×270逻辑画面和Memo 6首引导。P2权威提交clean后进入P3并行实现；Human最终视觉Gate仍在自动验证之后、文档关闭之前。
+- 核对sprayer、路线群众、静态群众、concert/protest、bug/hazmat、reading/eating/cat licking、dancing、rat attack、ghost、birds及仅有资源证据的UNKNOWN对象；
+- 为每个owner记录配置与资源、激活与数量、位置与随机性、路径/动作、生命周期、系统接口、清理失败路径、当前代码与验证证据；
+- 建立一张Main-owned统一差异表，并按共同根因聚类；
+- 形成完整SYS-NPC卡候选、推荐实施批次、每批验收、成本与风险。
 
-### 第一波执行边界
-
-| 窗口 | 分支 | active 范围 | 交接 |
-|---|---|---|---|
-| 地图 | `impl/map-runtime-completion` | particles raw visual、粒子运行资源、24层安全生命周期与有界回归 | preview accepted；结果提交 `5290eca` |
-| 玩法 | `impl/gameplay-serial` | 控制门、8s idle、30s sitting、stand-up、资源降级 | preview accepted；结果提交 `482b52f` |
-| Main | `integration/map-gameplay-p0` | 已接收两个明确提交并完成 `CampusScene`/共享 Smoke 接线 | Human accepted；integration 结果 `f2fe106`，第一波 bounded closed |
-
-冻结接口仍以 `02-接口层/API契约表.md` 为唯一索引；SYS-CAMERA 只消费玩家只读快照/控制门并提交 viewport，不直接管理输入设备、chunk cache 或 Tilemap。
+Human接受机制理解、专项范围与分批顺序后，状态才能进入`implementation-authorized`。当前禁止修改`src/`、`game/`、测试或运行资源，也不建立通用NPC/Entity框架。
 
 ## 已阻塞或暂停工作项
 
 - `WI-VERIFY-CURRENT-WORK-ITEM-001`：已接受但验证器文件尚未落地；不能误报为已实现或已验证。
 - `WI-RENDER-PLAYABLE-001`：已通过 typecheck、133 项测试、build、编译产物 preview、browser Smoke 和Human视觉验收；结果提交 `7c5a738`。不代表完整原站功能或16个正式系统已完成。
-- 当前产品阻塞仍为Human视觉FAIL；`54c0e29`在自动/双视口production PASS后仍出现入口停滞/相机回切、Loading偏差和party屋顶遗漏，已回到同一差异表audit。意图与证据工作流已作为全局`pi-project-workflow@0.1.0-beta.3`安装；现待按其完成真实审计，第四项贴图/NPC/喷泉粒子暂不实施。Human已报告WIP仓库完成推送，但WSL没有远端commit/tree收据，不能把远端状态标为verified。
+- `WI-THREE-BOARD-VISIBLE-WAVE-001`不再是动态当前工作项；C3、04-A、03-A与05-A等已签结果保留，群众第三轮Human视觉失败已转入当前`WI-SYS-NPC-SPECIAL-001`统一审计。Human已报告WIP仓库完成推送，但WSL没有远端commit/tree收据，远端状态仍不能标为verified。
 - `WI-RESOURCE-REPRO-001`：调查已完成，结果提交 `f8a9014`。
 - `WI-RESOURCE-IMPLEMENT-001`：方案 A 已完成，结果提交 `6815a6f`。
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
