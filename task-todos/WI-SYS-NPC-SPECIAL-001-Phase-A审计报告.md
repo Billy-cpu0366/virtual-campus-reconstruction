@@ -3,8 +3,8 @@ work-item: WI-SYS-NPC-SPECIAL-001
 type: audit-report
 system: SYS-NPC
 issue-class: systemic-failure
-status: proposed-human-gate
-decision: DEC-SYS-NPC-SPECIAL-001
+status: accepted-b0-authorized
+decision: DEC-SYS-NPC-PHASE-A-001
 public-evidence: sample/original-public-build/mirror/chunk-WMFY56ZM.js
 candidate-worktree: .pi/worktrees/visible-product-integration
 candidate-head: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
@@ -153,14 +153,14 @@ updated: 2026-08-25
 
 `route/path`、`region-static`、`special-trigger`、`encounter`和`moving-sprite`的激活、状态与清理差异显著。当前根检出也没有两个已集成、Human通过的owner显示稳定共同合同。因此继续`NO-GO`：不建立通用NPC/Entity框架。只保留已经有多个真实route消费者的`GridRouteCrowdPathProvider`候选能力，是否进入根基线仍由后续集成Gate决定。
 
-## 7. Human机制Gate
+## 7. Human机制Gate结果
 
-建议Human一次确认以下范围：
+Human在结构化Gate选择`接受并开始B0 (Recommended)`，已接受：
 
-1. 接受“SYS-NPC是owner家族，不是统一NPC runtime”的机制理解；
-2. 接受六状态分离和上述RC-NPC-1..6统一差异表；
-3. 接受`B0→B1→B2→B3→B4→B5`顺序，先补证据再实现UNKNOWN owner；
-4. 接受每批owner级Human视觉，最后再做一次整体视觉；
+1. “SYS-NPC是owner家族，不是统一NPC runtime”的机制理解；
+2. 六状态分离和上述RC-NPC-1..6统一差异表；
+3. `B0→B1→B2→B3→B4→B5`顺序，先补证据再实现UNKNOWN owner；
+4. 每批owner级Human视觉，最后再做一次整体视觉；
 5. 保持不抽取通用NPC/Entity框架。
 
-Gate通过前：仅完成审计候选落盘，尚未授权修改`src/`、`game/`、测试、运行资源或失败candidate。
+当前仅授权B0只读证据与合同收口。仍未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate；B1-B5实现需后续独立授权。

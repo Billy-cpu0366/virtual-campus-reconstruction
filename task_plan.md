@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-plan-gate
+correction-phase: batch-implement
 classification-trigger: human-rejected-third-crowd-candidate-and-requested-full-npc-special
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-NPC-SPECIAL-001
 work-item-level: system
 work-item-type: systemic-special-project
-work-item-status: active-human-gate
-current-phase: npc-special-mechanism-and-batch-review
-current-gate: npc-special-mechanism-and-batch-plan
-gate-status: awaiting-human
-authorization-ref: DEC-SYS-NPC-SPECIAL-001
+work-item-status: active-b0-evidence
+current-phase: npc-special-b0-evidence-contract
+current-gate: npc-special-b0-evidence-review
+gate-status: b0-evidence-authorized
+authorization-ref: DEC-SYS-NPC-PHASE-A-001
 preauthorized-next-work-item: none
-next-phase: npc-special-batch-implementation-authorization
+next-phase: npc-special-b0-evidence-review
 updated: 2026-08-25
 ---
 
@@ -24,10 +24,10 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-NPC-SPECIAL-001`；Human已接受建立独立SYS-NPC专项，不再沿05-D-2按视觉症状追加补丁。
-- **当前阶段**：Phase A只读审计已完成，形成完整owner/六状态矩阵、RC-NPC-1..6统一差异表、SYS-NPC七格候选和`B0→B5`分批方案；当前等待Human机制与分批计划Gate。
+- **当前阶段**：Human已接受Phase A的完整owner/六状态矩阵、RC-NPC-1..6、SYS-NPC七格和`B0→B5`顺序；当前执行B0证据与合同收口。
 - **失败基线**：第三轮群众candidate `ef9f004`/`70aefe4`/`76beaf0`/`ea87512`虽自动回归通过，但Human确认仍有很多毛病；代码保留在clean integration worktree作为失败对照，不作为正确根基线或交付结论。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；原`WI-THREE-BOARD-VISIBLE-WAVE-001`不再是动态当前工作项，历史状态仍可追溯。
-- **当前授权**：审计候选文档已落盘；Human接受机制理解、专项范围与分批顺序前，仍未授权修改`src/`、`game/`、测试、运行资源或失败candidate。
+- **当前授权**：只读补train、rat、ghost、birds正常入口与生命周期、route worker和铁路策略直接证据；未授权修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：先过Human机制理解与分批计划Gate，再授权实现；自动检查不能替代任何owner级或整体视觉验收。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -61,7 +61,7 @@ updated: 2026-08-25
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| SYS-NPC完整专项 | `systemic-failure`；Phase A审计已落盘，当前为`human-plan-gate`；第三轮candidate保持automated-verified / human-visual-rejected | Human审查完整owner机制、RC-NPC-1..6和`B0→B5`分批方案 | 修改`src/`、`game/`、测试或运行资源；继续按视觉症状零散补丁；删除失败candidate；远端操作 | Human接受机制理解、专项范围和分批顺序后，进入下一实施授权阶段 |
+| SYS-NPC完整专项 | `systemic-failure`；Human已接受Phase A机制与`B0→B5`顺序，当前为B0只读证据收口 | 核对train、rat、ghost、birds、route worker和铁路策略直接证据，更新六状态台账 | 修改`src/`、`game/`、测试、运行资源、`sample/`或失败candidate；补猜UNKNOWN；远端操作 | B0证据与残余UNKNOWN审查后，再决定B1实现授权 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -155,16 +155,16 @@ updated: 2026-08-25
 
 ## 当前工作项
 
-当前 active 为[SYS-NPC专项](task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md)，父路线已从`systemic-flow / audit`进入`systemic-flow / human-plan-gate`。第三轮群众candidate `ef9f004`、`70aefe4`、`76beaf0`、`ea87512`继续冻结为代码与失败对照，不作为正确根基线。
+当前 active 为[SYS-NPC专项](task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md)，父路线已通过`human-plan-gate`进入B0证据包。第三轮群众candidate `ef9f004`、`70aefe4`、`76beaf0`、`ea87512`继续冻结为代码与失败对照，不作为正确根基线。
 
-Phase A已交付：
+Human已接受：
 
-- [机制与覆盖审计](task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)：完整owner/六状态矩阵、每owner机制表、RC-NPC-1..6统一差异；
-- [SYS-NPC七格候选](03-执行层/05-旁支/01-NPC.md)：将sprayer主体扩展为route/static/venue/special/encounter/ghost/birds完整owner家族；
-- 推荐`B0证据合同→B1静态/venue→B2路线/train→B3 special/rat→B4 ghost/birds→B5联合关闭`；
-- 根`master`没有NPC实现；candidate worktree clean HEAD `ea87512`只作失败对照。
+- [机制与覆盖审计](task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的完整owner/六状态矩阵和RC-NPC-1..6；
+- [SYS-NPC七格](03-执行层/05-旁支/01-NPC.md)的owner家族边界；
+- `B0证据合同→B1静态/venue→B2路线/train→B3 special/rat→B4 ghost/birds→B5联合关闭`顺序；
+- 不建立通用NPC/Entity框架。
 
-当前等待Human接受机制理解、专项范围与分批顺序。Gate前禁止修改`src/`、`game/`、测试或运行资源，也不建立通用NPC/Entity框架。
+当前只执行B0：补train正常离站、rat、ghost、birds、route worker和铁路/不可站策略直接证据。B1-B5实现仍未授权。
 
 ## 已阻塞或暂停工作项
 

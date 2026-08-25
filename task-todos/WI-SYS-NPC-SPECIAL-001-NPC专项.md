@@ -4,9 +4,9 @@ type: system-special-project
 system: SYS-NPC
 issue-class: systemic-failure
 active-route: systemic-flow
-status: audit-complete-awaiting-human
-phase: mechanism-and-batch-plan-review
-decision: DEC-SYS-NPC-SPECIAL-001
+status: b0-evidence-authorized
+phase: b0-evidence-and-contract
+decision: DEC-SYS-NPC-PHASE-A-001
 updated: 2026-08-25
 ---
 
@@ -83,9 +83,17 @@ updated: 2026-08-25
 - 推荐`B0→B1→B2→B3→B4→B5`批次、每批验收、成本与风险；
 - candidate对照固定为`.pi/worktrees/visible-product-integration` clean HEAD `ea87512`；根`master`没有NPC实现，不把历史自动PASS冒充根基线。
 
-Human Gate：Human 接受机制理解、专项范围与分批顺序后，才能进入下一授权阶段。Phase A 未修改 `src/`、`game/`、测试、运行资源或失败candidate。
+Human Gate结果：Human选择`接受并开始B0 (Recommended)`，已接受owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序，并仅授权B0只读补证。Phase A 未修改 `src/`、`game/`、测试、运行资源或失败candidate。
 
-## 后续阶段（仅 proposed，未授权）
+## Phase A.1：B0证据与合同收口（已授权）
+
+- 重放或追查train正常离站调用链与10人配置的可观察关系；
+- 补rat触发/路径/完成、ghost正常入口、birds正常入口与销毁链；
+- 核对route worker/候选路径和铁路/不可站区域的数据流，区分FACT与重构DECISION；
+- 更新每owner六状态台账，证据不足继续保持UNKNOWN；
+- 只读公开证据和clean失败candidate，不修改任何实现、测试、运行资源或`sample/`。
+
+## 后续阶段（B1-B5仅 proposed，未授权）
 
 - Phase B：按 Human 接受的 owner 批次修复核心机制和 Phaser presentation；每批先失败证据，再最小实现与专项回归。
 - Phase C：固定场景重放与 owner 级 Human 视觉验收；不等全部 NPC 做完才首次验收。

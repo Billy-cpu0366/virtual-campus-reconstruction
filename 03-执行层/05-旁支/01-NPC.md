@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: proposed-human-gate
+audit-status: accepted-b0-evidence
 work-item: WI-SYS-NPC-SPECIAL-001
 updated: 2026-08-25
 ---
@@ -13,9 +13,9 @@ updated: 2026-08-25
 
 **当前结论候选**：SYS-NPC不是一个统一运行时，而是多类独立owner组成的家族：路线/事件群众、区域静态群众、venue人群、固定special、sprayer、encounter、ghost和moving-sprite。不同owner的激活、动作、视口、回收和失败路径有实质差异，不能再用一套“NPC出现/移动/消失”模型统一修补。
 
-**当前状态**：Phase A只读审计已经形成[机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)，等待Human接受机制理解、差异表和分批顺序。第三轮candidate `ef9f004`→`70aefe4`→`76beaf0`→`ea87512`保持automated-verified / human-visual-rejected；不作为正确基线。
+**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序，并授权先执行B0只读证据收口。第三轮candidate `ef9f004`→`70aefe4`→`76beaf0`→`ea87512`保持automated-verified / human-visual-rejected；不作为正确基线。
 
-**当前硬边界**：本卡新增完整SYS-NPC候选内容，但在Human机制Gate前仍是`PROPOSED`，不授权修改代码。rat、ghost、birds正常入口，铁路合法性、完整shutdown和资源-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
+**当前硬边界**：B0只补train、rat、ghost、birds、route worker和铁路策略直接证据，不授权修改代码。rat、ghost、birds正常入口，铁路合法性、完整shutdown和资源-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
@@ -44,7 +44,7 @@ updated: 2026-08-25
 
 ## 3. 怎么做
 
-> 以下是`PROPOSED`分批方案，Human机制Gate前不构成实现授权。
+> Human已接受以下分批顺序；当前只授权B0只读证据收口，B1-B5实现仍需独立授权。
 
 1. **B0 证据与合同收口**：重放train正常离站；补rat、ghost、birds入口与生命周期；确认铁路/不可站策略和route worker直接链。
 2. **B1 static + venue**：分别恢复`crowd/crowd_up`、concert、protest的region生命周期、稳定身份、方向池和逐NPC动作。
