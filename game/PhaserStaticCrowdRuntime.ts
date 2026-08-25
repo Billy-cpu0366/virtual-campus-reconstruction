@@ -4,6 +4,12 @@ import {
 } from "../src/npc/index.js";
 import { walkFrameStart } from "../src/player/index.js";
 
+const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
+function keepStaticCrowdOffTrack(x: number, y: number): { x: number; y: number } {
+  if (x < CROWD_TRACK_BAND.minX || x > CROWD_TRACK_BAND.maxX || y < CROWD_TRACK_BAND.minY || y > CROWD_TRACK_BAND.maxY) return { x, y };
+  return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
+}
+
 export const STATIC_CROWD_EXTRA_TEXTURES = Object.freeze([
   "npc-man-beach", "npc-man-beach2", "npc-woman-beach", "npc-woman-beach2",
   "npc_footballer_blue", "npc_footballer_red",
@@ -39,6 +45,8 @@ export class PhaserStaticCrowdRuntime {
   private readonly core: StaticCrowdRuntime;
   private readonly sprites = new Map<string, PhaserStaticCrowdSpriteLike>();
   private shutdownState = false;
+  private lookAroundStep = 0;
+  private nextLookAroundAt = 0;
 
   constructor(private readonly scene: PhaserStaticCrowdSceneLike, private readonly options: PhaserStaticCrowdRuntimeOptions) {
     this.core = new StaticCrowdRuntime({
@@ -58,10 +66,15 @@ export class PhaserStaticCrowdRuntime {
     return true;
   }
 
-  update(): void {
+  update(now = Date.now()): void {
     if (this.shutdownState) return;
+    const lookAroundChanged = now >= this.nextLookAroundAt;
+    if (lookAroundChanged) {
+      this.lookAroundStep += 1;
+      this.nextLookAroundAt = now + 1_000;
+    }
     this.core.tick(this.options.viewport());
-    this.sync();
+    this.sync(lookAroundChanged);
   }
 
   shutdown(): void {
@@ -72,17 +85,31 @@ export class PhaserStaticCrowdRuntime {
     this.sprites.clear();
   }
 
-  private sync(): void {
+  private sync(lookAroundChanged = true): void {
     const active = new Set<string>();
+    let created = 0;
     for (const item of this.core.snapshot.instances) {
       if (!item.materialized) continue;
       active.add(item.id);
-      const sprite = this.sprites.get(item.id) ?? this.scene.add.sprite(item.position.x, item.position.y, item.spriteKey);
-      sprite.x = item.position.x;
-      sprite.y = item.position.y;
-      sprite.setDepth(500 + item.position.y * .1);
-      sprite.setFrame?.(walkFrameStart(item.direction === "up" ? "north" : "south"));
-      this.sprites.set(item.id, sprite);
+      let sprite = this.sprites.get(item.id);
+      const isNew = sprite === undefined;
+      if (isNew) {
+        if (created >= 16) continue;
+        sprite = this.scene.add.sprite(item.position.x, item.position.y, item.spriteKey);
+        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y);
+        sprite.x = display.x;
+        sprite.y = display.y;
+        sprite.setDepth(500 + display.y * .1);
+        created += 1;
+      }
+      const readySprite = sprite!;
+      if (isNew || lookAroundChanged) {
+        const directions = ["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"] as const;
+        const base = directions.indexOf(item.direction);
+        const direction = directions[(base + this.lookAroundStep + item.id.length) % directions.length]!;
+        readySprite.setFrame?.(walkFrameStart(direction));
+      }
+      this.sprites.set(item.id, readySprite);
     }
     for (const [id, sprite] of this.sprites) {
       if (active.has(id)) continue;

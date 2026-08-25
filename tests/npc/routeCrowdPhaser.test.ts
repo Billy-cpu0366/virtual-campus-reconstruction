@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { ROUTE_CROWD_CONFIGS } from "../../src/npc/index.js";
-import { PhaserRouteCrowdRuntime } from "../../game/PhaserRouteCrowdRuntime.js";
+import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack } from "../../game/PhaserRouteCrowdRuntime.js";
 
 class Sprite { x:number; y:number; depth=0; destroyed=false; constructor(x:number,y:number){this.x=x;this.y=y} setDepth(v:number){this.depth=v;return this} destroy(){this.destroyed=true} }
 
 describe("PhaserRouteCrowdRuntime",()=>{
+ it("keeps ordinary crowd displays off the track while preserving train passengers",()=>{
+  expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 312).y).not.toBe(312);
+  expect(keepOrdinaryCrowdOffTrack("crowd-train", 600, 312)).toEqual({x:600,y:312});
+  expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 296)).toEqual({x:600,y:296});
+ });
+
  it("materializes visible route crowds and destroys them on shutdown",()=>{
   const sprites:Sprite[]=[];
   const runtime=new PhaserRouteCrowdRuntime({add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}}},{

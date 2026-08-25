@@ -1,6 +1,8 @@
 export type StaticCrowdRegionType = "crowd" | "crowd_up";
 export type StaticCrowdCategory = "ordinary" | "beach" | "football";
-export type StaticCrowdDirection = "up" | "down";
+export type StaticCrowdDirection =
+  | "east" | "north-east" | "north" | "north-west"
+  | "west" | "south-west" | "south" | "south-east";
 
 export interface StaticCrowdPoint {
   readonly x: number;
@@ -61,7 +63,7 @@ export const STATIC_CROWD_FACTOR = 0.004;
 export const STATIC_CROWD_UP_FACTOR = 0.016;
 export const STATIC_CROWD_VIEWPORT_MARGIN = 300;
 export const STATIC_CROWD_MIN_SPACING = 20;
-export const STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE = 100;
+export const STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE = 20;
 
 // DECISION: the public API is one source-region projection plus one local
 // lifecycle owner. Placement records are generated once and only their
@@ -3878,7 +3880,11 @@ function categoryFor(region: StaticCrowdRegion): StaticCrowdCategory {
 }
 
 function directionsFor(region: StaticCrowdRegion): readonly StaticCrowdDirection[] {
-  return region.type === "crowd_up" ? ["up"] : ["down", "up"];
+  if (region.type === "crowd_up") return ["north-east", "north", "north-west"];
+  if (region.id === "station_static_crowd") {
+    return ["east", "south-east", "south", "south-west", "west"];
+  }
+  return ["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"];
 }
 
 function freezeInstance(instance: StaticCrowdInstanceSnapshot): StaticCrowdInstanceSnapshot {

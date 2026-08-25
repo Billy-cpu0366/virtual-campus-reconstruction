@@ -19,6 +19,18 @@ export const ROUTE_CROWD_TEXTURES = Object.freeze([
   "npc-man9", "npc-man10",
 ] as const);
 
+const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
+export function keepOrdinaryCrowdOffTrack(groupId: string, x: number, y: number): { x: number; y: number } {
+  if (groupId === "crowd-train" || x < CROWD_TRACK_BAND.minX || x > CROWD_TRACK_BAND.maxX || y < CROWD_TRACK_BAND.minY || y > CROWD_TRACK_BAND.maxY) return { x, y };
+  return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
+}
+
+const ROUTE_CROWD_VISUAL_OFFSETS: Readonly<Record<string, number>> = Object.freeze({
+  "main-crowd": 16, "loop-crowd": 8, drinkers: 8, concert_crowd: 10,
+  beach_crowd_walk: 8, "vertical-crowd": 8, "vertical-crowd-reverse": 8,
+  "walking-crowd": 8, "hazmat-crowd": 8, outside_concert1: 8, "crowd-train": 8,
+});
+
 const ROUTE_CROWD_SPECIAL_TEXTURES = Object.freeze({
   beach_crowd_walk: ["npc-man-beach", "npc-man-beach2", "npc-woman-beach", "npc-woman-beach2"],
   "hazmat-crowd": ["npc-hazmat-suit"],
@@ -251,8 +263,13 @@ export class PhaserRouteCrowdRuntime {
         item.position.y,
         texture,
       );
-      sprite.x = item.position.x;
-      sprite.y = item.position.y;
+      const offsetRange = ROUTE_CROWD_VISUAL_OFFSETS[groupId] ?? 0;
+      const seed = [...item.id].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 0);
+      const offsetX = offsetRange === 0 ? 0 : (seed % (offsetRange * 2 + 1)) - offsetRange;
+      const offsetY = offsetRange === 0 ? 0 : ((seed >>> 8) % (offsetRange * 2 + 1)) - offsetRange;
+      const display = keepOrdinaryCrowdOffTrack(groupId, item.position.x + offsetX, item.position.y + offsetY);
+      sprite.x = display.x;
+      sprite.y = display.y;
       sprite.setDepth(500 + item.position.y * .1);
       this.renderFacing(
         sprite,
