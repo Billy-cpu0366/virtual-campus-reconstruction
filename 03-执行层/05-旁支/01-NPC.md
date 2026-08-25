@@ -11,7 +11,7 @@ updated: 2026-08-23
 
 **P5.1 R4（bounded verified）**：`da68d08`保持四锚点、触发窗、300ms、速度140和路线FACT不变；sprayer presentation depth按`500+(y+24)*0.1`动态更新，train holding时四人可与player同屏辨识。train complete发布无teleport路径，真人键盘到约`(1280,416)`触发后切换factory提示；route完成与shutdown sprite/listener=0。
 
-**05-D-1 路线群众与常驻动作（自动验证通过，等待 Human 视觉验收）**：9组公开路线群众按17张48×48、64帧人物表播放8方向走路；可见时持续移动，随机已算路径 waypoint 起点、路径打乱、速度/延迟和每组活跃上限使其分散；仅折返组到端点驻留后返回。列车离站才创建乘客并暂停/恢复`loop-crowd`，火车占用下一格则等待。阅读、吃饭、舔猫三类公开静态动作 NPC 独立按视口创建/回收。`DEC-P5.4-05D1-DISPERSION-001` 已通过typecheck、339项测试、build、路线群众探针、完整production和性能回归；不补造全局避让或额外驻留地点。
+**05-D-2 第三轮群众 candidate（自动验证通过，等待 Human 视觉验收）**：静态/venue群众按region级在镜头外预热并滞后回收，route群众按path bounds激活与alpha生命周期，不再按NPC单点跨镜头边界直接创建/销毁。路线使用公开8向A*、octile heuristic、seeded随机边成本和候选路径池；火车保留10人、22起点、6终点与2400ms，30条候选为10人分配唯一pathId。Stop AI固定约三分之一为可动作子集，每次短动作后idle 2–6秒，同时最多2人动作；其余稳定站立。`ef9f004`、`70aefe4`、`76beaf0`、`ea87512`已通过357项测试、build、性能smoke、完整production及群众production（静止镜头ID/spriteCount稳定、火车至少6种轨迹签名、抗议动作有界）；自动结果不代替Human视觉验收。
 
 **仍未完成**：其余原站NPC、intro跨场景复位和完整跨chunk长路线语义；R4不等于完整SYS-NPC。
 
@@ -48,4 +48,8 @@ UNKNOWN：intro标记的跨场景复位、长路线穿过未加载chunk、完整
 
 ## 7. 代码位置
 
-P2实现包：`task-todos/WI-VISIBLE-SIDE-WAVE-001-P2-实现包.md`；候选`src/npc/**`、新增专属Phaser适配器、`tests/npc/**`。
+P2实现包：`task-todos/WI-VISIBLE-SIDE-WAVE-001-P2-实现包.md`；群众审计：`task-todos/WI-THREE-BOARD-VISIBLE-WAVE-001-P5.4-05D1-人群源码审计.md`。
+
+当前candidate：`src/npc/routeCrowd.ts`、`src/npc/gridPathProvider.ts`、`src/npc/staticCrowd.ts`、`src/npc/venueCrowdRuntime.ts`；presentation：`game/PhaserRouteCrowdRuntime.ts`、`game/PhaserStaticCrowdRuntime.ts`、`game/PhaserVenueCrowdRuntime.ts`；验证：`tests/npc/**`与`scripts/browser-route-crowd-production.mjs`。
+
+复用观察：route path与region lifecycle的触发、状态和回收语义仍不同，未发现第二个稳定共同合同，不提取通用Entity/crowd lifecycle框架；A*只保留既有`GridRouteCrowdPathProvider`这一真实多消费者能力。

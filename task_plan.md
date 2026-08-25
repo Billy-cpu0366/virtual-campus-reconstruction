@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: batch-implement
+correction-phase: human-acceptance
 classification-trigger: human-accepted-third-crowd-root-cause-replacement-plan
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
 work-item-type: parallel-visible-product-wave
 work-item-status: active-p5.1
-current-phase: p5.4-05d2-third-crowd-root-cause-batch
+current-phase: p5.4-05d2-third-crowd-human-acceptance
 current-gate: p5.4-05d2-human-visual-acceptance
-gate-status: implementation-authorized
+gate-status: awaiting-human-visual-acceptance
 authorization-ref: DEC-P5.4-05D2-CROWD-ROOT-CAUSE-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05d2-full-regression
+next-phase: p5.4-05d2-completed-on-human-acceptance
 updated: 2026-08-24
 ---
 

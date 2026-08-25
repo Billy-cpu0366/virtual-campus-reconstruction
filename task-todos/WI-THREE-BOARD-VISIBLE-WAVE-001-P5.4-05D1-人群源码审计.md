@@ -1,9 +1,9 @@
 ---
 type: source-audit
-status: audit-complete-awaiting-human-plan-gate
+status: third-candidate-automated-verified-awaiting-human-visual
 work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 route: systemic-flow
-updated: 2026-08-24
+updated: 2026-08-25
 ---
 
 # 05-D-1 人群公开源码审计
@@ -114,6 +114,15 @@ C. 按 Bundle 的区域方向池初始化静态 crowd，并以1秒节拍做可�
 - 精确 A* 路径池比当前 BFS 更耗启动计算，必须按帧批量并重新过性能 smoke。
 - region-level 生命周期会增加屏幕外 sprite 数量，需要外圈预热与回收滞后平衡内存；不能再靠镜头内补生节省创建成本。
 - “仅约三分之一抗议者会动作、idle 2–6秒”来自 Human 视觉目标，若接受后登记为 DECISION；公开原站本身是所有 protesters 都有带停顿的循环。
+
+### 第三轮自动验证收据（implemented / automated-verified / awaiting Human）
+
+- 生命周期：`ef9f004`；静态/venue region级预热与滞后回收，route path-bounds与alpha生命周期。
+- 路径池：`70aefe4`；增量8向A*、30条火车候选、10个唯一pathId、production采样至少6种轨迹签名。
+- 抗议动作：`76beaf0`；约三分之一可动作、单次`repeat:0`、idle 2–6秒、同时最多2人。
+- 稳定性探针：`ea87512`；镜头静止3秒时static/venue materialized ID集合与spriteCount不变。
+- PASS：357项全量测试、`npm run build`、群众production、performance smoke、complete production；无exceptions/failed requests。
+- 尚未解决：Human整体视觉验收未签；自动结果不能关闭systemic route。
 
 ## 历史建议的整体修复包（已被第三轮审计替代）
 
