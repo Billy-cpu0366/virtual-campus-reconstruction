@@ -60,6 +60,22 @@ updated: 2026-08-24
 - Bundle 未提供固定随机 seed，因此截图里的精确人物、坐标、朝向、同时可见人数不是可冻结 FACT。
 - Human 所见“火车开走只出现两名离站者”与 Bundle `npcCount:10` 冲突。需重放原站该事件并记录真实镜头/时序，或由 Human 明确选择重构目标；不能直接把 10 改成 2。
 
+## 第二轮 Human 视觉失败差异（2026-08-25）
+
+| 差异 | 图片证据 | 公开 FACT | 当前根因 | 修复包 |
+|---|---|---|---|---|
+| 人站在火车轨道 | `df724b414485dca1fd44dbf8717c0dc1.png`、`0003f3637cebc56df5a1da1b7a069f5c.png` | crowd 位置来自公开 polygon/路径；没有把轨道作为 crowd 可站区域的证据 | 当前区域与路线 owner 未有铁路禁站过滤 | A 位置合法性 |
+| 路线排队 | `6fccdec09aab0200f90948a1651e23b6.png` | Bundle 的 `visualOffset` 有消费者；`main-crowd` 为16px，其他常见为8px（约 byte 328491） | 当前渲染将逻辑路径坐标直接用于 sprite，遗漏视觉偏移 | B 路线分散 |
+| 聚集人群静止且多背对 | `6fccdec09aab0200f90948a1651e23b6.png` | `crowd_up` 只取方向[3,4,5]；`station_static_crowd`取[0,1,2,6,7]；其他区域可取完整方向，并每秒触发随机 look-around（约 byte 560363） | 当前静态 crowd 只分 up/down，且无 look-around/特殊 idle | C 场所姿态 |
+
+**修复包边界（待 Human Gate）**：
+
+A. 在所有 crowd owner 的最终 position/路径候选上使用公开地图可走区域与铁路禁站掩码；不改火车路线或地图。
+
+B. 将公开 `visualOffset` 加入 RouteCrowdConfig 与 Phaser presentation；偏移只改变 sprite 显示，不改变逻辑路径、碰撞或火车等待。
+
+C. 按 Bundle 的区域方向池初始化静态 crowd，并以1秒节拍做可复放 look-around；只对已有普通 spritesheet 应用公开 walk 首帧/已证实 idle，不猜新动作。
+
 ## 建议的整体修复包（等待 Human Gate）
 
 A. **人口生命周期**：按 region polygon 生成 seeded、最小间距的静态群众；视口只管理 sprite，不停止其逻辑。范围包括所有 46 个 `crowd`/`crowd_up` region，不建立通用 Entity 框架。
