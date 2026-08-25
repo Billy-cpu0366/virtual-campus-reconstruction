@@ -3,8 +3,8 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: audit
-classification-trigger: human-visual-gate-failed-track-occupancy-route-queue-and-static-crowd-facing
+correction-phase: batch-implement
+classification-trigger: human-accepted-track-position-route-offset-and-static-facing-correction-batch
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-THREE-BOARD-VISIBLE-WAVE-001
 work-item-level: program
