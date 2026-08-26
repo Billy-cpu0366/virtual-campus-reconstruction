@@ -6,10 +6,19 @@ import {
   StaticCrowdRuntime,
   staticCrowdRequestedCount,
 } from "../../src/npc/index.js";
+import { PhaserStaticCrowdRuntime } from "../../game/PhaserStaticCrowdRuntime.js";
 
 function seeded(values: number[]): () => number {
   let index = 0;
   return () => values[index++ % values.length]!;
+}
+
+class Sprite {
+  destroyed = false;
+  constructor(public x: number, public y: number) {}
+  setDepth(): this { return this; }
+  setFrame(): this { return this; }
+  destroy(): void { this.destroyed = true; }
 }
 
 describe("StaticCrowdRuntime", () => {
@@ -52,5 +61,39 @@ describe("StaticCrowdRuntime", () => {
     first.tick({ left: 0, top: 0, width: 10, height: 10 });
     expect(first.snapshot.instances.every((item) => !item.materialized)).toBe(true);
     expect(first.snapshot.instances.map((item) => item.position)).toEqual(original);
+  });
+
+  it("keeps visible sprite identity through core culling and culls only when offscreen", () => {
+    let viewport: { left: number; top: number; width: number; height: number } | undefined = {
+      left: 0, top: 0, width: 2240, height: 2240,
+    };
+    const sprites: Sprite[] = [];
+    const runtime = new PhaserStaticCrowdRuntime({
+      add: { sprite: (x, y) => { const sprite = new Sprite(x, y); sprites.push(sprite); return sprite; } },
+      textures: { exists: () => true },
+    }, { viewport: () => viewport, viewportMargin: 0 });
+
+    expect(runtime.start()).toBe(true);
+    const materializedCount = runtime.snapshot.instances
+      .filter((instance) => instance.materialized).length;
+    expect(materializedCount).toBeGreaterThan(16);
+    expect(runtime.spriteCount).toBe(materializedCount);
+    const retained = sprites[0]!;
+
+    viewport = undefined;
+    runtime.update(0);
+    expect(retained.destroyed).toBe(false);
+    expect(sprites[0]).toBe(retained);
+
+    viewport = {
+      left: retained.x - 5, top: retained.y - 5, width: 10, height: 10,
+    };
+    runtime.update(1_000);
+    expect(retained.destroyed).toBe(false);
+    expect(sprites[0]).toBe(retained);
+
+    viewport = { left: 10_000, top: 10_000, width: 10, height: 10 };
+    runtime.update(2_000);
+    expect(retained.destroyed).toBe(true);
   });
 });

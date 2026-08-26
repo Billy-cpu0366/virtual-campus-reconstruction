@@ -6,6 +6,16 @@ import {
 } from "../src/player/index.js";
 
 type View = { left: number; top: number; width: number; height: number };
+const NPC_HALF_SIZE = 24;
+
+function isInViewport(x: number, y: number, viewport: View | undefined): boolean {
+  if (viewport === undefined) return true;
+  return x + NPC_HALF_SIZE >= viewport.left &&
+    x - NPC_HALF_SIZE <= viewport.left + viewport.width &&
+    y + NPC_HALF_SIZE >= viewport.top &&
+    y - NPC_HALF_SIZE <= viewport.top + viewport.height;
+}
+
 type Direction =
   | "east" | "north-east" | "north-west" | "north"
   | "south-east" | "south-west" | "south" | "west";
@@ -89,16 +99,18 @@ export class PhaserVenueCrowdRuntime {
   start(): boolean {
     if (this.dead || !this.scene.textures.exists("npc_protester_rising")) return false;
     this.startedAt = this.now();
-    this.core.start(this.viewport());
-    this.sync(this.startedAt);
+    const viewport = this.viewport();
+    this.core.start(viewport);
+    this.sync(this.startedAt, viewport);
     return true;
   }
 
   update(): void {
     if (this.dead) return;
     const now = this.now();
-    this.core.tick(this.viewport());
-    this.sync(now);
+    const viewport = this.viewport();
+    this.core.tick(viewport);
+    this.sync(now, viewport);
   }
 
   shutdown(): void {
@@ -116,29 +128,54 @@ export class PhaserVenueCrowdRuntime {
       Object.freeze({ ...state })));
   }
 
-  private sync(now: number): void {
+  private sync(now: number, viewport: View | undefined): void {
+    const instances = this.core.snapshot.instances;
+    const byId = new Map(instances.map((instance) => [instance.id, instance]));
+    const readyRegionIds = new Set<string>();
+    if (viewport !== undefined) {
+      for (const instance of instances) {
+        if (instance.materialized && isInViewport(
+          instance.position.x, instance.position.y, viewport)) {
+          readyRegionIds.add(instance.regionId);
+        }
+      }
+      for (const [id, sprite] of this.sprites) {
+        const instance = byId.get(id);
+        if (instance !== undefined && isInViewport(sprite.x, sprite.y, viewport)) {
+          readyRegionIds.add(instance.regionId);
+        }
+      }
+    }
+
     const activeIds = new Set<string>();
     let created = 0;
-    for (const instance of this.core.snapshot.instances) {
-      if (!instance.materialized) continue;
-      activeIds.add(instance.id);
+    for (const instance of instances) {
       let sprite = this.sprites.get(instance.id);
+      const isNew = sprite === undefined;
+      const existingVisible = sprite !== undefined && isInViewport(
+        sprite.x, sprite.y, viewport);
+      if (!instance.materialized && !existingVisible) continue;
+      if (!isNew && viewport !== undefined && !existingVisible) continue;
+      activeIds.add(instance.id);
       const protest = instance.regionId.startsWith("protesters_rising");
-      if (sprite === undefined) {
-        if (created >= 16) continue;
+      if (isNew) {
+        if (created >= 16 && !readyRegionIds.has(instance.regionId)) continue;
         const texture = protest ? "npc_protester_rising" : "npc-man";
         sprite = this.scene.add.sprite(instance.position.x, instance.position.y, texture);
         created += 1;
         if (protest) this.initializeProtester(instance.id, sprite);
       }
-      sprite.x = instance.position.x;
-      sprite.y = instance.position.y;
-      sprite.setDepth(500 + instance.position.y * .1);
-      if (protest) this.updateProtester(instance.id, sprite, now);
-      this.sprites.set(instance.id, sprite);
+      const readySprite = sprite!;
+      if (instance.materialized) {
+        readySprite.x = instance.position.x;
+        readySprite.y = instance.position.y;
+      }
+      readySprite.setDepth(500 + readySprite.y * .1);
+      if (protest) this.updateProtester(instance.id, readySprite, now);
+      this.sprites.set(instance.id, readySprite);
     }
     for (const [id, sprite] of this.sprites) {
-      if (activeIds.has(id)) continue;
+      if (activeIds.has(id) || isInViewport(sprite.x, sprite.y, viewport)) continue;
       sprite.destroy();
       this.sprites.delete(id);
       const state = this.protestStates.get(id);

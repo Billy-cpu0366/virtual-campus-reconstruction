@@ -5,6 +5,25 @@ import {
 import { walkFrameStart } from "../src/player/index.js";
 
 const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
+const NPC_HALF_SIZE = 24;
+
+function isInViewport(
+  x: number,
+  y: number,
+  viewport: StaticCrowdViewport | undefined,
+): boolean {
+  if (viewport === undefined) return true;
+  return x + NPC_HALF_SIZE >= viewport.left &&
+    x - NPC_HALF_SIZE <= viewport.left + viewport.width &&
+    y + NPC_HALF_SIZE >= viewport.top &&
+    y - NPC_HALF_SIZE <= viewport.top + viewport.height;
+}
+
+function staticCrowdRegionId(instanceId: string): string {
+  const separator = instanceId.lastIndexOf(":");
+  return separator === -1 ? instanceId : instanceId.slice(0, separator);
+}
+
 function keepStaticCrowdOffTrack(x: number, y: number): { x: number; y: number } {
   if (x < CROWD_TRACK_BAND.minX || x > CROWD_TRACK_BAND.maxX || y < CROWD_TRACK_BAND.minY || y > CROWD_TRACK_BAND.maxY) return { x, y };
   return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
@@ -62,8 +81,9 @@ export class PhaserStaticCrowdRuntime {
     if (this.shutdownState) return false;
     const missing = ["npc-man", ...STATIC_CROWD_EXTRA_TEXTURES].find((key) => !this.scene.textures.exists(key));
     if (missing !== undefined) { this.options.onError?.(`missing-texture:${missing}`); return false; }
-    this.core.start(this.options.viewport());
-    this.sync();
+    const viewport = this.options.viewport();
+    this.core.start(viewport);
+    this.sync(true, viewport);
     return true;
   }
 
@@ -78,8 +98,9 @@ export class PhaserStaticCrowdRuntime {
       const start = candidates.length === 0 ? 0 : (this.lookAroundStep * 3) % candidates.length;
       this.lookAroundIds = new Set(Array.from({ length: count }, (_, index) => candidates[(start + index) % candidates.length]!));
     }
-    this.core.tick(this.options.viewport());
-    this.sync(lookAroundChanged);
+    const viewport = this.options.viewport();
+    this.core.tick(viewport);
+    this.sync(lookAroundChanged, viewport);
   }
 
   shutdown(): void {
@@ -90,24 +111,50 @@ export class PhaserStaticCrowdRuntime {
     this.sprites.clear();
   }
 
-  private sync(lookAroundChanged = true): void {
+  private sync(
+    lookAroundChanged = true,
+    viewport: StaticCrowdViewport | undefined = this.options.viewport(),
+  ): void {
+    const instances = this.core.snapshot.instances;
+    const byId = new Map(instances.map((item) => [item.id, item]));
+    const readyRegionIds = new Set<string>();
+    if (viewport !== undefined) {
+      for (const item of instances) {
+        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y);
+        if (item.materialized && isInViewport(display.x, display.y, viewport)) {
+          readyRegionIds.add(staticCrowdRegionId(item.id));
+        }
+      }
+      for (const [id, sprite] of this.sprites) {
+        const item = byId.get(id);
+        if (item !== undefined && isInViewport(sprite.x, sprite.y, viewport)) {
+          readyRegionIds.add(staticCrowdRegionId(item.id));
+        }
+      }
+    }
+
     const active = new Set<string>();
     let created = 0;
-    for (const item of this.core.snapshot.instances) {
-      if (!item.materialized) continue;
-      active.add(item.id);
+    for (const item of instances) {
       let sprite = this.sprites.get(item.id);
       const isNew = sprite === undefined;
+      const existingVisible = sprite !== undefined && isInViewport(
+        sprite.x, sprite.y, viewport);
+      if (!item.materialized && !existingVisible) continue;
+      if (!isNew && viewport !== undefined && !existingVisible) continue;
+      active.add(item.id);
       if (isNew) {
-        if (created >= 16) continue;
+        if (created >= 16 && !readyRegionIds.has(staticCrowdRegionId(item.id))) continue;
         sprite = this.scene.add.sprite(item.position.x, item.position.y, item.spriteKey);
-        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y);
-        sprite.x = display.x;
-        sprite.y = display.y;
-        sprite.setDepth(500 + display.y * .1);
         created += 1;
       }
       const readySprite = sprite!;
+      if (item.materialized) {
+        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y);
+        readySprite.x = display.x;
+        readySprite.y = display.y;
+        readySprite.setDepth(500 + display.y * .1);
+      }
       if (isNew || (lookAroundChanged && this.lookAroundIds.has(item.id))) {
         const directions = ["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"] as const;
         const base = directions.indexOf(item.direction);
@@ -117,7 +164,7 @@ export class PhaserStaticCrowdRuntime {
       this.sprites.set(item.id, readySprite);
     }
     for (const [id, sprite] of this.sprites) {
-      if (active.has(id)) continue;
+      if (active.has(id) || isInViewport(sprite.x, sprite.y, viewport)) continue;
       sprite.destroy();
       this.sprites.delete(id);
     }

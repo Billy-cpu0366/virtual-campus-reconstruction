@@ -73,4 +73,38 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
     expect(fixed.every((state) => state.actionCount === 0)).toBe(true);
   });
+
+  it("keeps visible sprite identity through core culling and culls only when offscreen", () => {
+    let viewport: { left: number; top: number; width: number; height: number } | undefined = {
+      left: 0, top: 0, width: 2240, height: 2240,
+    };
+    const sprites: Sprite[] = [];
+    const runtime = new PhaserVenueCrowdRuntime({
+      add: { sprite: (x, y) => { const sprite = new Sprite(x, y); sprites.push(sprite); return sprite; } },
+      textures: { exists: () => true },
+    }, () => viewport);
+
+    expect(runtime.start()).toBe(true);
+    const materializedCount = runtime.snapshot.instances
+      .filter((instance) => instance.materialized).length;
+    expect(materializedCount).toBeGreaterThan(16);
+    expect(runtime.spriteCount).toBe(materializedCount);
+    const retained = sprites[0]!;
+
+    viewport = undefined;
+    runtime.update();
+    expect(retained.destroyed).toBe(false);
+    expect(sprites[0]).toBe(retained);
+
+    viewport = {
+      left: retained.x - 5, top: retained.y - 5, width: 10, height: 10,
+    };
+    runtime.update();
+    expect(retained.destroyed).toBe(false);
+    expect(sprites[0]).toBe(retained);
+
+    viewport = { left: 10_000, top: 10_000, width: 10, height: 10 };
+    runtime.update();
+    expect(retained.destroyed).toBe(true);
+  });
 });
