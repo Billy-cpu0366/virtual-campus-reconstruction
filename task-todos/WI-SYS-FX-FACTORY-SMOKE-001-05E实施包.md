@@ -3,8 +3,8 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 phase: p5.4-05e-factory-smoke
 system: SYS-FX
 type: bounded-verification-and-repair
-status: systemic-audit-authorized-implementation-paused
-decision: DEC-P5.4-05E-SMOKE-AUDIT-001
+status: s1-implementation-authorized
+decision: DEC-P5.4-05E-S1-STOP-AI-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
 ---
@@ -21,12 +21,7 @@ Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(
 
 推荐`S1 Stop AI彩烟+orange_smoke → S2全量white generators → S3其余8 fog regions → S4联合回归`。S1中彩烟与fog保持独立owner，但共同做Stop AI场景视觉Gate；每批独立自动与Human验收，不再完成全量后第一次看。
 
-当前仅审计完成，等待Human接受范围、顺序及以下两项重构决定：
-
-1. 显式修复公开彩烟离屏重建后wind loop续接缺口，而不是复制可能失效的旧timer引用；
-2. cars未实现时保留可注入清雾接口和测试，不伪造production车辆清雾已集成。
-
-未获Human接受前不修改runtime。
+Human已接受上述顺序，并只授权[S1 Stop AI实施包](WI-SYS-FX-FACTORY-SMOKE-001-05E-S1-StopAI实施包.md)：显式修复彩烟离屏重建后的wind loop续接；cars未实现时保留可注入清雾接口和测试，不伪造production车辆清雾已集成。S2–S4仍未授权。
 
 ## 历史单点目标（已撤回）
 
