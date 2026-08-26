@@ -4,7 +4,7 @@ subtask: 05E-S1-StopAI-smoke
 system: SYS-FX
 issue-class: systemic-failure
 correction-phase: batch-implement
-status: implementation-authorized
+status: automated-verified-awaiting-human-visual
 decision: DEC-P5.4-05E-S1-STOP-AI-001
 candidate-base: 8586196
 updated: 2026-08-25
@@ -30,7 +30,16 @@ updated: 2026-08-25
 - main depth在player前后动态调整；back/front固定。
 - 彩烟/graphics按camera边界控制；emitter每500ms离屏destroy、返回重建；graphics按外扩100px显示；wind每3–6秒触发，gravityX 15..40持续1.5–4秒，shutdown取消全部timer。
 - `orange_smoke` polygon直接来自`particle-trajectories.json` region75；cellSize32，13 cells，depth1100，NORMAL，scale8、alpha.3、speed5、quantity4、frequency20、lifespan350..2000、respawn500ms。
-- Fog按camera worldView外扩100及cellSize边距逐cellstart/stop；玩家移动按前方85×35椭圆清雾；注入cars按40px半径清雾；500ms恢复。
+- Fog按camera worldView逐cell启停，四边外扩公开`cellSize=32`；玩家移动按前方85×35椭圆清雾；注入cars按40px半径清雾；500ms恢复。
+
+## 已落盘与自动验证（Human视觉待验收）
+
+- 代码提交：隔离分支 `integration/visible-product-wave` 的 `e07d2c7`，未push。
+- PASS：typecheck、S1 FX专项10项、全量68 files / 363 tests、build、performance smoke。
+- PASS：`browser:stop-ai-smoke-production`无production debug/test hook，真实键盘到Stop AI后9层彩烟与13-cell fog active；离场后彩烟destroy/Fog inactive；返回后generation=2且wind重建续接；shutdown后两类owner均清0；无console/exception/failed request/bad response。
+- 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/receipt.json`（SHA-256 `b36e41537972e9e1331f65ea909f785d1013a912f01de6e5c883f8bd8577265e`）、`performance.json`（SHA-256 `8a188bc019f283b1bcd9889d0a6e0481622dbb22e028813ce8e439267c9a32a3`）及`screenshots/`。
+- 独立verifier：所有客观检查PASS，结论为`UNVERIFIED`，未代替Human视觉。
+- 尚未解决：Human尚未确认三处彩烟、orange fog和前中后深度穿插的肉眼效果；S2–S4未授权。
 
 ## 实现边界
 

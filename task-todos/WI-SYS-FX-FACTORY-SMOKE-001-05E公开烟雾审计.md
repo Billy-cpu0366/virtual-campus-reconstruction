@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: source-audit
 system: SYS-FX
 issue-class: systemic-failure
-status: audit-complete-awaiting-human-plan-gate
+status: s1-automated-verified-awaiting-human-visual
 decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 updated: 2026-08-25
 ---
@@ -12,7 +12,7 @@ updated: 2026-08-25
 
 ## 结论
 
-此前05-E把`createSmokeGenerator({x:50.5*16,y:33.7*16,...})`单点选作“唯一factory smoke”，但公开Bundle没有为该点提供这个业务名，且同一初始化链实际创建10个white smokeGenerators、Stop AI周边3处烟雾罐×3层particle emitters，并从`particle-trajectories.json`创建9个fog regions。当前candidate只覆盖第一类中的1/10，未覆盖Human指出的Stop AI道路烟雾和全部区域雾。
+此前05-E把`createSmokeGenerator({x:50.5*16,y:33.7*16,...})`单点选作“唯一factory smoke”，但公开Bundle没有为该点提供这个业务名，且同一初始化链实际创建10个white smokeGenerators、Stop AI周边3处烟雾罐×3层particle emitters，并从`particle-trajectories.json`创建9个fog regions。当前candidate仍只覆盖第一类中的1/10；S1已覆盖Human指出的Stop AI道路烟雾与`orange_smoke`，其余white/fog仍待后续授权。
 
 这不是单点位置错误，而是owner范围系统性遗漏。三类烟雾的创建、视口、深度、交互和销毁语义不同，不能继续把一个`FactorySmokeRuntime`复制到所有效果。
 
@@ -102,7 +102,7 @@ FogManager按32px cell中心落入polygon创建cell。下表cell数按公开算�
 
 ### C2. 生命周期与交互
 
-- FogManager初始化时创建全部cell emitters；按camera worldView外扩100形成region view，再按cellSize边距逐cellstart/stop，不离屏destroy。
+- FogManager初始化时创建全部cell emitters；region先做camera相交判断，实际逐cell启停边界为`cellSize=32`（camera四边各扩32px），不离屏destroy。
 - 玩家移动时，以朝向前方椭圆`85×35`清除非`ignorePlayer` cell；停止发射后按region respawnDelay恢复。
 - active cars以40px半径清fog；`orange_smoke`500ms恢复，普通fog默认5秒。
 - FogManager有显式`destroy()`清timer/emitter，但公开场景统一shutdown是否调用仍未直接发现，记`UNKNOWN`。
@@ -124,12 +124,12 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 |---|---|---|---|
 | white smokeGenerators | 10 configs / 14 emitters | 只实现`(808,539.2)`一个emitter | 1/10 config覆盖；scope fail |
 | white动态depth | standalone跟player前后；split有overlay | 所有显示固定depth3400 | 与公开机制不等价；早期roof补偿DECISION |
-| Stop AI canisters | 3 sites / 9 layered emitters + 3 graphics + wind | 未实现 | missing |
-| `orange_smoke` | 13-cell互动fog | 未实现 | missing |
-| 其余fog | 8 regions / 47 cells | 未实现 | missing |
-| 视口语义 | generator stop/hide；particleData destroy/recreate；fog cell stop/start | 只有generator stop/hide | owner被遗漏 |
-| teardown | 多类公开完整接线UNKNOWN | 单点owner显式清理 | 只证明重构单点，不证明全量 |
-| 自动probe | 单点键盘往返PASS | 没有Stop AI/fog场景probe | 不能关闭05-E |
+| Stop AI canisters | 3 sites / 9 layered emitters + 3 graphics + wind | S1已实现独立owner | 自动行为PASS；待Human视觉 |
+| `orange_smoke` | 13-cell互动fog | S1已实现13-cell独立owner | 自动行为PASS；待Human视觉 |
+| 其余fog | 8 regions / 47 cells | 未实现 | S3待授权 |
+| 视口语义 | generator stop/hide；particleData destroy/recreate；fog cell stop/start | S1分别实现Stop AI destroy/recreate与orange fog cell stop/start | S1自动PASS；全量未完成 |
+| teardown | 多类公开完整接线UNKNOWN | S1显式清理9 emitters/3 graphics/13 cells/listeners/timers | S1自动PASS；公开全量仍UNKNOWN |
+| 自动probe | 全量此前只有单点往返 | S1真实键盘probe覆盖Stop AI离屏/返回/wind/shutdown | S1自动PASS；不能代签视觉 |
 
 ## 根因聚类
 
@@ -140,9 +140,9 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 
 ## 推荐实施批次（proposed）
 
-### S1 Stop AI场景（优先）
+### S1 Stop AI场景（已实现，Human视觉待验收）
 
-分别实现、共同验收：
+分别实现、共同验收；代码提交`e07d2c7`与收据记录见S1实施包。
 
 1. 彩烟罐owner：3位置、9层emitter、3 graphics、动态main depth、可取消wind state；
 2. Fog owner中的`orange_smoke`：polygon、13 cells、500ms清除/恢复、玩家/车辆接口；
@@ -168,8 +168,8 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - Stop AI彩烟使用通用particleData的destroy/recreate语义，white generator使用持久stop/hide，不能为了复用强行统一。
 - 公开动态depth与当前roof depth体系存在冲突；需先建立depth Oracle，不能继续统一设3400。
 - fog清除依赖player velocity与cars；cars未纳入当前重构时，必须明确car接口未集成，不伪造验证。
-- 公开wind loop的离屏重建续接存在证据缺口；需在实施Gate中明确采用产品意图修复还是严格保留公开缺口。
+- 公开wind loop的离屏重建续接已按Human接受的S1决定显式恢复；全量其他owner的wind/teardown仍需后续验证。
 
 ## Human Gate
 
-审计已完成，尚未授权代码。建议接受`S1→S2→S3→S4`，先交付Stop AI场景并独立视觉验收，再继续其他烟雾；不再等全量完成后才第一次看效果。
+审计和S1实现已完成，自动验证通过，等待Human在Stop AI道路两边验收彩烟、orange fog与深度穿插。S2–S4仍未授权；Human通过S1后再决定是否启动S2。

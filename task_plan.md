@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: batch-implement
+correction-phase: human-acceptance
 classification-trigger: human-found-05e-smoke-owner-scope-incomplete
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-05e-s1-implementation
-current-phase: p5.4-05e-s1-stop-ai-smoke
-current-gate: p5.4-05e-s1-automated-and-human-visual
-gate-status: human-plan-accepted-implementation-authorized
+work-item-status: active-05e-s1-human-visual-gate
+current-phase: p5.4-05e-s1-human-visual-gate
+current-gate: p5.4-05e-s1-human-visual
+gate-status: automated-verified-awaiting-human-visual
 authorization-ref: DEC-P5.4-05E-S1-STOP-AI-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05e-s1-automated-verification
+next-phase: p5.4-05e-s1-human-acceptance
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：Human已接受`S1 Stop AI→S2 white→S3其余fog→S4联合回归`，当前只实施S1：三处/九层彩烟owner与`orange_smoke`13-cell fog owner，之后停在Stop AI视觉Gate。
+- **当前阶段**：S1已实现并自动验证，代码提交`e07d2c7`；当前停在Stop AI Human视觉Gate：三处/九层彩烟owner与`orange_smoke`13-cell fog owner，之后才决定是否启动S2。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：按`DEC-P5.4-05E-S1-STOP-AI-001`实现S1；彩烟离屏重建后显式恢复wind，fog提供并测试cars 40px清雾注入接口但不声称production已集成。S2–S4未授权。
+- **当前授权**：S1实现已消费`DEC-P5.4-05E-S1-STOP-AI-001`；彩烟离屏重建后显式恢复wind，fog提供并测试cars 40px清雾注入接口但不声称production已集成。当前只做Human视觉验收，S2–S4未授权。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：S1自动验证后必须由Human在Stop AI道路两边验收彩烟、orange fog与深度穿插；通过也只关闭S1，不自动启动S2。单点`8586196`不能关闭05-E；旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：自动与独立verifier均PASS，但S1必须由Human在Stop AI道路两边验收彩烟、orange fog与深度穿插；通过也只关闭S1，不自动启动S2。单点`8586196`不能关闭05-E；旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -39,7 +39,7 @@ updated: 2026-08-25
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计、执行层16卡迁移及历史归档均已验证关闭；当前进入SYS-NPC专项，只读审计完整owner、公开机制、当前代码覆盖与统一差异。
+- 世界装配与图层详细设计、执行层16卡迁移及历史归档均已验证关闭；SYS-NPC专项已延期，当前进入SYS-FX 05-E S1，维护公开烟雾owner、实现差异与验证收据。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
