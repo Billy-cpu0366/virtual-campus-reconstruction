@@ -1,21 +1,21 @@
 ---
 workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
-issue-class: adjustment
-active-route: adjustment-flow
-correction-phase: targeted-verify
-classification-trigger: human-deferred-npc-and-selected-next-roadmap-stage
+issue-class: systemic-failure
+active-route: systemic-flow
+correction-phase: audit
+classification-trigger: human-found-05e-smoke-owner-scope-incomplete
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-05e-human-visual-gate
-current-phase: p5.4-05e-human-visual-gate
-current-gate: p5.4-05e-human-visual-gate
-gate-status: automated-verified-human-review-pending
-authorization-ref: DEC-P5.4-05E-FACTORY-SMOKE-001
+work-item-status: active-05e-systemic-audit
+current-phase: p5.4-05e-public-smoke-family-audit
+current-gate: p5.4-05e-smoke-model-and-batch-plan
+gate-status: audit-authorized-implementation-paused
+authorization-ref: DEC-P5.4-05E-SMOKE-AUDIT-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05e-close-or-correction
+next-phase: p5.4-05e-human-plan-gate
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：factory smoke runtime无需修改；`8586196`新增正常键盘往返production probe并移除过期入口2秒断言。357测试、build、05-E production、性能和完整production已PASS，当前等待Human视觉。
+- **当前阶段**：Human指出公开显眼烟雾位于Stop AI道路两边；只读复核确认05-E把单个无公开业务名的白烟点`(808,539.2)`误当完整factory smoke。当前撤回视觉Gate，审计全部white smokeGenerators、Stop AI彩烟与trajectory fog owner，实施暂停。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：05-E bounded verification/repair；不得修改NPC、恢复烟雾入口中间镜头或改玩家/地图/相机/火车/roof/30FPS。
+- **当前授权**：仅只读形成公开烟雾全量清单、owner机制、当前覆盖差异和一次性批次计划；不得修改runtime、NPC、玩家、地图、相机、火车、roof或30FPS。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：Human须肉眼确认正常路径中的烟雾上升、放大、淡出和可辨识度；通过不自动授权05-F。旧`browser-side-smoke`仍在无关火车离场穿越坐标`(600,348)`受地图阻挡，已记录但不以05-E修改火车。
+- **关闭门禁**：Human先接受烟雾家族理解、范围和实施批次，再授权代码；单点`8586196`自动PASS不能关闭05-E。旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标

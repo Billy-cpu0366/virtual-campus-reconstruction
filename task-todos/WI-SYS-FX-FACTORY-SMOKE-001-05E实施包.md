@@ -3,13 +3,17 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 phase: p5.4-05e-factory-smoke
 system: SYS-FX
 type: bounded-verification-and-repair
-status: automated-verified-human-visual-pending
-decision: DEC-P5.4-05E-FACTORY-SMOKE-001
+status: systemic-audit-authorized-implementation-paused
+decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
 ---
 
-# 05-E 工厂烟雾实施包
+# 05-E 公开烟雾实施包
+
+## Human范围修正
+
+Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。当前只读审计全量，实施暂停。
 
 ## 目标
 
@@ -70,7 +74,8 @@ updated: 2026-08-25
 - PASS：typecheck、FX 4项专项、357项全量测试、build、05-E production、performance smoke、complete production（首次Memo6路径距阈值1.33px停止，原命令重放PASS）。
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e/receipt.json`，SHA-256 `edb69fbe2ffc66365b2503d62efb095a646cf07d753df318559acdce3b555eab`；截图hash见同目录`SHA256SUMS`。
 - 已知非05-E失败：`browser-side-smoke`在火车collider计数已为0后仍于地图坐标`(600,348)`受阻，重复两次一致；不在烟雾任务中删除火车断言或修改路线，留待05-F验证门禁整理。
-- 尚未完成：Human肉眼视觉验收。
+- 结论限制：上述收据只证明单个`(808,539.2)`白烟owner技术行为，不能代表完整05-E。
+- 尚未完成：公开烟雾家族审计、Human计划Gate、全量实现与视觉验收。
 
 ## 依据
 
