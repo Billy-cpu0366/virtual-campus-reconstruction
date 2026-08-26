@@ -8,6 +8,8 @@ export const FOG_PLAYER_CLEAR_WIDTH = 85;
 export const FOG_PLAYER_CLEAR_HEIGHT = 35;
 export const FOG_CAR_CLEAR_RADIUS = 40;
 export const FOG_ORANGE_SMOKE_RESPAWN_MS = 500;
+/** Rebuild decision: keep the public quantity, render fewer fog particles. */
+export const FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY = 2;
 
 export interface FogPoint {
   readonly x: number;

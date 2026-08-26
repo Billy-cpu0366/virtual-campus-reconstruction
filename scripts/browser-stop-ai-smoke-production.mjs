@@ -227,6 +227,68 @@ async function sampleSmoke(durationMs) {
   return samples;
 }
 
+async function sampleStopAiFrameBudget(durationMs = 10_000) {
+  const sampleDurationMs = Math.max(1, Math.floor(durationMs));
+  return evaluate(`(async () => {
+    const durationMs = ${sampleDurationMs};
+    const intervals = [];
+    let longtaskCount = 0;
+    let longtaskSupported = false;
+    let previousTimestamp;
+    let frameCount = 0;
+    let timedOut = false;
+    let finish;
+    const startedAt = performance.now();
+    const completed = new Promise((resolve) => { finish = resolve; });
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      finish();
+    }, durationMs + 2_000);
+    let observer;
+    try {
+      observer = new PerformanceObserver((list) => {
+        longtaskCount += list.getEntries().length;
+      });
+      observer.observe({ type: "longtask" });
+      longtaskSupported = true;
+    } catch {
+      longtaskSupported = false;
+    }
+    const frame = (timestamp) => {
+      if (previousTimestamp !== undefined) {
+        intervals.push(timestamp - previousTimestamp);
+      }
+      previousTimestamp = timestamp;
+      frameCount += 1;
+      if (performance.now() - startedAt >= durationMs) finish();
+      else requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+    await completed;
+    clearTimeout(timeoutId);
+    if (observer !== undefined) {
+      longtaskCount += observer.takeRecords().length;
+      observer.disconnect();
+    }
+    const sorted = intervals.slice().sort((a, b) => a - b);
+    const percentileIndex = Math.min(
+      sorted.length - 1,
+      Math.max(0, Math.ceil(sorted.length * 0.95) - 1),
+    );
+    return {
+      durationMs: performance.now() - startedAt,
+      frameCount,
+      p95Ms: sorted.length === 0 ? null : sorted[percentileIndex],
+      maxMs: sorted.length === 0 ? null : sorted[sorted.length - 1],
+      over20Ms: intervals.filter((interval) => interval > 20).length,
+      over34Ms: intervals.filter((interval) => interval > 34).length,
+      longtaskCount,
+      longtaskSupported,
+      timedOut,
+    };
+  })()`);
+}
+
 async function capture(name) {
   if (!screenshotDir) return null;
   mkdirSync(screenshotDir, { recursive: true });
@@ -332,6 +394,14 @@ try {
     atStopAi.fog.cells.every((cell) => cell.active),
     "orange_smoke cells are not all active at Stop AI",
   );
+  const stopAiPerformance = await sampleStopAiFrameBudget();
+  assert.equal(stopAiPerformance.timedOut, false);
+  assert.ok(stopAiPerformance.durationMs >= 10_000);
+  assert.ok(stopAiPerformance.frameCount > 1);
+  assert.equal(stopAiPerformance.longtaskSupported, true);
+  assert.equal(stopAiPerformance.longtaskCount, 0);
+  assert.ok(stopAiPerformance.p95Ms !== null && stopAiPerformance.p95Ms <= 20);
+  assert.ok(stopAiPerformance.maxMs !== null && stopAiPerformance.maxMs <= 34);
   const stopAiScreenshot = await capture("stop-ai-smoke-visible");
 
   const awayRoute = [];
@@ -401,6 +471,7 @@ try {
     route,
     atStopAi,
     stopAiScreenshot,
+    stopAiPerformance,
     awayRoute,
     away,
     returnRoute,

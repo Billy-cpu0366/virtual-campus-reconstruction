@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FOG_ORANGE_SMOKE_CELLS,
   FOG_ORANGE_SMOKE_CONFIG,
+  FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY,
   FogRuntime,
 } from "../../src/fx/index.js";
 import {
@@ -53,13 +54,15 @@ function makeScene() {
   const events = new Events();
   const timers: Timer[] = [];
   const emitters: Emitter[] = [];
+  const configs: Record<string, unknown>[] = [];
   let now = 0;
   const scene: PhaserFogSceneLike = {
     load: { image: () => undefined },
     textures: { exists: () => true },
     add: {
-      particles: () => {
+      particles: (_x, _y, _texture, config) => {
         const emitter = new Emitter();
+        configs.push(config);
         emitters.push(emitter);
         return emitter;
       },
@@ -79,6 +82,7 @@ function makeScene() {
     events,
     timers,
     emitters,
+    configs,
     setNow(value: number): void { now = value; },
   };
 }
@@ -91,6 +95,7 @@ describe("FogRuntime", () => {
       region: "orange_smoke",
       carsInputIntegrated: true,
     });
+    expect(FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY).toBe(2);
     expect(FOG_ORANGE_SMOKE_CONFIG).toMatchObject({
       depth: 1100,
       blendMode: "NORMAL",
@@ -151,6 +156,8 @@ describe("PhaserFogRuntime", () => {
     });
     expect(runtime.start()).toEqual({ ok: true });
     expect(runtime.emitterCount).toBe(13);
+    expect(fake.configs).toHaveLength(13);
+    expect(fake.configs.every((config) => config.quantity === 2)).toBe(true);
     expect(runtime.snapshot.cells.some((item) => item.active)).toBe(true);
     const cell = runtime.snapshot.cells[0]!;
     cars = [{ x: cell.x, y: cell.y }];
