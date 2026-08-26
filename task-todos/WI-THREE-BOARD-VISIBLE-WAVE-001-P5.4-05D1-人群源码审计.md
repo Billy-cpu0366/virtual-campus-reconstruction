@@ -82,7 +82,7 @@ C. 按 Bundle 的区域方向池初始化静态 crowd，并以1秒节拍做可�
 
 | 差异 | 公开证据 | 当前实现 | 已确认根因 |
 |---|---|---|---|
-| 镜头内 NPC 产生/消失 | 静态/抗议 owner 按**整个 region bounds**与扩展100px视口相交来整区创建/回收（Bundle约 byte 560743、565791）；路线 owner 按 path bounds 激活并用 alpha fade，不按单点严格镜头框切 sprite（约 byte 180700） | route 按单点严格视口切 `materialized`（`src/npc/routeCrowd.ts:533`）；venue 按单点切换（`src/npc/venueCrowdRuntime.ts:8`）；创建预算可延迟到对象已进镜头后 | 把公开的区域/路径级生命周期错误实现成单点级；“加大margin”没有修正 owner 语义 |
+| 镜头内 NPC 产生/消失 | 静态/抗议 owner 按**整个 region bounds**与扩展100px视口相交来整区创建/回收（Bundle约 byte 560743、565791）；路线 owner 按 path bounds 激活并用 alpha fade，不按单点严格镜头框切 sprite（约 byte 180700） | route 按单点严格视口切 `materialized`（`src/npc/routeCrowd.ts:599-610`）；venue按单点切换；创建预算可延迟到对象已进镜头后；route完成还会直接回`start`并alpha=0 | 把公开的区域/路径级生命周期错误实现成单点级；Human进一步明确：视口内禁止可见性断裂，不能用公开`fadeOut→hidden→reset`直接解决 |
 | 火车乘客仍单轨排队 | 每组先生成 `min(npcCount×3,start×end)` 条 seed + `pathRandomFactor` A* 路径，打乱路径池后每 NPC 独占一条；`crowd-train` 因而有30条候选供10人选择（约 byte 178660、194634） | 每 NPC 独立调用一次 BFS；所谓随机化只是打乱 BFS 邻居，未实现 A* 随机边成本，也没有路径池/唯一分配（`src/npc/routeCrowd.ts:323`） | 上一轮只模拟了“随机”，没有复刻公开多路径算法；不同路径在长走廊快速收敛 |
 | Stop AI 动作连续 | 公开 protesters 每人初始延迟0–2秒；单次动画重复0–2次；完成后停500–2000ms再换方向（约 byte 567000） | 按方向共享 animation key，并在创建时让固定三分之一直接播放；没有每 NPC 的 idle/active 状态与定时器（`game/PhaserVenueCrowdRuntime.ts:8`） | 把每 NPC 异步循环压成共享 Phaser 动画配置，无法表达独立停顿；也未实现 Human 要求的“仅部分 NPC 具备动作” |
 
@@ -92,8 +92,8 @@ C. 按 Bundle 的区域方向池初始化静态 crowd，并以1秒节拍做可�
 
 1. 静态 crowd、concert、protest 改为 region-level 状态：region 进入预热框时整区准备，离开更大的回收框才销毁；不再按每个点的镜头内外切换。
 2. 为兼顾性能与无闪现，采用两级边界：外圈提前分帧准备，进入公开100px扩展框前必须全部 ready；离开更大回收框才销毁。这是重构性能决定，不冒充原站 FACT。
-3. route crowd 保持全量逻辑模拟，按公开 path-bounds 激活与 alpha fade；取消单点严格视口 `materialized`。
-4. 验证：镜头静止10秒时静态/venue可见ID集合不增减；慢速跨 region 边缘时，任何创建/销毁只能发生在屏幕外；路线 NPC 只允许从屏幕边缘自然进出或按公开完成态淡出。
+3. route crowd 保持全量逻辑模拟，但presentation必须满足Human新增硬约束：当前视口内不得alpha归零、destroy、重建或瞬移；取消单点严格视口 `materialized` 造成的屏内断裂。公开完成态淡出只有在对象已经处于安全视口外时才可采用。
+4. 验证：镜头静止10秒时静态/venue可见ID集合不增减；慢速跨region边缘时，任何创建/销毁只能发生在屏幕外；路线NPC只能从屏幕外连续走入，或因自身连续移动走出后回收；终点/起点重置若会落入视口，必须延迟或使用有证据的连续路径。
 
 #### B. 火车与路线真实多路径
 

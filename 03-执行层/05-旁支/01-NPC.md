@@ -23,9 +23,10 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 
 - **资源链缺口（已定位）**：公开镜像存在`npc-helicopter.webp`、两个rotor、high-resolution及`car-police.webp`等文件，公开Bundle也有preload和创建配置；当前`prepare-runtime-assets.mjs`/`check-runtime-assets.mjs`的白名单没有它们，`CampusScene`也没有moving-sprite/vehicle owner或对应preload/创建链。因此不是单个图片URL失败，而是资源→preload→owner→附属部件整链缺失。
 - **Stop AI闪烁（尚未完全定位）**：公开`protesters_rising-87`区域与Stop AI相邻/重叠；当前`PhaserVenueCrowdRuntime.ts`每次`sync`最多新建16个sprite（约128–143），而Stop AI fog深度1100高于当前NPC约`500+y*.1`的呈现深度，烟雾遮挡和分帧物化都可能造成闪烁。必须用逐帧owner ID、sprite create/destroy、depth和fog可见性区分，不能先把观察定性为单一NPC逻辑Bug。
-- **行走后消失/固定点冒出（route高可信）**：`src/npc/routeCrowd.ts:557-593`在非`goBack`且非`deleteAfterComplete`完成时直接把NPC重置到`start`并将alpha置0；`PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed清理sprite。公开Bundle是`fadeOut→hidden→reset/fadeIn`，当前直接重置会制造突兀消失和固定点重新出现；static/venue仍不能套用此结论。
+- **行走后消失/固定点冒出（route高可信）**：`src/npc/routeCrowd.ts:557-593`在非`goBack`且非`deleteAfterComplete`完成时直接把NPC重置到`start`并将alpha置0；`PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed清理sprite。公开Bundle的`fadeOut→hidden→reset/fadeIn`是来源事实，但不能直接作为产品修复：只要终点或起点在Human视口内，任何淡出、隐藏、destroy、presentation重建或瞬移都会违反当前验收约束；static/venue仍不能套用route结论。
+- **Human接受的视口连续性硬约束**：NPC在当前摄像机视口内必须保持连续的presentation身份与可见性；不得通过`alpha=0`、`destroy`、重建或瞬移消失/出现。NPC只能从视口外连续走入，或因自身连续移动走出视口后再回收。路线仍按各组`goBack`/`deleteAfterComplete`处理，不把所有NPC改成循环。
 
-**处理决定**：以上只进入统一跨系统差异表；NPC继续`human-deferred-not-accepted`，不在SYS-FX修复中夹带代码。若恢复，先由Human重新接受NPC方案，再按route、static/venue、资源owner分别固定路径和修复。
+**处理决定**：以上只进入统一跨系统差异表；NPC继续`human-deferred-not-accepted`，不在SYS-FX修复中夹带代码。若恢复，先由Human重新接受NPC方案，再按route、static/venue、资源owner分别固定路径和修复；实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
@@ -93,7 +94,7 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 2. owner核心状态/路径/动作测试；
 3. Phaser presentation与资源失败测试；
 4. 对应正常production区域/事件probe，而非仅test hook或对象计数；
-5. 慢相机边界和静止相机身份稳定验证；
+5. 慢相机边界和静止相机身份稳定验证；视口内不得发生alpha归零、destroy、presentation重建、瞬移或分帧冒出；NPC只能连续走入或连续走出后回收；
 6. owner shutdown后sprite/timer/tween/listener归零收据；
 7. 该批owner级Human视觉通过。
 

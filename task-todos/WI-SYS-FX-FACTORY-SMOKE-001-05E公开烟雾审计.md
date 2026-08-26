@@ -224,7 +224,8 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 | 走入烟雾后整片红烟突然消失，500ms后补回但很突兀 | **FACT**：公开`FogManager.clearCell()`只`emitter.stop()`，不立即`setVisible(false)`；alive粒子自然走完 | `src/fx/fog.ts:245-252,276-282`清cell；`game/PhaserFogRuntime.ts:224-238`对inactive cell同帧`stop()+setVisible(false)` | **已定位**：candidate把停止新粒子错误扩大为立即隐藏存活粒子；Human所称红烟是否还包含canister需再分辨 | clear逻辑与presentation分离：清cell只停发，保留存活粒子淡出；仅离屏/生命周期结束隐藏；相邻cell逐个淡出 |
 | 直升机、警车没有贴图 | **FACT**：公开镜像有helicopter主体/rotor/high-res与`car-police`及附属文件，并有preload/创建链 | `scripts/prepare-runtime-assets.mjs:18-78`、`check-runtime-assets.mjs:15-58`无这些资源；`CampusScene`只preload route/static/venue等owner，无moving-sprite/vehicle owner | **已定位**：不是单纯贴图加载失败，而是资源复制、preload和创建owner整链缺失 | 先冻结公开配置和owner；再独立加入白名单/校验/preload/静态警车与直升机rotor创建；不能只复制图片 |
 | Stop AI NPC闪烁/闪现 | **FACT**：Stop AI附近公开`protesters_rising` region与fog重叠；**INFERRED**：公开fog depth1100、当前NPC约500+`y*.1`，烟会盖住NPC | `game/PhaserVenueCrowdRuntime.ts:120-143`每次最多创建16个；`CampusScene.ts:677-682`每帧更新多owner；当前红/orange smoke在NPC上层 | **未完全定位**：可能是烟雾遮挡造成的视觉闪烁，也可能叠加16个一批的物化；尚无逐帧owner create/destroy证据 | 先做固定Stop AI路线逐帧归因（owner ID、sprite create/destroy、depth、fog visible）；再分别修遮挡规则或物化批次，不统一改NPC |
-| NPC走到某处消失、固定点突然冒出 | **FACT**：公开路线有`fadeOut→hidden→reset/fadeIn`；`deleteAfterComplete`决定是否销毁 | `src/npc/routeCrowd.ts:557-593`完成路径后直接`restart`，位置立刻回`start`、alpha=0；`game/PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed销毁sprite | **对route crowd已定位高可信根因**；不能外推到static/venue | route owner增加显式fadeOut/hidden阶段，完成后再reset；保留各组goBack/deleteAfterComplete差异；region owner另做滞后/预热 |
+| NPC走到某处消失、固定点突然冒出 | **FACT**：公开路线有`fadeOut→hidden→reset/fadeIn`；`deleteAfterComplete`决定是否销毁；但Human产品约束禁止视口内断裂 | `src/npc/routeCrowd.ts:557-593`完成路径后直接`restart`，位置立刻回`start`、alpha=0；`game/PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed销毁sprite | **route重启链仍是高可信根因**；上一版“淡出后重置”建议被Human纠正，因仍会在视口内消失/冒出；不能外推到static/venue | 建立视口连续性门：视口内禁止alpha归零、destroy、重建和瞬移；route行为仍按各组`goBack/deleteAfterComplete`保留，只有在安全视口外才能回收/重置，或沿有证据的连续路径移动；region owner另做屏外预热/滞后 |
+
 
 ### 共同根因聚类与边界
 
@@ -237,7 +238,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 
 1. **Fog clear淡出包**：只改`src/fx/fog.ts`、`game/PhaserFogRuntime.ts`及对应测试/probe；先证明单cell、相邻cell和整区穿行均为自然淡出，500ms恢复和quantity2帧门禁不回归。
 2. **资源与owner审计包**：冻结helicopter/police公开配置后，单独登记资源白名单、preload、创建和附属部件；不夹带NPC路线修复。
-3. **NPC恢复审计包**：Human明确取消延期后，先固定Stop AI逐帧证据；route的终点状态与static/venue的视口物化分开修复，不能按每个闪现点建立补丁。
+3. **NPC恢复审计包**：Human明确取消延期后，先固定Stop AI逐帧证据；以“视口内零可见性断裂、零瞬移、零屏内创建/销毁”为硬停止条件。route的终点/回收策略与static/venue的视口物化分开修复，不能按每个闪现点建立补丁，也不能用淡出隐藏掩盖问题。
 
 ## Human Plan Gate
 

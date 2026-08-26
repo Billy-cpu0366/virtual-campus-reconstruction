@@ -26,6 +26,7 @@ updated: 2026-08-25
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
 - **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题：烟雾穿行时整片突兀消失、直升机/警车缺贴图、Stop AI NPC闪烁、NPC行走后消失并在固定点冒出。当前冻结candidate，做一次跨系统根因审计，之后才形成修复方案Gate。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮NPC闪烁/消失是新增视觉证据，不等于恢复授权。B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后由Human重新授权并从统一差异表恢复。
+- **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
 - **当前授权**：此前`DEC-P5.4-05E-S1-SMOOTHNESS-001`已消费；当前没有新的代码授权。先审计fog清除、资源入口、Stop AI NPC遮挡/物化和route重启的共同差异；NPC专项仍延期，S2–S4未授权，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
@@ -61,7 +62,7 @@ updated: 2026-08-25
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1 static+venue自动验证已通过，当前等待Human视觉 | 仅审查`b6a4e6c`候选及双视口截图/收据；若Human拒绝则回同一owner根因包修正 | 合并回根基线、启动B2-B5、route/train/special/rat/ghost/birds、`sample/`、地图/玩家/相机/30FPS/火车、远端 | Human通过则落盘视觉结论并关闭B1；不自动进入B2 |
+| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1自动验证通过但Human视觉失败，当前延期 | 仅将新增视觉证据和“视口内不得消失/出现”硬约束纳入统一审计；待重新授权后再固定owner证据 | 合并回根基线、恢复B1视觉签字、启动B2-B5、route/train/special/rat/ghost/birds、`sample/`、地图/玩家/相机/30FPS/火车、远端 | Human重新授权后先做owner级复现/方案Gate；不把本次纠正自动当作实现授权 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -155,16 +156,11 @@ updated: 2026-08-25
 
 ## 当前工作项
 
-当前 active 为[SYS-NPC专项](task-todos/WI-SYS-NPC-SPECIAL-001-NPC专项.md)。第三轮群众candidate `ef9f004`、`70aefe4`、`76beaf0`、`ea87512`继续冻结为代码与失败对照，不作为正确根基线。
+当前 active 为[05-E烟雾审计与S1修正](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-05E公开烟雾审计.md)。candidate `c4b2d6a`及此前失败candidate继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
 
-[B0证据与合同收口](task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成：
+本轮Human新增四类视觉失败已进入同一`systemic-flow`差异表：fog清除整片突兀消失、直升机/警车资源与owner链缺失、Stop AI NPC闪烁、route NPC消失/固定点冒出。只读审计确认Fog clear和route restart有高可信差异，资源整链缺失已定位，Stop AI闪烁仍需逐帧区分遮挡与物化。
 
-- FACT确认正常`startGame→crowdTrain→departTrain→spawnTrainPassengers`、乘客目标10和`loop-crowd`暂停恢复；
-- FACT确认公开`walls-layer`→Blob Worker→seeded 8向A*；candidate主线程A*/endpoint吸附/轨道显示位移均为DECISION；
-- FACT确认rat、ghost、birds的owner内部机制；三者正常产品入口仍受`Q-CAMERA-ENTRY-001`阻塞；
-- 新增`Q-NPC-RAIL-001`与`Q-NPC-TEARDOWN-001`。
-
-Human已授权[B1静态与Venue实施包](task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)。候选从clean `ea87512`隔离实现并在`integration/npc-special`完成Main接线；最终候选`b6a4e6c`已通过typecheck、67文件/361测试、两种build、browser smoke/chunk smoke，以及桌面1280×720与移动375×667的B1 production probe。收据为`.pi/audit-evidence/npc-b1/r3/receipt.json`（SHA-256 `80ce72db1b19507a9f08769651fa2f53eb58c0d8354427b47048886c7f0ec8af`），当前等待Human分别验收static、concert、protest；B2-B5仍未授权。
+NPC的Phase A/B0结论、B1 candidate和收据均保留，但按`DEC-SYS-NPC-DEFER-001`继续延期；本次Human新增的视口连续性硬约束已登记，不能在05-E中夹带NPC实现。
 
 ## 已阻塞或暂停工作项
 
