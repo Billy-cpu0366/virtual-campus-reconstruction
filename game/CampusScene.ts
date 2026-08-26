@@ -126,6 +126,10 @@ import {
   type PhaserFogSceneLike,
 } from "./PhaserFogRuntime.js";
 import {
+  PhaserVehicleRuntime,
+  type PhaserVehicleSceneLike,
+} from "./PhaserVehicleRuntime.js";
+import {
   PhaserFootstepRuntime,
   type PhaserFootstepSceneLike,
 } from "./PhaserFootstepRuntime.js";
@@ -363,6 +367,7 @@ export class CampusScene extends Phaser.Scene {
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private stopAiSmokeRuntime: PhaserStopAiSmokeRuntime | undefined;
   private fogRuntime: PhaserFogRuntime | undefined;
+  private vehicleRuntime: PhaserVehicleRuntime | undefined;
   private footstepRuntime: PhaserFootstepRuntime | undefined;
   private mapRuntime: PhaserCampusMapRuntime | undefined;
   private mapLeaseToken: GameplayControlLeaseToken | undefined;
@@ -556,9 +561,14 @@ export class CampusScene extends Phaser.Scene {
         onError: (reason) => this.recordSideFailure(`fog:${reason}`),
       },
     );
+    this.vehicleRuntime = new PhaserVehicleRuntime(
+      this as unknown as PhaserVehicleSceneLike,
+      { onError: (reason) => this.recordSideFailure(`vehicle:${reason}`) },
+    );
     this.sprayerRuntime.preload();
     this.trainRuntime.preload();
     this.smokeRuntime.preload();
+    this.vehicleRuntime.preload();
     preloadRouteCrowdRuntimeAssets(this.load);
     preloadStaticNpcRuntimeAssets(this.load);
     preloadStaticCrowdRuntimeAssets(this.load);
@@ -1099,6 +1109,7 @@ export class CampusScene extends Phaser.Scene {
       stopAiSmokeEmitterCount: this.stopAiSmokeRuntime?.emitterCount ?? 0,
       fog: this.fogRuntime?.snapshot ?? null,
       fogEmitterCount: this.fogRuntime?.emitterCount ?? 0,
+      vehicle: this.vehicleRuntime?.snapshot ?? null,
       failures: Object.freeze([...this.sideFailures]),
     };
   }
@@ -1157,6 +1168,7 @@ export class CampusScene extends Phaser.Scene {
     this.dancingCrowdRuntime?.shutdown();
     this.stopAiSmokeRuntime?.shutdown();
     this.fogRuntime?.shutdown();
+    this.vehicleRuntime?.shutdown();
     this.smokeRuntime?.shutdown();
     this.trainRuntime?.shutdown(this.time?.now);
     this.entryRuntime = undefined;
@@ -1232,6 +1244,7 @@ export class CampusScene extends Phaser.Scene {
     this.dancingCrowdRuntime = undefined;
     this.stopAiSmokeRuntime = undefined;
     this.fogRuntime = undefined;
+    this.vehicleRuntime = undefined;
     this.smokeRuntime = undefined;
     this.trainRuntime = undefined;
     return receipt;
@@ -1541,6 +1554,10 @@ export class CampusScene extends Phaser.Scene {
     if (!this.venueCrowdRuntime.start()) this.recordSideFailure("venue-crowd:start-failed");
     this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
     if (!this.dancingCrowdRuntime.start()) this.recordSideFailure("dancing-crowd:start-failed");
+    const vehicleStarted = this.vehicleRuntime?.start(this.time.now);
+    if (vehicleStarted === undefined || !vehicleStarted.ok) {
+      this.recordSideFailure(`vehicle:${vehicleStarted?.reason ?? "missing-owner"}`);
+    }
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(
