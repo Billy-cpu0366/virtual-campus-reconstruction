@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-acceptance
-classification-trigger: human-rejected-compiled-s1-smoke-smoothness
+correction-phase: audit
+classification-trigger: human-rejected-smoke-clear-and-npc-visibility
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-05e-s1-human-visual-gate
-current-phase: p5.4-05e-s1-human-visual-gate
-current-gate: p5.4-05e-s1-human-visual
-gate-status: automated-verified-awaiting-human-visual
+work-item-status: active-cross-system-visual-audit
+current-phase: p5.4-cross-system-visual-audit
+current-gate: p5.4-cross-system-root-cause
+gate-status: human-rejected-additional-findings-awaiting-audit
 authorization-ref: DEC-P5.4-05E-S1-SMOOTHNESS-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05e-s1-human-acceptance
+next-phase: p5.4-cross-system-repair-plan-gate
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1原candidate `e07d2c7`曾被Human拒绝红烟平滑度；统一审计将根因收敛到orange fog透明粒子绘制负载，Human已接受quantity4→2修复包。修复提交`c4b2d6a`已自动/production验证通过，当前等待Human重新视觉验收，之后才决定是否启动S2。
-- **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
+- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题：烟雾穿行时整片突兀消失、直升机/警车缺贴图、Stop AI NPC闪烁、NPC行走后消失并在固定点冒出。当前冻结candidate，做一次跨系统根因审计，之后才形成修复方案Gate。
+- **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮NPC闪烁/消失是新增视觉证据，不等于恢复授权。B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后由Human重新授权并从统一差异表恢复。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：`DEC-P5.4-05E-S1-SMOOTHNESS-001`已消费；quantity4→2修复只改fog呈现/测试/定点probe，保留13-cell核心、清雾/生命周期和红烟公开参数。当前只做Human重新视觉验收，S2–S4未授权，cars清雾仍不声称production已集成。
+- **当前授权**：此前`DEC-P5.4-05E-S1-SMOOTHNESS-001`已消费；当前没有新的代码授权。先审计fog清除、资源入口、Stop AI NPC遮挡/物化和route重启的共同差异；NPC专项仍延期，S2–S4未授权，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：quantity4→2实施、Stop AI定点帧门禁和完整相关回归均已PASS；S1仍必须由Human重新验收红烟连续性、orange fog可见度和深度穿插，才能关闭。若失败回同一差异表，不自动降到quantity1或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：此前quantity4→2的自动门禁已PASS，但新增四类Human反馈重新打开同一systemic差异表；必须完成跨系统审计、根因聚类、一次Human修复方案Gate、成批修复、完整回归和重新视觉验收。不得启动S2或恢复NPC专项。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标

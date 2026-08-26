@@ -17,6 +17,16 @@ updated: 2026-08-25
 
 **当前硬边界**：整个SYS-NPC专项已按`DEC-SYS-NPC-DEFER-001`延期；B1不合并、不视觉签字，B2-B5不授权，其他板块不得夹带NPC修改。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；恢复专项时从这些未解决项继续，不建立通用NPC/Entity框架。
 
+## 新增Human视觉证据（2026-08-25，未授权修复）
+
+Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪现；部分NPC行走到某处消失，固定位置又突然冒出；同时直升机和警车没有贴图。这些是有效的视觉失败证据，但不等于取消NPC延期或授权修改。
+
+- **资源链缺口（已定位）**：公开镜像存在`npc-helicopter.webp`、两个rotor、high-resolution及`car-police.webp`等文件，公开Bundle也有preload和创建配置；当前`prepare-runtime-assets.mjs`/`check-runtime-assets.mjs`的白名单没有它们，`CampusScene`也没有moving-sprite/vehicle owner或对应preload/创建链。因此不是单个图片URL失败，而是资源→preload→owner→附属部件整链缺失。
+- **Stop AI闪烁（尚未完全定位）**：公开`protesters_rising-87`区域与Stop AI相邻/重叠；当前`PhaserVenueCrowdRuntime.ts`每次`sync`最多新建16个sprite（约128–143），而Stop AI fog深度1100高于当前NPC约`500+y*.1`的呈现深度，烟雾遮挡和分帧物化都可能造成闪烁。必须用逐帧owner ID、sprite create/destroy、depth和fog可见性区分，不能先把观察定性为单一NPC逻辑Bug。
+- **行走后消失/固定点冒出（route高可信）**：`src/npc/routeCrowd.ts:557-593`在非`goBack`且非`deleteAfterComplete`完成时直接把NPC重置到`start`并将alpha置0；`PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed清理sprite。公开Bundle是`fadeOut→hidden→reset/fadeIn`，当前直接重置会制造突兀消失和固定点重新出现；static/venue仍不能套用此结论。
+
+**处理决定**：以上只进入统一跨系统差异表；NPC继续`human-deferred-not-accepted`，不在SYS-FX修复中夹带代码。若恢复，先由Human重新接受NPC方案，再按route、static/venue、资源owner分别固定路径和修复。
+
 ## 1. 逆向结论（从 sample 读出来的事实）
 
 - **FACT**：公开前端至少存在以下不同owner：

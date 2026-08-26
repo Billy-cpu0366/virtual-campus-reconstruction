@@ -4,7 +4,7 @@ subtask: 05E-S1-StopAI-smoke
 system: SYS-FX
 issue-class: systemic-failure
 correction-phase: batch-implement
-status: automated-verified-awaiting-human-visual
+status: human-visual-rejected-additional-findings-audit
 decision: DEC-P5.4-05E-S1-STOP-AI-001
 repair-decision: DEC-P5.4-05E-S1-SMOOTHNESS-001
 candidate-base: 8586196
@@ -33,7 +33,7 @@ updated: 2026-08-25
 - `orange_smoke` polygon直接来自`particle-trajectories.json` region75；cellSize32，13 cells，depth1100，NORMAL，scale8、alpha.3、speed5、quantity4、frequency20、lifespan350..2000、respawn500ms。
 - Fog按camera worldView逐cell启停，四边外扩公开`cellSize=32`；玩家移动按前方85×35椭圆清雾；注入cars按40px半径清雾；500ms恢复。
 
-## 已落盘与自动验证（Human视觉已拒绝；审计完成，等待修复方案Gate）
+## 已落盘与自动验证（Human视觉再次拒绝；跨系统审计中）
 
 - 代码提交：隔离分支 `integration/visible-product-wave` 的 `e07d2c7`，未push。
 - PASS：typecheck、S1 FX专项10项、全量68 files / 363 tests、build、performance smoke。
@@ -41,10 +41,10 @@ updated: 2026-08-25
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/receipt.json`（SHA-256 `b36e41537972e9e1331f65ea909f785d1013a912f01de6e5c883f8bd8577265e`）、`performance.json`（SHA-256 `8a188bc019f283b1bcd9889d0a6e0481622dbb22e028813ce8e439267c9a32a3`）及`screenshots/`。
 - 独立verifier：所有客观检查PASS，结论为`UNVERIFIED`，未代替Human视觉。
 - Human Gate结果（2026-08-25）：拒绝当前编译production视觉，明确反馈红烟运动“卡卡的，不知道怎么回事，很不丝滑”。该反馈覆盖整体视觉体验，自动PASS不能覆盖；S2–S4未授权。
-- 当前处理：统一审计已完成。定点控制显示orange fog透明粒子绘制是最高可信负载根因，runtime每帧同步不是主因；旧`e07d2c7`保留为失败candidate，修复candidate为`c4b2d6a`，当前等待Human重新视觉Gate。
+- 当前处理：quantity4→2的平滑度修复已自动/production验证，但Human继续指出：穿行时红烟整片突兀消失、直升机/警车缺贴图、Stop AI NPC闪烁、NPC行走后消失并在固定点冒出。旧`e07d2c7`与`c4b2d6a`均保留；当前返回同一systemic差异表，先审计Fog clear与跨系统资源/NPC owner，不追加零散补丁。
 - Human Plan Gate已通过（2026-08-25）：接受`DEC-P5.4-05E-S1-SMOOTHNESS-001`，只优化`orange_smoke`呈现密度，将Phaser adapter的`quantity`从公开FACT `4`改为重构DECISION `2`；保留13-cell核心、清雾/respawn、owner/lifecycle和红烟9层公开参数。`quantity1`仅为诊断上限，不预授权。
 - 修复已落盘：代码提交`c4b2d6a`；公开FACT quantity4仍保留，Phaser presentation使用quantity2；Stop AI定点帧门禁已加入production probe。
-- 客观停止条件：Stop AI编译production定点停留至少10秒，p95≤20ms、max≤34ms、无长任务/异常/坏请求，9红+13fog和离屏/返回/shutdown回归通过，再交Human视觉复验。当前最终收据：10,001ms、575帧、p95 16.8ms、max33.4ms、longtask0、>34ms=0；截图与收据见`.pi/audit-evidence/05e-s1/correction-round-1/final/`。若Human视觉仍失败，回到同一差异表，不自动降到quantity1或启动S2。
+- 已验证停止条件：Stop AI编译production定点10,001ms、575帧、p95 16.8ms、max33.4ms、longtask0、>34ms=0；9红+13fog、离屏/返回generation2/wind/shutdown通过。该收据只证明帧预算和生命周期，不证明清雾淡出或NPC/资源视觉。当前新增问题需回同一差异表，不自动降到quantity1或启动S2。
 - 审计收据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/correction-round-1/`；定点帧`stop-ai-frame-before-capture.json` SHA-256 `5eb4f920064bbd4b9746a96716d4088e460cd63d0a69b9ad66961bc4c34cafa0`，渲染关闭/同步保留`render-off-sync-active.json` SHA-256 `cf86106699f8d9c0ff86fd9decff053a2abfa6a67661328a506db25e5076d5dc`，quantity实验`fog-quantity-sensitivity.json` SHA-256 `d9250f0205c4853bd8bee461cbe8b0324b6a8891e05ff3778446793a40d27feb`。
 
 ## 实现边界

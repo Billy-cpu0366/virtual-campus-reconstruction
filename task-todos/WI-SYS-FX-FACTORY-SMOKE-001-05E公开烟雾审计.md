@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: source-audit
 system: SYS-FX
 issue-class: systemic-failure
-status: s1-human-visual-rejected-smoothness-awaiting-audit
+status: cross-system-human-visual-rejected-awaiting-audit
 decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 updated: 2026-08-25
 ---
@@ -215,6 +215,30 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - PASS：compiled preview真实路径定点10,001ms/575帧，p95 16.8ms、max33.4ms、longtask0、>34ms=0；9 red/13 fog active，离屏/返回generation2/wind/shutdown和错误收集均通过。
 - 收据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/correction-round-1/final/receipt.json` SHA-256 `7085f67732c94798663d6baa72d98999e6c5c6bfda2e63b3c22998aa2b6dcb1d`；截图见同目录`final/screenshots/`。
 
+## Human新增跨系统视觉发现（统一差异表，2026-08-25）
+
+本节记录同一Human视觉Gate中新增的四类观察；它们尚未转为实现授权，不能把NPC延期边界或未实现资源链自动升级为代码任务。
+
+| Human观察 | expected source | 当前actual/位置 | 当前判断 | 解决方向 |
+|---|---|---|---|---|
+| 走入烟雾后整片红烟突然消失，500ms后补回但很突兀 | **FACT**：公开`FogManager.clearCell()`只`emitter.stop()`，不立即`setVisible(false)`；alive粒子自然走完 | `src/fx/fog.ts:245-252,276-282`清cell；`game/PhaserFogRuntime.ts:224-238`对inactive cell同帧`stop()+setVisible(false)` | **已定位**：candidate把停止新粒子错误扩大为立即隐藏存活粒子；Human所称红烟是否还包含canister需再分辨 | clear逻辑与presentation分离：清cell只停发，保留存活粒子淡出；仅离屏/生命周期结束隐藏；相邻cell逐个淡出 |
+| 直升机、警车没有贴图 | **FACT**：公开镜像有helicopter主体/rotor/high-res与`car-police`及附属文件，并有preload/创建链 | `scripts/prepare-runtime-assets.mjs:18-78`、`check-runtime-assets.mjs:15-58`无这些资源；`CampusScene`只preload route/static/venue等owner，无moving-sprite/vehicle owner | **已定位**：不是单纯贴图加载失败，而是资源复制、preload和创建owner整链缺失 | 先冻结公开配置和owner；再独立加入白名单/校验/preload/静态警车与直升机rotor创建；不能只复制图片 |
+| Stop AI NPC闪烁/闪现 | **FACT**：Stop AI附近公开`protesters_rising` region与fog重叠；**INFERRED**：公开fog depth1100、当前NPC约500+`y*.1`，烟会盖住NPC | `game/PhaserVenueCrowdRuntime.ts:120-143`每次最多创建16个；`CampusScene.ts:677-682`每帧更新多owner；当前红/orange smoke在NPC上层 | **未完全定位**：可能是烟雾遮挡造成的视觉闪烁，也可能叠加16个一批的物化；尚无逐帧owner create/destroy证据 | 先做固定Stop AI路线逐帧归因（owner ID、sprite create/destroy、depth、fog visible）；再分别修遮挡规则或物化批次，不统一改NPC |
+| NPC走到某处消失、固定点突然冒出 | **FACT**：公开路线有`fadeOut→hidden→reset/fadeIn`；`deleteAfterComplete`决定是否销毁 | `src/npc/routeCrowd.ts:557-593`完成路径后直接`restart`，位置立刻回`start`、alpha=0；`game/PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed销毁sprite | **对route crowd已定位高可信根因**；不能外推到static/venue | route owner增加显式fadeOut/hidden阶段，完成后再reset；保留各组goBack/deleteAfterComplete差异；region owner另做滞后/预热 |
+
+### 共同根因聚类与边界
+
+- **RC-VIS-1：presentation状态被直接切断**。烟雾清除的逻辑状态与粒子存活状态混用，属于一个可独立修复包。
+- **RC-VIS-2：公开对象的资源/owner链尚未覆盖**。直升机和警车是资源、预加载、创建、附属动画/灯光的完整缺口，不是`<img>`路径问题。
+- **RC-VIS-3：NPC视口/呈现生命周期与烟雾深度叠加**。Stop AI闪烁的具体owner尚未证实；route终点重启是另一条明确链，不能合并成一个“NPC闪烁修复”。
+- NPC仍按`DEC-SYS-NPC-DEFER-001`延期；本节是新增证据，不是B2–B5授权。若要修NPC，需先由Human重新接受NPC恢复方案，再按route/static/venue等owner分包。
+
+### 当前解决顺序（proposed，未授权）
+
+1. **Fog clear淡出包**：只改`src/fx/fog.ts`、`game/PhaserFogRuntime.ts`及对应测试/probe；先证明单cell、相邻cell和整区穿行均为自然淡出，500ms恢复和quantity2帧门禁不回归。
+2. **资源与owner审计包**：冻结helicopter/police公开配置后，单独登记资源白名单、preload、创建和附属部件；不夹带NPC路线修复。
+3. **NPC恢复审计包**：Human明确取消延期后，先固定Stop AI逐帧证据；route的终点状态与static/venue的视口物化分开修复，不能按每个闪现点建立补丁。
+
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”（2026-08-25）。随后明确接受`quantity 4→2 (Recommended)`：保留13-cell核心、清雾/生命周期和红烟公开参数，只实施orange fog呈现密度修复，并按定点帧门禁重新回归。该接受已登记为`DEC-P5.4-05E-S1-SMOOTHNESS-001`；修复candidate `c4b2d6a`已自动/production验证通过，当前只等待Human重新视觉验收，不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。当前返回统一`systemic-failure`审计：quantity4→2的旧candidate `c4b2d6a`及其自动收据均保留，但不能关闭本轮视觉Gate；Fog clear、资源owner和NPC问题尚待审计与重新授权，不启动S2–S4。

@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 phase: p5.4-05e-factory-smoke
 system: SYS-FX
 type: bounded-verification-and-repair
-status: s1-automated-verified-awaiting-human-visual
+status: cross-system-human-visual-rejected-awaiting-audit
 decision: DEC-P5.4-05E-S1-STOP-AI-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
@@ -81,7 +81,7 @@ Human已接受上述顺序，并只授权[S1 Stop AI实施包](WI-SYS-FX-FACTORY
 - PASS：无production debug/test hook的真实键盘探针 `browser:stop-ai-smoke-production`。正常路径到Stop AI时9层/13-cell active；离场后彩烟9层destroy、Fog13 emitter保留且inactive；返回后9层generation=2并观察到wind；shutdown后两类owner emitter/graphics为0；console、exception、failed request、bad response均为空。
 - 独立verifier结果：`UNVERIFIED`（所有客观检查PASS，未代替Human视觉）。
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/receipt.json` SHA-256 `b36e41537972e9e1331f65ea909f785d1013a912f01de6e5c883f8bd8577265e`；performance `performance.json` SHA-256 `8a188bc019f283b1bcd9889d0a6e0481622dbb22e028813ce8e439267c9a32a3`；截图见同目录`screenshots/`。
-- Human Gate（视觉拒绝后已通过修复方案Gate，2026-08-25）：编译production截图中的红烟运动“卡卡的、不丝滑”。统一审计已完成，最高可信根因是orange fog透明粒子绘制负载；Human接受只将orange fog呈现quantity由4降为2，红烟参数不动，修复candidate `c4b2d6a`已自动/production验证通过，当前等待重新视觉验收。
+- Human Gate（视觉拒绝后修复方案已通过，但又发现跨系统问题，2026-08-25）：编译production截图中的红烟运动“卡卡的、不丝滑”。quantity4→2的修复candidate `c4b2d6a`已自动/production验证通过，但Human新增烟雾清除突兀、直升机/警车缺贴图、Stop AI NPC闪烁、NPC消失/冒出四类问题；当前返回统一systemic差异表和审计，不关闭05-E。
 
 ## 历史单点自动验证收据
 
