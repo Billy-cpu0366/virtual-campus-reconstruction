@@ -36,16 +36,22 @@ class Events implements PhaserFogEventsLike {
 
 class Timer implements PhaserFogTimerLike {
   removed = false;
-  constructor(readonly callback: () => void) {}
+  constructor(readonly delay: number, readonly callback: () => void) {}
   remove(): void { this.removed = true; }
 }
 
 class Emitter implements PhaserFogEmitterLike {
   emitting = false;
   destroyed = false;
+  visible = false;
+  visibilityCalls: boolean[] = [];
   start(): void { this.emitting = true; }
   stop(): void { this.emitting = false; }
-  setVisible(_value: boolean): this { return this; }
+  setVisible(value: boolean): this {
+    this.visible = value;
+    this.visibilityCalls.push(value);
+    return this;
+  }
   setDepth(_value: number): this { return this; }
   destroy(): void { this.destroyed = true; }
 }
@@ -69,8 +75,8 @@ function makeScene() {
     },
     time: {
       get now() { return now; },
-      delayedCall: (_delay, callback) => {
-        const timer = new Timer(callback);
+      delayedCall: (delay, callback) => {
+        const timer = new Timer(delay, callback);
         timers.push(timer);
         return timer;
       },
@@ -147,6 +153,121 @@ describe("FogRuntime", () => {
 });
 
 describe("PhaserFogRuntime", () => {
+  it("stops one cleared emitter without hiding its living particles", () => {
+    const fake = makeScene();
+    let cars: readonly { x: number; y: number }[] | undefined;
+    const runtime = new PhaserFogRuntime(fake.scene, {
+      viewport: () => VIEWPORT,
+      cars: () => cars,
+    });
+    expect(runtime.start()).toEqual({ ok: true });
+    const cell = runtime.snapshot.cells[0]!;
+    const emitter = fake.emitters[0]!;
+    const visibilityCalls = emitter.visibilityCalls.length;
+    cars = [{ x: cell.x, y: cell.y }];
+
+    fake.events.emit("update");
+
+    expect(emitter.emitting).toBe(false);
+    expect(emitter.visible).toBe(true);
+    expect(emitter.visibilityCalls).toHaveLength(visibilityCalls);
+    expect(runtime.snapshot.cells.some((item) => item.cleared)).toBe(true);
+    expect(fake.timers.length).toBeGreaterThan(0);
+    expect(fake.timers.every((timer) => timer.delay === 500)).toBe(true);
+
+    fake.events.emit("update");
+    expect(emitter.emitting).toBe(false);
+    expect(emitter.visible).toBe(true);
+    expect(emitter.visibilityCalls).toHaveLength(visibilityCalls);
+    runtime.shutdown();
+  });
+
+  it("stops adjacent cleared emitters without hiding either one", () => {
+    const fake = makeScene();
+    let cars: readonly { x: number; y: number }[] | undefined;
+    const runtime = new PhaserFogRuntime(fake.scene, {
+      viewport: () => VIEWPORT,
+      cars: () => cars,
+    });
+    expect(runtime.start()).toEqual({ ok: true });
+    const cells = [runtime.snapshot.cells[0]!, runtime.snapshot.cells[2]!];
+    const firstEmitter = fake.emitters[0]!;
+    const secondEmitter = fake.emitters[2]!;
+    const firstVisibilityCalls = firstEmitter.visibilityCalls.length;
+    const secondVisibilityCalls = secondEmitter.visibilityCalls.length;
+    cars = [{
+      x: (cells[0]!.x + cells[1]!.x) / 2,
+      y: (cells[0]!.y + cells[1]!.y) / 2,
+    }];
+
+    fake.events.emit("update");
+
+    expect(cells.every((cell) => runtime.snapshot.cells
+      .find((item) => item.id === cell.id)?.cleared)).toBe(true);
+    expect(firstEmitter.emitting).toBe(false);
+    expect(secondEmitter.emitting).toBe(false);
+    expect(firstEmitter.visible).toBe(true);
+    expect(secondEmitter.visible).toBe(true);
+    expect(firstEmitter.visibilityCalls).toHaveLength(firstVisibilityCalls);
+    expect(secondEmitter.visibilityCalls).toHaveLength(secondVisibilityCalls);
+    expect(fake.timers.length).toBeGreaterThanOrEqual(2);
+    expect(fake.timers.every((timer) => timer.delay === 500)).toBe(true);
+
+    fake.setNow(500);
+    for (const timer of fake.timers) timer.callback();
+    expect(firstEmitter.emitting).toBe(true);
+    expect(secondEmitter.emitting).toBe(true);
+    expect(cells.every((cell) => !runtime.snapshot.cells
+      .find((item) => item.id === cell.id)?.cleared)).toBe(true);
+    runtime.shutdown();
+  });
+
+  it("keeps every emitter visible while clearing the whole region", () => {
+    const fake = makeScene();
+    let cars: readonly { x: number; y: number }[] | undefined;
+    const runtime = new PhaserFogRuntime(fake.scene, {
+      viewport: () => VIEWPORT,
+      cars: () => cars,
+    });
+    expect(runtime.start()).toEqual({ ok: true });
+    const visibilityCalls = fake.emitters.map(
+      (emitter) => emitter.visibilityCalls.length,
+    );
+    cars = runtime.snapshot.cells.map(({ x, y }) => ({ x, y }));
+
+    fake.events.emit("update");
+
+    expect(runtime.snapshot.cells.every((cell) => cell.cleared)).toBe(true);
+    expect(fake.emitters.every((emitter) => !emitter.emitting)).toBe(true);
+    expect(fake.emitters.every((emitter) => emitter.visible)).toBe(true);
+    expect(fake.emitters.every(
+      (emitter, index) => emitter.visibilityCalls.length === visibilityCalls[index],
+    )).toBe(true);
+    expect(fake.timers).toHaveLength(13);
+    expect(fake.timers.every((timer) => timer.delay === 500)).toBe(true);
+    runtime.shutdown();
+  });
+
+  it("hides offscreen emitters and shows them again on return", () => {
+    const fake = makeScene();
+    let viewport: { left: number; top: number; width: number; height: number } = VIEWPORT;
+    const runtime = new PhaserFogRuntime(fake.scene, {
+      viewport: () => viewport,
+    });
+    expect(runtime.start()).toEqual({ ok: true });
+
+    viewport = { left: 0, top: 0, width: 100, height: 100 };
+    fake.events.emit("update");
+    expect(fake.emitters.every((emitter) => !emitter.emitting)).toBe(true);
+    expect(fake.emitters.every((emitter) => !emitter.visible)).toBe(true);
+
+    viewport = VIEWPORT;
+    fake.events.emit("update");
+    expect(fake.emitters.every((emitter) => emitter.emitting)).toBe(true);
+    expect(fake.emitters.every((emitter) => emitter.visible)).toBe(true);
+    runtime.shutdown();
+  });
+
   it("owns 13 emitters and tears down listeners/timers", () => {
     const fake = makeScene();
     let cars: readonly { x: number; y: number }[] | undefined;

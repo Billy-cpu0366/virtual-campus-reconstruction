@@ -226,10 +226,15 @@ export class PhaserFogRuntime {
     for (const cell of snapshot.cells) {
       const emitter = this.emitters.get(cell.id);
       if (emitter === undefined) continue;
-      if (cell.cleared && !before.cells.find((item) => item.id === cell.id)?.cleared) {
+      const wasCleared = before.cells.find(
+        (item) => item.id === cell.id,
+      )?.cleared ?? false;
+      if (cell.cleared && !wasCleared) {
         this.scheduleRespawn(cell.id, cell.respawnAt, now);
       }
-      if (cell.active) {
+      if (cell.cleared) {
+        emitter.stop();
+      } else if (cell.active) {
         emitter.setVisible?.(true);
         if (emitter.emitting !== true) emitter.start();
       } else {
