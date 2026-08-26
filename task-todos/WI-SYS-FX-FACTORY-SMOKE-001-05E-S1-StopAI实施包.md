@@ -4,8 +4,9 @@ subtask: 05E-S1-StopAI-smoke
 system: SYS-FX
 issue-class: systemic-failure
 correction-phase: batch-implement
-status: audit-complete-awaiting-human-repair-plan
+status: repair-implementation-authorized
 decision: DEC-P5.4-05E-S1-STOP-AI-001
+repair-decision: DEC-P5.4-05E-S1-SMOOTHNESS-001
 candidate-base: 8586196
 updated: 2026-08-25
 ---
@@ -41,8 +42,8 @@ updated: 2026-08-25
 - 独立verifier：所有客观检查PASS，结论为`UNVERIFIED`，未代替Human视觉。
 - Human Gate结果（2026-08-25）：拒绝当前编译production视觉，明确反馈红烟运动“卡卡的，不知道怎么回事，很不丝滑”。该反馈覆盖整体视觉体验，自动PASS不能覆盖；S2–S4未授权。
 - 当前处理：统一审计已完成。定点控制显示orange fog透明粒子绘制是最高可信负载根因，runtime每帧同步不是主因；冻结`e07d2c7`，不按截图症状零散调参。
-- 待Human Plan Gate：只优化`orange_smoke`呈现密度，将Phaser adapter的`quantity`从公开FACT `4`改为重构DECISION `2`；保留13-cell核心、清雾/respawn、owner/lifecycle和红烟9层公开参数。`quantity1`仅为诊断上限，不预授权。
-- 客观停止条件：Stop AI编译production定点停留至少10秒，p95≤20ms、max≤34ms、无长任务/异常/坏请求，9红+13fog和离屏/返回/shutdown回归通过，再交Human视觉复验。
+- Human Plan Gate已通过（2026-08-25）：接受`DEC-P5.4-05E-S1-SMOOTHNESS-001`，只优化`orange_smoke`呈现密度，将Phaser adapter的`quantity`从公开FACT `4`改为重构DECISION `2`；保留13-cell核心、清雾/respawn、owner/lifecycle和红烟9层公开参数。`quantity1`仅为诊断上限，不预授权。
+- 客观停止条件：Stop AI编译production定点停留至少10秒，p95≤20ms、max≤34ms、无长任务/异常/坏请求，9红+13fog和离屏/返回/shutdown回归通过，再交Human视觉复验。若quantity2仍失败，回到同一差异表，不自动降到quantity1或启动S2。
 - 审计收据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/correction-round-1/`；定点帧`stop-ai-frame-before-capture.json` SHA-256 `5eb4f920064bbd4b9746a96716d4088e460cd63d0a69b9ad66961bc4c34cafa0`，渲染关闭/同步保留`render-off-sync-active.json` SHA-256 `cf86106699f8d9c0ff86fd9decff053a2abfa6a67661328a506db25e5076d5dc`，quantity实验`fog-quantity-sensitivity.json` SHA-256 `d9250f0205c4853bd8bee461cbe8b0324b6a8891e05ff3778446793a40d27feb`。
 
 ## 实现边界

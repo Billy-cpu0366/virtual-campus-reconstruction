@@ -200,7 +200,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - **RC-FX-SMOOTH-2（待验证）**：同一频率批次与同时启动造成视觉密度脉冲；quantity2实验改善帧时序，但尚未完成Human同场景视觉复验。
 - **RC-FX-SMOOTH-3（独立UNKNOWN）**：候选的全局最近邻过滤可能使4×4烟雾边缘更块状；不能仅凭静态截图把它和帧丢失混为一个根因。
 
-### 推荐的一次修复方案（proposed，必须Human Plan Gate）
+### 已接受的一次修复方案（accepted，待实施/验证）
 
 1. **只改orange fog的presentation density**：保留`FogRuntime`的13-cell状态、玩家/车辆清除合同、500ms respawn、视口生命周期和独立owner；首个产品candidate把Phaser fog emitter的`quantity`由公开FACT `4`改为重构`DECISION` `2`。红烟9层的位置、depth、tint、frequency、lifespan、wind和owner先完全不动。
 2. **把公开偏差显式登记为DECISION**：这不是Bundle FACT复刻，而是为Human已拒绝的平滑度做最小呈现取舍；`quantity1`只作为诊断上限，不预授权直接采用。
@@ -210,4 +210,4 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”（2026-08-25）。当前等待Human接受或拒绝上面的“一次性fog呈现密度修复包”；未接受前冻结`e07d2c7`，不修改运行时代码、不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”（2026-08-25）。随后明确接受`quantity 4→2 (Recommended)`：保留13-cell核心、清雾/生命周期和红烟公开参数，只实施orange fog呈现密度修复，并按定点帧门禁重新回归。该接受已登记为`DEC-P5.4-05E-S1-SMOOTHNESS-001`；当前允许有界实施，不启动S2–S4。
