@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: b1-implementation-authorized
+audit-status: deferred-after-b1-automated-verification
 work-item: WI-SYS-NPC-SPECIAL-001
 updated: 2026-08-25
 ---
@@ -13,9 +13,9 @@ updated: 2026-08-25
 
 **当前结论候选**：SYS-NPC不是一个统一运行时，而是多类独立owner组成的家族：路线/事件群众、区域静态群众、venue人群、固定special、sprayer、encounter、ghost和moving-sprite。不同owner的激活、动作、视口、回收和失败路径有实质差异，不能再用一套“NPC出现/移动/消失”模型统一修补。
 
-**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选已在`integration/npc-special`通过自动门禁，当前等待owner级Human视觉；第三轮candidate `ef9f004`→`70aefe4`→`76beaf0`→`ea87512`仍保持automated-verified / human-visual-rejected，不作为正确基线。
+**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，但Human决定NPC留到最后再修，状态为human-deferred-not-accepted；第三轮candidate仍为human-visual-rejected。
 
-**当前硬边界**：[B1静态与Venue实施包](../../task-todos/WI-SYS-NPC-SPECIAL-001-B1静态与Venue实施包.md)已获Human授权并完成自动验证；Human视觉前不合并候选或启动B2。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；B2-B5未授权，不建立通用NPC/Entity框架。
+**当前硬边界**：整个SYS-NPC专项已按`DEC-SYS-NPC-DEFER-001`延期；B1不合并、不视觉签字，B2-B5不授权，其他板块不得夹带NPC修改。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；恢复专项时从这些未解决项继续，不建立通用NPC/Entity框架。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 

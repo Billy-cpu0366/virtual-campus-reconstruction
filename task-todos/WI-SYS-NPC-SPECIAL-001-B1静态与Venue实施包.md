@@ -4,7 +4,7 @@ parent-batch: B0
 batch: B1
 systems: [SYS-NPC]
 type: bounded-implementation-package
-status: approved
+status: automated-verified-human-deferred-not-accepted
 authorization: DEC-SYS-NPC-B1-STATIC-VENUE-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
@@ -12,6 +12,8 @@ updated: 2026-08-25
 
 # SYS-NPC B1 静态与 Venue 实施包（候选）
 
+> 延期状态：candidate `b6a4e6c`及自动收据保留；Human未视觉接受，并决定NPC到最后再修。本包不再授权继续修改或进入B2。
+>
 > Human已选择`授权B1实现 (Recommended)`。目标是只修公开机制已经足够、且不依赖六点相机序列入口的`crowd/crowd_up`、concert和protest；不夹带route、train、special、rat、ghost或birds。
 
 ## 1. 目标与 expected

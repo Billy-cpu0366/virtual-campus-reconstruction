@@ -4,13 +4,17 @@ type: system-special-project
 system: SYS-NPC
 issue-class: systemic-failure
 active-route: systemic-flow
-status: b1-implementation-authorized
-phase: b1-static-venue-implementation
-decision: DEC-SYS-NPC-B1-STATIC-VENUE-001
+status: deferred-until-final-repair
+phase: paused-after-b1-automated-verification
+decision: DEC-SYS-NPC-DEFER-001
 updated: 2026-08-25
 ---
 
 # SYS-NPC 专项
+
+## 当前延期状态
+
+Human决定NPC留到其余板块完成后再修。Phase A/B0文档结论和B1自动candidate `b6a4e6c`全部保留，但B1未获Human视觉接受、不合并，B2–B5未授权；恢复时必须从本状态和`DEC-SYS-NPC-DEFER-001`继续，不得把自动PASS冒充验收通过。
 
 ## 目标
 

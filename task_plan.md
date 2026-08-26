@@ -1,21 +1,21 @@
 ---
 workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
-issue-class: systemic-failure
-active-route: systemic-flow
-correction-phase: batch-implement
-classification-trigger: human-rejected-third-crowd-candidate-and-requested-full-npc-special
+issue-class: adjustment
+active-route: adjustment-flow
+correction-phase: implement
+classification-trigger: human-deferred-npc-and-selected-next-roadmap-stage
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
-current-work-item: WI-SYS-NPC-SPECIAL-001
+current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
-work-item-type: systemic-special-project
-work-item-status: active-b1-human-visual-gate
-current-phase: npc-special-b1-human-visual-gate
-current-gate: npc-special-b1-human-visual-gate
-gate-status: automated-verified-human-review-pending
-authorization-ref: DEC-SYS-NPC-B1-STATIC-VENUE-001
+work-item-type: bounded-verification-and-repair
+work-item-status: active-05e
+current-phase: p5.4-05e-factory-smoke-verification
+current-gate: p5.4-05e-automated-verification
+gate-status: implementation-authorized
+authorization-ref: DEC-P5.4-05E-FACTORY-SMOKE-001
 preauthorized-next-work-item: none
-next-phase: npc-special-b1-close-or-correction
+next-phase: p5.4-05e-human-visual-gate
 updated: 2026-08-25
 ---
 
@@ -23,13 +23,13 @@ updated: 2026-08-25
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-SYS-NPC-SPECIAL-001`；Human已接受建立独立SYS-NPC专项，不再沿05-D-2按视觉症状追加补丁。
-- **当前阶段**：B0证据与合同收口已完成；B1 static+venue候选已在`integration/npc-special`完成实现、Main接线与严格production probe，自动阶段通过，当前停在owner级Human视觉Gate。
-- **失败基线**：第三轮群众candidate `ef9f004`/`70aefe4`/`76beaf0`/`ea87512`虽自动回归通过，但Human确认仍有很多毛病；原integration worktree保持clean失败对照，不作为正确根基线或交付结论。
-- **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；原`WI-THREE-BOARD-VISIBLE-WAVE-001`不再是动态当前工作项，历史状态仍可追溯。
-- **当前授权**：B1候选提交为`9315276`→`71bdb58`→`c67810c`→`b6a4e6c`；Human视觉前不合并回根基线、不继续产品修改；B2-B5未授权。
+- **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
+- **当前阶段**：先修正绑定旧入口镜头的过期probe，再沿正常键盘短路径验证factory smoke可见、离屏停发、返回复用和shutdown；真实runtime失败时才改产品代码。
+- **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
+- **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
+- **当前授权**：05-E bounded verification/repair；不得修改NPC、恢复烟雾入口中间镜头或改玩家/地图/相机/火车/roof/30FPS。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：B1自动检查后仍需static、concert、protest owner级Human视觉Gate；通过不自动授权B2，也不能替代完整SYS-NPC整体视觉验收。
+- **关闭门禁**：自动门禁后仍须Human肉眼确认正常路径中的烟雾形态和可见性；通过不自动授权05-F。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
