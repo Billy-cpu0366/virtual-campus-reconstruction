@@ -157,6 +157,8 @@ export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("crowd-train", 10, Array.from({ length: 22 }, (_, index) => [63 + index, 19] as const), [[68, 121], [8, 100], [36, 117], [129, 108], [106, 46], [21, 86]], 35, .2, { minMs: 2_400, maxMs: 2_400 }, { minMs: 0, maxMs: 0 }, false, true, false, 10),
 ]);
 
+type CompletionAction = "delete" | "restart";
+
 type Item = RouteCrowdInstanceSnapshot & {
   readonly config: RouteCrowdConfig;
   readonly forwardPath: readonly RouteCrowdTile[];
@@ -166,6 +168,9 @@ type Item = RouteCrowdInstanceSnapshot & {
   speed: number;
   start: RouteCrowdTile;
   waitingFrom: "moving" | "returning" | undefined;
+  completionAction: CompletionAction | undefined;
+  everMaterialized: boolean;
+  capSuppressed: boolean;
 };
 
 type PendingStart = {
@@ -213,11 +218,33 @@ function facingForDelta(
   return "west";
 }
 
-function pathBoundsIntersectViewport(
+const ROUTE_CROWD_SAFE_MARGIN = 100;
+
+function pointInSafeRange(
+  point: RouteCrowdTile,
+  viewport: RouteCrowdViewport,
+): boolean {
+  return point.x >= viewport.left - ROUTE_CROWD_SAFE_MARGIN &&
+    point.x <= viewport.left + viewport.width + ROUTE_CROWD_SAFE_MARGIN &&
+    point.y >= viewport.top - ROUTE_CROWD_SAFE_MARGIN &&
+    point.y <= viewport.top + viewport.height + ROUTE_CROWD_SAFE_MARGIN;
+}
+
+function pointInViewport(
+  point: RouteCrowdTile,
+  viewport: RouteCrowdViewport,
+): boolean {
+  return point.x >= viewport.left &&
+    point.x <= viewport.left + viewport.width &&
+    point.y >= viewport.top &&
+    point.y <= viewport.top + viewport.height;
+}
+
+function pathIntersectsSafeRange(
   path: readonly RouteCrowdTile[],
   viewport: RouteCrowdViewport,
-  margin = 100,
 ): boolean {
+  if (path.length === 0) return false;
   let left = Infinity;
   let top = Infinity;
   let right = -Infinity;
@@ -228,10 +255,10 @@ function pathBoundsIntersectViewport(
     right = Math.max(right, point.x);
     bottom = Math.max(bottom, point.y);
   }
-  return left <= viewport.left + viewport.width + margin &&
-    right >= viewport.left - margin &&
-    top <= viewport.top + viewport.height + margin &&
-    bottom >= viewport.top - margin;
+  return left <= viewport.left + viewport.width + ROUTE_CROWD_SAFE_MARGIN &&
+    right >= viewport.left - ROUTE_CROWD_SAFE_MARGIN &&
+    top <= viewport.top + viewport.height + ROUTE_CROWD_SAFE_MARGIN &&
+    bottom >= viewport.top - ROUTE_CROWD_SAFE_MARGIN;
 }
 
 function shuffledIndexes(length: number, random: () => number): number[] {
@@ -274,7 +301,20 @@ export class RouteCrowdRuntime {
 
   get snapshot(): RouteCrowdSnapshot {
     return {
-      instances: this.items.map(({ config, forwardPath, path, waypointIndex, delayAt, speed, start, waitingFrom, ...item }) => ({
+      instances: this.items.map(({
+        config,
+        forwardPath,
+        path,
+        waypointIndex,
+        delayAt,
+        speed,
+        start,
+        waitingFrom,
+        completionAction,
+        everMaterialized,
+        capSuppressed,
+        ...item
+      }) => ({
         ...item,
       })),
     };
@@ -421,13 +461,13 @@ export class RouteCrowdRuntime {
         state: "delay",
         position: start,
         generation: 0,
-        materialized: true,
-        visible: true,
+        materialized: false,
+        visible: false,
         destroyed: false,
         facing: next === undefined
           ? "south"
           : facingForDelta(next.x - start.x, next.y - start.y, "south"),
-        alpha: 0,
+        alpha: 1,
         pathId,
         config: pending.config,
         forwardPath: routePath,
@@ -440,6 +480,9 @@ export class RouteCrowdRuntime {
         ),
         start,
         waitingFrom: undefined,
+        completionAction: undefined,
+        everMaterialized: false,
+        capSuppressed: false,
       });
       this.createdByGroup.set(pending.config.id, createdForGroup + 1);
       this.batchedCreated += 1;
@@ -468,6 +511,9 @@ export class RouteCrowdRuntime {
 
     for (const item of this.items) {
       if (this.pausedConfigIds.has(item.config.id)) continue;
+      if (item.completionAction !== undefined && viewport === undefined) {
+        this.resolveCompletion(item, now);
+      }
       let remainingMs = elapsedMs;
       while (remainingMs > 0 && item.state !== "gone") {
         if (item.state === "delay") {
@@ -488,7 +534,7 @@ export class RouteCrowdRuntime {
         if (item.state === "moving" || item.state === "returning") {
           const target = item.path[item.waypointIndex];
           if (target === undefined) {
-            this.completePath(item, now);
+            this.completePath(item, now, viewport);
             continue;
           }
           if (this.options.isBlocked?.(target) === true) {
@@ -518,13 +564,13 @@ export class RouteCrowdRuntime {
           item.waypointIndex += 1;
           remainingMs -= distance / item.speed * 1_000;
           if (item.path[item.waypointIndex] === undefined) {
-            this.completePath(item, now - remainingMs);
+            this.completePath(item, now - remainingMs, viewport);
           }
         }
       }
     }
 
-    this.applyView(viewport, elapsedMs);
+    this.applyView(viewport);
     return this.snapshot;
   }
 
@@ -554,7 +600,11 @@ export class RouteCrowdRuntime {
     return this.cancel();
   }
 
-  private completePath(item: Item, now: number): void {
+  private completePath(
+    item: Item,
+    now: number,
+    viewport?: RouteCrowdViewport,
+  ): void {
     if (item.state === "moving" && item.config.goBack) {
       item.state = "delay";
       item.path = [...item.forwardPath].reverse();
@@ -566,21 +616,26 @@ export class RouteCrowdRuntime {
       );
       return;
     }
-    if (item.state === "returning") {
-      this.restart(item, now);
-      return;
-    }
-    if (item.config.deleteAfterComplete) {
-      item.state = "gone";
-      item.destroyed = false;
-      return;
-    }
-    this.restart(item, now);
+
+    const action: CompletionAction = item.state === "returning" ||
+      !item.config.deleteAfterComplete
+      ? "restart"
+      : "delete";
+    item.state = "gone";
+    item.waitingFrom = undefined;
+    item.completionAction = action;
+    if (viewport === undefined) this.resolveCompletion(item, now);
+  }
+
+  private resolveCompletion(item: Item, now: number): void {
+    const action = item.completionAction;
+    item.completionAction = undefined;
+    if (action === "restart") this.restart(item, now);
   }
 
   private restart(item: Item, now: number): void {
     item.state = "delay";
-    item.alpha = 0;
+    item.alpha = 1;
     item.generation += 1;
     item.position = item.start;
     item.path = item.forwardPath;
@@ -592,23 +647,71 @@ export class RouteCrowdRuntime {
     );
   }
 
-  private applyView(viewport?: RouteCrowdViewport, elapsedMs = 0): void {
+  private applyView(viewport?: RouteCrowdViewport): void {
     if (viewport === undefined) return;
     const activeByGroup = new Map<string, number>();
+    const safe = (item: Item): boolean => pointInSafeRange(item.position, viewport);
+    const upcoming = (item: Item): boolean => pathIntersectsSafeRange(
+      [item.position, ...item.path.slice(item.waypointIndex)],
+      viewport,
+    );
+
     for (const item of this.items) {
-      const pathActive = pathBoundsIntersectViewport(item.forwardPath, viewport);
+      if (item.completionAction !== undefined &&
+          !safe(item) && !pointInSafeRange(item.start, viewport)) {
+        this.resolveCompletion(item, this.last);
+      }
+    }
+
+    for (const item of this.items) {
+      const inSafeRange = safe(item);
+      const hasUpcomingSafeRange = upcoming(item);
+      const retained = item.materialized && (
+        inSafeRange ||
+        hasUpcomingSafeRange ||
+        item.completionAction !== undefined
+      );
+      if (retained) {
+        item.visible = true;
+        item.alpha = 1;
+        item.destroyed = false;
+        activeByGroup.set(
+          item.config.id,
+          (activeByGroup.get(item.config.id) ?? 0) + 1,
+        );
+        continue;
+      }
+
+      item.materialized = false;
+      item.visible = false;
+      item.alpha = 1;
+      const restartStillInSafeRange = item.completionAction !== undefined &&
+        pointInSafeRange(item.start, viewport);
+      item.destroyed = item.everMaterialized &&
+        !inSafeRange && !hasUpcomingSafeRange && !restartStillInSafeRange;
+    }
+
+    for (const item of this.items) {
+      if (item.materialized) continue;
+      const canPresent = item.state !== "gone" ||
+        item.completionAction === "restart";
+      if (!canPresent || (!safe(item) && !upcoming(item))) continue;
       const active = activeByGroup.get(item.config.id) ?? 0;
       const cap = item.config.maxActiveInViewport;
-      const withinCap = cap === undefined || active < cap;
-      const shouldActivate = item.state !== "gone" && pathActive && withinCap;
-      const alphaDelta = 4 * Math.min(elapsedMs, 50) / 1_000;
-      item.alpha = shouldActivate
-        ? Math.min(1, item.alpha + alphaDelta)
-        : Math.max(0, item.alpha - alphaDelta);
-      item.materialized = shouldActivate || item.alpha > 0;
-      item.visible = item.materialized;
-      item.destroyed = item.state === "gone" && item.alpha === 0;
-      if (shouldActivate) activeByGroup.set(item.config.id, active + 1);
+      if (cap !== undefined && active >= cap) {
+        item.capSuppressed = true;
+        continue;
+      }
+      if (item.capSuppressed && pointInViewport(item.position, viewport)) {
+        continue;
+      }
+      item.materialized = true;
+      item.visible = true;
+      item.alpha = 1;
+      item.destroyed = false;
+      item.everMaterialized = true;
+      item.capSuppressed = false;
+      activeByGroup.set(item.config.id, active + 1);
     }
   }
 }

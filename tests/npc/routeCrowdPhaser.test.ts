@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { ROUTE_CROWD_CONFIGS } from "../../src/npc/index.js";
 import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack, ROUTE_CROWD_VISUAL_OFFSETS } from "../../game/PhaserRouteCrowdRuntime.js";
 
-class Sprite { x:number; y:number; depth=0; destroyed=false; constructor(x:number,y:number){this.x=x;this.y=y} setDepth(v:number){this.depth=v;return this} destroy(){this.destroyed=true} }
+class Sprite {
+ x:number; y:number; depth=0; alpha=1; destroyed=false;
+ constructor(x:number,y:number){this.x=x;this.y=y}
+ setDepth(v:number){this.depth=v;return this}
+ setAlpha(v:number){this.alpha=v;return this}
+ destroy(){this.destroyed=true}
+}
 
 describe("PhaserRouteCrowdRuntime",()=>{
  it("uses only source-backed route display offsets",()=>{
@@ -122,5 +128,65 @@ describe("PhaserRouteCrowdRuntime",()=>{
   staleAfterShutdown();
   expect(calls).toBe(16);
   expect(runtime.spriteCount).toBe(0);
+ });
+
+ it("keeps presentation opaque and reuses sprites while inside the safe range",()=>{
+  const sprites:Sprite[]=[];
+  const runtime=new PhaserRouteCrowdRuntime({
+   add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
+  },{
+   pathProvider:{findPath:r=>[r.start,{x:r.start.x+32,y:r.start.y}]},
+   viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
+  });
+  runtime.start(0);
+  const initial=[...sprites];
+  expect(sprites.length).toBeGreaterThan(0);
+  expect(sprites.every((sprite)=>sprite.alpha===1)).toBe(true);
+  runtime.update(100);
+  expect(sprites).toEqual(initial);
+  expect(sprites.every((sprite)=>!sprite.destroyed&&sprite.alpha===1)).toBe(true);
+ });
+
+ it("keeps a completed on-screen route sprite at its terminal position",()=>{
+  const sprites:Sprite[]=[];
+  const runtime=new PhaserRouteCrowdRuntime({
+   add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
+  },{
+   pathProvider:{findPath:r=>[r.start,{x:r.start.x+96,y:r.start.y}]},
+   viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
+  });
+  runtime.start(0);
+  const initial=[...sprites];
+  runtime.update(5_000);
+  const terminal=runtime.snapshot.instances.find(item=>item.id==="main-crowd:0")!;
+  expect(terminal).toMatchObject({state:"gone",materialized:true,visible:true,alpha:1,destroyed:false});
+  const terminalPosition={...terminal.position};
+  runtime.update(5_500);
+  expect(runtime.snapshot.instances.find(item=>item.id===terminal.id)?.position)
+   .toEqual(terminalPosition);
+  expect(sprites).toEqual(initial);
+  expect(sprites.every((sprite)=>!sprite.destroyed&&sprite.alpha===1)).toBe(true);
+ });
+
+ it("only recreates route sprites after the core reports an outside-safe cull",()=>{
+  const sprites:Sprite[]=[];
+  let viewport={left:0,top:0,width:2240,height:2240};
+  const runtime=new PhaserRouteCrowdRuntime({
+   add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
+  },{
+   pathProvider:{findPath:r=>[r.start,{x:r.start.x+32,y:r.start.y}]},
+   viewport:()=>viewport,random:()=>0,
+  });
+  runtime.start(0);
+  const initialCount=sprites.length;
+  viewport={left:2_000,top:2_000,width:100,height:100};
+  runtime.update(100);
+  expect(sprites).toHaveLength(initialCount);
+  expect(sprites.every((sprite)=>sprite.destroyed)).toBe(true);
+
+  viewport={left:0,top:0,width:2240,height:2240};
+  runtime.update(200);
+  expect(sprites.length).toBeGreaterThan(initialCount);
+  expect(sprites.slice(initialCount).every((sprite)=>!sprite.destroyed&&sprite.alpha===1)).toBe(true);
  });
 });

@@ -251,11 +251,12 @@ export class PhaserRouteCrowdRuntime {
     for (const [index, item] of allInstances.entries()) {
       activeIds.add(item.id);
       const prior = this.sprites.get(item.id);
-      if (!item.materialized || item.destroyed) {
+      if (item.destroyed) {
         prior?.destroy();
         this.sprites.delete(item.id);
         continue;
       }
+      if (!item.materialized) continue;
       const groupId = item.id.split(":", 1)[0]!;
       const textures = ROUTE_CROWD_SPECIAL_TEXTURES[groupId as keyof typeof ROUTE_CROWD_SPECIAL_TEXTURES] ?? ROUTE_CROWD_TEXTURES;
       const texture = textures[index % textures.length]!;

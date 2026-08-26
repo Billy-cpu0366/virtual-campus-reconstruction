@@ -403,6 +403,234 @@ describe("RouteCrowdRuntime contract", () => {
     expect(runtime.snapshot.instances[0]!.position.x).toBeGreaterThan(56);
   });
 
+  it("materializes opaque before viewport entry and keeps logical state offscreen", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        startTiles: [{ x: -10, y: 3 }],
+        endTiles: [{ x: 10, y: 3 }],
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 320, y: request.start.y },
+      ],
+    });
+    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    runtime.start(0, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      position: { x: -160, y: 48 },
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+
+    runtime.tick(1_500, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+  });
+
+  it("retains a materialized item through the safe margin and then reports culling", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        startTiles: [{ x: -10, y: 3 }],
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 560, y: request.start.y },
+      ],
+    });
+    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    runtime.start(0, viewport);
+    runtime.tick(6_400, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      position: { x: 147.2, y: 48 },
+      materialized: true,
+      alpha: 1,
+      destroyed: false,
+    });
+
+    runtime.tick(7_600, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      materialized: false,
+      visible: false,
+      alpha: 1,
+      destroyed: true,
+    });
+  });
+
+  it("defers one-way completion until terminal and restart positions are safe to leave", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        startTiles: [{ x: 2, y: 3 }],
+        endTiles: [{ x: 2, y: 3 }],
+        delay: { minMs: 0, maxMs: 0 },
+        afterDelay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 96, y: request.start.y },
+      ],
+    });
+    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    runtime.start(0, viewport);
+    runtime.tick(3_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      position: { x: 128, y: 48 },
+      generation: 0,
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+
+    const restartStillSafe = new RouteCrowdRuntime({
+      configs: [testConfig({
+        startTiles: [{ x: 2, y: 3 }],
+        endTiles: [{ x: 2, y: 3 }],
+        delay: { minMs: 0, maxMs: 0 },
+        afterDelay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 96, y: request.start.y },
+      ],
+    });
+    const narrowViewport = { left: 0, top: 0, width: 1, height: 100 };
+    restartStillSafe.start(0, narrowViewport);
+    restartStillSafe.tick(3_000, narrowViewport);
+    expect(restartStillSafe.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      position: { x: 128, y: 48 },
+      generation: 0,
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+
+    const outside = { left: 1_000, top: 1_000, width: 100, height: 100 };
+    runtime.tick(7_001, outside);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "delay",
+      position: { x: 32, y: 48 },
+      generation: 1,
+      materialized: false,
+      destroyed: true,
+    });
+
+    const deleteRuntime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        startTiles: [{ x: 2, y: 3 }],
+        endTiles: [{ x: 2, y: 3 }],
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: true,
+      })],
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 96, y: request.start.y },
+      ],
+    });
+    deleteRuntime.start(0, viewport);
+    deleteRuntime.tick(3_000, viewport);
+    expect(deleteRuntime.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      position: { x: 128, y: 48 },
+      materialized: true,
+      alpha: 1,
+      destroyed: false,
+    });
+    deleteRuntime.tick(3_001, outside);
+    expect(deleteRuntime.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      destroyed: true,
+    });
+  });
+
+  it("does not pop a cap-suppressed item into the viewport", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        count: 2,
+        maxActiveInViewport: 1,
+        startTiles: [{ x: 2, y: 3 }, { x: 2, y: 4 }],
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      random: () => 0.99,
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 400, y: request.start.y },
+      ],
+      isBlocked: (point) => point.y === 64,
+    });
+    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    runtime.start(0, viewport);
+    const suppressed = runtime.snapshot.instances.find(
+      (item) => item.position.y === 64,
+    )!;
+    expect(suppressed).toMatchObject({
+      materialized: false,
+      visible: false,
+      destroyed: false,
+    });
+
+    runtime.tick(5_000, viewport);
+    expect(runtime.snapshot.instances.find(
+      (item) => item.id === suppressed.id,
+    )).toMatchObject({
+      position: { x: 32, y: 64 },
+      materialized: false,
+      visible: false,
+      destroyed: false,
+    });
+  });
+
+  it("does not let the active cap dematerialize retained items", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        count: 2,
+        maxActiveInViewport: 1,
+        startTiles: [{ x: 2, y: 3 }, { x: 2, y: 4 }],
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+      })],
+      pathProvider: pathFor,
+    });
+    const viewport = { left: 0, top: 0, width: 100, height: 100 };
+    runtime.start(0, viewport);
+    const first = runtime.snapshot.instances[0]!;
+    expect(first.materialized).toBe(true);
+    expect(runtime.snapshot.instances[1]?.materialized).toBe(false);
+
+    runtime.tick(1, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      id: first.id,
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+    expect(runtime.snapshot.instances.filter((item) => item.materialized))
+      .toHaveLength(1);
+  });
+
   it("cancel clears active instances, while shutdown prevents restart", () => {
     const runtime = new RouteCrowdRuntime({
       configs: [testConfig()],
