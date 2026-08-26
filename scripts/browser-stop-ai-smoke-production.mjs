@@ -1,0 +1,425 @@
+import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+const cdpBase = process.env.CDP_URL ?? "http://127.0.0.1:9223";
+const url = process.argv[2] ?? "http://127.0.0.1:4175/";
+const receiptPath = process.env.STOP_AI_SMOKE_RECEIPT;
+const screenshotDir = process.env.STOP_AI_SMOKE_SCREENSHOT_DIR;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const keyByDirection = Object.freeze({
+  left: { key: "ArrowLeft", keyCode: 37 },
+  up: { key: "ArrowUp", keyCode: 38 },
+  right: { key: "ArrowRight", keyCode: 39 },
+  down: { key: "ArrowDown", keyCode: 40 },
+});
+
+const targetResponse = await fetch(
+  `${cdpBase}/json/new?${encodeURIComponent("about:blank")}`,
+  { method: "PUT" },
+);
+if (!targetResponse.ok) throw new Error(`create target: ${targetResponse.status}`);
+const target = await targetResponse.json();
+const socket = new WebSocket(target.webSocketDebuggerUrl);
+const pending = new Map();
+const events = { console: [], exceptions: [], failedRequests: [], badResponses: [] };
+let nextId = 0;
+let phaserGamesObjectId;
+
+await new Promise((resolve, reject) => {
+  socket.addEventListener("open", resolve, { once: true });
+  socket.addEventListener("error", reject, { once: true });
+});
+
+socket.addEventListener("message", (event) => {
+  const message = JSON.parse(event.data);
+  if (message.id && pending.has(message.id)) {
+    const request = pending.get(message.id);
+    pending.delete(message.id);
+    if (message.error) request.reject(new Error(JSON.stringify(message.error)));
+    else request.resolve(message.result ?? {});
+    return;
+  }
+  if (
+    message.method === "Runtime.consoleAPICalled" &&
+    ["error", "warning"].includes(message.params.type)
+  ) {
+    events.console.push(
+      message.params.args?.map((argument) => argument.value ?? argument.description),
+    );
+  }
+  if (message.method === "Runtime.exceptionThrown") {
+    events.exceptions.push(
+      message.params.exceptionDetails?.exception?.description ??
+        message.params.exceptionDetails?.text,
+    );
+  }
+  if (message.method === "Network.loadingFailed") {
+    events.failedRequests.push({
+      url: message.params.url,
+      errorText: message.params.errorText,
+    });
+  }
+  if (message.method === "Network.responseReceived") {
+    const response = message.params.response;
+    if (response.status >= 400 && !response.url.endsWith("/favicon.ico")) {
+      events.badResponses.push({ url: response.url, status: response.status });
+    }
+  }
+});
+
+function command(method, params = {}) {
+  const id = ++nextId;
+  socket.send(JSON.stringify({ id, method, params }));
+  return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+}
+
+async function evaluate(expression) {
+  const response = await command("Runtime.evaluate", {
+    expression,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  if (response.exceptionDetails) {
+    throw new Error(
+      response.exceptionDetails.exception?.description ?? response.exceptionDetails.text,
+    );
+  }
+  return response.result?.value;
+}
+
+async function waitFor(expression, predicate, label, timeoutMs = 60_000) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const value = await evaluate(expression);
+    if (predicate(value)) return value;
+    await sleep(50);
+  }
+  throw new Error(`timed out waiting for ${label}`);
+}
+
+async function initializeProductionSceneQuery() {
+  const prototype = await command("Runtime.evaluate", {
+    expression: "Phaser.Game.prototype",
+  });
+  const prototypeObjectId = prototype.result?.objectId;
+  assert.ok(prototypeObjectId, "Phaser.Game.prototype is not inspectable");
+  const instances = await command("Runtime.queryObjects", { prototypeObjectId });
+  phaserGamesObjectId = instances.objects?.objectId;
+  assert.ok(phaserGamesObjectId, "Phaser game instances are not inspectable");
+  await command("Runtime.releaseObject", { objectId: prototypeObjectId });
+}
+
+async function sceneCall(functionDeclaration) {
+  assert.ok(phaserGamesObjectId, "production scene query is not initialized");
+  const response = await command("Runtime.callFunctionOn", {
+    objectId: phaserGamesObjectId,
+    functionDeclaration,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  if (response.exceptionDetails) {
+    throw new Error(
+      response.exceptionDetails.exception?.description ?? response.exceptionDetails.text,
+    );
+  }
+  return response.result?.value;
+}
+
+async function smokeSnapshot() {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const stop = scene?.stopAiSmokeRuntime;
+      const fog = scene?.fogRuntime;
+      const camera = scene?.cameras?.main;
+      if (!scene?.player || !stop || !fog || !camera) continue;
+      const view = camera.worldView;
+      return {
+        player: { x: scene.player.x, y: scene.player.y },
+        viewport: {
+          left: view.x,
+          right: view.x + view.width,
+          top: view.y,
+          bottom: view.y + view.height,
+        },
+        stop: stop.snapshot,
+        stopEmitterCount: stop.emitterCount,
+        stopGraphicsCount: stop.graphicsCount,
+        fog: fog.snapshot,
+        fogEmitterCount: fog.emitterCount,
+        trainState: scene.trainRuntime?.snapshot?.state ?? null,
+      };
+    }
+    return null;
+  }`);
+}
+
+async function move(step) {
+  const binding = keyByDirection[step.direction];
+  await command("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key: binding.key,
+    code: binding.key,
+    windowsVirtualKeyCode: binding.keyCode,
+  });
+  const startedAt = Date.now();
+  let previous;
+  let stationarySamples = 0;
+  try {
+    while (Date.now() - startedAt < 20_000) {
+      const snapshot = await smokeSnapshot();
+      assert.ok(snapshot, "production S1 smoke snapshot is unavailable");
+      const value = snapshot.player[step.axis];
+      const reached = step.comparison === "lte"
+        ? value <= step.target
+        : value >= step.target;
+      if (reached) {
+        return { ...step, durationMs: Date.now() - startedAt, position: snapshot.player };
+      }
+      if (
+        previous &&
+        Math.hypot(
+          snapshot.player.x - previous.x,
+          snapshot.player.y - previous.y,
+        ) < 0.1
+      ) stationarySamples += 1;
+      else stationarySamples = 0;
+      if (stationarySamples > 25) {
+        throw new Error(
+          `route blocked: ${step.direction} ${step.axis}=${step.target} at ` +
+            `${snapshot.player.x},${snapshot.player.y}`,
+        );
+      }
+      previous = snapshot.player;
+      await sleep(10);
+    }
+    throw new Error(`route timeout: ${step.direction} ${step.target}`);
+  } finally {
+    await command("Input.dispatchKeyEvent", {
+      type: "keyUp",
+      key: binding.key,
+      code: binding.key,
+      windowsVirtualKeyCode: binding.keyCode,
+    });
+  }
+}
+
+async function waitForTrainDeparture() {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < 30_000) {
+    const snapshot = await smokeSnapshot();
+    if (snapshot?.trainState === "complete") return snapshot;
+    await sleep(100);
+  }
+  throw new Error("train did not complete before the physical Stop AI route");
+}
+
+async function sampleSmoke(durationMs) {
+  const samples = [];
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < durationMs) {
+    const snapshot = await smokeSnapshot();
+    assert.ok(snapshot, "production S1 smoke snapshot disappeared");
+    samples.push({ elapsedMs: Date.now() - startedAt, ...snapshot });
+    await sleep(100);
+  }
+  return samples;
+}
+
+async function capture(name) {
+  if (!screenshotDir) return null;
+  mkdirSync(screenshotDir, { recursive: true });
+  const screenshot = await command("Page.captureScreenshot", { format: "png" });
+  const path = join(screenshotDir, `${name}.png`);
+  writeFileSync(path, Buffer.from(screenshot.data, "base64"));
+  return path;
+}
+
+const toStopAi = Object.freeze([
+  { direction: "right", target: 1408, axis: "x", comparison: "gte" },
+  { direction: "down", target: 416, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1280, axis: "x", comparison: "lte" },
+  { direction: "down", target: 560, axis: "y", comparison: "gte" },
+  { direction: "right", target: 1460, axis: "x", comparison: "gte" },
+  { direction: "down", target: 656, axis: "y", comparison: "gte" },
+  { direction: "right", target: 1632, axis: "x", comparison: "gte" },
+  { direction: "down", target: 848, axis: "y", comparison: "gte" },
+  { direction: "right", target: 2048, axis: "x", comparison: "gte" },
+  { direction: "down", target: 1008, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1960, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1040, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1808, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1152, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1632, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1296, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1600, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1312, axis: "y", comparison: "gte" },
+]);
+
+const awayFromStopAi = Object.freeze([
+  { direction: "up", target: 1296, axis: "y", comparison: "lte" },
+  { direction: "right", target: 1632, axis: "x", comparison: "gte" },
+  { direction: "up", target: 1152, axis: "y", comparison: "lte" },
+  { direction: "right", target: 1820, axis: "x", comparison: "gte" },
+  { direction: "up", target: 1040, axis: "y", comparison: "lte" },
+  { direction: "right", target: 1960, axis: "x", comparison: "gte" },
+  { direction: "up", target: 1008, axis: "y", comparison: "lte" },
+]);
+
+const backToStopAi = Object.freeze([
+  { direction: "down", target: 1040, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1820, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1152, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1632, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1296, axis: "y", comparison: "gte" },
+  { direction: "left", target: 1600, axis: "x", comparison: "lte" },
+  { direction: "down", target: 1312, axis: "y", comparison: "gte" },
+]);
+
+function allCanisters(snapshot) {
+  return snapshot.stop.canisters.length === 9 &&
+    snapshot.stop.canisters.every((item) => item.active);
+}
+
+let result;
+try {
+  await Promise.all([
+    command("Page.enable"),
+    command("Runtime.enable"),
+    command("Network.enable"),
+  ]);
+  await command("Page.navigate", { url });
+  await waitFor(
+    "document.body?.dataset.appState",
+    (state) => state === "READY",
+    "READY",
+  );
+  assert.equal(await evaluate("typeof window.__campusDebug"), "undefined");
+  assert.equal(await evaluate("typeof window.__campusCollisionTest"), "undefined");
+  assert.equal(await evaluate("typeof window.__campusLifecycleTest"), "undefined");
+  assert.equal(await evaluate("typeof window.__campusContentTest"), "undefined");
+  await initializeProductionSceneQuery();
+
+  const ready = await smokeSnapshot();
+  assert.ok(ready);
+  assert.equal(ready.stop.canisters.length, 9);
+  assert.equal(ready.stopGraphicsCount, 3);
+  assert.equal(ready.stopEmitterCount, 0);
+  assert.equal(ready.fog.cells.length, 13);
+  assert.equal(ready.fogEmitterCount, 13);
+  assert.equal(ready.fog.carsInputIntegrated, false);
+
+  await evaluate("document.querySelector('#app-play')?.click()");
+  await waitFor(
+    "document.body?.dataset.appState",
+    (state) => state === "PLAYING",
+    "PLAYING",
+    20_000,
+  );
+  await waitForTrainDeparture();
+
+  const route = [];
+  for (const step of toStopAi) route.push(await move(step));
+  await sleep(700);
+  const atStopAi = await smokeSnapshot();
+  assert.ok(atStopAi);
+  assert.ok(allCanisters(atStopAi), "Stop AI canisters are not all active");
+  assert.equal(atStopAi.stopEmitterCount, 9);
+  assert.equal(atStopAi.stopGraphicsCount, 3);
+  assert.equal(atStopAi.fogEmitterCount, 13);
+  assert.ok(
+    atStopAi.fog.cells.every((cell) => cell.active),
+    "orange_smoke cells are not all active at Stop AI",
+  );
+  const stopAiScreenshot = await capture("stop-ai-smoke-visible");
+
+  const awayRoute = [];
+  for (const step of awayFromStopAi) awayRoute.push(await move(step));
+  await sleep(700);
+  const away = await smokeSnapshot();
+  assert.ok(away);
+  assert.equal(away.stopEmitterCount, 0);
+  assert.ok(away.stop.canisters.every((item) => !item.active));
+  assert.ok(away.stop.canisters.every((item) => item.destroyed));
+  assert.equal(away.stopGraphicsCount, 3);
+  assert.ok(away.fog.cells.every((cell) => !cell.active));
+  assert.equal(away.fogEmitterCount, 13);
+
+  const returnRoute = [];
+  for (const step of backToStopAi) returnRoute.push(await move(step));
+  await sleep(700);
+  const returned = await smokeSnapshot();
+  assert.ok(returned);
+  assert.ok(allCanisters(returned), "Stop AI canisters did not return");
+  assert.equal(returned.stopEmitterCount, 9);
+  assert.ok(returned.stop.canisters.every((item) => item.generation === 2));
+  assert.ok(returned.fog.cells.every((cell) => cell.active));
+  const windSamples = await sampleSmoke(7_500);
+  assert.ok(
+    windSamples.some((sample) =>
+      sample.stop.canisters.some((item) => item.windActive),
+    ),
+    "recreated Stop AI emitters never received a wind loop",
+  );
+  const returnedScreenshot = await capture("stop-ai-smoke-returned");
+
+  const shutdown = await sceneCall(`async function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const stop = scene?.stopAiSmokeRuntime;
+      const fog = scene?.fogRuntime;
+      if (!scene?.shutdownForGeneration || !stop || !fog) continue;
+      const receipt = await scene.shutdownForGeneration();
+      return {
+        receipt,
+        stop: stop.snapshot,
+        stopEmitterCount: stop.emitterCount,
+        stopGraphicsCount: stop.graphicsCount,
+        fog: fog.snapshot,
+        fogEmitterCount: fog.emitterCount,
+      };
+    }
+    return null;
+  }`);
+  assert.ok(shutdown);
+  assert.equal(shutdown.stop.state, "shutdown");
+  assert.equal(shutdown.stopEmitterCount, 0);
+  assert.equal(shutdown.stopGraphicsCount, 0);
+  assert.equal(shutdown.fog.state, "shutdown");
+  assert.equal(shutdown.fogEmitterCount, 0);
+  assert.equal(shutdown.receipt.smokeEmitterActive, false);
+  assert.deepEqual(events.console, []);
+  assert.deepEqual(events.exceptions, []);
+  assert.deepEqual(events.failedRequests, []);
+  assert.deepEqual(events.badResponses, []);
+
+  result = {
+    passed: true,
+    url,
+    ready,
+    route,
+    atStopAi,
+    stopAiScreenshot,
+    awayRoute,
+    away,
+    returnRoute,
+    returned,
+    windSampleCount: windSamples.length,
+    returnedScreenshot,
+    shutdown,
+    events,
+  };
+  if (receiptPath) writeFileSync(receiptPath, `${JSON.stringify(result, null, 2)}\n`);
+  console.log(JSON.stringify(result, null, 2));
+} finally {
+  if (phaserGamesObjectId) {
+    await command("Runtime.releaseObject", { objectId: phaserGamesObjectId }).catch(
+      () => undefined,
+    );
+  }
+  await command("Target.closeTarget", { targetId: target.id }).catch(() => undefined);
+  socket.close();
+}
+
+if (!result?.passed) process.exitCode = 1;

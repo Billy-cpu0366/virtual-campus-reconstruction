@@ -10,3 +10,6 @@ export {
   type FactorySmokeState,
   type SmokeViewport,
 } from "./factory-smoke.js";
+
+export * from "./stop-ai-smoke.js";
+export * from "./fog.js";

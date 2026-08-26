@@ -118,6 +118,14 @@ import {
   type PhaserFactorySmokeSceneLike,
 } from "./PhaserFactorySmokeRuntime.js";
 import {
+  PhaserStopAiSmokeRuntime,
+  type PhaserStopAiSmokeSceneLike,
+} from "./PhaserStopAiSmokeRuntime.js";
+import {
+  PhaserFogRuntime,
+  type PhaserFogSceneLike,
+} from "./PhaserFogRuntime.js";
+import {
   PhaserFootstepRuntime,
   type PhaserFootstepSceneLike,
 } from "./PhaserFootstepRuntime.js";
@@ -353,6 +361,8 @@ export class CampusScene extends Phaser.Scene {
   private venueCrowdRuntime: PhaserVenueCrowdRuntime | undefined;
   private dancingCrowdRuntime: PhaserDancingCrowdRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
+  private stopAiSmokeRuntime: PhaserStopAiSmokeRuntime | undefined;
+  private fogRuntime: PhaserFogRuntime | undefined;
   private footstepRuntime: PhaserFootstepRuntime | undefined;
   private mapRuntime: PhaserCampusMapRuntime | undefined;
   private mapLeaseToken: GameplayControlLeaseToken | undefined;
@@ -511,6 +521,39 @@ export class CampusScene extends Phaser.Scene {
       {
         viewport: () => this.smokeViewport(),
         onError: (reason) => this.recordSideFailure(`smoke:${reason}`),
+      },
+    );
+    const stopAiPlayerPosition = () => {
+      const position = this.playerRuntime?.position;
+      if (position === undefined || this.player === undefined) return undefined;
+      return {
+        ...position,
+        bodyBottom: (this.player.body as any).bottom as number,
+        depth: (this.player as any).depth as number,
+      };
+    };
+    this.stopAiSmokeRuntime = new PhaserStopAiSmokeRuntime(
+      this as unknown as PhaserStopAiSmokeSceneLike,
+      {
+        viewport: () => this.smokeViewport(),
+        playerPosition: stopAiPlayerPosition,
+        onError: (reason) => this.recordSideFailure(`stop-ai-smoke:${reason}`),
+      },
+    );
+    this.fogRuntime = new PhaserFogRuntime(
+      this as unknown as PhaserFogSceneLike,
+      {
+        viewport: () => this.smokeViewport(),
+        player: () => {
+          const position = this.playerRuntime?.position;
+          if (position === undefined || this.player === undefined) return undefined;
+          return {
+            ...position,
+            velocityX: this.player.body.velocity.x,
+            velocityY: this.player.body.velocity.y,
+          };
+        },
+        onError: (reason) => this.recordSideFailure(`fog:${reason}`),
       },
     );
     this.sprayerRuntime.preload();
@@ -1052,6 +1095,10 @@ export class CampusScene extends Phaser.Scene {
       smoke: this.smokeRuntime?.snapshot ?? null,
       smokeVisual: this.smokeRuntime?.visualSnapshot ?? null,
       smokeHasEmitter: this.smokeRuntime?.hasEmitter ?? false,
+      stopAiSmoke: this.stopAiSmokeRuntime?.snapshot ?? null,
+      stopAiSmokeEmitterCount: this.stopAiSmokeRuntime?.emitterCount ?? 0,
+      fog: this.fogRuntime?.snapshot ?? null,
+      fogEmitterCount: this.fogRuntime?.emitterCount ?? 0,
       failures: Object.freeze([...this.sideFailures]),
     };
   }
@@ -1108,6 +1155,8 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime?.shutdown();
     this.venueCrowdRuntime?.shutdown();
     this.dancingCrowdRuntime?.shutdown();
+    this.stopAiSmokeRuntime?.shutdown();
+    this.fogRuntime?.shutdown();
     this.smokeRuntime?.shutdown();
     this.trainRuntime?.shutdown(this.time?.now);
     this.entryRuntime = undefined;
@@ -1181,6 +1230,8 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime = undefined;
     this.venueCrowdRuntime = undefined;
     this.dancingCrowdRuntime = undefined;
+    this.stopAiSmokeRuntime = undefined;
+    this.fogRuntime = undefined;
     this.smokeRuntime = undefined;
     this.trainRuntime = undefined;
     return receipt;
@@ -1494,6 +1545,18 @@ export class CampusScene extends Phaser.Scene {
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(
         `factory smoke runtime failed: ${smokeStarted?.reason ?? "missing-owner"}`,
+      );
+    }
+    const stopAiSmokeStarted = this.stopAiSmokeRuntime?.start();
+    if (stopAiSmokeStarted === undefined || !stopAiSmokeStarted.ok) {
+      throw new Error(
+        `Stop AI smoke runtime failed: ${stopAiSmokeStarted?.reason ?? "missing-owner"}`,
+      );
+    }
+    const fogStarted = this.fogRuntime?.start();
+    if (fogStarted === undefined || !fogStarted.ok) {
+      throw new Error(
+        `orange smoke fog runtime failed: ${fogStarted?.reason ?? "missing-owner"}`,
       );
     }
 
