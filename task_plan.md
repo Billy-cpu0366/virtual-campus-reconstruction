@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: audit
+correction-phase: human-plan-gate
 classification-trigger: human-found-05e-smoke-owner-scope-incomplete
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
 work-item-status: active-05e-systemic-audit
-current-phase: p5.4-05e-public-smoke-family-audit
+current-phase: p5.4-05e-smoke-model-and-batch-plan-gate
 current-gate: p5.4-05e-smoke-model-and-batch-plan
-gate-status: audit-authorized-implementation-paused
+gate-status: audit-complete-awaiting-human-plan-acceptance
 authorization-ref: DEC-P5.4-05E-SMOKE-AUDIT-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05e-human-plan-gate
+next-phase: p5.4-05e-s1-stop-ai-smoke
 updated: 2026-08-25
 ---
 
@@ -24,10 +24,10 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：Human指出公开显眼烟雾位于Stop AI道路两边；只读复核确认05-E把单个无公开业务名的白烟点`(808,539.2)`误当完整factory smoke。当前撤回视觉Gate，审计全部white smokeGenerators、Stop AI彩烟与trajectory fog owner，实施暂停。
+- **当前阶段**：05-E全量审计已完成：10个white configs/14 emitters、Stop AI三处/9层彩烟、9个fog regions/60 cells；当前代码只覆盖1/10 white。推荐`S1 Stop AI→S2 white→S3其余fog→S4联合回归`，实施暂停等待Human计划Gate。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：仅只读形成公开烟雾全量清单、owner机制、当前覆盖差异和一次性批次计划；不得修改runtime、NPC、玩家、地图、相机、火车、roof或30FPS。
+- **当前授权**：审计已完成；未授权runtime修改。待Human接受批次，并决定彩烟重建后wind续接采用显式修复、cars清雾仅保留可注入接口不冒充production集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：Human先接受烟雾家族理解、范围和实施批次，再授权代码；单点`8586196`自动PASS不能关闭05-E。旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。

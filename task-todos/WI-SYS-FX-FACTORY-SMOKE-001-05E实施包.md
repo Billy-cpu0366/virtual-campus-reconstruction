@@ -15,7 +15,20 @@ updated: 2026-08-25
 
 Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。当前只读审计全量，实施暂停。
 
-## 目标
+## 全量审计结果与当前Gate
+
+[公开烟雾全量审计](WI-SYS-FX-FACTORY-SMOKE-001-05E公开烟雾审计.md)已完成并由脚本复核：10个white configs/14 emitters、Stop AI 3处/9层彩烟、9个fog regions/60 cells。当前代码仅覆盖一个white config。
+
+推荐`S1 Stop AI彩烟+orange_smoke → S2全量white generators → S3其余8 fog regions → S4联合回归`。S1中彩烟与fog保持独立owner，但共同做Stop AI场景视觉Gate；每批独立自动与Human验收，不再完成全量后第一次看。
+
+当前仅审计完成，等待Human接受范围、顺序及以下两项重构决定：
+
+1. 显式修复公开彩烟离屏重建后wind loop续接缺口，而不是复制可能失效的旧timer引用；
+2. cars未实现时保留可注入清雾接口和测试，不伪造production车辆清雾已集成。
+
+未获Human接受前不修改runtime。
+
+## 历史单点目标（已撤回）
 
 在不恢复旧入口烟雾预览的前提下，沿正常游戏短路径验证并必要时修正唯一factory smoke owner：可见烟雾上升/放大/淡出，离开视口停发，返回复用同一emitter/generation，scene shutdown清理完整。
 
@@ -27,7 +40,7 @@ Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(
 - **已接受冲突处理**：R4曾通过入口中间镜头让smoke可见约2.10秒；C3后来由Human接受“Play当前视角直接落玩家”，取消该中间镜头。05-E不得恢复旧入口路径，过期的`browser-side-smoke`入口2秒断言必须转为正常短路径验收。
 - **UNKNOWN**：公开Bundle没有证明统一scene teardown；重构runtime必须显式清理emitter/path/listener并保留为DECISION。
 
-## 允许范围
+## 历史单点允许范围（已撤回）
 
 优先只修改：
 
@@ -48,7 +61,7 @@ Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(
 - 不改`sample/`、远端或Windows仓库；
 - 不实现天气、raw tile、cars reaction、player reaction或通用粒子系统。
 
-## 执行步骤
+## 历史单点执行步骤
 
 1. 修正`browser-side-smoke`：保留train/sprayer合同，但删除已被C3替代的“入口连续可见2秒”要求；仍断言smoke owner存在、generation稳定且无异常。
 2. 新建无production debug hook的05-E探针，使用正常键盘路径从玩家区域前往factory smoke；不得teleport或恢复入口镜头。
@@ -57,7 +70,7 @@ Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(
 5. 停止scene并验证emitter/path/listener清理；复用现有unit/lifecycle门禁补足不可直接观察项。
 6. 只有上述真实行为失败才修runtime；随后执行typecheck、FX专项、全量测试、build、05-E production、side smoke、performance和complete production。
 
-## 验收
+## 历史单点验收
 
 - **配置**：公开锚点与粒子参数不漂移，presentation depth偏离明确标DECISION。
 - **可见**：正常短路径到达factory后，Human能连续观察烟雾上升、放大、淡出，不靠teleport或入口航拍。
@@ -65,7 +78,7 @@ Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(
 - **安全**：无console exception、failed request或bad response；性能不回归。
 - **Human**：自动探针和截图不代替Human视觉验收。
 
-## 自动验证收据
+## 历史单点自动验证收据
 
 - 结论：现有`FactorySmokeRuntime`和`PhaserFactorySmokeRuntime`已符合05-E合同，无需修改产品runtime。
 - candidate：`8586196`只新增`scripts/browser-factory-smoke-production.mjs`、`browser:factory-smoke-production`命令，并移除已被C3替代的side smoke入口2秒断言。
