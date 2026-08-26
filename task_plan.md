@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: batch-implement
+correction-phase: human-acceptance
 classification-trigger: human-rejected-compiled-s1-smoke-smoothness
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-05e-s1-correction-implementation
-current-phase: p5.4-05e-s1-correction-batch-implement
-current-gate: p5.4-05e-s1-correction-implementation
-gate-status: human-repair-plan-accepted-implementation-authorized
+work-item-status: active-05e-s1-human-visual-gate
+current-phase: p5.4-05e-s1-human-visual-gate
+current-gate: p5.4-05e-s1-human-visual
+gate-status: automated-verified-awaiting-human-visual
 authorization-ref: DEC-P5.4-05E-S1-SMOOTHNESS-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05e-s1-correction-full-regression
+next-phase: p5.4-05e-s1-human-acceptance
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1 candidate `e07d2c7`已通过自动验证但Human视觉拒绝，反馈为编译production中的红烟运动“卡卡的、不丝滑”；统一审计已将根因收敛到orange fog透明粒子绘制负载，Human已接受一次性quantity4→2修复包，当前进入有界实施，之后才决定是否启动S2。
+- **当前阶段**：S1原candidate `e07d2c7`曾被Human拒绝红烟平滑度；统一审计将根因收敛到orange fog透明粒子绘制负载，Human已接受quantity4→2修复包。修复提交`c4b2d6a`已自动/production验证通过，当前等待Human重新视觉验收，之后才决定是否启动S2。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：按`DEC-P5.4-05E-S1-SMOOTHNESS-001`实施quantity4→2修复；只改fog呈现/测试/定点probe，保留13-cell核心、清雾/生命周期和红烟公开参数。S2–S4未授权，cars清雾仍不声称production已集成。
+- **当前授权**：`DEC-P5.4-05E-S1-SMOOTHNESS-001`已消费；quantity4→2修复只改fog呈现/测试/定点probe，保留13-cell核心、清雾/生命周期和红烟公开参数。当前只做Human重新视觉验收，S2–S4未授权，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：Human已接受quantity4→2修复包；实施后必须完成Stop AI定点帧门禁、完整相关回归和重新Human视觉验收，才能关闭S1。若失败回同一差异表，不自动降到quantity1或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：quantity4→2实施、Stop AI定点帧门禁和完整相关回归均已PASS；S1仍必须由Human重新验收红烟连续性、orange fog可见度和深度穿插，才能关闭。若失败回同一差异表，不自动降到quantity1或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标

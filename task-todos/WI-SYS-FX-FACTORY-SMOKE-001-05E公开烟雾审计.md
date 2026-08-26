@@ -200,7 +200,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - **RC-FX-SMOOTH-2（待验证）**：同一频率批次与同时启动造成视觉密度脉冲；quantity2实验改善帧时序，但尚未完成Human同场景视觉复验。
 - **RC-FX-SMOOTH-3（独立UNKNOWN）**：候选的全局最近邻过滤可能使4×4烟雾边缘更块状；不能仅凭静态截图把它和帧丢失混为一个根因。
 
-### 已接受的一次修复方案（accepted，待实施/验证）
+### 已接受的一次修复方案（accepted，自动验证通过，Human视觉待验收）
 
 1. **只改orange fog的presentation density**：保留`FogRuntime`的13-cell状态、玩家/车辆清除合同、500ms respawn、视口生命周期和独立owner；首个产品candidate把Phaser fog emitter的`quantity`由公开FACT `4`改为重构`DECISION` `2`。红烟9层的位置、depth、tint、frequency、lifespan、wind和owner先完全不动。
 2. **把公开偏差显式登记为DECISION**：这不是Bundle FACT复刻，而是为Human已拒绝的平滑度做最小呈现取舍；`quantity1`只作为诊断上限，不预授权直接采用。
@@ -208,6 +208,13 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 4. **客观停止条件**：同一编译production、同一路线、Stop AI停留至少10秒；9红+13fog仍全部active；Stop AI定点帧`p95≤20ms`、`max≤34ms`、无长任务/异常/坏请求；离屏/返回/shutdown合同全部回归通过。随后Human重新检查红烟连续性、orange fog可见度和深度穿插。
 5. **失败处理**：若`quantity2`自动条件或Human视觉仍失败，回到本差异表，不直接降到`quantity1`，由Human重新决定密度/视觉取舍；在S1重新通过前不启动S2。
 
+### 实施与自动验证结果
+
+- candidate：`c4b2d6a`；只改`src/fx/fog.ts`、`game/PhaserFogRuntime.ts`、`tests/fx/fog.test.ts`和Stop AI production probe，公开FACT quantity4保持不变。
+- PASS：typecheck、定向10项、全量68 files / 363 tests、build；独立verifier PASS。
+- PASS：compiled preview真实路径定点10,001ms/575帧，p95 16.8ms、max33.4ms、longtask0、>34ms=0；9 red/13 fog active，离屏/返回generation2/wind/shutdown和错误收集均通过。
+- 收据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/correction-round-1/final/receipt.json` SHA-256 `7085f67732c94798663d6baa72d98999e6c5c6bfda2e63b3c22998aa2b6dcb1d`；截图见同目录`final/screenshots/`。
+
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”（2026-08-25）。随后明确接受`quantity 4→2 (Recommended)`：保留13-cell核心、清雾/生命周期和红烟公开参数，只实施orange fog呈现密度修复，并按定点帧门禁重新回归。该接受已登记为`DEC-P5.4-05E-S1-SMOOTHNESS-001`；当前允许有界实施，不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”（2026-08-25）。随后明确接受`quantity 4→2 (Recommended)`：保留13-cell核心、清雾/生命周期和红烟公开参数，只实施orange fog呈现密度修复，并按定点帧门禁重新回归。该接受已登记为`DEC-P5.4-05E-S1-SMOOTHNESS-001`；修复candidate `c4b2d6a`已自动/production验证通过，当前只等待Human重新视觉验收，不启动S2–S4。
