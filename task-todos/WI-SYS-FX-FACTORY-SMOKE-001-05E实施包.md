@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 phase: p5.4-05e-factory-smoke
 system: SYS-FX
 type: bounded-verification-and-repair
-status: implementation-authorized
+status: automated-verified-human-visual-pending
 decision: DEC-P5.4-05E-FACTORY-SMOKE-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
@@ -60,6 +60,17 @@ updated: 2026-08-25
 - **生命周期**：离屏停发/隐藏，返回复用generation 1且不重复emitter；shutdown对象与listener为0。
 - **安全**：无console exception、failed request或bad response；性能不回归。
 - **Human**：自动探针和截图不代替Human视觉验收。
+
+## 自动验证收据
+
+- 结论：现有`FactorySmokeRuntime`和`PhaserFactorySmokeRuntime`已符合05-E合同，无需修改产品runtime。
+- candidate：`8586196`只新增`scripts/browser-factory-smoke-production.mjs`、`browser:factory-smoke-production`命令，并移除已被C3替代的side smoke入口2秒断言。
+- 正常production无公开debug/test hooks；等待火车离场后，真人键盘走`east→south→west→south`到factory，连续27个100ms样本均证明emitting、alive particle bounds进屏、generation=1。
+- 离开到约`(1288.67,406.67)`后state=`paused`、alive=0、emitter保留、generation=1；键盘返回后恢复emitting；正式shutdown `smokeEmitterActive=false`。
+- PASS：typecheck、FX 4项专项、357项全量测试、build、05-E production、performance smoke、complete production（首次Memo6路径距阈值1.33px停止，原命令重放PASS）。
+- 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e/receipt.json`，SHA-256 `edb69fbe2ffc66365b2503d62efb095a646cf07d753df318559acdce3b555eab`；截图hash见同目录`SHA256SUMS`。
+- 已知非05-E失败：`browser-side-smoke`在火车collider计数已为0后仍于地图坐标`(600,348)`受阻，重复两次一致；不在烟雾任务中删除火车断言或修改路线，留待05-F验证门禁整理。
+- 尚未完成：Human肉眼视觉验收。
 
 ## 依据
 
