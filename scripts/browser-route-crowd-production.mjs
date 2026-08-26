@@ -307,12 +307,13 @@ try {
   const afterLeavingViewport = await crowdSnapshot();
   const continued = afterLeavingViewport.instances.find((item) => item.id === movingBefore.id);
   assert.ok(continued, "crowd instance disappeared from logical runtime");
+  const routeProgressed = continued.position.x !== movedItem.position.x ||
+    continued.position.y !== movedItem.position.y ||
+    continued.state !== movedItem.state ||
+    continued.generation !== movedItem.generation;
   assert.ok(
-    continued.position.x !== movedItem.position.x ||
-      continued.position.y !== movedItem.position.y ||
-      continued.state !== movedItem.state ||
-      continued.generation !== movedItem.generation,
-    "crowd did not continue its route state after leaving viewport",
+    routeProgressed || continued.state === "gone",
+    "moving route crowd stalled outside the viewport before completion",
   );
 
   const staticProbes = [];

@@ -148,12 +148,161 @@ async function smokeSnapshot() {
         stopGraphicsCount: stop.graphicsCount,
         fog: fog.snapshot,
         fogEmitterCount: fog.emitterCount,
+        fogPresentation: fog.emitters instanceof Map
+          ? [...fog.emitters.entries()].map(([id, emitter]) => ({
+            id,
+            emitting: emitter.emitting,
+            visible: emitter.visible,
+            aliveParticleCount: emitter.getAliveParticleCount?.() ?? null,
+          }))
+          : [],
         trainState: scene.trainRuntime?.snapshot?.state ?? null,
       };
     }
     return null;
   }`);
 }
+
+async function presentationSnapshot() {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const camera = scene?.cameras?.main;
+      if (!scene || !camera) continue;
+      const view = camera.worldView;
+      const probe = globalThis.__crossSystemProbe ??=
+        { nextId: 0, identities: new WeakMap() };
+      const identify = (object) => {
+        if (object === null || typeof object !== "object") return null;
+        let id = probe.identities.get(object);
+        if (id === undefined) {
+          id = "sprite-" + (++probe.nextId);
+          probe.identities.set(object, id);
+        }
+        return id;
+      };
+      const inView = (x, y) =>
+        x + 24 >= view.x && x - 24 <= view.x + view.width &&
+        y + 24 >= view.y && y - 24 <= view.y + view.height;
+      const capture = (owner, runtime) => {
+        const sprites = runtime?.sprites;
+        if (!(sprites instanceof Map)) return [];
+        return [...sprites.entries()].map(([id, sprite]) => ({
+          id: String(id),
+          identity: identify(sprite),
+          x: sprite.x,
+          y: sprite.y,
+          alpha: sprite.alpha,
+          visible: sprite.visible,
+          active: sprite.active,
+          inView: inView(sprite.x, sprite.y),
+          owner,
+        }));
+      };
+      return {
+        viewport: {
+          left: view.x,
+          right: view.x + view.width,
+          top: view.y,
+          bottom: view.y + view.height,
+        },
+        route: capture("route", scene.routeCrowdRuntime),
+        venue: capture("venue", scene.venueCrowdRuntime),
+        staticCrowd: capture("static", scene.staticCrowdRuntime),
+        vehicle: scene.vehicleRuntime?.snapshot ?? null,
+      };
+    }
+    return null;
+  }`);
+}
+
+async function centerCameraOnWorld(x, y) {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene?.cameras?.main) continue;
+      scene.cameras.main.stopFollow?.();
+      scene.cameras.main.centerOn(${x}, ${y});
+      return true;
+    }
+    return false;
+  }`);
+}
+
+async function vehiclePresentationSnapshot() {
+  return sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const runtime = scene?.vehicleRuntime;
+      if (!runtime) continue;
+      const objects = runtime.objects instanceof Set
+        ? [...runtime.objects]
+        : [];
+      return {
+        snapshot: runtime.snapshot,
+        objects: objects.map((object) => ({
+          key: object.texture?.key ?? null,
+          x: object.x,
+          y: object.y,
+          visible: object.visible,
+          active: object.active,
+          alpha: object.alpha,
+          depth: object.depth,
+        })),
+      };
+    }
+    return null;
+  }`);
+}
+
+async function samplePresentation(durationMs) {
+  const samples = [];
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < durationMs) {
+    const snapshot = await presentationSnapshot();
+    assert.ok(snapshot, "cross-system presentation snapshot is unavailable");
+    samples.push({ elapsedMs: Date.now() - startedAt, ...snapshot });
+    await sleep(100);
+  }
+  return samples;
+}
+
+function assertPresentationContinuity(samples) {
+  const previous = new Map();
+  for (const [sampleIndex, sample] of samples.entries()) {
+    const current = new Map();
+    for (const group of ["route", "venue", "staticCrowd"]) {
+      for (const item of sample[group] ?? []) {
+        const key = `${group}:${item.id}`;
+        current.set(key, item);
+        if (item.inView) {
+          assert.equal(item.visible, true,
+            `${key} became invisible inside the viewport at sample ${sampleIndex}`);
+          assert.ok((item.alpha ?? 1) > 0,
+            `${key} reached zero alpha inside the viewport at sample ${sampleIndex}`);
+        }
+        const prior = previous.get(key);
+        if (prior?.inView) {
+          assert.equal(item.identity, prior.identity,
+            `${key} was recreated while inside the viewport`);
+          assert.ok(item.inView || !item.visible || item.alpha > 0,
+            `${key} left the viewport with an invalid presentation state`);
+        } else if (sampleIndex > 0 && prior === undefined && item.inView) {
+          throw new Error(`${key} first appeared inside the viewport at sample ${sampleIndex}`);
+        }
+      }
+    }
+    for (const [key, prior] of previous) {
+      if (prior.inView && !current.has(key)) {
+        throw new Error(`${key} disappeared while inside the viewport at sample ${sampleIndex}`);
+      }
+    }
+    previous.clear();
+    for (const [key, item] of current) previous.set(key, item);
+  }
+}
+
+const fogClearSamples = [];
 
 async function move(step) {
   const binding = keyByDirection[step.direction];
@@ -170,6 +319,13 @@ async function move(step) {
     while (Date.now() - startedAt < 20_000) {
       const snapshot = await smokeSnapshot();
       assert.ok(snapshot, "production S1 smoke snapshot is unavailable");
+      if (snapshot.fog.cells.some((cell) => cell.cleared)) {
+        fogClearSamples.push({
+          elapsedMs: Date.now() - startedAt,
+          fog: snapshot.fog,
+          fogPresentation: snapshot.fogPresentation,
+        });
+      }
       const value = snapshot.player[step.axis];
       const reached = step.comparison === "lte"
         ? value <= step.target
@@ -394,6 +550,19 @@ try {
     atStopAi.fog.cells.every((cell) => cell.active),
     "orange_smoke cells are not all active at Stop AI",
   );
+  assert.ok(fogClearSamples.length > 0, "player did not clear an orange_smoke cell");
+  assert.ok(
+    fogClearSamples.some((sample) => sample.fogPresentation.some((emitter) =>
+      emitter.emitting === false && emitter.visible === true)),
+    "cleared fog particles were hidden instead of naturally draining",
+  );
+  const atStopAiPresentation = await presentationSnapshot();
+  assert.ok(atStopAiPresentation, "presentation snapshot is unavailable at Stop AI");
+  assert.equal(atStopAiPresentation.vehicle?.state, "running");
+  assert.equal(atStopAiPresentation.vehicle?.police?.length, 3);
+  assert.ok(atStopAiPresentation.vehicle?.helicopter !== null);
+  const stopAiContinuitySamples = await samplePresentation(5_000);
+  assertPresentationContinuity(stopAiContinuitySamples);
   const stopAiPerformance = await sampleStopAiFrameBudget();
   assert.equal(stopAiPerformance.timedOut, false);
   assert.ok(stopAiPerformance.durationMs >= 10_000);
@@ -434,6 +603,23 @@ try {
   );
   const returnedScreenshot = await capture("stop-ai-smoke-returned");
 
+  assert.equal(await centerCameraOnWorld(504, 1288), true);
+  await sleep(500);
+  const helicopterPresentation = await vehiclePresentationSnapshot();
+  assert.ok(helicopterPresentation, "vehicle presentation snapshot is unavailable");
+  assert.equal(helicopterPresentation.snapshot.state, "running");
+  assert.ok(helicopterPresentation.snapshot.helicopter !== null);
+  assert.equal(helicopterPresentation.snapshot.police.length, 3);
+  const visibleVehicleKeys = new Set(
+    helicopterPresentation.objects
+      .filter((object) => object.visible && object.alpha > 0)
+      .map((object) => object.key),
+  );
+  assert.ok(visibleVehicleKeys.has("npc-helicopter-high-resolution"));
+  assert.ok(visibleVehicleKeys.has("npc-helicopter-rotor-main"));
+  assert.ok(visibleVehicleKeys.has("npc-helicopter-rotor-back"));
+  const helicopterScreenshot = await capture("helicopter-visible");
+
   const shutdown = await sceneCall(`async function () {
     for (const game of this) {
       const scene = game?.scene?.getScene?.("campus");
@@ -448,6 +634,7 @@ try {
         stopGraphicsCount: stop.graphicsCount,
         fog: fog.snapshot,
         fogEmitterCount: fog.emitterCount,
+        vehicle: scene.vehicleRuntime?.snapshot ?? null,
       };
     }
     return null;
@@ -470,7 +657,12 @@ try {
     ready,
     route,
     atStopAi,
+    fogClearSamples,
+    atStopAiPresentation,
+    stopAiContinuitySamples,
     stopAiScreenshot,
+    helicopterPresentation,
+    helicopterScreenshot,
     stopAiPerformance,
     awayRoute,
     away,
