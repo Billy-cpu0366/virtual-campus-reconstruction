@@ -164,32 +164,56 @@ async function staticNpcSnapshot() {
   }`);
 }
 
-async function staticCrowdSnapshot() {
+async function visibleSpriteSnapshot(runtimeName) {
   return sceneCall(`function () {
     for (const game of this) {
       const scene = game?.scene?.getScene?.("campus");
-      const runtime = scene?.staticCrowdRuntime;
-      if (!runtime) continue;
-      return {
-        spriteCount: runtime.spriteCount ?? 0,
-        materializedIds: (runtime.snapshot?.instances ?? [])
-          .filter((item) => item.materialized)
-          .map((item) => item.id)
-          .sort(),
-      };
+      const runtime = scene?.[${JSON.stringify(runtimeName)}];
+      const camera = scene?.cameras?.main;
+      if (!runtime || !camera || !(runtime.sprites instanceof Map)) continue;
+      const view = camera.worldView;
+      const visible = [...runtime.sprites.entries()]
+        .filter(([, sprite]) =>
+          sprite.x + 24 >= view.x && sprite.x - 24 <= view.x + view.width &&
+          sprite.y + 24 >= view.y && sprite.y - 24 <= view.y + view.height)
+        .map(([id, sprite]) => ({
+          id: String(id),
+          x: sprite.x,
+          y: sprite.y,
+          alpha: sprite.alpha,
+          visible: sprite.visible,
+          active: sprite.active,
+        }))
+        .sort((left, right) => left.id.localeCompare(right.id));
+      return visible;
     }
     return null;
   }`);
 }
 
+async function staticCrowdSnapshot() {
+  const visible = await visibleSpriteSnapshot("staticCrowdRuntime");
+  if (visible === null) return null;
+  return {
+    visibleIds: visible.map((item) => item.id),
+    visible,
+  };
+}
+
 async function venueCrowdSnapshot() {
+  const visible = await visibleSpriteSnapshot("venueCrowdRuntime");
+  const serializedVisible = JSON.stringify(visible ?? []);
+  const serializedVisibleIds = JSON.stringify(
+    (visible ?? []).map((item) => item.id),
+  );
   return sceneCall(`function () {
     for (const game of this) {
       const scene = game?.scene?.getScene?.("campus");
       const runtime = scene?.venueCrowdRuntime;
       if (!runtime) continue;
       return {
-        spriteCount: runtime.spriteCount ?? 0,
+        visibleIds: ${serializedVisibleIds},
+        visible: ${serializedVisible},
         materializedIds: (runtime.snapshot?.instances ?? [])
           .filter((item) => item.materialized)
           .map((item) => item.id)
@@ -378,10 +402,11 @@ try {
   const staticRegionStableStart = await staticCrowdSnapshot();
   await sleep(3_000);
   const staticRegionStableEnd = await staticCrowdSnapshot();
-  assert.deepEqual(staticRegionStableEnd?.materializedIds, staticRegionStableStart?.materializedIds,
-    "static crowd IDs changed while the camera remained stationary");
-  assert.equal(staticRegionStableEnd?.spriteCount, staticRegionStableStart?.spriteCount,
-    "static crowd sprite count changed while the camera remained stationary");
+  assert.deepEqual(staticRegionStableEnd?.visibleIds, staticRegionStableStart?.visibleIds,
+    "static crowd visible IDs changed while the camera remained stationary");
+  assert.ok(staticRegionStableEnd?.visible?.every((item) =>
+    item.visible === true && (item.alpha ?? 1) > 0),
+  "static crowd has an invalid visible presentation");
 
   await centerCameraOn({ x: 2_000, y: 2_000 });
   await sleep(100);
@@ -395,10 +420,11 @@ try {
     await sleep(250);
     protestSamples.push(await venueCrowdSnapshot());
   }
-  assert.deepEqual(protestSamples.at(-1)?.materializedIds, protestSamples[0]?.materializedIds,
-    "venue crowd IDs changed while the camera remained stationary");
-  assert.equal(protestSamples.at(-1)?.spriteCount, protestSamples[0]?.spriteCount,
-    "venue crowd sprite count changed while the camera remained stationary");
+  assert.deepEqual(protestSamples.at(-1)?.visibleIds, protestSamples[0]?.visibleIds,
+    "venue crowd visible IDs changed while the camera remained stationary");
+  assert.ok(protestSamples.every((sample) => sample.visible?.every((item) =>
+    item.visible === true && (item.alpha ?? 1) > 0)),
+  "venue crowd has an invalid visible presentation");
   const protestStates = protestSamples.at(-1)?.protestStates ?? [];
   const capableProtesters = protestStates.filter((state) => state.capable);
   const fixedProtesters = protestStates.filter((state) => !state.capable);
