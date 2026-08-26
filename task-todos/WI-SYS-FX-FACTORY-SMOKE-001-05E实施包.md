@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 phase: p5.4-05e-factory-smoke
 system: SYS-FX
 type: bounded-verification-and-repair
-status: s1-automated-verified-awaiting-human-visual
+status: s1-audit-complete-awaiting-human-repair-plan
 decision: DEC-P5.4-05E-S1-STOP-AI-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
@@ -15,7 +15,7 @@ updated: 2026-08-25
 
 Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。全量审计后S1已实现并自动验证，当前等待Stop AI Human视觉Gate。
 
-## 全量审计结果与S1当前Gate
+## 全量审计结果与S1修正方案Gate
 
 [公开烟雾全量审计](WI-SYS-FX-FACTORY-SMOKE-001-05E公开烟雾审计.md)已完成并由脚本复核：10个white configs/14 emitters、Stop AI 3处/9层彩烟、9个fog regions/60 cells。当前代码仍只覆盖1/10 white config；S1另已覆盖Stop AI三处/九层彩烟与`orange_smoke`13-cell fog，均保持独立owner。
 
@@ -81,7 +81,7 @@ Human已接受上述顺序，并只授权[S1 Stop AI实施包](WI-SYS-FX-FACTORY
 - PASS：无production debug/test hook的真实键盘探针 `browser:stop-ai-smoke-production`。正常路径到Stop AI时9层/13-cell active；离场后彩烟9层destroy、Fog13 emitter保留且inactive；返回后9层generation=2并观察到wind；shutdown后两类owner emitter/graphics为0；console、exception、failed request、bad response均为空。
 - 独立verifier结果：`UNVERIFIED`（所有客观检查PASS，未代替Human视觉）。
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/receipt.json` SHA-256 `b36e41537972e9e1331f65ea909f785d1013a912f01de6e5c883f8bd8577265e`；performance `performance.json` SHA-256 `8a188bc019f283b1bcd9889d0a6e0481622dbb22e028813ce8e439267c9a32a3`；截图见同目录`screenshots/`。
-- Human Gate：请在Stop AI道路两边确认三处彩烟的颜色、形态、前中后深度穿插及orange fog是否清晰；自动收据不能签视觉。
+- Human Gate（已拒绝，2026-08-25）：编译production截图中的红烟运动“卡卡的、不丝滑”。统一审计已完成，最高可信根因是orange fog透明粒子绘制负载；按systemic-failure冻结candidate，等待Human审一次整体修复方案：只将orange fog呈现quantity由4降为2，红烟参数不动。
 
 ## 历史单点自动验证收据
 

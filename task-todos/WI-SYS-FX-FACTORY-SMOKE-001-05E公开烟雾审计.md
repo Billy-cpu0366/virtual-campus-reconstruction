@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: source-audit
 system: SYS-FX
 issue-class: systemic-failure
-status: s1-automated-verified-awaiting-human-visual
+status: s1-human-visual-rejected-smoothness-awaiting-audit
 decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 updated: 2026-08-25
 ---
@@ -170,6 +170,44 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - fog清除依赖player velocity与cars；cars未纳入当前重构时，必须明确car接口未集成，不伪造验证。
 - 公开wind loop的离屏重建续接已按Human接受的S1决定显式恢复；全量其他owner的wind/teardown仍需后续验证。
 
-## Human Gate
+## S1 Human拒绝后的系统性修正审计（2026-08-25）
 
-审计和S1实现已完成，自动验证通过，等待Human在Stop AI道路两边验收彩烟、orange fog与深度穿插。S2–S4仍未授权；Human通过S1后再决定是否启动S2。
+### 分类与证据
+
+- **classification**：`systemic-failure`。理由是自动检查/production probe通过，但Human在编译production视觉Gate明确拒绝“红烟卡卡的、不丝滑”；该问题涉及红烟与orange fog的整体呈现，不能按截图症状拆成零散补丁。
+- **冻结对象**：`e07d2c7`保留，不修改、不覆盖；S2–S4未授权。
+- **定点帧证据**：真实键盘路线到Stop AI后，9个彩烟emitter与13个orange fog emitter active。10秒定点采样`stop-ai-frame-before-capture.json`为383帧，median约33.3ms、p95约33.4ms、max50ms；旧入口/移动performance smoke的16.7ms不覆盖此场景。
+- **owner隔离**：同一compiled preview中，红烟+orange fog的4秒采样有26–29帧超过20ms；正式关闭Fog后红烟单独为median约16.7ms/p95约16.7ms且无>20ms帧；反向orange-only仍有13帧超过20ms；无烟为全段约16.7ms。
+- **绘制/同步隔离**：临时关闭fog粒子绘制但保留两个runtime的每帧同步后恢复为241帧、median约16.7ms、无>20ms帧；因此每帧snapshot/sync不是主因，透明粒子绘制/overdraw是当前最高可信根因候选。
+- **密度敏感性**：只在页面实例临时调用fog emitter `setQuantity(2)`，4秒采样median约16.7ms、p95约16.8ms、8帧超过20ms；`setQuantity(1)`为全段约16.8ms以内。该实验不改变仓库源码，仅证明呈现密度对帧时序有直接影响。
+- **纹理事实**：候选加载的`particle_smoke_white`为4×4像素，文件SHA-256与公开`smoke-white.webp`相同；候选全局`pixelArt:true`而公开Bundle未发现该配置字面量，最近邻造成的块状边缘仍是独立UNKNOWN，不与本批性能修复混合。
+- **修正收据**：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/correction-round-1/`下保存定点帧、red/orange隔离、render-off同步控制、fog quantity敏感性和纹理收据；其中`stop-ai-frame-before-capture.json` SHA-256 `5eb4f920064bbd4b9746a96716d4088e460cd63d0a69b9ad66961bc4c34cafa0`，`render-off-sync-active.json` SHA-256 `cf86106699f8d9c0ff86fd9decff053a2abfa6a67661328a506db25e5076d5dc`，`fog-quantity-sensitivity.json` SHA-256 `d9250f0205c4853bd8bee461cbe8b0324b6a8891e05ff3778446793a40d27feb`。
+
+### 统一差异表
+
+| 差异 | Expected source | Actual evidence | 严重度 | 根因状态 |
+|---|---|---|---|---|
+| Stop AI整体红烟运动卡顿 | Human视觉Gate要求连续、无明显跳帧 | 编译production截图/定点帧采样拒绝；同时出现9红+13fog | P0 | **INFERRED**：组合透明粒子绘制负载 |
+| `orange_smoke`呈现预算 | Bundle region75为13 cells、quantity4、frequency20、scale8、NORMAL | 13 emitter同时渲染；orange-only出现33ms级帧间隔；quantity2/1实验明显改善 | P0 | **INFERRED**：fog overdraw/粒子密度主因 |
+| 红烟自身参数 | Bundle三处九层为quantity2、frequency20、lifespan1800等；candidate逐项匹配 | red-only控制组无>20ms帧 | P1 | **PASS配置匹配**；不先改红烟 |
+| runtime每帧同步 | owner需逐帧更新交互/视口状态 | render-off但保留sync恢复60Hz | P1 | **已排除为主因**，后续可不做无证据重构 |
+| 4×4纹理与过滤 | 公开使用同一4×4 smoke-white；公开过滤最终状态未直接证实 | candidate `pixelArt:true`可能造成边缘块状；尚无同硬件原站对照 | P1 | **UNKNOWN**；另立视觉差异，不混入本批 |
+| 旧性能门禁覆盖不足 | 性能检查必须覆盖Human实际Stop AI路径 | 旧脚本只测boot/入口移动；新定点临时观察器覆盖Stop AI | P1 | **FIXED EVIDENCE GAP**；正式收据需纳入可重复定点指标 |
+
+### 根因聚类
+
+- **RC-FX-SMOOTH-1（当前最高可信）**：13个orange fog cell emitter以公开`quantity4/frequency20/scale8`同时做NORMAL透明绘制，和三处红烟叠加后触发compositor帧丢失；红烟本身单独没有复现同级帧丢失。
+- **RC-FX-SMOOTH-2（待验证）**：同一频率批次与同时启动造成视觉密度脉冲；quantity2实验改善帧时序，但尚未完成Human同场景视觉复验。
+- **RC-FX-SMOOTH-3（独立UNKNOWN）**：候选的全局最近邻过滤可能使4×4烟雾边缘更块状；不能仅凭静态截图把它和帧丢失混为一个根因。
+
+### 推荐的一次修复方案（proposed，必须Human Plan Gate）
+
+1. **只改orange fog的presentation density**：保留`FogRuntime`的13-cell状态、玩家/车辆清除合同、500ms respawn、视口生命周期和独立owner；首个产品candidate把Phaser fog emitter的`quantity`由公开FACT `4`改为重构`DECISION` `2`。红烟9层的位置、depth、tint、frequency、lifespan、wind和owner先完全不动。
+2. **把公开偏差显式登记为DECISION**：这不是Bundle FACT复刻，而是为Human已拒绝的平滑度做最小呈现取舍；`quantity1`只作为诊断上限，不预授权直接采用。
+3. **修复包允许路径**：`src/fx/fog.ts`、`game/PhaserFogRuntime.ts`、`tests/fx/fog.test.ts`、必要的`browser-stop-ai-smoke-production`定点帧收据脚本；不改`game/main.ts`的30FPS/像素配置，不改红烟、地图、玩家、NPC、火车或`sample/`。
+4. **客观停止条件**：同一编译production、同一路线、Stop AI停留至少10秒；9红+13fog仍全部active；Stop AI定点帧`p95≤20ms`、`max≤34ms`、无长任务/异常/坏请求；离屏/返回/shutdown合同全部回归通过。随后Human重新检查红烟连续性、orange fog可见度和深度穿插。
+5. **失败处理**：若`quantity2`自动条件或Human视觉仍失败，回到本差异表，不直接降到`quantity1`，由Human重新决定密度/视觉取舍；在S1重新通过前不启动S2。
+
+## Human Plan Gate
+
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”（2026-08-25）。当前等待Human接受或拒绝上面的“一次性fog呈现密度修复包”；未接受前冻结`e07d2c7`，不修改运行时代码、不启动S2–S4。

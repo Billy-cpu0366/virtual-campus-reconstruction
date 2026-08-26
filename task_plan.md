@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-acceptance
-classification-trigger: human-found-05e-smoke-owner-scope-incomplete
+correction-phase: human-plan-gate
+classification-trigger: human-rejected-compiled-s1-smoke-smoothness
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-05e-s1-human-visual-gate
-current-phase: p5.4-05e-s1-human-visual-gate
-current-gate: p5.4-05e-s1-human-visual
-gate-status: automated-verified-awaiting-human-visual
+work-item-status: active-05e-s1-correction-plan-gate
+current-phase: p5.4-05e-s1-correction-plan-gate
+current-gate: p5.4-05e-s1-correction-plan
+gate-status: audit-complete-awaiting-human-repair-plan
 authorization-ref: DEC-P5.4-05E-S1-STOP-AI-001
 preauthorized-next-work-item: none
-next-phase: p5.4-05e-s1-human-acceptance
+next-phase: p5.4-05e-s1-correction-batch-implement
 updated: 2026-08-25
 ---
 
@@ -24,12 +24,12 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1已实现并自动验证，代码提交`e07d2c7`；当前停在Stop AI Human视觉Gate：三处/九层彩烟owner与`orange_smoke`13-cell fog owner，之后才决定是否启动S2。
+- **当前阶段**：S1 candidate `e07d2c7`已通过自动验证但Human视觉拒绝，反馈为编译production中的红烟运动“卡卡的、不丝滑”；统一根因审计已完成，当前等待Human确认一次性修复包：只优化orange fog呈现密度（quantity 4→2），之后才决定是否启动S2。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体延期；B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后恢复专项。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：S1实现已消费`DEC-P5.4-05E-S1-STOP-AI-001`；彩烟离屏重建后显式恢复wind，fog提供并测试cars 40px清雾注入接口但不声称production已集成。当前只做Human视觉验收，S2–S4未授权。
+- **当前授权**：S1实现已消费`DEC-P5.4-05E-S1-STOP-AI-001`；审计后提出的quantity4→2是待Human接受的修复DECISION，未接受前不改代码、不追加零散补丁。S2–S4未授权，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：自动与独立verifier均PASS，但S1必须由Human在Stop AI道路两边验收彩烟、orange fog与深度穿插；通过也只关闭S1，不自动启动S2。单点`8586196`不能关闭05-E；旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：Human已拒绝编译production红烟平滑度；统一审计和根因聚类已完成，当前必须由Human接受或拒绝quantity4→2的一次性修复方案，之后才可成批修复、完整回归和重新视觉验收。不得用既有自动PASS关闭S1，不自动启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
