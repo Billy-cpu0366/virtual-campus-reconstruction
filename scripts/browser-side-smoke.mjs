@@ -326,7 +326,8 @@ try {
   const trainVisibleDurationMs = longestVisibleDuration(samples, "trainVisible");
   assert.ok(samples.some((sample) => sample.smokeState === "emitting"));
   assert.ok(samples.every((sample) => sample.smokeGeneration === 1));
-  assert.ok(smokeVisibleDurationMs >= 2000, `smoke visible only ${smokeVisibleDurationMs}ms`);
+  // C3 removed the old entry smoke-preview waypoint. 05-E verifies the
+  // two-second visible contract on the normal physical route instead.
   assert.ok(trainVisibleDurationMs >= 5000, `train visible only ${trainVisibleDurationMs}ms`);
   assert.ok((holding.side.trainVisual?.depth ?? -Infinity) > holding.player.depth);
   assert.ok(
