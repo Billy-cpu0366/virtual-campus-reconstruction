@@ -26,7 +26,7 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 - **行走后消失/固定点冒出（route高可信）**：`src/npc/routeCrowd.ts:557-593`在非`goBack`且非`deleteAfterComplete`完成时直接把NPC重置到`start`并将alpha置0；`PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed清理sprite。公开Bundle的`fadeOut→hidden→reset/fadeIn`是来源事实，但不能直接作为产品修复：只要终点或起点在Human视口内，任何淡出、隐藏、destroy、presentation重建或瞬移都会违反当前验收约束；static/venue仍不能套用route结论。
 - **Human接受的视口连续性硬约束**：NPC在当前摄像机视口内必须保持连续的presentation身份与可见性；不得通过`alpha=0`、`destroy`、重建或瞬移消失/出现。NPC只能从视口外连续走入，或因自身连续移动走出视口后再回收。路线仍按各组`goBack`/`deleteAfterComplete`处理，不把所有NPC改成循环。当前route/venue/static实现已通过identity/visible/alpha自动采样，Human仍需确认肉眼没有被Fog遮挡造成的闪烁感。
 
-**处理决定**：Human已接受以上四包一起实施；NPC已在本次父工作项中恢复route、Stop AI venue presentation和车辆资源owner，产品分支`69f6fca`的自动/真实路径收据通过，Human视觉待验收。static crowd的其他行为、rat、ghost、birds、sprayer、fixed special、dancing及B2-B5仍保持延期。实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
+**处理决定**：Human已接受以上四包一起实施；NPC已在本次父工作项中恢复route、Stop AI venue presentation和车辆资源owner，产品分支`883faa2`的自动/真实路径收据及独立复核通过，Human视觉待验收。static crowd的其他行为、rat、ghost、birds、sprayer、fixed special、dancing及B2-B5仍保持延期。实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 

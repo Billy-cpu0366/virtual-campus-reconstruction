@@ -158,7 +158,7 @@ updated: 2026-08-25
 
 当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及此前失败candidate继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
 
-Human已接受四个修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC闪烁归因与连续性、route NPC连续性。实现已在产品分支`69f6fca`完成并通过自动/真实路径回归；NPC只在本包涉及的route和venue/Stop AI范围内恢复，其他专项继续延期。
+Human已接受四个修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC闪烁归因与连续性、route NPC连续性。实现已在产品分支`883faa2`完成并通过自动/真实路径回归及独立只读验证；NPC只在本包涉及的route和venue/Stop AI范围内恢复，其他专项继续延期。
 
 当前停止在Human视觉Gate：需要确认视口内NPC没有消失/出现/瞬移、清雾自然淡出、直升机和警车画面可见；Human通过前不关闭父任务。
 

@@ -243,7 +243,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。产品分支`69f6fca`已完成并通过自动/真实路径回归；当前只等待Human视觉验收，不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。产品分支`883faa2`已完成并通过自动/真实路径回归；当前只等待Human视觉验收，不启动S2–S4。
 
 ### 实施收据
 
@@ -251,6 +251,6 @@ Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的�
 - `73df384`：route视口连续性；专项19+10项通过。
 - `180865d` + `5ea711d`：车辆owner与CampusScene接线；车辆专项7项通过，真实owner快照/直升机截图通过。
 - `7341cc0`：venue/static可见region原子ready和屏内identity保护；相关NPC专项通过。
-- `69f6fca`：生产probe更新；Stop AI清雾289次采样、NPC连续性47次采样、route production probe通过。
+- `883faa2`：生产probe更新；Stop AI清雾289次采样、NPC连续性47次采样、route production probe通过。
 - 父回归：全量69文件/384测试、typecheck、check:runtime、build、普通browser smoke和test-hooks chunk smoke通过；事件收集无console/exception/failed request/bad response。
-- `c4b2d6a`保留为上一轮quantity2 candidate；本轮仍未取得Human最终视觉签字。
+- `c4b2d6a`保留为上一轮quantity2 candidate；独立`lightweight-verifier`复核通过；本轮仍未取得Human最终视觉签字。

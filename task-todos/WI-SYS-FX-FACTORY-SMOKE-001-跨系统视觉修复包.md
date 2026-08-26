@@ -100,6 +100,7 @@ Human明确接受“全部四类问题一起处理”：
 - route：产品提交`73df384`；屏内保持alpha/identity，active cap释放不在屏内冒出；route专项29项和production probe通过。
 - 车辆：产品提交`180865d`、Main接线`5ea711d`；资源白名单、preload、专用owner、直升机主体/双旋翼/high-res、3辆警车已接入；production快照与直升机截图通过。警灯和动态车辆行为保持UNKNOWN。
 - venue/static：产品提交`7341cc0`；可见region原子ready、屏内sprite不销毁；专项测试和Stop AI连续性采样通过。
-- probe：产品提交`69f6fca`；真实Stop AI probe收集289次清雾样本、47次NPC连续性样本，route production probe通过。
+- probe：产品提交`883faa2`；真实Stop AI probe收集289次清雾样本、47次NPC连续性样本，route production probe通过。
 - 父回归：`npm run typecheck`、全量69文件/384测试、`npm run check:runtime`、普通build、普通browser smoke、test-hooks chunk smoke通过；无console/exception/failed request/bad response。
+- 独立`lightweight-verifier`复核通过：HEAD、工作树、typecheck、全量测试、资源、build、两个production probe和静态边界均PASS；未运行build:test-hooks。
 - Human视觉仍未签字；当前唯一待验收内容是整条真实路径的肉眼结果，尤其红烟连续性、烟雾遮挡下NPC观感、车辆构图和路线NPC自然进出。

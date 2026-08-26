@@ -13,7 +13,7 @@ updated: 2026-08-25
 
 ## Human范围修正
 
-Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。全量审计后S1已实现并自动验证；Human随后接受四个跨系统有界修复包，产品分支`69f6fca`已完成实施和自动/真实路径回归，当前等待Human视觉验收。
+Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。全量审计后S1已实现并自动验证；Human随后接受四个跨系统有界修复包，产品分支`883faa2`已完成实施、自动/真实路径回归和独立复核，当前等待Human视觉验收。
 
 ## 全量审计结果与S1修正方案Gate
 
