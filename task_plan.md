@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: audit
+correction-phase: human-acceptance
 classification-trigger: human-rejected-smoke-clear-and-npc-visibility
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-cross-system-visual-audit
-current-phase: p5.4-cross-system-visual-audit
-current-gate: p5.4-cross-system-root-cause
-gate-status: human-rejected-additional-findings-awaiting-audit
-authorization-ref: DEC-P5.4-05E-S1-SMOOTHNESS-001
+work-item-status: active-cross-system-human-acceptance
+current-phase: p5.4-cross-system-human-acceptance
+current-gate: p5.4-cross-system-visual-gate
+gate-status: automated-verified-awaiting-human-visual
+authorization-ref: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 preauthorized-next-work-item: none
-next-phase: p5.4-cross-system-repair-plan-gate
+next-phase: p5.4-cross-system-completed-after-human-acceptance
 updated: 2026-08-25
 ---
 
@@ -24,13 +24,13 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题：烟雾穿行时整片突兀消失、直升机/警车缺贴图、Stop AI NPC闪烁、NPC行走后消失并在固定点冒出。当前冻结candidate，做一次跨系统根因审计，之后才形成修复方案Gate。
+- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题：烟雾穿行时整片突兀消失、直升机/警车缺贴图、Stop AI NPC闪烁、NPC行走后消失并在固定点冒出。四个有界修复包已实施并通过自动/真实路径回归，当前等待Human视觉验收。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮NPC闪烁/消失是新增视觉证据，不等于恢复授权。B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后由Human重新授权并从统一差异表恢复。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：此前`DEC-P5.4-05E-S1-SMOOTHNESS-001`已消费；当前没有新的代码授权。先审计fog清除、资源入口、Stop AI NPC遮挡/物化和route重启的共同差异；NPC专项仍延期，S2–S4未授权，cars清雾仍不声称production已集成。
+- **当前授权**：Human已接受并消费`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`。Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性均已实施；只恢复NPC涉及的route与venue/Stop AI范围，其他B2–B5仍未授权；S2–S4未启动，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：此前quantity4→2的自动门禁已PASS，但新增四类Human反馈重新打开同一systemic差异表；必须完成跨系统审计、根因聚类、一次Human修复方案Gate、成批修复、完整回归和重新视觉验收。不得启动S2或恢复NPC专项。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：四个修复包已分别通过专项检查、全量测试、build、资源检查、编译production固定路径和普通/test-hooks browser回归；最终仍必须由Human确认视口内无NPC消失/出现/瞬移、烟雾清除自然淡出、直升机/警车可见。Human视觉通过前不得关闭本项或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -62,7 +62,7 @@ updated: 2026-08-25
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1自动验证通过但Human视觉失败，当前延期 | 仅将新增视觉证据和“视口内不得消失/出现”硬约束纳入统一审计；待重新授权后再固定owner证据 | 合并回根基线、恢复B1视觉签字、启动B2-B5、route/train/special/rat/ghost/birds、`sample/`、地图/玩家/相机/30FPS/火车、远端 | Human重新授权后先做owner级复现/方案Gate；不把本次纠正自动当作实现授权 |
+| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1自动验证通过但Human视觉失败；本次仅恢复有界修复范围 | 允许修复route连续性、Stop AI venue presentation和车辆资源owner，并纳入统一父工作项；视口内不得消失/出现 | 合并回根基线、恢复完整B1视觉签字、启动其他B2-B5、route/train/special/rat/ghost/birds以外范围、`sample/`、地图/玩家/相机/30FPS/火车、远端 | 四包回归后由Human做整体验收；其他NPC owner仍需另行授权 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -156,11 +156,11 @@ updated: 2026-08-25
 
 ## 当前工作项
 
-当前 active 为[05-E烟雾审计与S1修正](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-05E公开烟雾审计.md)。candidate `c4b2d6a`及此前失败candidate继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
+当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及此前失败candidate继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
 
-本轮Human新增四类视觉失败已进入同一`systemic-flow`差异表：fog清除整片突兀消失、直升机/警车资源与owner链缺失、Stop AI NPC闪烁、route NPC消失/固定点冒出。只读审计确认Fog clear和route restart有高可信差异，资源整链缺失已定位，Stop AI闪烁仍需逐帧区分遮挡与物化。
+Human已接受四个修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC闪烁归因与连续性、route NPC连续性。实现已在产品分支`69f6fca`完成并通过自动/真实路径回归；NPC只在本包涉及的route和venue/Stop AI范围内恢复，其他专项继续延期。
 
-NPC的Phase A/B0结论、B1 candidate和收据均保留，但按`DEC-SYS-NPC-DEFER-001`继续延期；本次Human新增的视口连续性硬约束已登记，不能在05-E中夹带NPC实现。
+当前停止在Human视觉Gate：需要确认视口内NPC没有消失/出现/瞬移、清雾自然淡出、直升机和警车画面可见；Human通过前不关闭父任务。
 
 ## 已阻塞或暂停工作项
 

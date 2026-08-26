@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 phase: p5.4-05e-factory-smoke
 system: SYS-FX
 type: bounded-verification-and-repair
-status: cross-system-human-visual-rejected-awaiting-audit
+status: automated-verified-awaiting-human-visual
 decision: DEC-P5.4-05E-S1-STOP-AI-001
 candidate-base: ea8751260984fa6ef5e4589c2fbf196a6b28aa8c
 updated: 2026-08-25
@@ -13,7 +13,7 @@ updated: 2026-08-25
 
 ## Human范围修正
 
-Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。全量审计后S1已实现并自动验证，当前等待Stop AI Human视觉Gate。
+Human指出显眼烟雾在Stop AI道路两边。公开Bundle复核已确认：`(808,539.2)`只是多个无业务名white smokeGenerators之一；另有Stop AI周边红/橙烟雾罐分层emitters和trajectory fog owner。此前“唯一factory smoke”范围与命名不完整，单点candidate `8586196`状态为automated-verified / human-visual-rejected-scope-incomplete。全量审计后S1已实现并自动验证；Human随后接受四个跨系统有界修复包，产品分支`69f6fca`已完成实施和自动/真实路径回归，当前等待Human视觉验收。
 
 ## 全量审计结果与S1修正方案Gate
 
@@ -81,7 +81,7 @@ Human已接受上述顺序，并只授权[S1 Stop AI实施包](WI-SYS-FX-FACTORY
 - PASS：无production debug/test hook的真实键盘探针 `browser:stop-ai-smoke-production`。正常路径到Stop AI时9层/13-cell active；离场后彩烟9层destroy、Fog13 emitter保留且inactive；返回后9层generation=2并观察到wind；shutdown后两类owner emitter/graphics为0；console、exception、failed request、bad response均为空。
 - 独立verifier结果：`UNVERIFIED`（所有客观检查PASS，未代替Human视觉）。
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/receipt.json` SHA-256 `b36e41537972e9e1331f65ea909f785d1013a912f01de6e5c883f8bd8577265e`；performance `performance.json` SHA-256 `8a188bc019f283b1bcd9889d0a6e0481622dbb22e028813ce8e439267c9a32a3`；截图见同目录`screenshots/`。
-- Human Gate（视觉拒绝后修复方案已通过，但又发现跨系统问题，2026-08-25）：编译production截图中的红烟运动“卡卡的、不丝滑”。quantity4→2的修复candidate `c4b2d6a`已自动/production验证通过，但Human新增烟雾清除突兀、直升机/警车缺贴图、Stop AI NPC闪烁、NPC消失/冒出四类问题；当前返回统一systemic差异表和审计，不关闭05-E。
+- Human Gate（2026-08-25）：编译production截图中的红烟运动“卡卡的、不丝滑”。quantity4→2的修复candidate `c4b2d6a`已自动/production验证通过，但Human新增烟雾清除突兀、直升机/警车缺贴图、Stop AI NPC闪烁、NPC消失/冒出四类问题；Human已接受将四类问题纳入同一父工作项的四个有界修复包，按`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`实施。
 
 ## 历史单点自动验证收据
 
@@ -93,7 +93,8 @@ Human已接受上述顺序，并只授权[S1 Stop AI实施包](WI-SYS-FX-FACTORY
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e/receipt.json`，SHA-256 `edb69fbe2ffc66365b2503d62efb095a646cf07d753df318559acdce3b555eab`；截图hash见同目录`SHA256SUMS`。
 - 已知非05-E失败：`browser-side-smoke`在火车collider计数已为0后仍于地图坐标`(600,348)`受阻，重复两次一致；不在烟雾任务中删除火车断言或修改路线，留待05-F验证门禁整理。
 - 结论限制：上述收据只证明单个`(808,539.2)`白烟owner技术行为，不能代表完整05-E。
-- 尚未完成：公开烟雾家族审计、Human计划Gate、全量实现与视觉验收。
+- 已完成：四个跨系统修复包实现、专项/全量回归、编译production重放；全量69文件/384测试、typecheck、资源检查、build、普通/test-hooks browser smoke和Stop AI/route production probe通过。
+- 尚未完成：Human视觉验收，尤其是烟雾清除的肉眼淡出、烟雾覆盖下NPC观感、route NPC自然进出、车辆构图；不启动S2–S4。
 
 ## 依据
 

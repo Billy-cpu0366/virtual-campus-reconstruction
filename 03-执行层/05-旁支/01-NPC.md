@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: deferred-after-b1-automated-verification
+audit-status: bounded-repair-automated-verified-awaiting-human-visual
 work-item: WI-SYS-NPC-SPECIAL-001
 updated: 2026-08-25
 ---
@@ -13,20 +13,20 @@ updated: 2026-08-25
 
 **当前结论候选**：SYS-NPC不是一个统一运行时，而是多类独立owner组成的家族：路线/事件群众、区域静态群众、venue人群、固定special、sprayer、encounter、ghost和moving-sprite。不同owner的激活、动作、视口、回收和失败路径有实质差异，不能再用一套“NPC出现/移动/消失”模型统一修补。
 
-**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，但Human决定NPC留到最后再修，状态为human-deferred-not-accepted；第三轮candidate仍为human-visual-rejected。
+**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，完整NPC专项仍未通过Human视觉；本次Human明确重新授权一个有界跨系统修复包，仅覆盖route连续性、Stop AI venue presentation和直升机/警车资源owner，其他NPC owner继续延期。
 
-**当前硬边界**：整个SYS-NPC专项已按`DEC-SYS-NPC-DEFER-001`延期；B1不合并、不视觉签字，B2-B5不授权，其他板块不得夹带NPC修改。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；恢复专项时从这些未解决项继续，不建立通用NPC/Entity框架。
+**当前硬边界**：完整SYS-NPC专项仍按`DEC-SYS-NPC-DEFER-001`延期；本次仅按`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`恢复route、Stop AI venue presentation和车辆资源owner的有界修复，不恢复完整B1视觉签字或B2-B5。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
 
-## 新增Human视觉证据（2026-08-25，未授权修复）
+## 新增Human视觉证据（2026-08-25，已实施，Human视觉待验收）
 
 Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪现；部分NPC行走到某处消失，固定位置又突然冒出；同时直升机和警车没有贴图。这些是有效的视觉失败证据，但不等于取消NPC延期或授权修改。
 
 - **资源链缺口（已定位）**：公开镜像存在`npc-helicopter.webp`、两个rotor、high-resolution及`car-police.webp`等文件，公开Bundle也有preload和创建配置；当前`prepare-runtime-assets.mjs`/`check-runtime-assets.mjs`的白名单没有它们，`CampusScene`也没有moving-sprite/vehicle owner或对应preload/创建链。因此不是单个图片URL失败，而是资源→preload→owner→附属部件整链缺失。
 - **Stop AI闪烁（尚未完全定位）**：公开`protesters_rising-87`区域与Stop AI相邻/重叠；当前`PhaserVenueCrowdRuntime.ts`每次`sync`最多新建16个sprite（约128–143），而Stop AI fog深度1100高于当前NPC约`500+y*.1`的呈现深度，烟雾遮挡和分帧物化都可能造成闪烁。必须用逐帧owner ID、sprite create/destroy、depth和fog可见性区分，不能先把观察定性为单一NPC逻辑Bug。
 - **行走后消失/固定点冒出（route高可信）**：`src/npc/routeCrowd.ts:557-593`在非`goBack`且非`deleteAfterComplete`完成时直接把NPC重置到`start`并将alpha置0；`PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed清理sprite。公开Bundle的`fadeOut→hidden→reset/fadeIn`是来源事实，但不能直接作为产品修复：只要终点或起点在Human视口内，任何淡出、隐藏、destroy、presentation重建或瞬移都会违反当前验收约束；static/venue仍不能套用route结论。
-- **Human接受的视口连续性硬约束**：NPC在当前摄像机视口内必须保持连续的presentation身份与可见性；不得通过`alpha=0`、`destroy`、重建或瞬移消失/出现。NPC只能从视口外连续走入，或因自身连续移动走出视口后再回收。路线仍按各组`goBack`/`deleteAfterComplete`处理，不把所有NPC改成循环。
+- **Human接受的视口连续性硬约束**：NPC在当前摄像机视口内必须保持连续的presentation身份与可见性；不得通过`alpha=0`、`destroy`、重建或瞬移消失/出现。NPC只能从视口外连续走入，或因自身连续移动走出视口后再回收。路线仍按各组`goBack`/`deleteAfterComplete`处理，不把所有NPC改成循环。当前route/venue/static实现已通过identity/visible/alpha自动采样，Human仍需确认肉眼没有被Fog遮挡造成的闪烁感。
 
-**处理决定**：以上只进入统一跨系统差异表；NPC继续`human-deferred-not-accepted`，不在SYS-FX修复中夹带代码。若恢复，先由Human重新接受NPC方案，再按route、static/venue、资源owner分别固定路径和修复；实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
+**处理决定**：Human已接受以上四包一起实施；NPC已在本次父工作项中恢复route、Stop AI venue presentation和车辆资源owner，产品分支`69f6fca`的自动/真实路径收据通过，Human视觉待验收。static crowd的其他行为、rat、ghost、birds、sprayer、fixed special、dancing及B2-B5仍保持延期。实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
@@ -58,7 +58,7 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 
 ## 3. 怎么做
 
-> Human已接受以下分批顺序；B0已完成，B1有界实现已授权，B2-B5仍未授权。
+> Human已接受以下owner分批顺序；B0已完成，完整B1视觉与B2-B5仍未通过/未授权。本次仅按`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`恢复route、Stop AI venue presentation和车辆资源owner。
 
 1. **B0 证据与合同收口（完成）**：train正常入口和route worker已关闭；rat/ghost/birds owner内部机制已关闭；产品入口、铁路策略和完整teardown残余UNKNOWN已登记。
 2. **B1 static + venue（自动验证完成，Human视觉待验）**：恢复`crowd/crowd_up`的region生命周期、稳定身份、方向池和每秒2–4人公开选择机制，以及concert/protest逐NPC动作；双视口production门禁已PASS。

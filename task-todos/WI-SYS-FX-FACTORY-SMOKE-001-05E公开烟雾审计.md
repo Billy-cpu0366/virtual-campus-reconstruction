@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: source-audit
 system: SYS-FX
 issue-class: systemic-failure
-status: cross-system-human-visual-rejected-awaiting-audit
+status: automated-verified-awaiting-human-visual
 decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 updated: 2026-08-25
 ---
@@ -215,9 +215,9 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - PASS：compiled preview真实路径定点10,001ms/575帧，p95 16.8ms、max33.4ms、longtask0、>34ms=0；9 red/13 fog active，离屏/返回generation2/wind/shutdown和错误收集均通过。
 - 收据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/correction-round-1/final/receipt.json` SHA-256 `7085f67732c94798663d6baa72d98999e6c5c6bfda2e63b3c22998aa2b6dcb1d`；截图见同目录`final/screenshots/`。
 
-## Human新增跨系统视觉发现（统一差异表，2026-08-25）
+## Human新增跨系统视觉发现（统一差异表，已进入实施，2026-08-25）
 
-本节记录同一Human视觉Gate中新增的四类观察；它们尚未转为实现授权，不能把NPC延期边界或未实现资源链自动升级为代码任务。
+本节记录同一Human视觉Gate中新增的四类观察。Human已接受统一跨系统修复包；实现仍必须遵守owner边界，不能把四个问题合并成通用Entity/NPC/粒子框架。
 
 | Human观察 | expected source | 当前actual/位置 | 当前判断 | 解决方向 |
 |---|---|---|---|---|
@@ -234,12 +234,23 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - **RC-VIS-3：NPC视口/呈现生命周期与烟雾深度叠加**。Stop AI闪烁的具体owner尚未证实；route终点重启是另一条明确链，不能合并成一个“NPC闪烁修复”。
 - NPC仍按`DEC-SYS-NPC-DEFER-001`延期；本节是新增证据，不是B2–B5授权。若要修NPC，需先由Human重新接受NPC恢复方案，再按route/static/venue等owner分包。
 
-### 当前解决顺序（proposed，未授权）
+### Human接受的当前解决顺序（accepted，已实施，Human视觉待验收）
 
-1. **Fog clear淡出包**：只改`src/fx/fog.ts`、`game/PhaserFogRuntime.ts`及对应测试/probe；先证明单cell、相邻cell和整区穿行均为自然淡出，500ms恢复和quantity2帧门禁不回归。
-2. **资源与owner审计包**：冻结helicopter/police公开配置后，单独登记资源白名单、preload、创建和附属部件；不夹带NPC路线修复。
-3. **NPC恢复审计包**：Human明确取消延期后，先固定Stop AI逐帧证据；以“视口内零可见性断裂、零瞬移、零屏内创建/销毁”为硬停止条件。route的终点/回收策略与static/venue的视口物化分开修复，不能按每个闪现点建立补丁，也不能用淡出隐藏掩盖问题。
+1. **Fog clear presentation（已实施）**：只改Fog owner及对应测试/probe；清cell停止新粒子、保留存活粒子自然淡出，quantity2帧门禁不回归。
+2. **资源与车辆owner（已实施）**：冻结helicopter/police公开配置，完成资源白名单、preload、创建和附属部件链；不夹带route逻辑。
+3. **NPC route连续性（已实施）**：视口内禁止alpha归零、destroy、重建和瞬移；保留各组`goBack/deleteAfterComplete`差异，屏外才允许回收/重置。
+4. **Stop AI venue presentation（已实施）**：固定逐帧owner证据，区分烟雾遮挡、分帧物化和真实create/destroy；视口内连续性是硬停止条件。
 
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。当前返回统一`systemic-failure`审计：quantity4→2的旧candidate `c4b2d6a`及其自动收据均保留，但不能关闭本轮视觉Gate；Fog clear、资源owner和NPC问题尚待审计与重新授权，不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。产品分支`69f6fca`已完成并通过自动/真实路径回归；当前只等待Human视觉验收，不启动S2–S4。
+
+### 实施收据
+
+- `4ace8b5`：Fog clear自然淡出；专项8项通过。
+- `73df384`：route视口连续性；专项19+10项通过。
+- `180865d` + `5ea711d`：车辆owner与CampusScene接线；车辆专项7项通过，真实owner快照/直升机截图通过。
+- `7341cc0`：venue/static可见region原子ready和屏内identity保护；相关NPC专项通过。
+- `69f6fca`：生产probe更新；Stop AI清雾289次采样、NPC连续性47次采样、route production probe通过。
+- 父回归：全量69文件/384测试、typecheck、check:runtime、build、普通browser smoke和test-hooks chunk smoke通过；事件收集无console/exception/failed request/bad response。
+- `c4b2d6a`保留为上一轮quantity2 candidate；本轮仍未取得Human最终视觉签字。
