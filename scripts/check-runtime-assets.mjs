@@ -26,6 +26,22 @@ const STATIC_CROWD_TEXTURES = [
   "npc_footballer_blue", "npc_footballer_red", "npc-hazmat-suit", "npc-bug", "npc_protester_rising",
 ];
 const DANCING_CROWD_TEXTURES = ["npc-dancing-down", "npc-dancing-left", "npc-dancing-right", "npc-dancing-up"];
+const VEHICLE_ASSETS = [
+  ["sprites/npc-helicopter.webp", "sprites/npc-helicopter.webp"],
+  [
+    "sprites/npc-helicopter-rotor-back.webp",
+    "sprites/npc-helicopter-rotor-back.webp",
+  ],
+  [
+    "sprites/npc-helicopter-rotor-main.webp",
+    "sprites/npc-helicopter-rotor-main.webp",
+  ],
+  [
+    "sprites/npc-helicopter-high-resolution.webp",
+    "sprites/npc-helicopter-high-resolution.webp",
+  ],
+  ["sprites/cars/car-police.webp", "sprites/cars/car-police.webp"],
+];
 
 const FILES = [
   ["maps/exterior-final.webp", "maps/exterior-final.webp"],
@@ -48,6 +64,7 @@ const FILES = [
     `sprites/special/${name}.webp`,
     `sprites/special/${name}.webp`,
   ]),
+  ...VEHICLE_ASSETS,
   ["images/peter-oravec.gif", "assets/images/peter-oravec.gif"],
   ["images/peteroravec-logo.webp", "assets/images/peteroravec-logo.webp"],
   ["maps/mini-map.webp", "assets/maps/mini-map.webp"],
