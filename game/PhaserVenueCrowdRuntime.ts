@@ -331,6 +331,7 @@ export class PhaserVenueCrowdRuntime {
     if (bubble === undefined) {
       bubble = this.scene.add.text(sprite.x, sprite.y - PROTESTER_HALF_SIZE - 8, state.text, {
         fontFamily: "monospace",
+        fontStyle: "bold",
         color: "#111111",
         backgroundColor: "#ffffff",
         padding: { left: 3, right: 3, top: 1, bottom: 1 },
@@ -341,8 +342,8 @@ export class PhaserVenueCrowdRuntime {
       bubble.setOrigin?.(0.5, 1);
       this.speechBubbles.set(id, bubble);
     }
-    bubble.x = sprite.x;
-    bubble.y = sprite.y - PROTESTER_HALF_SIZE - 8;
+    bubble.x = Math.round(sprite.x);
+    bubble.y = Math.round(sprite.y - PROTESTER_HALF_SIZE - 8);
     bubble.setText?.(state.text);
     bubble.setDepth(700 + sprite.y * .1);
     bubble.setVisible?.(state.phase === "visible");

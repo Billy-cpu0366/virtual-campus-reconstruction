@@ -144,6 +144,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     expect(bubbles.length).toBeGreaterThan(0);
     expect(bubbles[0]!.style).toMatchObject({
       fontSize: "8px",
+      fontStyle: "bold",
       padding: { left: 3, right: 3, top: 1, bottom: 1 },
       wordWrap: { width: 128, useAdvancedWrap: true },
     });
