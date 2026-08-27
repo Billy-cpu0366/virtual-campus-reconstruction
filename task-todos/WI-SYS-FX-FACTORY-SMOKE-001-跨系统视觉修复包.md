@@ -3,10 +3,11 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: automated-verified-awaiting-human-visual
+status: completed
+audit-status: human-visual-verified
 result-commit: 1d16393
 verification-evidence: .pi/audit-evidence/05e-npc-visual-repair-018/
-audit-status: automated-verified-awaiting-human-visual
+human-gate: passed
 plan-decision: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
@@ -103,9 +104,9 @@ Human明确接受“全部四类问题一起处理”：
 
 ## 7. 输出收据
 
-每个包返回：实际修改路径、根因对照、专项检查、失败/UNKNOWN、未解决风险。Main负责合并共享接线、审查完整diff和最终Human Gate；本包未通过Human视觉前不得关闭05-E或进入S2。
+每个包返回：实际修改路径、根因对照、专项检查、失败/UNKNOWN、未解决风险。Main负责合并共享接线、审查完整diff和最终Human Gate；本包已通过Human视觉并关闭05-E，但不自动进入S2。
 
-## 8. 当前实施结果（自动与生产验证通过，等待Human最终视觉）
+## 8. 历史实施结果（自动与生产验证通过，后续由Human复验）
 
 - Fog：产品提交`4ace8b5`；清除时停止新粒子、保留存活粒子可见；Fog专项8项通过。
 - route：产品提交`73df384`；屏内保持alpha/identity，active cap释放不在屏内冒出；route专项29项和production probe通过。
@@ -183,22 +184,22 @@ Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩
 2. **END OF THE WORLD PARTY venue包**：按公开Bundle已证实的dark zone、2 spotlight、红蓝移动灯、6 laser和concert loop动作建立专用owner；用下门/侧门固定路径验证同一300ms roof fade；先固定路径定位左侧栅栏，再接入准确碰撞；补灯光、动作、入口、障碍和shutdown验证，不凭截图猜视觉细节。
 3. **bug贴图包**：修正`npc-bug`的38×38/24帧/`.63`显示合同，补左下角固定视口截图和frame geometry验证；不顺带扩展bug AI。
 
-**当前Gate**：三包实现和完整自动回归已通过，当前等待Human视觉Gate；不能把自动结果当最终验收。
+**历史Gate记录**：三包实现和完整自动回归已通过；当时等待Human视觉Gate，后续已由Human确认并关闭本包。
 
 ## 14. 三包实现与最终自动验证结果（2026-08-27）
 
 - **已落盘**：产品提交`0f3e646`。A包让route/bug移动NPC消费警车动态阻塞与walls网格，reverse coffee使用10个camera内分道实例和最终sprite坐标reservation；B包新增party lighting owner（1 dark zone、2 spotlight、2 color light、6 laser）及concert loop动作，并验证下门/侧门roof状态；C包修正bug 38×38、24帧、`.63`和方向帧。
 - **已验证**：`npm test`为70个文件/405项，typecheck、runtime asset check、普通production build、普通入口`browser:smoke`、test-hooks `browser:chunk-smoke`和独立reviewer PASS。扩展production probe PASS：coffee camera内10人、最小中心距`65.03389289370136px`、route/bug警车违规0、墙格违规0；party双入口均300ms、11个灯光对象、concert动作计数30、固定左门障碍路径停在`x=1794`；bug实际采样10个，截图可见，console/exception/failed request/bad response均为0。
 - **证据**：`.pi/audit-evidence/05e-npc-cross-owner-repair-008/receipt.json`，SHA-256 `c7527df4a95050245b7a8fd89feb1d85668298e5e3c571c5ffc9e04a0dce7702`；前后截图在同目录`screens/`，清单见`SHA256SUMS`。证据目录按仓库规则不纳入Git提交，保留在产品worktree。
-- **当前状态**：上一轮008已被Human否定；按006完成简化coffee、party回退和Stop AI气泡缩小。Human反馈整体勉强可接受但字体发糊；产品提交`1d16393`改为粗体并取整气泡坐标，完整自动回归和018 production证据通过，当前等待Human复看字体；完整SYS-NPC/B2–B5及S2–S4仍不启动、不关闭05-E。
+- **当前状态**：上一轮008已被Human否定；按006完成简化coffee、party回退和Stop AI气泡缩小。Human反馈整体勉强可接受但字体发糊；产品提交`1d16393`改为粗体并取整气泡坐标，完整自动回归和018 production证据通过，Human已确认字体修复，本包已关闭；完整SYS-NPC/B2–B5及S2–S4仍不启动。
 
 ## 15. Human复验失败与重新审计入口（2026-08-27）
 
 - **classification**：保持`systemic-failure`；本次触发为同类coffee连续修复仍无进展，同时出现性能回归和party/Stop AI新呈现问题；自动production PASS与Human实际体验冲突。
 - **evidence-known**：Human直接反馈为coffee NPC闪现、穿墙、明显卡顿；party当前实现要求回退上一版本；Stop AI对话框尺寸过大。`0f3e646`保留为失败复现基线，旧`9233b20`及其party相关差异作为版本对照。
 - **scope-confidence**：`unknown`。目前不能假设coffee只是单个墙格判断，也不能假设party只需回滚一个文件；需要一次性审计启动/路径/呈现/性能和版本差异。
-- **work-stopped-at**：停止继续修改代码、停止关闭05-E和启动S2–S4；当前阶段为`cluster`。
-- **next-required-step**：产品提交`1d16393`已完成字体清晰度小修和完整自动回归，当前等待Human复看Stop AI字体；不能把018收据当作Human通过。
+- **work-stopped-at**：停止继续修改代码、停止关闭05-E和启动S2–S4；当时阶段为`cluster`。
+- **next-required-step**：该历史入口已完成；产品提交`1d16393`的字体修复已获Human确认，当前不再继续本包修补。
 
 ## 16. 根因聚类与一次性方案（Human已接受）
 
@@ -210,7 +211,7 @@ Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩
 
 **停止条件**：coffee固定视口连续重放中，sprite坐标始终等于可行路径坐标（允许统一小于1像素的渲染误差）、墙格违规0、无身份/可见性断裂、无屏内重建；启动和移动固定帧采样无超过34ms长帧，且Human不再看到卡顿。party画面不再有当前新增的紫色覆盖/彩色大光晕/绿色laser；Stop AI气泡按8px规格可读且不遮挡NPC。自动检查仍不能代替Human验收。
 
-## 17. 006实现结果与当前Human Gate（2026-08-27）
+## 17. 006实现结果（Human Gate已在后续完成，2026-08-27）
 
 - **已落盘**：产品提交`50ab1ba`。coffee移除固定显示车道、显示层reservation、10人扩容和统一20秒delay，保留真实walls-safe路径与完整连续退场；party断开`0f3e646`新增lighting/concert action，保留roof；Stop AI气泡使用8px、左右3/上下1和128px word-wrap。
 - **已验证**：`npm test`为70个文件/405项，typecheck、runtime asset check、普通production build、普通入口`browser:smoke`、test-hooks `browser:chunk-smoke`和性能Smoke通过；017 probe显示coffee display/path mismatch为0、display wall violation为0，party lighting为null、concert action为空，Stop AI实际气泡字体为8px且最大宽度108px，console/exception/failed request/bad response均为空。
@@ -222,4 +223,11 @@ Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩
 - **Human反馈（已确认）**：气泡大小现在合适，但8px普通等宽字在当前画布放大后过于发糊；这是单一呈现层缺陷，不改变文案、大小或生命周期。
 - **最小修复（已落盘）**：产品提交`1d16393`在`game/PhaserVenueCrowdRuntime.ts`仅加入`fontStyle: "bold"`，并将气泡x/y坐标整数化；8px、padding 3/3/1/1、128px word-wrap、三条英文口号和清理语义保持不变。
 - **验证（已验证）**：70个测试文件/405项、typecheck、runtime asset check、production build、普通入口Smoke、test-hooks跨块Smoke和018 production probe通过；018截图显示字体粗体版本，浏览器console/exception/failed request/bad response均为空。独立reviewer无阻塞问题。
-- **Human Gate（待确认）**：自动证据只能证明样式配置与运行路径无回归；仍需Human直接确认字体清晰度。
+- **Human Gate（已通过）**：Human回复“ok。那就继续收口吧”，确认字体修复和本包最终视觉结果；018自动证据与人工验收分开记录。
+
+## 19. Human最终验收与工作项关闭（2026-08-27）
+
+- **Human接受**：Human表示各部分“勉勉强强”，指出唯一剩余问题为Stop AI气泡字体发糊；在`1d16393`粗体/整数定位修复后回复“ok。那就继续收口吧”，视为本次有界视觉Gate通过。
+- **已落盘**：任务卡状态为`completed`，产品结果为`1d16393`，根状态/总账/决策记录同步关闭05-E；018证据目录仍保留在产品worktree，不纳入Git。
+- **已验证**：70个测试文件/405项、typecheck、runtime asset check、production build、普通入口Smoke、test-hooks跨块Smoke、018 production probe、证据哈希和独立review均通过。
+- **关闭边界**：本次只关闭05-E跨系统有界修复包；完整SYS-NPC仍延期，B2–B5和S2–S4未授权，不自动启动新的实现或远端交付。

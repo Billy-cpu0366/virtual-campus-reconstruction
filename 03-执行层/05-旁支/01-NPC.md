@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: cross-owner-repair-006-automated-verified-awaiting-human-visual
+audit-status: cross-owner-repair-006-human-visual-verified-bounded
 work-item: WI-SYS-NPC-SPECIAL-001
 result-commit: 1d16393
 verification-evidence: .pi/audit-evidence/05e-npc-visual-repair-018/
@@ -16,9 +16,9 @@ updated: 2026-08-27
 
 **当前结论候选**：SYS-NPC不是一个统一运行时，而是多类独立owner组成的家族：路线/事件群众、区域静态群众、venue人群、固定special、sprayer、encounter、ghost和moving-sprite。不同owner的激活、动作、视口、回收和失败路径有实质差异，不能再用一套“NPC出现/移动/消失”模型统一修补。
 
-**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，完整NPC专项仍未通过Human视觉；本次Human明确重新授权一个有界跨系统修复包，仅覆盖route连续性、Stop AI venue presentation和直升机/警车资源owner。产品提交`1d16393`已完成上一轮警车、Stop AI和coffee局部修复及本次动态阻塞、coffee简化/墙格、party回退和bug贴图三包，并补充Stop AI字体清晰度修复；自动/生产验证通过。Human此前明确否定`0f3e646`，统一audit→cluster后已接受`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`并完成实现，当前等待Human复看字体，其他NPC owner继续延期。
+**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，完整NPC专项仍延期；本次Human明确重新授权的有界跨系统修复包已覆盖route连续性、Stop AI venue presentation和直升机/警车资源owner。产品提交`1d16393`完成主体修复和Stop AI字体清晰度修复，自动/生产验证通过，Human已最终通过该有界包；其他NPC owner继续延期。
 
-**当前硬边界**：完整SYS-NPC专项仍按`DEC-SYS-NPC-DEFER-001`延期；本次仅按006有界范围完成回归，不恢复完整B1视觉签字或B2-B5。烟雾、车辆和飞机已由Human验收；`0f3e646`的coffee、party和Stop AI呈现已被Human复验否定，`50ab1ba`已按006修复，`1d16393`补充字体清晰度修复并通过自动/生产验证，但最终视觉仍待Human。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
+**当前硬边界**：完整SYS-NPC专项仍按`DEC-SYS-NPC-DEFER-001`延期；本次仅按006有界范围完成回归，不恢复完整B1视觉签字或B2-B5。烟雾、车辆和飞机已由Human验收；`0f3e646`的coffee、party和Stop AI呈现已被Human复验否定，`50ab1ba`已按006修复，`1d16393`补充字体清晰度修复并通过自动/生产验证；Human已通过本次有界修复，但完整SYS-NPC仍延期。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
 
 ## 新增Human视觉证据（2026-08-25至2026-08-27，修复后等待Human最终验收）
 
@@ -76,7 +76,7 @@ Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`，首次尝试已实现静态
 
 - **已落盘**：产品提交`0f3e646`完成动态route/bug避让警车与walls、coffee十人分道/reservation、END OF THE WORLD PARTY lighting与concert动作、双入口roof固定路径复验和bug38×38/24帧/.63贴图。
 - **已验证**：70个测试文件/405项通过；typecheck、资源检查、普通/跨块Smoke、production probe和独立review通过。008收据显示coffee camera内10人、最小中心距65.03389289370136px、route/bug警车与墙格违规0；party 11个灯光对象、30个concert action样本、双入口300ms roof；bug10个真实frame样本且截图无遮挡。
-- **状态**：Human已明确否定`0f3e646`的coffee、party和Stop AI结果；`50ab1ba`已完成006简化修复，`1d16393`补充字体清晰度修复并通过自动/production验证，Human仍待复看字体，完整SYS-NPC继续延期。
+- **状态**：Human已明确否定`0f3e646`的coffee、party和Stop AI结果；`50ab1ba`已完成006简化修复，`1d16393`补充字体清晰度修复并通过自动/production验证，Human已通过该有界包，完整SYS-NPC继续延期。
 
 ## 新一轮Human反馈统一审计与授权（2026-08-27）
 
@@ -164,7 +164,7 @@ B5还需重放完整入口→地图→NPC区域→火车事件→scene shutdown�
 ## 7. 代码位置
 
 - **当前根基线**：根`master`尚无`src/npc/`、`tests/npc/`或NPC production probe。
-- **失败candidate（只读对照）**：历史基线`ea87512`及失败对照`883faa2`保留；当前有界产品提交为`.pi/worktrees/visible-product-integration` / `1d16393`；006主体修复`50ab1ba`、失败复现基线`0f3e646`、上一轮实现基线`9233b20`与连续退场基线`16c74bb`继续作为可追溯父提交。
+- **失败candidate（只读对照）**：历史基线`ea87512`及失败对照`883faa2`保留；当前有界产品提交为`.pi/worktrees/visible-product-integration` / `1d16393`；006主体修复`50ab1ba`、失败复现基线`0f3e646`、上一轮实现基线`9233b20`与连续退场基线`16c74bb`继续作为可追溯父提交。Human已通过该有界包，不代表完整SYS-NPC关闭。
 - candidate core：`src/npc/sprayer.ts`、`routeCrowd.ts`、`gridPathProvider.ts`、`staticCrowd.ts`、`staticNpc.ts`、`venueCrowd.ts`、`venueCrowdRuntime.ts`、`bugCrowd.ts`、`dancingCrowd.ts`。
 - candidate presentation：`game/PhaserSprayerRuntime.ts`、`PhaserRouteCrowdRuntime.ts`、`PhaserStaticCrowdRuntime.ts`、`PhaserStaticNpcRuntime.ts`、`PhaserVenueCrowdRuntime.ts`、`PhaserBugCrowdRuntime.ts`、`PhaserDancingCrowdRuntime.ts`及`game/CampusScene.ts`。
 - candidate tests/probe：`tests/npc/**`、`scripts/browser-route-crowd-production.mjs`、`scripts/browser-npc-visual-production.mjs`；后者带30秒总超时、5秒CDP超时和TIMEOUT诊断收据。

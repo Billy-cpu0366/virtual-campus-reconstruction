@@ -1,21 +1,21 @@
 ---
 workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
-issue-class: systemic-failure
-active-route: systemic-flow
-correction-phase: human-acceptance
-classification-trigger: human-reported-coffee-flash-wall-collision-stutter-party-rejection-stop-ai-dialogue-regression
-classification-ref: DEC-AI-CORRECTION-ROUTING-001
-current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
-work-item-level: system
-work-item-type: bounded-verification-and-repair
-work-item-status: active-cross-owner-awaiting-human-visual
-current-phase: p5.4-cross-owner-human-visual-review
-current-gate: p5.4-cross-owner-human-visual-review
-gate-status: automated-verified-awaiting-human-visual
-authorization-ref: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006
+issue-class: not-applicable
+active-route: standard-workflow
+correction-phase: none
+classification-trigger: none
+classification-ref: none
+current-work-item: none
+work-item-level:
+work-item-type:
+work-item-status:
+current-phase: work-item-selection
+current-gate: none
+gate-status: not-applicable
+authorization-ref:
 preauthorized-next-work-item: none
-next-phase: p5.4-human-acceptance
+next-phase: work-item-selection
 updated: 2026-08-27
 ---
 
@@ -23,14 +23,14 @@ updated: 2026-08-27
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：按Human接受的006完成有界批量修复；产品提交`50ab1ba`通过后，针对Human指出的Stop AI字体发糊又完成`1d16393`粗体/整数定位小修，完整自动回归通过，当前等待Human复看字体清晰度。
-- **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；`0f3e646`保留为失败复现基线，`50ab1ba`只消费006范围，不恢复完整授权。不启动B2-B5，自动结果不代替Human视觉Gate。
+- **当前状态**：05-E跨系统视觉修复包已按006完成并通过Human最终视觉验收，产品结果为`1d16393`，当前回到合法的`none / work-item-selection`。
+- **已关闭范围**：coffee真实路径/连续退场、party新增lighting/concert回退、Stop AI气泡清晰度和bug/警车等既定有界修复均已收口；完整SYS-NPC和S2–S4不随本包完成。
+- **NPC延期**：完整`SYS-NPC`专项仍延期；`0f3e646`保留为失败复现基线，`50ab1ba`和`1d16393`只消费006范围，不恢复完整授权。不启动B2–B5。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：Human已接受`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`：coffee移除10人强制车道/显示reservation/扩容候选，显示跟随真实墙格路径并保留连续退场；party只回到`fca08dd`的lighting/concert动作状态并保留roof；Stop AI气泡缩小为8px与较小留白。其他B2–B5仍未授权，S2–S4未启动。
+- **已接受范围**：`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`覆盖coffee、party和Stop AI本次有界修复；其他B2–B5仍未授权，S2–S4未启动。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：005、008、017和018收据及Human反馈均保留；018证明字体小修后的自动/production条件通过，但不能代替Human视觉验收。Human确认前不关闭05-E，不启动S2–S4。
+- **关闭门禁**：005、008、017和018收据、Human反馈及最终视觉接受均保留；05-E已关闭，但不代表完整SYS-NPC、S2–S4或远端交付完成。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -40,7 +40,7 @@ updated: 2026-08-27
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
 - 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
-- 世界装配与图层详细设计、执行层16卡迁移及历史归档均已验证关闭；SYS-NPC专项已延期，当前进入SYS-FX 05-E S1，维护公开烟雾owner、实现差异与验证收据。
+- 世界装配与图层详细设计、执行层16卡迁移及历史归档均已验证关闭；05-E跨系统有界修复已完成并关闭，SYS-NPC完整专项延期，S2–S4未启动。
 
 ## 阶段
 1. **公开发布文件参考包与运行时采集** — complete
@@ -62,7 +62,7 @@ updated: 2026-08-27
 
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
-| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1自动验证通过但Human视觉失败；本次仅恢复有界修复范围 | 允许修复route连续性、Stop AI venue presentation和车辆资源owner，并纳入统一父工作项；视口内不得消失/出现 | 合并回根基线、恢复完整B1视觉签字、启动其他B2-B5、route/train/special/rat/ghost/birds以外范围、`sample/`、地图/玩家/相机/30FPS/火车、远端 | 四包回归后由Human做整体验收；其他NPC owner仍需另行授权 |
+| SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1完整专项仍延期；本次有界跨系统修复包已通过Human视觉并关闭 | 维护已关闭的route/Stop AI/车辆有界结果；未来完整NPC需重新授权 | 合并回根基线、恢复完整B1视觉签字、启动其他B2-B5、route/train/special/rat/ghost/birds以外范围、`sample/`、地图/玩家/相机/30FPS/火车、远端 | 重新选择并授权后，再从剩余owner进入专项 |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -154,11 +154,11 @@ updated: 2026-08-27
 
 结果：5 场景证据全部 VERIFIED（layer8 遮挡、factory roof 淡隐恢复、bridge1 进出、footsteps 0→5），particles3 为 VERIFIED_WITH_RESIDUAL_UNKNOWN 并转 `Q-LAYER-002`；证据在 `sample/analysis/layer-visual-evidence/`。Human 证据结论审查 `通过`（2026-08-15），工作项关闭。历史任务卡归档于 [migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md](migration-history/doc-v0.1/03-具体怎么做/系统/图层与遮挡：最小视觉补证任务卡（SYS-LAYER）.md)。
 
-## 当前工作项
+## 最近关闭工作项
 
-当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及上一候选`883faa2`继续冻结为代码和失败对照；`9233b20`、`0f3e646`和017收据均保留，`50ab1ba`为006主体修复，`1d16393`为字体清晰度修复，018收据为当前自动验证证据。
+当前无 active 工作项，已回到合法的`none / work-item-selection`。最近关闭的是[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)：产品主体修复为`50ab1ba`，字体清晰度修复为`1d16393`，018收据为最终自动验证证据。
 
-Human此前已验收烟雾、直升机和警车画面；本次coffee/party/Stop AI回归已按006修复并完成全量自动回归，Human反馈整体勉强可接受但字体发糊，现已完成粗体/整数定位修复。当前仅等待Human直接复看Stop AI字体，尚未关闭05-E。
+Human此前已验收烟雾、直升机和警车画面，并在最终复看中确认本包“ok”；coffee、party和Stop AI均按006有界范围收口。完整SYS-NPC、B2–B5和S2–S4保持延期/未授权。
 
 ## 已阻塞或暂停工作项
 
@@ -205,6 +205,7 @@ Human此前已验收烟雾、直升机和警车画面；本次coffee/party/Stop 
 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
 | `WI-SYS-MOVE-WORLD-COLLISION-001` | completed | SYS-MOVE; SYS-LAYER; SYS-WORLD; SYS-CHUNK | 玩家 Arcade Body、walls/bridge 碰撞、桥状态切换、`body.blocked` 反馈、collider 安全清理、碰撞/桥/跨块 Smoke | `e3f412a` | `DEC-SYS-MOVE-WORLD-COLLISION-001` |
 | `WI-RUNTIME-SAFETY-001` | completed | SYS-WORLD; SYS-CHUNK; SYS-APP | World 当前层同步/异步回滚补偿、production diagnostics/hooks 限制、入口 rejected 收敛、favicon 清理、普通安全/普通/跨块/test-hooks 碰撞 Smoke | `632a0c9` | `DEC-RUNTIME-SAFETY-001` |
+| `WI-SYS-FX-FACTORY-SMOKE-001` | completed | SYS-FX; SYS-NPC | 05-E跨系统有界视觉修复：coffee真实路径/连续退场、party新增lighting/concert回退、Stop AI气泡清晰度、警车/bug既定合同；018 production证据、全量回归、Smoke与Human视觉Gate | `1d16393` | `DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006` |
 | `WI-SYS-ZONE-DESIGN-001` | completed | SYS-ZONE | 11 个 marker 公开来源、严格 `<30px`/100ms 区域规则、visited/手动关闭语义、`menuId` 内容桥接、内容索引、SYS-ZONE 设计和冻结接口 | `05c2274` | `DEC-SYS-ZONE-DESIGN-001` |
 | `WI-RENDER-PLAYABLE-001` | completed | SYS-APP; SYS-GAME-UI | `game/` 可玩雏形；编译 preview；browser Smoke；Human视觉验收 | `7c5a738` | `DEC-RENDER-PLAYABLE-001` |
 | `WI-API-COLLABORATION-REVIEW-001` | completed | not-applicable | `AGENTS.md`；`03-执行层/README.md`；API协作审查边界和状态分层 | `6da5755` | `DEC-API-COLLABORATION-001` |
