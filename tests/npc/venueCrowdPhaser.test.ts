@@ -1,23 +1,71 @@
 import { describe, expect, it } from "vitest";
-import { PhaserVenueCrowdRuntime } from "../../game/PhaserVenueCrowdRuntime.js";
+import {
+  PhaserVenueCrowdRuntime,
+  preloadVenueCrowdRuntimeAssets,
+} from "../../game/PhaserVenueCrowdRuntime.js";
 
 class Sprite {
   x: number;
   y: number;
   frame = 0;
   destroyed = false;
+  readonly texture: string;
   readonly played: string[] = [];
   readonly anims = {
     play: (key: string) => { this.played.push(key); },
     stop: () => undefined,
   };
-  constructor(x: number, y: number) { this.x = x; this.y = y; }
+  constructor(x: number, y: number, texture = "") {
+    this.x = x;
+    this.y = y;
+    this.texture = texture;
+  }
   setDepth(): this { return this; }
   setFrame(frame: number): this { this.frame = frame; return this; }
   destroy(): void { this.destroyed = true; }
 }
 
 describe("PhaserVenueCrowdRuntime protest actions", () => {
+  it("loads protest frames at 64px and culls by the matching sprite boundary", () => {
+    let frameConfig: { frameWidth: number; frameHeight: number } | undefined;
+    preloadVenueCrowdRuntimeAssets({
+      spritesheet: (_key, _url, config) => { frameConfig = config; },
+    });
+    expect(frameConfig).toEqual({ frameWidth: 64, frameHeight: 64 });
+
+    let viewport = { left: 0, top: 0, width: 2240, height: 2240 };
+    const sprites: Sprite[] = [];
+    const runtime = new PhaserVenueCrowdRuntime({
+      add: {
+        sprite: (x, y, texture) => {
+          const sprite = new Sprite(x, y, texture);
+          sprites.push(sprite);
+          return sprite;
+        },
+      },
+      textures: { exists: () => true },
+    }, () => viewport);
+
+    expect(runtime.start()).toBe(true);
+    const protester = runtime.snapshot.instances.find((instance) =>
+      instance.regionId.startsWith("protesters_rising"));
+    expect(protester).toBeDefined();
+    const protesterSprite = sprites.find((sprite) =>
+      sprite.texture === "npc_protester_rising" &&
+      sprite.x === protester!.position.x &&
+      sprite.y === protester!.position.y);
+    expect(protesterSprite).toBeDefined();
+
+    const { x, y } = protester!.position;
+    viewport = { left: x - 33, top: y - 1, width: 1, height: 2 };
+    runtime.update();
+    expect(protesterSprite!.destroyed).toBe(false);
+
+    viewport = { left: x - 34, top: y - 1, width: 1, height: 2 };
+    runtime.update();
+    expect(protesterSprite!.destroyed).toBe(true);
+  });
+
   it("staggeres finite actions for one stable subset with observable idle gaps", () => {
     let now = 0;
     let viewport = { left: 0, top: 0, width: 2240, height: 2240 };
@@ -58,7 +106,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
 
     expect(seenActing.size).toBe(capable.length);
     expect(seenIdleAfterAction.size).toBe(capable.length);
-    expect(maximumConcurrent).toBeLessThan(capable.length);
+    expect(maximumConcurrent).toBeLessThanOrEqual(2);
     expect(runtime.protestActionSnapshot
       .filter((state) => !state.capable)
       .every((state) => state.actionCount === 0 && state.phase === "idle"))

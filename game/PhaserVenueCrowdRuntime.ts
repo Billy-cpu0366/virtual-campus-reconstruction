@@ -6,14 +6,32 @@ import {
 } from "../src/player/index.js";
 
 type View = { left: number; top: number; width: number; height: number };
-const NPC_HALF_SIZE = 24;
+const DEFAULT_NPC_HALF_SIZE = 24;
+const PROTESTER_HALF_SIZE = 32;
 
-function isInViewport(x: number, y: number, viewport: View | undefined): boolean {
+function isInViewport(
+  x: number,
+  y: number,
+  viewport: View | undefined,
+  halfSize: number,
+): boolean {
   if (viewport === undefined) return true;
-  return x + NPC_HALF_SIZE >= viewport.left &&
-    x - NPC_HALF_SIZE <= viewport.left + viewport.width &&
-    y + NPC_HALF_SIZE >= viewport.top &&
-    y - NPC_HALF_SIZE <= viewport.top + viewport.height;
+  return x + halfSize >= viewport.left &&
+    x - halfSize <= viewport.left + viewport.width &&
+    y + halfSize >= viewport.top &&
+    y - halfSize <= viewport.top + viewport.height;
+}
+
+function isInViewportForRegion(
+  x: number,
+  y: number,
+  regionId: string | undefined,
+  viewport: View | undefined,
+): boolean {
+  const halfSize = regionId?.startsWith("protesters_rising")
+    ? PROTESTER_HALF_SIZE
+    : DEFAULT_NPC_HALF_SIZE;
+  return isInViewport(x, y, viewport, halfSize);
 }
 
 type Direction =
@@ -59,7 +77,7 @@ export function preloadVenueCrowdRuntimeAssets(loader: {
   loader.spritesheet(
     "npc_protester_rising",
     "/sprites/npc_protester_rising.webp",
-    { frameWidth: 48, frameHeight: 48 },
+    { frameWidth: 64, frameHeight: 64 },
   );
 }
 
@@ -134,14 +152,15 @@ export class PhaserVenueCrowdRuntime {
     const readyRegionIds = new Set<string>();
     if (viewport !== undefined) {
       for (const instance of instances) {
-        if (instance.materialized && isInViewport(
-          instance.position.x, instance.position.y, viewport)) {
+        if (instance.materialized && isInViewportForRegion(
+          instance.position.x, instance.position.y, instance.regionId, viewport)) {
           readyRegionIds.add(instance.regionId);
         }
       }
       for (const [id, sprite] of this.sprites) {
         const instance = byId.get(id);
-        if (instance !== undefined && isInViewport(sprite.x, sprite.y, viewport)) {
+        if (instance !== undefined && isInViewportForRegion(
+          sprite.x, sprite.y, instance.regionId, viewport)) {
           readyRegionIds.add(instance.regionId);
         }
       }
@@ -152,8 +171,8 @@ export class PhaserVenueCrowdRuntime {
     for (const instance of instances) {
       let sprite = this.sprites.get(instance.id);
       const isNew = sprite === undefined;
-      const existingVisible = sprite !== undefined && isInViewport(
-        sprite.x, sprite.y, viewport);
+      const existingVisible = sprite !== undefined && isInViewportForRegion(
+        sprite.x, sprite.y, instance.regionId, viewport);
       if (!instance.materialized && !existingVisible) continue;
       if (!isNew && viewport !== undefined && !existingVisible) continue;
       activeIds.add(instance.id);
@@ -175,7 +194,8 @@ export class PhaserVenueCrowdRuntime {
       this.sprites.set(instance.id, readySprite);
     }
     for (const [id, sprite] of this.sprites) {
-      if (activeIds.has(id) || isInViewport(sprite.x, sprite.y, viewport)) continue;
+      if (activeIds.has(id) || isInViewportForRegion(
+        sprite.x, sprite.y, byId.get(id)?.regionId, viewport)) continue;
       sprite.destroy();
       this.sprites.delete(id);
       const state = this.protestStates.get(id);
