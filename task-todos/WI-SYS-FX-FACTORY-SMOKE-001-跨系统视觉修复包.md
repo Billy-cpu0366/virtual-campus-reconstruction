@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: implementation-authorized
+status: automated-verified-awaiting-human-visual
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
@@ -100,30 +100,30 @@ Human明确接受“全部四类问题一起处理”：
 
 每个包返回：实际修改路径、根因对照、专项检查、失败/UNKNOWN、未解决风险。Main负责合并共享接线、审查完整diff和最终Human Gate；本包未通过Human视觉前不得关闭05-E或进入S2。
 
-## 8. 当前实施结果（自动验证通过，Human部分验收；NPC修正冻结）
+## 8. 当前实施结果（自动与生产验证通过，等待Human最终视觉）
 
 - Fog：产品提交`4ace8b5`；清除时停止新粒子、保留存活粒子可见；Fog专项8项通过。
 - route：产品提交`73df384`；屏内保持alpha/identity，active cap释放不在屏内冒出；route专项29项和production probe通过。
 - 车辆：产品提交`180865d`、Main接线`5ea711d`；资源白名单、preload、专用owner、直升机主体/双旋翼/high-res、3辆警车已接入；production快照与直升机截图通过。警灯和动态车辆行为保持UNKNOWN。
 - venue/static：产品提交`7341cc0`；可见region原子ready、屏内sprite不销毁；专项测试和Stop AI连续性采样通过。
 - probe：产品提交`883faa2`；真实Stop AI probe收集289次清雾样本、47次NPC连续性样本，route production probe通过。
-- 父回归：`npm run typecheck`、全量69文件/384测试、`npm run check:runtime`、普通build、普通browser smoke、test-hooks chunk smoke通过；无console/exception/failed request/bad response。
-- 独立`lightweight-verifier`复核通过：HEAD、工作树、typecheck、全量测试、资源、build、两个production probe和静态边界均PASS；未运行build:test-hooks。
-- Human部分验收已通过烟雾、车辆和飞机；Stop AI人物仍闪现且部分只显示半个身子，coffee路线NPC仍齐刷刷站成一坨。
-- 当前处理：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`已实施专用64×64帧、`drinkers`屏外连续退场和coffee两个静态region局部去重；新build真实视口审计确认`drinkers`已离场，但`vertical-crowd-reverse`仍在coffee终点`gone+visible`成团。当前按systemic-failure重新审计owner，不对已验收Fog/车辆做回归性修改，也不在新方案Gate前扩展代码。
-- 父任务未关闭；不启动S2–S4或完整SYS-NPC B2–B5。
+- 父回归：`npm test`（69个测试文件/389项测试）、`npm run typecheck`、`npm run check:runtime`和当前产品worktree build通过；无console/exception/failed request/bad response。
+- 独立`lightweight-verifier`复核：typecheck、全量389项测试、资源检查和build均PASS；视觉探针因其沙箱不能复用4182而标UNKNOWN。主会话真实4182生产探针已独立取得PASS。
+- Human部分验收已通过烟雾、车辆和飞机；Stop AI人物和coffee路线的历史视觉失败仍需Human最终复验。
+- 当前结果：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`与`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`已实施；产品提交`16c74bb`保存完整原始路径退场、随机起点回归测试及带看门狗的`browser:npc-visual-production`。4182生产探针PASS：Stop AI采样50帧，两个route owner均观察到可见连续退场，静态region 38/61最小间距35.35px，浏览器错误全为0。收据位于产品worktree`.pi/audit-evidence/05e-npc-visual-targeted/receipt.json`，SHA-256 `925c0c99f889361501fa5d95123b47f3b8e205ebcf3b8c508254c34200a9cff9`。
+- 父任务未关闭；Human最终视觉通过前不关闭05-E，不启动S2–S4或完整SYS-NPC B2–B5。
 
-## 9. Human失败差异表（第二次审计后扩展已授权，等待实现与复验）
+## 9. Human失败差异表（第二次审计后扩展已实施，等待Human复验）
 
 | 差异 | Expected source | Actual evidence | 根因簇 | 当前结论 |
 |---|---|---|---|---|
 | Stop AI人物闪现、部分半身 | Human要求视口内NPC完整、连续、不能错误帧或呈现断裂 | `npc_protester_rising.webp`实际为`512×1024`，即8×16个64×64格；`game/PhaserVenueCrowdRuntime.ts`当前preload按48×48切帧，运行时frame为48×48；Stop AI自动identity采样通过但未测像素/帧 | 专用spritesheet几何错误（高可信）；高层烟雾/地图前景遮挡为次要候选，尚未单独证伪 | 先修专用64×64帧合同并补逐帧/截图证据；不改已验收Fog语义 |
-| coffee路线NPC齐刷刷成坨 | Human要求路线人群视觉分散，不能在视口内堆成静止一团 | 新build固定coffee视口`(x≈1160..1640,y≈753..1023)`连续审计：`drinkers`已在视口外；实际画面为9个`vertical-crowd-reverse`实例在约`(1400,904)`终点变成`gone+visible`，另有静态38/61共8个实例 | 先前只修`drinkers`，漏掉同样为`goBack:false/deleteAfterComplete:false`且终点落在coffee视口内的`vertical-crowd-reverse`；这是同一类非往返完成态驻留，但owner和路径需单独复核 | 不直接套用旧方案；建议审计后只为明确coffee owner增加有界连续安全退场，保留该组公开flags，并验证静态去重与路线离场叠加效果；需Human新方案Gate |
+| coffee路线NPC齐刷刷成坨 | Human要求路线人群视觉分散，不能在视口内堆成静止一团 | 新build固定coffee视口`(x≈1160..1640,y≈753..1023)`连续审计：`drinkers`已在视口外；实际画面为9个`vertical-crowd-reverse`实例在约`(1400,904)`终点变成`gone+visible`，另有静态38/61共8个实例 | 先前只修`drinkers`，漏掉同样为`goBack:false/deleteAfterComplete:false`且终点落在coffee视口内的`vertical-crowd-reverse`；这是同一类非往返完成态驻留，但owner和路径需单独复核 | 已按Human接受的扩展只为明确coffee owner增加有界连续安全退场，保留该组公开flags；已验证静态去重与路线离场叠加效果，待Human视觉复验 |
 
-### 首次方案执行结果与第二次审计方案（待Human接受）
+### 首次方案执行结果与第二次审计方案（已接受并实施）
 
 1. **Stop AI专用帧合同**：`npc_protester_rising`已按64×64 spritesheet加载；新build逐帧收据显示texture frame/cut/display均为64，固定视口连续50帧通过。Human视觉仍需确认没有半身/闪现。
 2. **首次coffee方案结果**：`drinkers`已保持公开起点、终点及`goBack:false/deleteAfterComplete:false`，沿`forwardPath`反向连续走到屏外再restart；静态38/61局部最小间距为32px以上。但这只证明`drinkers`根因，不证明coffee视口整体通过。
-3. **第二次owner审计结果**：确认`vertical-crowd-reverse`公开起点/终点/flags；其终点约`(1400,904)`及9个实例在视口内`gone+visible`。Human已通过`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`授权同样沿已有forwardPath连续反向走到安全视口外再restart；不扩展到其他route。
+3. **第二次owner审计结果与修复**：确认`vertical-crowd-reverse`公开起点/终点/flags；其终点约`(1400,904)`及9个实例在视口内`gone+visible`。Human已通过`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`授权该组沿完整原始路径连续反向走到安全视口外再restart；产品提交`16c74bb`已实现，不扩展到其他route。
 
-**当前结论**：Stop AI新build帧/边界审计、`drinkers`退场和静态38/61间距已通过局部自动证据；`vertical-crowd-reverse`扩展尚待实现、生产复验和Human视觉验收。
+**当前结论**：Stop AI新build帧/边界审计、两个coffee route owner的完整路径退场和静态38/61间距已通过自动/生产证据；完整69文件/389测试和编译通过。Human最终视觉验收仍待，自动证据不能代签。

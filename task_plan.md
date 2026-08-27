@@ -9,10 +9,10 @@ classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-cross-system-npc-batch-implement
-current-phase: p5.4-systemic-npc-batch-implement
-current-gate: p5.4-systemic-npc-repair-plan
-gate-status: human-vertical-owner-plan-accepted-awaiting-implementation
+work-item-status: active-cross-system-npc-awaiting-human-visual
+current-phase: p5.4-systemic-npc-full-regression
+current-gate: p5.4-npc-production-visual-review
+gate-status: automated-verified-awaiting-human-visual
 authorization-ref: DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004
 preauthorized-next-work-item: none
 next-phase: p5.4-systemic-npc-full-regression
@@ -24,13 +24,13 @@ updated: 2026-08-27
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题。烟雾已被Human验收，车辆和飞机也已被Human验收；Stop AI人物和coffee路线NPC曾被Human拒绝。`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`的专用帧与`drinkers`退场代码已实施，但新build真实视口审计发现coffee实际成团owner是`vertical-crowd-reverse`；Human已接受`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`，当前只实施该组的有界安全退场。
+- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题。烟雾已被Human验收，车辆和飞机也已被Human验收；Stop AI人物和coffee路线NPC曾被Human拒绝。`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`及`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`的有界修复已在产品提交`16c74bb`落盘；短生产探针、全量回归和编译均通过，当前等待Human最终视觉复验。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮Stop AI半身/闪现与coffee路线拥挤是对上一候选的新Human失败证据，不等于恢复完整授权。上一候选的route/venue有界实现保留为冻结对照；不启动B2-B5，先从同一差异表审计根因。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：Human已部分验收`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`，接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`并进一步接受`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`；现在只允许给`vertical-crowd-reverse`增加沿已有路径的连续屏外退场，保持公开flags，不改其他路线或owner。其他B2–B5仍未授权，S2–S4未启动，cars清雾仍不声称production已集成。
+- **当前授权**：Human已部分验收`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`，并接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`与`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`；本轮只改了明确的两个route owner及既有Stop AI/static范围，保持公开flags和其他owner边界。产品提交`16c74bb`已通过自动与生产验证，但Human最终视觉尚未签字。其他B2–B5仍未授权，S2–S4未启动，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：Fog/车辆包已通过Human视觉；NPC两个失败owner必须先完成统一差异表审计、Human确认一次整体修复方案、成批修复、完整回归，再由Human确认Stop AI无闪现/半身且coffee路线不成坨。Human通过前不得关闭本项或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：Fog/车辆包已通过Human视觉；NPC两个失败owner已经完成统一差异表审计、成批修复、完整自动回归和生产探针，收据为`16c74bb`及`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-npc-visual-targeted/receipt.json`（SHA-256 `925c0c99...a9cff9`）。仍需Human确认Stop AI无闪现/半身且coffee路线不成坨；Human通过前不得关闭本项或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -158,7 +158,7 @@ updated: 2026-08-27
 
 当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及上一候选`883faa2`继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
 
-Human已部分验收四个修复包：烟雾、直升机和警车通过；Stop AI人物闪现/半身、coffee路线NPC拥挤未通过。初次审计方案已实施：Stop AI改64×64帧，`drinkers`沿连续出口退场，两个静态region局部去重。但新build真实视口审计显示：`drinkers`已在视口外，coffee画面中的堆积实际是9个`vertical-crowd-reverse`实例在约`(1400,904)`终点变成`gone+visible`，并叠加静态38/61的8个实例。Human已接受`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`，当前只实施该组安全退场。
+Human已部分验收四个修复包：烟雾、直升机和警车通过；Stop AI人物闪现/半身、coffee路线NPC拥挤未通过。初次审计方案已实施并发现coffee真实堆积owner为`vertical-crowd-reverse`；Human随后接受`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`。当前产品提交`16c74bb`已完成两个明确route owner的完整路径退场修复，并通过短生产探针、69文件/389测试、typecheck、runtime asset check和build；仍等待Human最终视觉验收。
 
 ## 已阻塞或暂停工作项
 
