@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: implementation-authorized
+status: systemic-audit-awaiting-replan
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
@@ -146,4 +146,11 @@ Human在当前本地production预览中新增4条反馈：警车可站立/穿透
 2. **Stop AI content/ambient packet**：将公开`crowd_up`背景从5人局部重构为2人，并为`protesters_rising`加入公开英文口号轮换气泡；不把背景人群误迁为抗议者，不改其他静态region或未授权NPC owner。
 3. **Coffee spacing packet**：仅约束coffee局部route occupancy与静态38/61 placement，使相关NPC中心距至少56px；保留两个route的公开flags和已修好的连续退场，不改全局offset、其他路线或地图。
 
-本轮已进入实现；完成后必须通过专项测试、全量回归、生产探针和Human视觉验收。
+本轮首次实现尝试已执行；完成后必须通过专项测试、全量回归、生产探针和Human视觉验收。
+
+## 11. 新方案视觉失败（2026-08-27）
+
+- **自动结果**：警车碰撞、Stop AI protester/英文气泡、对街背景2人、coffee局部无间距违规均通过；完整测试为69个文件/396项，typecheck、runtime asset check和build通过。
+- **视觉结果**：coffee-before/coffee-after截图中该区域没有可见NPC。原因是为满足`>=56px`而同时禁用了静态38/61并把coffee route并发压到只剩1个，形成了空场景；这不是可接受的“有间隙”。
+- **结论**：本轮自动PASS与视觉结果冲突，按`systemic-failure`退回audit；产品worktree保留未提交失败尝试，不创建新的零散修补。失败证据位于`.pi/audit-evidence/05e-npc-visual-repair-003-failed/`，receipt SHA-256 `ce1eb475f1d31df1c3b0a1831cf181b0d62aa492e1d4632c8f0bcaf5ee2a10d8`。
+- **下一Gate**：重新定义coffee的非空验收（建议至少2个route NPC同时/交替可见，任何同时可见中心距`>=56px`），再决定局部lane/时序或保留少量静态点；未获Human重新确认前不继续改代码。
