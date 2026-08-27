@@ -50,6 +50,7 @@ export interface PhaserStaticCrowdSceneLike {
 export interface PhaserStaticCrowdRuntimeOptions {
   readonly viewport: () => StaticCrowdViewport | undefined;
   readonly viewportMargin?: number;
+  readonly disabledRegionIndexes?: readonly number[];
   readonly onError?: (reason: string) => void;
 }
 
@@ -71,6 +72,9 @@ export class PhaserStaticCrowdRuntime {
   constructor(private readonly scene: PhaserStaticCrowdSceneLike, private readonly options: PhaserStaticCrowdRuntimeOptions) {
     this.core = new StaticCrowdRuntime({
       ...(options.viewportMargin === undefined ? {} : { viewportMargin: options.viewportMargin }),
+      ...(options.disabledRegionIndexes === undefined ? {} : {
+        disabledRegionIndexes: options.disabledRegionIndexes,
+      }),
     });
   }
 

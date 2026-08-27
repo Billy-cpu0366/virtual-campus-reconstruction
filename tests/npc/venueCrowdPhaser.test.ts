@@ -2,7 +2,21 @@ import { describe, expect, it } from "vitest";
 import {
   PhaserVenueCrowdRuntime,
   preloadVenueCrowdRuntimeAssets,
+  PROTESTER_SLOGANS,
 } from "../../game/PhaserVenueCrowdRuntime.js";
+
+class Text {
+  visible = false;
+  destroyed = false;
+  depth = 0;
+  origin = { x: 0, y: 0 };
+  constructor(public x: number, public y: number, public value: string) {}
+  setDepth(value: number): this { this.depth = value; return this; }
+  setOrigin(x: number, y: number): this { this.origin = { x, y }; return this; }
+  setText(value: string): this { this.value = value; return this; }
+  setVisible(value: boolean): this { this.visible = value; return this; }
+  destroy(): void { this.destroyed = true; }
+}
 
 class Sprite {
   x: number;
@@ -64,6 +78,84 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     viewport = { left: x - 34, top: y - 1, width: 1, height: 2 };
     runtime.update();
     expect(protesterSprite!.destroyed).toBe(true);
+  });
+
+  it("prioritizes a visible protest region over offscreen prewarm", () => {
+    const viewport = { left: 1_560, top: 1_065, width: 480, height: 270 };
+    const sprites: Sprite[] = [];
+    const runtime = new PhaserVenueCrowdRuntime({
+      add: { sprite: (x, y, texture) => {
+        const sprite = new Sprite(x, y, texture);
+        sprites.push(sprite);
+        return sprite;
+      } },
+      textures: { exists: () => true },
+    }, () => viewport);
+
+    expect(runtime.start()).toBe(true);
+    expect(sprites.some((sprite) => sprite.texture === "npc_protester_rising")).toBe(true);
+  });
+
+  it("materializes protest sprites after moving from the spawn viewport", () => {
+    let viewport = { left: 848, top: 169, width: 480, height: 270 };
+    const sprites: Sprite[] = [];
+    const runtime = new PhaserVenueCrowdRuntime({
+      add: { sprite: (x, y, texture) => {
+        const sprite = new Sprite(x, y, texture);
+        sprites.push(sprite);
+        return sprite;
+      } },
+      textures: { exists: () => true },
+    }, () => viewport);
+
+    expect(runtime.start()).toBe(true);
+    viewport = { left: 1_560, top: 1_065, width: 480, height: 270 };
+    runtime.update();
+    expect(sprites.some((sprite) => sprite.texture === "npc_protester_rising")).toBe(true);
+  });
+
+  it("rotates public protest slogans only while protesters are visible", () => {
+    let now = 0;
+    let viewport = { left: 0, top: 0, width: 2240, height: 2240 };
+    const sprites: Sprite[] = [];
+    const bubbles: Text[] = [];
+    const runtime = new PhaserVenueCrowdRuntime({
+      add: {
+        sprite: (x, y, texture) => {
+          const sprite = new Sprite(x, y, texture);
+          sprites.push(sprite);
+          return sprite;
+        },
+        text: (x, y, text) => {
+          const bubble = new Text(x, y, text);
+          bubbles.push(bubble);
+          return bubble;
+        },
+      },
+      textures: { exists: () => true },
+    }, () => viewport, () => now);
+
+    expect(runtime.start()).toBe(true);
+    let sawVisible = false;
+    let sawBubble = false;
+    for (now = 0; now <= 4_000; now += 100) {
+      runtime.update();
+      sawVisible ||= runtime.protestSpeechSnapshot.some((state) => state.phase === "visible");
+      sawBubble ||= bubbles.some((bubble) => bubble.visible && PROTESTER_SLOGANS.includes(
+        bubble.value as typeof PROTESTER_SLOGANS[number],
+      ));
+    }
+    expect(sawVisible).toBe(true);
+    expect(sawBubble).toBe(true);
+    expect(runtime.protestSpeechSnapshot.every((state) =>
+      PROTESTER_SLOGANS.includes(state.text as typeof PROTESTER_SLOGANS[number]),
+    )).toBe(true);
+
+    viewport = { left: 10_000, top: 10_000, width: 10, height: 10 };
+    runtime.update();
+    expect(bubbles.every((bubble) => bubble.destroyed)).toBe(true);
+    expect(runtime.protestSpeechSnapshot).toHaveLength(0);
+    expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
   });
 
   it("staggeres finite actions for one stable subset with observable idle gaps", () => {

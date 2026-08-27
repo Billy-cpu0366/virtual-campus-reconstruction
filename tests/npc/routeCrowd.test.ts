@@ -345,6 +345,117 @@ describe("RouteCrowdRuntime contract", () => {
     });
   });
 
+  it("limits only route owners that enter the bounded coffee spacing area", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        count: 3,
+        startTiles: [{ x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }],
+        randomPositions: false,
+      })],
+      pathProvider: () => [
+        { x: 0, y: 48 },
+        { x: 100, y: 48 },
+      ],
+      visualSpacing: {
+        minDistance: 56,
+        isInScope: (point) => point.x >= 0 && point.x <= 200 && point.y === 48,
+        maxInstancesByConfig: { "test-crowd": 1 },
+      },
+    });
+    expect(runtime.start(0)).toMatchObject({ ok: true, created: 1 });
+  });
+
+  it("allows only the configured route owner inside a scoped area", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [
+        testConfig({ id: "allowed-crowd" }),
+        testConfig({ id: "blocked-crowd" }),
+      ],
+      pathProvider: pathFor,
+      visualSpacing: {
+        minDistance: 56,
+        isInScope: (point) => point.x >= 0 && point.x <= 200 &&
+          point.y === 48,
+        allowedConfigIdsInScope: ["allowed-crowd"],
+        maxInstancesByConfig: { "allowed-crowd": 1 },
+      },
+    });
+    expect(runtime.start(0)).toMatchObject({ ok: true, created: 1 });
+    expect(runtime.snapshot.instances.map((instance) =>
+      instance.id.split(":")[0],
+    )).toEqual(["allowed-crowd"]);
+  });
+
+  it("can fix a scoped route's offscreen start and delay", () => {
+    const runtime = new RouteCrowdRuntime({
+      random: () => 0,
+      configs: [testConfig({
+        count: 2,
+        startTiles: [{ x: 2, y: 3 }, { x: 6, y: 3 }],
+        randomPositions: true,
+        delay: { minMs: 1_000, maxMs: 5_000 },
+      })],
+      pathProvider: pathFor,
+      visualSpacing: {
+        minDistance: 56,
+        isInScope: (point) => point.y === 48,
+        fixedStartWaypointByConfig: { "test-crowd": 0 },
+        fixedDelayByConfig: { "test-crowd": 0 },
+        checkMovement: false,
+      },
+    });
+    const viewport = { left: 0, top: 0, width: 200, height: 100 };
+    runtime.start(0, viewport);
+    expect(runtime.snapshot.instances.map((instance) => instance.position))
+      .toEqual([{ x: 32, y: 48 }, { x: 96, y: 48 }]);
+    runtime.tick(1, viewport);
+    expect(runtime.snapshot.instances.every((instance) =>
+      instance.state === "moving" && instance.visible &&
+      instance.alpha === 1 && !instance.destroyed,
+    )).toBe(true);
+  });
+
+  it("waits before entering a bounded visual spacing exclusion", () => {
+    let externalPoints = [{ x: 100, y: 48 }];
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        delay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: true,
+        randomPositions: false,
+      })],
+      baseSpeed: 48,
+      pathProvider: () => [
+        { x: 0, y: 48 },
+        { x: 100, y: 48 },
+      ],
+      visualSpacing: {
+        minDistance: 56,
+        isInScope: (point) => point.x >= 0 && point.x <= 200 && point.y === 48,
+        externalPoints: () => externalPoints,
+      },
+    });
+    const viewport = { left: -100, top: 0, width: 400, height: 200 };
+    runtime.start(0, viewport);
+    runtime.tick(2_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "waiting",
+      position: { x: 0, y: 48 },
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+    externalPoints = [];
+    runtime.tick(5_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      generation: 0,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+  });
+
   it("deletes one-way routes or respawns them according to the contract", () => {
     const oneWayDelete = new RouteCrowdRuntime({
       configs: [testConfig({ goBack: false, deleteAfterComplete: true })],

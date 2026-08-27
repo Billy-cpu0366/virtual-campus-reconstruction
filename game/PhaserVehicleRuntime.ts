@@ -101,6 +101,7 @@ export const POLICE_POSITIONS = Object.freeze([
   Object.freeze({ x: 112 * VEHICLE_TILE_SIZE + 8, y: 82 * VEHICLE_TILE_SIZE + 8 - 5, frame: 6 }),
   Object.freeze({ x: 109 * VEHICLE_TILE_SIZE + 8, y: 84 * VEHICLE_TILE_SIZE + 8 - 5, frame: 4 }),
 ]);
+export const POLICE_COLLISION_SIZE = Object.freeze({ width: 64, height: 48 });
 export const POLICE_RUNTIME_CONTRACT = Object.freeze({
   count: 3,
   depth: VEHICLE_DEPTH,
@@ -148,6 +149,12 @@ export interface PhaserVehicleTextureManagerLike {
   exists(key: string): boolean;
 }
 
+export interface PhaserVehiclePhysicsBodyLike {
+  setSize?(width: number, height: number, center?: boolean): unknown;
+  immovable?: boolean;
+  moves?: boolean;
+}
+
 export interface PhaserVehicleDisplayObjectLike {
   x: number;
   y: number;
@@ -157,6 +164,7 @@ export interface PhaserVehicleDisplayObjectLike {
   displayWidth?: number;
   displayHeight?: number;
   visible?: boolean;
+  body?: PhaserVehiclePhysicsBodyLike;
   setOrigin?(x: number, y: number): this;
   setDepth?(value: number): this;
   setScale?(x: number, y?: number): this;
@@ -179,6 +187,11 @@ export interface PhaserVehicleSceneLike {
   readonly add: {
     image(x: number, y: number, texture: string): unknown;
     sprite(x: number, y: number, texture: string, frame?: number): unknown;
+  };
+  readonly physics?: {
+    readonly add: {
+      existing(object: unknown, isStatic?: boolean): unknown;
+    };
   };
   readonly events: PhaserVehicleEventsLike;
 }
@@ -238,6 +251,7 @@ export interface VehiclePoliceSnapshot {
   readonly bounds: VehicleBounds | "UNKNOWN";
   readonly componentKeys: readonly string[];
   readonly scale: number;
+  readonly collisionBodyCreated: boolean;
 }
 
 export interface VehicleRuntimeSnapshot {
@@ -374,6 +388,10 @@ export class PhaserVehicleRuntime {
     }
   }
 
+  public get policeCollisionTargets(): readonly PhaserVehicleDisplayObjectLike[] {
+    return Object.freeze([...this.policeObjects]);
+  }
+
   public start(nowMs?: number): VehicleStartResult {
     if (this.state === "shutdown") return { ok: false, reason: "shutdown" };
     if (this.state === "running") return { ok: false, reason: "already-running" };
@@ -479,6 +497,7 @@ export class PhaserVehicleRuntime {
       ...item,
       bounds: this.objectBounds(this.policeObjects[index], 0.5, 0.5),
       componentKeys: POLICE_COMPONENT_KEYS,
+      collisionBodyCreated: this.policeObjects[index]?.body !== undefined,
     })));
     const diagnostics = Object.freeze([...this.diagnostics]);
     return Object.freeze({
@@ -579,6 +598,7 @@ export class PhaserVehicleRuntime {
       this.setVisible(sprite, true);
       sprite.setFrame?.(position.frame);
       this.setScale(sprite, 1);
+      this.attachPoliceCollisionBody(sprite);
       this.policeObjects.push(sprite);
       this.police.push(Object.freeze({
         kind: "police" as const,
@@ -590,8 +610,27 @@ export class PhaserVehicleRuntime {
         bounds: "UNKNOWN" as const,
         componentKeys: POLICE_COMPONENT_KEYS,
         scale: 1,
+        collisionBodyCreated: sprite.body !== undefined,
       }));
     }
+  }
+
+  private attachPoliceCollisionBody(
+    sprite: PhaserVehicleDisplayObjectLike,
+  ): void {
+    const physics = this.scene.physics;
+    if (physics === undefined) return;
+    const created = physics.add.existing(sprite, true) as
+      PhaserVehiclePhysicsBodyLike | undefined;
+    const body = sprite.body ?? created;
+    if (body === undefined) return;
+    body.setSize?.(
+      POLICE_COLLISION_SIZE.width,
+      POLICE_COLLISION_SIZE.height,
+      true,
+    );
+    body.immovable = true;
+    body.moves = false;
   }
 
   private createImage(x: number, y: number, key: string): PhaserVehicleDisplayObjectLike {

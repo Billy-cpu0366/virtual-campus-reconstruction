@@ -431,6 +431,10 @@ export class CampusScene extends Phaser.Scene {
     TilemapLayerLike,
     { destroy(): void }
   >();
+  private readonly vehicleColliders = new Set<{
+    active?: boolean;
+    destroy(): void;
+  }>();
   private readonly heldMovementKeys = new Set<keyof KeyState>();
   private readonly mutationScheduler = new PhaserWorldMutationScheduler();
 
@@ -1119,6 +1123,30 @@ export class CampusScene extends Phaser.Scene {
     this.sideFailures.push(reason);
   }
 
+  private connectPoliceCollisions(): void {
+    this.disconnectPoliceCollisions();
+    for (const target of this.vehicleRuntime?.policeCollisionTargets ?? []) {
+      const collider = this.physics.add.collider(
+        this.player,
+        target as any,
+      ) as { active?: boolean; destroy(): void } | undefined;
+      if (collider === undefined) {
+        this.recordSideFailure("vehicle:police-collider-create-failed");
+        continue;
+      }
+      this.vehicleColliders.add(collider);
+    }
+  }
+
+  private disconnectPoliceCollisions(): void {
+    for (const collider of this.vehicleColliders) {
+      collider.active = false;
+      this.physics?.world?.removeCollider?.(collider as any);
+      collider.destroy();
+    }
+    this.vehicleColliders.clear();
+  }
+
   private connectTrainCollision(
     shape: PhaserTrainCollisionShapeLike,
   ): () => void {
@@ -1168,6 +1196,7 @@ export class CampusScene extends Phaser.Scene {
     this.dancingCrowdRuntime?.shutdown();
     this.stopAiSmokeRuntime?.shutdown();
     this.fogRuntime?.shutdown();
+    this.disconnectPoliceCollisions();
     this.vehicleRuntime?.shutdown();
     this.smokeRuntime?.shutdown();
     this.trainRuntime?.shutdown(this.time?.now);
@@ -1510,6 +1539,23 @@ export class CampusScene extends Phaser.Scene {
       isBlocked: (point) => this.trainBlockingCells.includes(
         `${Math.floor(point.x / 16)},${Math.floor(point.y / 16)}`,
       ),
+      visualSpacing: {
+        minDistance: 56,
+        isInScope: (point) => point.x >= 1_280 && point.x <= 1_520 &&
+          point.y >= 800 && point.y <= 1_080,
+        externalPoints: () => this.staticCrowdRuntime?.snapshot.instances
+          .filter((instance) => instance.regionIndex === 38 || instance.regionIndex === 61)
+          .map((instance) => instance.position) ?? [],
+        maxInstancesByConfig: {
+          drinkers: 0,
+          "vertical-crowd": 0,
+          "vertical-crowd-reverse": 2,
+        },
+        allowedConfigIdsInScope: ["vertical-crowd-reverse"],
+        fixedStartWaypointByConfig: { "vertical-crowd-reverse": 0 },
+        fixedDelayByConfig: { "vertical-crowd-reverse": 0 },
+        checkMovement: false,
+      },
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
       scheduleNextUpdate: (callback) => this.events.once("update", callback),
     });
@@ -1535,6 +1581,7 @@ export class CampusScene extends Phaser.Scene {
           height: this.cameras.main.worldView.height,
         }),
         viewportMargin: 400,
+        disabledRegionIndexes: [38, 61],
         onError: (reason) => this.recordSideFailure(`static-crowd:${reason}`),
       },
     );
@@ -1557,6 +1604,8 @@ export class CampusScene extends Phaser.Scene {
     const vehicleStarted = this.vehicleRuntime?.start(this.time.now);
     if (vehicleStarted === undefined || !vehicleStarted.ok) {
       this.recordSideFailure(`vehicle:${vehicleStarted?.reason ?? "missing-owner"}`);
+    } else {
+      this.connectPoliceCollisions();
     }
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {

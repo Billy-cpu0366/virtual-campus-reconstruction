@@ -24,6 +24,9 @@ export type {
 } from "./bugCrowd.js";
 
 export {
+  COFFEE_STATIC_MIN_SPACING,
+  STOP_AI_BACKGROUND_COUNT,
+  STOP_AI_BACKGROUND_REGION_INDEX,
   STATIC_CROWD_FACTOR,
   STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE,
   STATIC_CROWD_MIN_SPACING,
@@ -83,6 +86,7 @@ export type {
   RouteCrowdRange,
   RouteCrowdRuntimeOptions,
   RouteCrowdSnapshot,
+  RouteCrowdSpacingRule,
   RouteCrowdStartResult,
   RouteCrowdState,
   RouteCrowdTile,

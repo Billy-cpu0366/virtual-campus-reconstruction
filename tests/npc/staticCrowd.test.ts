@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   STATIC_CROWD_REGIONS,
+  COFFEE_STATIC_MIN_SPACING,
+  STOP_AI_BACKGROUND_COUNT,
+  STOP_AI_BACKGROUND_REGION_INDEX,
   STATIC_CROWD_MIN_SPACING,
   StaticCrowdRuntime,
   staticCrowdRequestedCount,
@@ -33,6 +36,21 @@ describe("StaticCrowdRuntime", () => {
     expect(station?.outline[0]).toEqual({ x: 1160, y: 264 });
     expect(STATIC_CROWD_REGIONS.find((region) => region.id === "football_team_blue"))
       .toSatisfy((region) => region !== undefined && staticCrowdRequestedCount(region) === 10);
+    const stopAiBackground = STATIC_CROWD_REGIONS.find((region) =>
+      region.regionIndex === STOP_AI_BACKGROUND_REGION_INDEX);
+    expect(stopAiBackground?.type).toBe("crowd_up");
+    expect(stopAiBackground && staticCrowdRequestedCount(stopAiBackground))
+      .toBe(STOP_AI_BACKGROUND_COUNT);
+  });
+
+  it("suppresses only explicitly disabled local regions before materialization", () => {
+    const region = STATIC_CROWD_REGIONS.find((item) => item.regionIndex === 38)!;
+    const runtime = new StaticCrowdRuntime({
+      regions: [region],
+      disabledRegionIndexes: [38],
+    });
+    const snapshot = runtime.start({ left: 0, top: 0, width: 2_240, height: 2_240 });
+    expect(snapshot.instances).toHaveLength(0);
   });
 
   it("keeps seeded polygon placements stable and spaced while viewport culling is presentation-only", () => {
@@ -65,7 +83,7 @@ describe("StaticCrowdRuntime", () => {
     expect(first.snapshot.instances.map((item) => item.position)).toEqual(original);
   });
 
-  it("applies 32px spacing only to the exact 38/61 region pair", () => {
+  it("applies 56px spacing to the exact coffee region pair", () => {
     const region = (regionIndex: number, left: number): StaticCrowdRegion => ({
       regionIndex,
       tileCount: 5,
@@ -108,20 +126,24 @@ describe("StaticCrowdRuntime", () => {
     for (const first of positions38) {
       for (const second of positions61) {
         expect(Math.hypot(first.x - second.x, first.y - second.y))
-          .toBeGreaterThanOrEqual(32);
+          .toBeGreaterThanOrEqual(COFFEE_STATIC_MIN_SPACING);
       }
     }
     expect(positions38.some((first) => positions62.some((second) =>
       Math.hypot(first.x - second.x, first.y - second.y) < 32,
     ))).toBe(true);
 
-    for (const positions of [positions38, positions61, positions62]) {
+    for (const [positions, minimum] of [
+      [positions38, COFFEE_STATIC_MIN_SPACING],
+      [positions61, COFFEE_STATIC_MIN_SPACING],
+      [positions62, STATIC_CROWD_MIN_SPACING],
+    ] as const) {
       for (let left = 0; left < positions.length; left += 1) {
         for (let right = left + 1; right < positions.length; right += 1) {
           expect(Math.hypot(
             positions[left]!.x - positions[right]!.x,
             positions[left]!.y - positions[right]!.y,
-          )).toBeGreaterThanOrEqual(20);
+          )).toBeGreaterThanOrEqual(minimum);
         }
       }
     }

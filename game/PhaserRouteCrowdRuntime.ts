@@ -5,6 +5,7 @@ import {
   type RouteCrowdPathProvider,
   type RouteCrowdTile,
   type RouteCrowdViewport,
+  type RouteCrowdSpacingRule,
 } from "../src/npc/index.js";
 import {
   ANIMATION_FRAME_RATE,
@@ -20,6 +21,15 @@ export const ROUTE_CROWD_TEXTURES = Object.freeze([
 ] as const);
 
 const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
+export const COFFEE_ROUTE_LANE_OFFSET = 40;
+
+function coffeeLaneOffset(groupId: string, id: string): number {
+  if (groupId !== "vertical-crowd-reverse") return 0;
+  const index = Number(id.split(":").at(-1));
+  if (!Number.isInteger(index)) return 0;
+  return index % 2 === 0 ? -COFFEE_ROUTE_LANE_OFFSET : COFFEE_ROUTE_LANE_OFFSET;
+}
+
 export function keepOrdinaryCrowdOffTrack(groupId: string, x: number, y: number): { x: number; y: number } {
   if (groupId === "crowd-train" || x < CROWD_TRACK_BAND.minX || x > CROWD_TRACK_BAND.maxX || y < CROWD_TRACK_BAND.minY || y > CROWD_TRACK_BAND.maxY) return { x, y };
   return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
@@ -78,6 +88,7 @@ export interface PhaserRouteCrowdRuntimeOptions {
   readonly random?: () => number;
   /** Production supplies a callback for the next Phaser update/frame. */
   readonly scheduleNextUpdate?: (callback: () => void) => void;
+  readonly visualSpacing?: RouteCrowdSpacingRule;
 }
 
 /** Presentation owner for route crowds with viewport-bounded sprites. */
@@ -104,7 +115,11 @@ export class PhaserRouteCrowdRuntime {
       ...(options.isBlocked === undefined ? {} : { isBlocked: options.isBlocked }),
       ...(options.random === undefined ? {} : { random: options.random }),
     };
-    this.core = new RouteCrowdRuntime({ configs: normalConfigs, ...runtimeOptions });
+    this.core = new RouteCrowdRuntime({
+      configs: normalConfigs,
+      ...runtimeOptions,
+      ...(options.visualSpacing === undefined ? {} : { visualSpacing: options.visualSpacing }),
+    });
     this.trainCore = new RouteCrowdRuntime({
       configs: ROUTE_CROWD_CONFIGS.filter((config) => config.id === "crowd-train"),
       ...runtimeOptions,
@@ -269,7 +284,12 @@ export class PhaserRouteCrowdRuntime {
       const seed = [...item.id].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 0);
       const offsetX = offsetRange === 0 ? 0 : (seed % (offsetRange * 2 + 1)) - offsetRange;
       const offsetY = offsetRange === 0 ? 0 : ((seed >>> 8) % (offsetRange * 2 + 1)) - offsetRange;
-      const display = keepOrdinaryCrowdOffTrack(groupId, item.position.x + offsetX, item.position.y + offsetY);
+      const laneOffset = coffeeLaneOffset(groupId, item.id);
+      const display = keepOrdinaryCrowdOffTrack(
+        groupId,
+        item.position.x + offsetX + laneOffset,
+        item.position.y + offsetY,
+      );
       sprite.x = display.x;
       sprite.y = display.y;
       sprite.setDepth(500 + item.position.y * .1);

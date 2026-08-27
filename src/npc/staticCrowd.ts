@@ -57,12 +57,16 @@ export interface StaticCrowdRuntimeOptions {
   readonly spritePools?: Partial<StaticCrowdSpritePools>;
   readonly viewportMargin?: number;
   readonly maxPlacementAttemptsPerInstance?: number;
+  readonly disabledRegionIndexes?: readonly number[];
 }
 
 export const STATIC_CROWD_FACTOR = 0.004;
 export const STATIC_CROWD_UP_FACTOR = 0.016;
 export const STATIC_CROWD_VIEWPORT_MARGIN = 300;
 export const STATIC_CROWD_MIN_SPACING = 20;
+export const COFFEE_STATIC_MIN_SPACING = 56;
+export const STOP_AI_BACKGROUND_REGION_INDEX = 64;
+export const STOP_AI_BACKGROUND_COUNT = 2;
 export const STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE = 20;
 
 // DECISION: the public API is one source-region projection plus one local
@@ -3830,6 +3834,9 @@ export function staticCrowdRequestedCount(region: StaticCrowdRegion): number {
   if (region.id === "football_team_blue" || region.id === "football_team_red") {
     return 10;
   }
+  if (region.regionIndex === STOP_AI_BACKGROUND_REGION_INDEX) {
+    return STOP_AI_BACKGROUND_COUNT;
+  }
   const factor = region.type === "crowd_up"
     ? STATIC_CROWD_UP_FACTOR
     : STATIC_CROWD_FACTOR;
@@ -3903,13 +3910,17 @@ function emptySnapshot(): StaticCrowdSnapshot {
 
 type Placement = Omit<StaticCrowdInstanceSnapshot, "materialized">;
 
+function isCoffeeRegion(regionIndex: number): boolean {
+  return regionIndex === 38 || regionIndex === 61;
+}
+
 function crossRegionMinSpacing(
   firstRegionIndex: number,
   secondRegionIndex: number,
 ): number | undefined {
   const isTargetPair = (firstRegionIndex === 38 && secondRegionIndex === 61) ||
     (firstRegionIndex === 61 && secondRegionIndex === 38);
-  return isTargetPair ? 32 : undefined;
+  return isTargetPair ? COFFEE_STATIC_MIN_SPACING : undefined;
 }
 
 function makePlacements(
@@ -3917,9 +3928,11 @@ function makePlacements(
   random: () => number,
   spritePools: StaticCrowdSpritePools,
   maxPlacementAttemptsPerInstance: number,
+  disabledRegionIndexes: ReadonlySet<number>,
 ): readonly Placement[] {
   const placements: Placement[] = [];
   for (const region of regions) {
+    if (disabledRegionIndexes.has(region.regionIndex)) continue;
     const bounds = boundsFor(region);
     const category = categoryFor(region);
     const sprites = spritePools[category];
@@ -3936,9 +3949,12 @@ function makePlacements(
           y: bounds.top + bounds.height * normalizedRandom(random),
         };
         if (!pointInPolygon(candidate, region.outline)) continue;
+        const withinRegionSpacing = isCoffeeRegion(region.regionIndex)
+          ? COFFEE_STATIC_MIN_SPACING
+          : STATIC_CROWD_MIN_SPACING;
         if (regionPlacements.some((placed) =>
           Math.hypot(placed.x - candidate.x, placed.y - candidate.y) <
-            STATIC_CROWD_MIN_SPACING)) continue;
+            withinRegionSpacing)) continue;
         if (placements.some((placed) => {
           const minimum = crossRegionMinSpacing(
             region.regionIndex,
@@ -3980,6 +3996,7 @@ export class StaticCrowdRuntime {
   private readonly spritePools: StaticCrowdSpritePools;
   private readonly viewportMargin: number;
   private readonly maxPlacementAttemptsPerInstance: number;
+  private readonly disabledRegionIndexes: ReadonlySet<number>;
   private placements: readonly Placement[] | undefined;
   private readonly activeRegionIndexes = new Set<number>();
   private started = false;
@@ -3996,6 +4013,7 @@ export class StaticCrowdRuntime {
     this.viewportMargin = options.viewportMargin ?? STATIC_CROWD_VIEWPORT_MARGIN;
     this.maxPlacementAttemptsPerInstance = options.maxPlacementAttemptsPerInstance ??
       STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE;
+    this.disabledRegionIndexes = new Set(options.disabledRegionIndexes ?? []);
   }
 
   get snapshot(): StaticCrowdSnapshot {
@@ -4015,6 +4033,7 @@ export class StaticCrowdRuntime {
         this.random,
         this.spritePools,
         this.maxPlacementAttemptsPerInstance,
+        this.disabledRegionIndexes,
       );
     }
     return this.tick(viewport);

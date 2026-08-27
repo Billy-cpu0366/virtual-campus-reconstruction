@@ -8,11 +8,28 @@ import {
   HELICOPTER_TAIL_ROTOR_OFFSET_EAST,
   PhaserVehicleRuntime,
   POLICE_POSITIONS,
+  POLICE_COLLISION_SIZE,
   VEHICLE_RUNTIME_ASSETS,
   VEHICLE_RUNTIME_CONTRACT,
   type PhaserVehicleDisplayObjectLike,
+  type PhaserVehiclePhysicsBodyLike,
   type PhaserVehicleSceneLike,
 } from "../../game/PhaserVehicleRuntime.js";
+
+class FakeBody implements PhaserVehiclePhysicsBodyLike {
+  public width = 0;
+  public height = 0;
+  public centered = false;
+  public immovable = false;
+  public moves = true;
+
+  public setSize(width: number, height: number, center = true): this {
+    this.width = width;
+    this.height = height;
+    this.centered = center;
+    return this;
+  }
+}
 
 class FakeObject implements PhaserVehicleDisplayObjectLike {
   public rotation = 0;
@@ -26,6 +43,7 @@ class FakeObject implements PhaserVehicleDisplayObjectLike {
   public frame: number | undefined;
   public destroyed = false;
   public destroyCount = 0;
+  public body?: FakeBody;
 
   public constructor(
     public x: number,
@@ -98,15 +116,18 @@ function createScene(options: {
   readonly missing?: string;
   readonly throwOnAdd?: number;
   readonly throwOnEvent?: string;
+  readonly physics?: boolean;
 } = {}): {
   readonly scene: PhaserVehicleSceneLike;
   readonly events: FakeEvents;
   readonly loaded: Array<Record<string, unknown>>;
   readonly objects: FakeObject[];
+  readonly bodies: FakeBody[];
 } {
   const events = new FakeEvents(options.throwOnEvent);
   const loaded: Array<Record<string, unknown>> = [];
   const objects: FakeObject[] = [];
+  const bodies: FakeBody[] = [];
   let addCount = 0;
   const textureKeys = new Set<string>(
     Object.values(VEHICLE_RUNTIME_ASSETS).map((asset) => asset.key),
@@ -133,9 +154,22 @@ function createScene(options: {
         return object;
       },
     },
+    ...(options.physics === true ? {
+      physics: {
+        add: {
+          existing: (value: unknown) => {
+            const object = value as FakeObject;
+            const body = new FakeBody();
+            object.body = body;
+            bodies.push(body);
+            return body;
+          },
+        },
+      },
+    } : {}),
     events,
   };
-  return { scene, events, loaded, objects };
+  return { scene, events, loaded, objects, bodies };
 }
 
 describe("PhaserVehicleRuntime", () => {
@@ -299,6 +333,7 @@ describe("PhaserVehicleRuntime", () => {
         bounds: "UNKNOWN",
         componentKeys: ["car-police"],
         scale: 1,
+        collisionBodyCreated: false,
       })),
     );
     expect(runtime.snapshot.policeAccessories).toEqual({
@@ -325,6 +360,25 @@ describe("PhaserVehicleRuntime", () => {
     expect(Object.isFrozen(runtime.snapshot)).toBe(true);
     expect(Object.isFrozen(runtime.snapshot.police)).toBe(true);
     expect(HELICOPTER_BLADE_ANGLES_DEGREES).toEqual([0, 72, 144, 216, 288]);
+  });
+
+  it("creates centered static police collision bodies when physics is available", () => {
+    const { scene, objects, bodies } = createScene({ physics: true });
+    const runtime = new PhaserVehicleRuntime(scene);
+
+    expect(runtime.start(0)).toEqual({ ok: true });
+    const police = objects.filter((object) => object.key === "car-police");
+    expect(runtime.policeCollisionTargets).toEqual(police);
+    expect(bodies).toHaveLength(3);
+    expect(bodies.every((body) =>
+      body.width === POLICE_COLLISION_SIZE.width &&
+      body.height === POLICE_COLLISION_SIZE.height &&
+      body.centered && body.immovable && !body.moves,
+    )).toBe(true);
+    expect(runtime.snapshot.police.every((item) => item.collisionBodyCreated)).toBe(true);
+
+    runtime.shutdown();
+    expect(objects.every((object) => object.destroyed)).toBe(true);
   });
 
   it("uses finite bounded deltas, rotates directionally, and never recreates", () => {

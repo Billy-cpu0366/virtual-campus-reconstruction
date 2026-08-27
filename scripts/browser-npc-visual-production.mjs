@@ -7,6 +7,11 @@ const url = process.env.NPC_VISUAL_AUDIT_URL ?? process.argv[2] ??
   "http://127.0.0.1:4175/";
 const out = process.env.NPC_VISUAL_AUDIT_OUT ?? "/tmp/npc-visual-targeted.json";
 const screens = process.env.NPC_VISUAL_AUDIT_SCREENS ?? "/tmp/npc-visual-targeted-screens";
+const PROTESTER_SLOGANS = [
+  "People, not machines!",
+  "Jobs for humans!",
+  "Human > machine",
+];
 function sleep(ms) {
   const remaining = auditDeadline - Date.now();
   if (remaining <= 0) return Promise.reject(new AuditTimeoutError("overall audit"));
@@ -102,6 +107,28 @@ async function waitFor(expression, predicate, label, timeout = 60_000) {
   }
   throw new Error(`timeout: ${label}`);
 }
+async function waitForScene(functionDeclaration, predicate, label, timeout = 5_000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const value = await sceneCall(functionDeclaration);
+    if (predicate(value)) return value;
+    await sleep(50);
+  }
+  throw new Error(`timeout: ${label}`);
+}
+async function waitForCameraCenter(x, y) {
+  return waitForScene(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const view = scene?.cameras?.main?.worldView;
+      if (!view) continue;
+      return { x: view.x, y: view.y, width: view.width, height: view.height };
+    }
+    return null;
+  }`, (view) => view !== null &&
+    Math.abs(view.x + view.width / 2 - x) < 2 &&
+    Math.abs(view.y + view.height / 2 - y) < 2, `camera center ${x},${y}`);
+}
 async function snapshot() {
   return sceneCall(`function () {
     for (const game of this) {
@@ -141,6 +168,9 @@ async function snapshot() {
         venue: capture(scene.venueCrowdRuntime, 32),
         route: capture(scene.routeCrowdRuntime, 24),
         static: capture(scene.staticCrowdRuntime, 24),
+        venueSpeech: scene.venueCrowdRuntime?.protestSpeechSnapshot ?? [],
+        vehicle: scene.vehicleRuntime?.snapshot ?? null,
+        vehicleCollisionCount: scene.vehicleColliders?.size ?? null,
         routeInstances: scene.routeCrowdRuntime?.snapshot?.instances ?? [],
         staticInstances: scene.staticCrowdRuntime?.snapshot?.instances ?? [],
       };
@@ -159,6 +189,52 @@ async function center(x, y) {
     }
     return false;
   }`);
+}
+async function probePoliceCollision() {
+  const setup = await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const car = scene?.vehicleRuntime?.policeCollisionTargets?.[0];
+      if (!scene?.player || !car) continue;
+      scene.cameras.main.stopFollow?.();
+      scene.player.setPosition(car.x - 100, car.y);
+      scene.player.setVelocity(0, 0);
+      return { carX: car.x, carY: car.y, startX: scene.player.x };
+    }
+    return null;
+  }`);
+  assert.ok(setup, "police collision setup unavailable");
+  await evaluate("window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowRight' }))");
+  await sleep(800);
+  await evaluate("window.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }))");
+  const result = await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const car = scene?.vehicleRuntime?.policeCollisionTargets?.[0];
+      if (!scene?.player || !car) continue;
+      return {
+        carX: car.x, carY: car.y, startX: ${setup.startX},
+        endX: scene.player.x, blockedRight: scene.player.body?.blocked?.right ?? false,
+      };
+    }
+    return null;
+  }`);
+  await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene?.player) continue;
+      scene.player.setPosition(1088, 304);
+      scene.player.setVelocity(0, 0);
+      return true;
+    }
+    return false;
+  }`);
+  assert.ok(result, "police collision result unavailable");
+  assert.equal(result.blockedRight, true,
+    `player was not blocked by police car: ${JSON.stringify(result)}`);
+  assert.ok(result.endX < result.carX,
+    `player crossed police car: ${JSON.stringify(result)}`);
+  return result;
 }
 async function capture(name, options = {}) {
   mkdirSync(screens, { recursive: true });
@@ -284,20 +360,38 @@ try {
   const objects = await command("Runtime.queryObjects", { prototypeObjectId: proto.result.objectId });
   gamesObjectId = objects.objects.objectId;
   await evaluate("document.querySelector('#app-play')?.click()");
-  setPhase("play", "waiting for PLAYING");
+  setPhase("play", "waiting for PLAYING and crowd owners");
   await waitFor("document.body?.dataset.appState", (state) => state === "PLAYING", "PLAYING", 20_000);
-  await sceneCall(`function () {
+  await waitForScene(`function () {
     for (const game of this) {
       const scene = game?.scene?.getScene?.("campus");
-      if (scene?.routeCrowdRuntime?.started) return true;
+      if (!scene) continue;
+      return {
+        routeStarted: scene.routeCrowdRuntime?.started ?? false,
+        venueSprites: scene.venueCrowdRuntime?.spriteCount ?? 0,
+      };
     }
-    return false;
-  }`);
-  await sleep(300);
+    return null;
+  }`, (value) => value !== null && value.routeStarted && value.venueSprites > 0,
+  "crowd owners ready", 10_000);
 
   setPhase("stop-ai", "centering and sampling 50 frames");
   assert.equal(await center(1800, 1200), true);
-  await sleep(300);
+  await waitForCameraCenter(1800, 1200);
+  await waitForScene(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      const view = scene?.cameras?.main?.worldView;
+      const sprites = [...(scene?.venueCrowdRuntime?.sprites ?? new Map())];
+      if (!view) continue;
+      return {
+        view: { x: view.x, y: view.y, width: view.width, height: view.height },
+        protesters: sprites.filter(([, sprite]) => sprite.texture?.key === "npc_protester_rising").length,
+      };
+    }
+    return null;
+  }`, (value) => value !== null && value.protesters > 0,
+  "Stop AI venue ready", 5_000);
   const stopBefore = await snapshot();
   const stopBeforeScreen = await capture("stop-ai-before");
   const stopSamples = [];
@@ -314,9 +408,25 @@ try {
     item.frame?.cutWidth === 64 && item.frame?.cutHeight === 64 &&
     item.displayWidth === 64 && item.displayHeight === 64), "Stop AI frame geometry drifted");
   assertIdentityContinuity(stopSamples, "venue");
+  const speeches = stopSamples.flatMap((sample) => sample.venueSpeech)
+    .filter((speech) => speech.phase === "visible");
+  assert.ok(speeches.length > 0, "no Stop AI protest slogan became visible");
+  assert.ok(speeches.every((speech) => PROTESTER_SLOGANS.includes(speech.text)),
+    "unexpected Stop AI slogan");
+  const vehicle = stopBefore.vehicle;
+  assert.ok(vehicle?.police?.length === 3, "three police vehicles were not created");
+  assert.ok(vehicle.police.every((police) => police.collisionBodyCreated),
+    "police collision body missing");
+  assert.equal(stopBefore.vehicleCollisionCount, 3,
+    "police colliders were not connected to the player");
+  assert.equal(stopBefore.staticInstances.filter((item) => item.regionIndex === 64).length, 2,
+    "Stop AI background crowd was not reduced to two instances");
+  setPhase("police-collision", "driving player into police body");
+  const policeCollision = await probePoliceCollision();
 
   setPhase("coffee-route", "controlled route replay");
   assert.equal(await center(1400, 888), true);
+  await waitForCameraCenter(1400, 888);
   await sleep(300);
   const coffeeBefore = await snapshot();
   const coffeeBeforeScreen = await capture("coffee-before");
@@ -327,7 +437,7 @@ try {
       if (!scene?.routeCrowdRuntime?.started) continue;
       scene.scene.pause?.();
       const view = scene.cameras.main.worldView;
-      const owners = ["drinkers:", "vertical-crowd-reverse:"];
+      const owners = ["drinkers:", "vertical-crowd:", "vertical-crowd-reverse:"];
       const firstReturning = {};
       const terminalGone = [];
       const identityBreaks = [];
@@ -335,6 +445,10 @@ try {
       let nextIdentity = 0;
       let prior = new Map();
       const samples = [];
+      let minimumCombinedSpacing = Infinity;
+      let maxRouteCountInScope = 0;
+      let maxRouteCountInVisualZone = 0;
+      const spacingViolations = [];
       const startNow = scene.time.now;
       const identity = (sprite) => {
         if (!sprite || typeof sprite !== "object") return null;
@@ -351,6 +465,36 @@ try {
         scene.routeCrowdRuntime.update(startNow + elapsed);
         const instances = scene.routeCrowdRuntime.snapshot.instances.filter((item) =>
           owners.some((owner) => item.id.startsWith(owner)));
+        const inSpacingScope = (point) => point.x >= 1_280 && point.x <= 1_520 &&
+          point.y >= 800 && point.y <= 1_080;
+        const routePoints = instances.map((item) => {
+          const sprite = scene.routeCrowdRuntime.sprites?.get(item.id);
+          if (sprite?.visible === false) return null;
+          return sprite === undefined
+            ? item.position
+            : { x: sprite.x, y: sprite.y };
+        }).filter((point) => point !== null && inSpacingScope(point));
+        maxRouteCountInScope = Math.max(maxRouteCountInScope, routePoints.length);
+        const visualPoints = routePoints.filter((point) =>
+          point.y >= 864 && point.y <= 984);
+        maxRouteCountInVisualZone = Math.max(maxRouteCountInVisualZone, visualPoints.length);
+        const staticPoints = (scene.staticCrowdRuntime?.snapshot?.instances ?? [])
+          .filter((item) => item.regionIndex === 38 || item.regionIndex === 61)
+          .map((item) => item.position)
+          .filter(inSpacingScope);
+        const comparePoints = (left, right, kind) => {
+          const distance = Math.hypot(left.x - right.x, left.y - right.y);
+          minimumCombinedSpacing = Math.min(minimumCombinedSpacing, distance);
+          if (distance < 56) spacingViolations.push({ elapsed, kind, distance, left, right });
+        };
+        for (let left = 0; left < routePoints.length; left += 1) {
+          for (let right = left + 1; right < routePoints.length; right += 1) {
+            comparePoints(routePoints[left], routePoints[right], "route-route");
+          }
+          for (const staticPoint of staticPoints) {
+            comparePoints(routePoints[left], staticPoint, "route-static");
+          }
+        }
         const current = new Map();
         for (const item of instances) {
           const owner = owners.find((prefix) => item.id.startsWith(prefix));
@@ -374,9 +518,12 @@ try {
         }
         prior = current;
         if (elapsed % 1_000 === 0) samples.push({ elapsed, instances });
+        if (maxRouteCountInVisualZone >= 2 &&
+          firstReturning["vertical-crowd-reverse:"] !== undefined) break;
       }
       const configs = scene.routeCrowdRuntime.core?.options?.configs ?? [];
-      const flags = configs.filter((config) => owners.some((owner) => config.id + ":" === owner))
+      const completionExitOwners = ["drinkers:", "vertical-crowd-reverse:"];
+      const flags = configs.filter((config) => completionExitOwners.some((owner) => config.id + ":" === owner))
         .map((config) => ({ id: config.id, completionExit: config.completionExit, goBack: config.goBack, deleteAfterComplete: config.deleteAfterComplete }));
       return {
         view: { x: view.x, y: view.y, width: view.width, height: view.height },
@@ -385,6 +532,13 @@ try {
         final: scene.routeCrowdRuntime.snapshot.instances.filter((item) =>
           owners.some((owner) => item.id.startsWith(owner))),
         staticSpacing: minSpacing(scene.staticCrowdRuntime?.snapshot?.instances ?? []),
+        combinedSpacing: {
+          minimum: Number.isFinite(minimumCombinedSpacing) ? minimumCombinedSpacing : null,
+          maxRouteCountInScope,
+          maxRouteCountInVisualZone,
+          violations: spacingViolations.slice(0, 20),
+          violationCount: spacingViolations.length,
+        },
       };
     }
     return null;
@@ -395,11 +549,11 @@ try {
       for (const left of first) for (const right of second) {
         minimum = Math.min(minimum, Math.hypot(left.position.x - right.position.x, left.position.y - right.position.y));
       }
-      return { minimum, count38: first.length, count61: second.length };
+      return { minimum: Number.isFinite(minimum) ? minimum : null, count38: first.length, count61: second.length };
     }
   }`);
   assert.ok(routeAudit, "route audit unavailable");
-  for (const owner of ["drinkers:", "vertical-crowd-reverse:"]) {
+  for (const owner of ["vertical-crowd-reverse:"]) {
     assert.ok(routeAudit.firstReturning[owner], `${owner} never entered visible completion exit`);
   }
   assert.deepEqual(routeAudit.terminalGone, [], "completion-exit route held gone+visible at coffee endpoint");
@@ -408,8 +562,14 @@ try {
     { id: "drinkers", completionExit: true, goBack: false, deleteAfterComplete: false },
     { id: "vertical-crowd-reverse", completionExit: true, goBack: false, deleteAfterComplete: false },
   ]);
-  assert.ok(routeAudit.staticSpacing.minimum >= 32,
-    `coffee static regions 38/61 spacing ${routeAudit.staticSpacing.minimum} < 32`);
+  assert.ok(routeAudit.staticSpacing.minimum === null || routeAudit.staticSpacing.minimum >= 56,
+    `coffee static regions 38/61 spacing ${routeAudit.staticSpacing.minimum} < 56`);
+  assert.ok(routeAudit.combinedSpacing.minimum === null || routeAudit.combinedSpacing.minimum >= 56,
+    `coffee route/static spacing ${routeAudit.combinedSpacing.minimum} < 56`);
+  assert.equal(routeAudit.combinedSpacing.violationCount, 0,
+    "coffee route/static spacing violations recorded");
+  assert.ok(routeAudit.combinedSpacing.maxRouteCountInVisualZone >= 2,
+    "coffee route replay did not keep two NPCs in the visual zone");
   const coffeeAfter = await snapshot();
   const coffeeAfterScreen = await capture("coffee-after");
   assert.equal(events.console.length, 0, "console errors or warnings recorded");
@@ -420,13 +580,13 @@ try {
   const result = {
     passed: true, url, stopBefore, stopSampleCount: stopSamples.length,
     stopAfter: stopSamples.at(-1), stopBeforeScreen, stopAfterScreen,
-    coffeeBefore, coffeeAfter, coffeeBeforeScreen, coffeeAfterScreen, routeAudit, events,
+    policeCollision, coffeeBefore, coffeeAfter, coffeeBeforeScreen, coffeeAfterScreen, routeAudit, events,
   };
   writeFileSync(out, `${JSON.stringify(result, null, 2)}\n`);
   console.log(JSON.stringify({ passed: true, out, stopSampleCount: stopSamples.length,
-    stopBeforeScreen, stopAfterScreen, coffeeBeforeScreen, coffeeAfterScreen,
+    stopBeforeScreen, stopAfterScreen, coffeeBeforeScreen, coffeeAfterScreen, policeCollision,
     routeAudit: { sampleCount: routeAudit.sampleCount, firstReturning: routeAudit.firstReturning,
-      staticSpacing: routeAudit.staticSpacing }, events }));
+      staticSpacing: routeAudit.staticSpacing, combinedSpacing: routeAudit.combinedSpacing }, events }));
   await command("Target.closeTarget", { targetId: target.id }, { ignoreDeadline: true, timeoutMs: 1_000 });
   activeTargetId = undefined;
   socket.close();

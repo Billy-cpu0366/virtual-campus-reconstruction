@@ -9,6 +9,16 @@ type View = { left: number; top: number; width: number; height: number };
 const DEFAULT_NPC_HALF_SIZE = 24;
 const PROTESTER_HALF_SIZE = 32;
 
+export const PROTESTER_SLOGANS = Object.freeze([
+  "People, not machines!",
+  "Jobs for humans!",
+  "Human > machine",
+]);
+const PROTEST_SPEECH_MAX_VISIBLE = 2;
+const PROTEST_SPEECH_INITIAL_DELAY_MS = 500;
+const PROTEST_SPEECH_DURATION_MS = 3_000;
+const PROTEST_SPEECH_INTERVAL_MS = 6_000;
+
 function isInViewport(
   x: number,
   y: number,
@@ -48,12 +58,30 @@ type Sprite = {
   };
   destroy(): void;
 };
+type SpeechBubble = {
+  x: number;
+  y: number;
+  setDepth(value: number): unknown;
+  setOrigin?(x: number, y: number): unknown;
+  setText?(value: string): unknown;
+  setVisible?(value: boolean): unknown;
+  destroy(): void;
+};
+
 type ProtestActionState = {
   readonly id: string;
   readonly capable: boolean;
   phase: "idle" | "acting";
   directionIndex: number;
   actionCount: number;
+  nextChangeAt: number;
+};
+
+type ProtestSpeechState = {
+  readonly id: string;
+  phase: "hidden" | "visible";
+  textIndex: number;
+  text: string;
   nextChangeAt: number;
 };
 
@@ -82,7 +110,15 @@ export function preloadVenueCrowdRuntimeAssets(loader: {
 }
 
 export interface PhaserVenueCrowdSceneLike {
-  readonly add: { sprite(x: number, y: number, key: string): Sprite };
+  readonly add: {
+    sprite(x: number, y: number, key: string): Sprite;
+    text?(
+      x: number,
+      y: number,
+      text: string,
+      style?: Record<string, unknown>,
+    ): SpeechBubble;
+  };
   readonly textures: { exists(key: string): boolean };
   readonly anims?: {
     exists?(key: string): boolean;
@@ -104,6 +140,8 @@ export class PhaserVenueCrowdRuntime {
   private readonly core = new VenueCrowdRuntime();
   private readonly sprites = new Map<string, Sprite>();
   private readonly protestStates = new Map<string, ProtestActionState>();
+  private readonly speechBubbles = new Map<string, SpeechBubble>();
+  private readonly speechStates = new Map<string, ProtestSpeechState>();
   private readonly createdAnimations = new Set<string>();
   private dead = false;
   private startedAt = 0;
@@ -136,13 +174,20 @@ export class PhaserVenueCrowdRuntime {
     this.core.shutdown();
     for (const sprite of this.sprites.values()) sprite.destroy();
     this.sprites.clear();
+    for (const bubble of this.speechBubbles.values()) bubble.destroy();
+    this.speechBubbles.clear();
     this.protestStates.clear();
+    this.speechStates.clear();
   }
 
   get spriteCount(): number { return this.sprites.size; }
   get snapshot() { return this.core.snapshot; }
   get protestActionSnapshot(): readonly Readonly<ProtestActionState>[] {
     return Object.freeze([...this.protestStates.values()].map((state) =>
+      Object.freeze({ ...state })));
+  }
+  get protestSpeechSnapshot(): readonly Readonly<ProtestSpeechState>[] {
+    return Object.freeze([...this.speechStates.values()].map((state) =>
       Object.freeze({ ...state })));
   }
 
@@ -152,8 +197,10 @@ export class PhaserVenueCrowdRuntime {
     const readyRegionIds = new Set<string>();
     if (viewport !== undefined) {
       for (const instance of instances) {
-        if (instance.materialized && isInViewportForRegion(
+        if (isInViewportForRegion(
           instance.position.x, instance.position.y, instance.regionId, viewport)) {
+          // A visible region must win the bounded creation budget over
+          // prewarmed regions that are still outside the current view.
           readyRegionIds.add(instance.regionId);
         }
       }
@@ -167,18 +214,32 @@ export class PhaserVenueCrowdRuntime {
     }
 
     const activeIds = new Set<string>();
+    const activeSpeechIds = new Set<string>();
+    const orderedInstances = [...instances].sort((left, right) => {
+      const leftVisible = isInViewportForRegion(
+        left.position.x, left.position.y, left.regionId, viewport,
+      );
+      const rightVisible = isInViewportForRegion(
+        right.position.x, right.position.y, right.regionId, viewport,
+      );
+      return Number(rightVisible) - Number(leftVisible);
+    });
     let created = 0;
-    for (const instance of instances) {
+    for (const instance of orderedInstances) {
       let sprite = this.sprites.get(instance.id);
       const isNew = sprite === undefined;
       const existingVisible = sprite !== undefined && isInViewportForRegion(
         sprite.x, sprite.y, instance.regionId, viewport);
-      if (!instance.materialized && !existingVisible) continue;
+      const currentlyVisible = isInViewportForRegion(
+        instance.position.x, instance.position.y, instance.regionId, viewport,
+      );
+      if (!instance.materialized && !existingVisible && !currentlyVisible) continue;
       if (!isNew && viewport !== undefined && !existingVisible) continue;
       activeIds.add(instance.id);
       const protest = instance.regionId.startsWith("protesters_rising");
       if (isNew) {
-        if (created >= 16 && !readyRegionIds.has(instance.regionId)) continue;
+        if (created >= 16 && !currentlyVisible &&
+          !readyRegionIds.has(instance.regionId)) continue;
         const texture = protest ? "npc_protester_rising" : "npc-man";
         sprite = this.scene.add.sprite(instance.position.x, instance.position.y, texture);
         created += 1;
@@ -190,7 +251,12 @@ export class PhaserVenueCrowdRuntime {
         readySprite.y = instance.position.y;
       }
       readySprite.setDepth(500 + readySprite.y * .1);
-      if (protest) this.updateProtester(instance.id, readySprite, now);
+      if (protest) {
+        this.updateProtester(instance.id, readySprite, now);
+        if (isInViewportForRegion(readySprite.x, readySprite.y, instance.regionId, viewport)) {
+          this.updateProtesterSpeech(instance.id, readySprite, now, activeSpeechIds);
+        }
+      }
       this.sprites.set(instance.id, readySprite);
     }
     for (const [id, sprite] of this.sprites) {
@@ -203,6 +269,10 @@ export class PhaserVenueCrowdRuntime {
         state.phase = "idle";
         state.nextChangeAt = now + this.idleDelay(id, state.actionCount);
       }
+      this.clearSpeech(id);
+    }
+    for (const id of this.speechBubbles.keys()) {
+      if (!activeSpeechIds.has(id)) this.clearSpeech(id);
     }
   }
 
@@ -219,6 +289,68 @@ export class PhaserVenueCrowdRuntime {
     this.protestStates.set(id, state);
     sprite.anims?.stop?.();
     sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!));
+  }
+
+  private updateProtesterSpeech(
+    id: string,
+    sprite: Sprite,
+    now: number,
+    activeSpeechIds: Set<string>,
+  ): void {
+    if (this.scene.add.text === undefined) return;
+    const state = this.speechStates.get(id) ?? {
+      id,
+      phase: "hidden" as const,
+      textIndex: stableHash(`${id}:slogan`) % PROTESTER_SLOGANS.length,
+      text: PROTESTER_SLOGANS[stableHash(`${id}:slogan`) % PROTESTER_SLOGANS.length]!,
+      nextChangeAt: this.startedAt + PROTEST_SPEECH_INITIAL_DELAY_MS +
+        stableHash(`${id}:speech-start`) % 1_501,
+    };
+    this.speechStates.set(id, state);
+    activeSpeechIds.add(id);
+    if (now >= state.nextChangeAt) {
+      if (state.phase === "visible") {
+        state.phase = "hidden";
+        state.textIndex = (state.textIndex + 1) % PROTESTER_SLOGANS.length;
+        state.text = PROTESTER_SLOGANS[state.textIndex]!;
+        state.nextChangeAt = now + PROTEST_SPEECH_INTERVAL_MS +
+          stableHash(`${id}:speech-next:${state.textIndex}`) % 8_001;
+      } else {
+        const visibleCount = [...this.speechStates.values()]
+          .filter((candidate) => candidate.phase === "visible").length;
+        if (visibleCount < PROTEST_SPEECH_MAX_VISIBLE) {
+          state.phase = "visible";
+          state.nextChangeAt = now + PROTEST_SPEECH_DURATION_MS;
+        } else {
+          state.nextChangeAt = now + 500 +
+            stableHash(`${id}:speech-defer:${state.textIndex}`) % 501;
+        }
+      }
+    }
+    let bubble = this.speechBubbles.get(id);
+    if (bubble === undefined) {
+      bubble = this.scene.add.text(sprite.x, sprite.y - PROTESTER_HALF_SIZE - 8, state.text, {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#111111",
+        backgroundColor: "#ffffff",
+        padding: { left: 5, right: 5, top: 2, bottom: 2 },
+        align: "center",
+      });
+      bubble.setOrigin?.(0.5, 1);
+      this.speechBubbles.set(id, bubble);
+    }
+    bubble.x = sprite.x;
+    bubble.y = sprite.y - PROTESTER_HALF_SIZE - 8;
+    bubble.setText?.(state.text);
+    bubble.setDepth(700 + sprite.y * .1);
+    bubble.setVisible?.(state.phase === "visible");
+  }
+
+  private clearSpeech(id: string): void {
+    this.speechBubbles.get(id)?.destroy();
+    this.speechBubbles.delete(id);
+    this.speechStates.delete(id);
   }
 
   private updateProtester(id: string, sprite: Sprite, now: number): void {

@@ -66,6 +66,17 @@ export interface RouteCrowdViewport {
   readonly height: number;
 }
 
+export interface RouteCrowdSpacingRule {
+  readonly minDistance: number;
+  readonly isInScope: (point: RouteCrowdTile) => boolean;
+  readonly externalPoints?: () => readonly RouteCrowdTile[];
+  readonly maxInstancesByConfig?: Readonly<Record<string, number>>;
+  readonly allowedConfigIdsInScope?: readonly string[];
+  readonly fixedStartWaypointByConfig?: Readonly<Record<string, number>>;
+  readonly fixedDelayByConfig?: Readonly<Record<string, number>>;
+  readonly checkMovement?: boolean;
+}
+
 export interface RouteCrowdInstanceSnapshot {
   id: string;
   state: RouteCrowdState;
@@ -103,6 +114,8 @@ export interface RouteCrowdRuntimeOptions {
   readonly baseSpeed?: number;
   /** Returns true when the next world-position waypoint is temporarily occupied. */
   readonly isBlocked?: (point: RouteCrowdTile) => boolean;
+  /** Optional local visual spacing rule for a bounded route area. */
+  readonly visualSpacing?: RouteCrowdSpacingRule;
 }
 
 export const ROUTE_CROWD_BASE_SPEED = 48;
@@ -455,13 +468,26 @@ export class RouteCrowdRuntime {
       const occupied = this.occupiedStarts.get(pending.config.id) ?? new Set<string>();
       this.occupiedStarts.set(pending.config.id, occupied);
       const waypointCount = path.length > 1 ? path.length - 1 : path.length;
-      const candidates = pending.config.randomPositions
-        ? shuffledIndexes(waypointCount, random)
-        : [0];
+      const fixedStartWaypoint = this.options.visualSpacing
+        ?.fixedStartWaypointByConfig?.[pending.config.id];
+      const candidates = fixedStartWaypoint === undefined
+        ? pending.config.randomPositions
+          ? shuffledIndexes(waypointCount, random)
+          : [0]
+        : [Math.min(
+          Math.max(0, Math.floor(fixedStartWaypoint)),
+          Math.max(0, waypointCount - 1),
+        )];
       const startWaypointIndex = candidates.find((index) =>
         !occupied.has(pointKey(path[index]!)),
       ) ?? candidates[0]!;
       const start = { ...path[startWaypointIndex]! };
+      const instanceId = `${pending.config.id}:${createdForGroup}`;
+      if (!this.hasSpacingRouteCapacity(pending.config.id, path) ||
+        !this.hasVisualSpacing(undefined, start, pending.config.id, instanceId)) {
+        processed += 1;
+        continue;
+      }
       const routePath = path.slice(startWaypointIndex);
       const restartPath = path;
       const exitPath = [...path].reverse();
@@ -488,7 +514,10 @@ export class RouteCrowdRuntime {
         restartPosition: { ...path[0]! },
         path: routePath,
         waypointIndex: 1,
-        delayAt: this.batchedStartNow + randomDelayIn(pending.config.delay, random),
+        delayAt: this.batchedStartNow + (
+          this.options.visualSpacing?.fixedDelayByConfig?.[pending.config.id] ??
+          randomDelayIn(pending.config.delay, random)
+        ),
         speed: (pending.config.movementSpeed ?? baseSpeed) * randomIn(
           pending.config.speedVariation,
           random,
@@ -541,7 +570,8 @@ export class RouteCrowdRuntime {
         }
         if (item.state === "waiting") {
           const target = item.path[item.waypointIndex];
-          if (target === undefined || this.options.isBlocked?.(target) === true) break;
+          if (target === undefined || this.options.isBlocked?.(target) === true ||
+            !this.hasVisualSpacing(item, target, item.config.id, item.id)) break;
           item.state = item.waitingFrom ?? "moving";
           item.waitingFrom = undefined;
           continue;
@@ -552,7 +582,8 @@ export class RouteCrowdRuntime {
             this.completePath(item, now, viewport);
             continue;
           }
-          if (this.options.isBlocked?.(target) === true) {
+          if (this.options.isBlocked?.(target) === true ||
+            !this.hasVisualSpacing(item, target, item.config.id, item.id)) {
             item.waitingFrom = item.state;
             item.state = "waiting";
             break;
@@ -587,6 +618,48 @@ export class RouteCrowdRuntime {
 
     this.applyView(viewport);
     return this.snapshot;
+  }
+
+  private hasSpacingRouteCapacity(
+    configId: string,
+    path: readonly RouteCrowdTile[],
+  ): boolean {
+    const rule = this.options.visualSpacing;
+    const limit = rule?.maxInstancesByConfig?.[configId];
+    if (rule === undefined || !path.some((point) => rule.isInScope(point))) {
+      return true;
+    }
+    if (rule.allowedConfigIdsInScope !== undefined &&
+      !rule.allowedConfigIdsInScope.includes(configId)) {
+      return false;
+    }
+    if (limit === undefined) return true;
+    const active = this.items.filter((item) => item.config.id === configId &&
+      (item.forwardPath.some((point) => rule.isInScope(point)) ||
+        rule.isInScope(item.position))).length;
+    return active < Math.max(0, Math.floor(limit));
+  }
+
+  private hasVisualSpacing(
+    item: Item | undefined,
+    point: RouteCrowdTile,
+    configId: string,
+    instanceId: string,
+  ): boolean {
+    const rule = this.options.visualSpacing;
+    if (rule === undefined || rule.checkMovement === false ||
+      !rule.isInScope(point)) return true;
+    const distance = (left: RouteCrowdTile, right: RouteCrowdTile): number =>
+      Math.hypot(left.x - right.x, left.y - right.y);
+    for (const other of this.items) {
+      if (other === item || !rule.isInScope(other.position)) continue;
+      if (other.id === instanceId && other.config.id === configId) continue;
+      if (distance(point, other.position) < rule.minDistance) return false;
+    }
+    for (const external of rule.externalPoints?.() ?? []) {
+      if (distance(point, external) < rule.minDistance) return false;
+    }
+    return true;
   }
 
   pauseGroup(id: string): void {
@@ -683,8 +756,15 @@ export class RouteCrowdRuntime {
     );
 
     for (const item of this.items) {
+      const restartAvailable = this.options.visualSpacing !== undefined &&
+        this.hasVisualSpacing(
+          undefined,
+          item.restartPosition,
+          item.config.id,
+          item.id,
+        );
       const completionOffscreen = !safe(item) &&
-        !pointInSafeRange(item.start, viewport);
+        (!pointInSafeRange(item.start, viewport) || restartAvailable);
       if (item.completionAction !== undefined && completionOffscreen) {
         this.resolveCompletion(item, this.last);
       }
