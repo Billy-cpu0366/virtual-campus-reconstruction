@@ -21,13 +21,76 @@ export const ROUTE_CROWD_TEXTURES = Object.freeze([
 ] as const);
 
 const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
-export const COFFEE_ROUTE_LANE_OFFSET = 40;
+export const COFFEE_ROUTE_LANE_CENTERS = Object.freeze([
+  1_288, 1_368, 1_448, 1_528,
+]);
+const COFFEE_MIN_DISPLAY_DISTANCE = 56;
+const COFFEE_MAX_DISPLAY_STEP = 8;
+type DisplayPoint = { readonly x: number; readonly y: number };
 
-function coffeeLaneOffset(groupId: string, id: string): number {
+function coffeeLaneCenter(groupId: string, id: string): number | undefined {
+  if (groupId !== "vertical-crowd-reverse") return undefined;
+  const index = Number(id.split(":").at(-1));
+  if (!Number.isInteger(index)) return undefined;
+  return COFFEE_ROUTE_LANE_CENTERS[index % COFFEE_ROUTE_LANE_CENTERS.length];
+}
+
+function coffeeVerticalOffset(groupId: string, id: string): number {
   if (groupId !== "vertical-crowd-reverse") return 0;
   const index = Number(id.split(":").at(-1));
   if (!Number.isInteger(index)) return 0;
-  return index % 2 === 0 ? -COFFEE_ROUTE_LANE_OFFSET : COFFEE_ROUTE_LANE_OFFSET;
+  if (index < 4) return 24;
+  if (index >= 8) return -48;
+  return 0;
+}
+
+function distance(left: DisplayPoint, right: DisplayPoint): number {
+  return Math.hypot(left.x - right.x, left.y - right.y);
+}
+
+function pointToSegmentDistance(
+  point: DisplayPoint,
+  start: DisplayPoint,
+  end: DisplayPoint,
+): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared === 0) return distance(point, start);
+  const progress = Math.min(1, Math.max(0,
+    ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared,
+  ));
+  return distance(point, {
+    x: start.x + progress * dx,
+    y: start.y + progress * dy,
+  });
+}
+
+function segmentDistance(
+  leftStart: DisplayPoint,
+  leftEnd: DisplayPoint,
+  rightStart: DisplayPoint,
+  rightEnd: DisplayPoint,
+): number {
+  return Math.min(
+    pointToSegmentDistance(leftStart, rightStart, rightEnd),
+    pointToSegmentDistance(leftEnd, rightStart, rightEnd),
+    pointToSegmentDistance(rightStart, leftStart, leftEnd),
+    pointToSegmentDistance(rightEnd, leftStart, leftEnd),
+  );
+}
+
+function advanceDisplayPosition(
+  from: DisplayPoint,
+  to: DisplayPoint,
+): DisplayPoint {
+  const total = distance(from, to);
+  if (total <= COFFEE_MAX_DISPLAY_STEP) return to;
+  const ratio = COFFEE_MAX_DISPLAY_STEP / total;
+  return {
+    x: from.x + (to.x - from.x) * ratio,
+    y: from.y + (to.y - from.y) * ratio,
+  };
 }
 
 export function keepOrdinaryCrowdOffTrack(groupId: string, x: number, y: number): { x: number; y: number } {
@@ -37,7 +100,7 @@ export function keepOrdinaryCrowdOffTrack(groupId: string, x: number, y: number)
 
 export const ROUTE_CROWD_VISUAL_OFFSETS: Readonly<Record<string, number>> = Object.freeze({
   "main-crowd": 16, "loop-crowd": 8, drinkers: 8, concert_crowd: 10,
-  beach_crowd_walk: 8, "vertical-crowd": 6, "vertical-crowd-reverse": 6,
+  beach_crowd_walk: 8, "vertical-crowd": 6, "vertical-crowd-reverse": 0,
   "crowd-train": 8,
 });
 
@@ -96,6 +159,7 @@ export class PhaserRouteCrowdRuntime {
   private readonly core: RouteCrowdRuntime;
   private readonly trainCore: RouteCrowdRuntime;
   private readonly sprites = new Map<string, PhaserRouteCrowdSpriteLike>();
+  private readonly coffeeDisplayPositions = new Map<string, DisplayPoint>();
   private shutdownState = false;
   private readonly createdAnimations = new Set<string>();
   private startupActive = false;
@@ -262,6 +326,7 @@ export class PhaserRouteCrowdRuntime {
 
   private sync(): void {
     const allInstances = this.snapshot.instances;
+    const coffeeDisplayPositions = this.resolveCoffeeDisplayPositions(allInstances);
     const activeIds = new Set<string>();
     for (const [index, item] of allInstances.entries()) {
       activeIds.add(item.id);
@@ -284,12 +349,14 @@ export class PhaserRouteCrowdRuntime {
       const seed = [...item.id].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 0);
       const offsetX = offsetRange === 0 ? 0 : (seed % (offsetRange * 2 + 1)) - offsetRange;
       const offsetY = offsetRange === 0 ? 0 : ((seed >>> 8) % (offsetRange * 2 + 1)) - offsetRange;
-      const laneOffset = coffeeLaneOffset(groupId, item.id);
-      const display = keepOrdinaryCrowdOffTrack(
-        groupId,
-        item.position.x + offsetX + laneOffset,
-        item.position.y + offsetY,
-      );
+      const display = groupId === "vertical-crowd-reverse"
+        ? coffeeDisplayPositions.get(item.id) ??
+          this.rawCoffeeDisplayPosition(item)
+        : keepOrdinaryCrowdOffTrack(
+          groupId,
+          item.position.x + offsetX,
+          item.position.y + offsetY,
+        );
       sprite.x = display.x;
       sprite.y = display.y;
       sprite.setDepth(500 + item.position.y * .1);
@@ -307,6 +374,53 @@ export class PhaserRouteCrowdRuntime {
       sprite.destroy();
       this.sprites.delete(id);
     }
+  }
+
+  private rawCoffeeDisplayPosition(item: { id: string; position: DisplayPoint }): DisplayPoint {
+    const groupId = item.id.split(":", 1)[0]!;
+    const range = ROUTE_CROWD_VISUAL_OFFSETS[groupId] ?? 0;
+    const seed = [...item.id].reduce((value, char) =>
+      (value * 31 + char.charCodeAt(0)) >>> 0, 0);
+    const offsetX = range === 0 ? 0 : (seed % (range * 2 + 1)) - range;
+    const offsetY = range === 0 ? 0 : ((seed >>> 8) % (range * 2 + 1)) - range;
+    return {
+      x: coffeeLaneCenter(groupId, item.id) ?? item.position.x + offsetX,
+      y: item.position.y + offsetY + coffeeVerticalOffset(groupId, item.id),
+    };
+  }
+
+  private resolveCoffeeDisplayPositions(
+    instances: readonly { id: string; position: DisplayPoint; materialized: boolean; visible: boolean; destroyed: boolean }[],
+  ): Map<string, DisplayPoint> {
+    const visible = instances
+      .filter((item) => item.id.startsWith("vertical-crowd-reverse:") &&
+        item.materialized && item.visible && !item.destroyed)
+      .sort((left, right) => left.id.localeCompare(right.id));
+    const reserved: { from: DisplayPoint; to: DisplayPoint }[] = [];
+    const result = new Map<string, DisplayPoint>();
+    for (const item of visible) {
+      const target = this.rawCoffeeDisplayPosition(item);
+      const prior = this.coffeeDisplayPositions.get(item.id);
+      const from = prior ?? target;
+      let to = prior === undefined
+        ? target
+        : advanceDisplayPosition(prior, target);
+      if (reserved.some((other) =>
+        segmentDistance(from, to, other.from, other.to) <
+        COFFEE_MIN_DISPLAY_DISTANCE)) {
+        to = from;
+      }
+      result.set(item.id, to);
+      reserved.push({ from, to });
+      this.coffeeDisplayPositions.set(item.id, to);
+    }
+    const activeIds = new Set(visible.map((item) => item.id));
+    for (const id of this.coffeeDisplayPositions.keys()) {
+      if (!activeIds.has(id) && !instances.some((item) => item.id === id && item.materialized)) {
+        this.coffeeDisplayPositions.delete(id);
+      }
+    }
+    return result;
   }
 
   private renderFacing(
@@ -353,5 +467,6 @@ export class PhaserRouteCrowdRuntime {
   private destroySprites(): void {
     for (const sprite of this.sprites.values()) sprite.destroy();
     this.sprites.clear();
+    this.coffeeDisplayPositions.clear();
   }
 }

@@ -73,6 +73,7 @@ export interface RouteCrowdSpacingRule {
   readonly maxInstancesByConfig?: Readonly<Record<string, number>>;
   readonly allowedConfigIdsInScope?: readonly string[];
   readonly fixedStartWaypointByConfig?: Readonly<Record<string, number>>;
+  readonly fixedStartWaypointRatiosByConfig?: Readonly<Record<string, readonly number[]>>;
   readonly fixedDelayByConfig?: Readonly<Record<string, number>>;
   readonly checkMovement?: boolean;
 }
@@ -167,7 +168,7 @@ export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 40),
   group("beach_crowd_walk", 4, [[96, 119]], [[68, 134]], 35, .2, { minMs: 0, maxMs: 0 }, { minMs: 0, maxMs: 0 }, true, false, true, 4),
   group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20, 0, true),
-  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20, .2, true, true),
+  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20, .2, false, true),
   group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, undefined, 1),
   group("hazmat-crowd", 8, [[13, 126], [19, 124]], [[5, 133], [11, 132], [8, 131]], 45, .15, { minMs: 0, maxMs: 10_000 }, { minMs: 2_000, maxMs: 2_000 }, true, false, true, undefined),
   group("outside_concert1", 10, [[115, 109], [123, 110], [130, 108]], [[120, 114], [137, 106], [138, 96]], 35, .5, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, undefined),
@@ -377,10 +378,11 @@ export class RouteCrowdRuntime {
         const swap = Math.floor(random() * (index + 1));
         [startTiles[index], startTiles[swap]] = [startTiles[swap]!, startTiles[index]!];
       }
-      const candidateCount = Math.min(
-        config.count * 3,
-        startTiles.length * config.endTiles.length,
-      );
+      const scopedLimit = this.options.visualSpacing
+        ?.maxInstancesByConfig?.[config.id];
+      const candidateCount = scopedLimit === undefined
+        ? Math.min(config.count * 3, startTiles.length * config.endTiles.length)
+        : config.count * 3 + Math.max(0, Math.floor(scopedLimit)) * 2;
       const candidates: PendingStart[] = Array.from(
         { length: candidateCount },
         (_, index) => ({
@@ -468,14 +470,23 @@ export class RouteCrowdRuntime {
       const occupied = this.occupiedStarts.get(pending.config.id) ?? new Set<string>();
       this.occupiedStarts.set(pending.config.id, occupied);
       const waypointCount = path.length > 1 ? path.length - 1 : path.length;
+      const fixedStartWaypointRatio = this.options.visualSpacing
+        ?.fixedStartWaypointRatiosByConfig?.[pending.config.id]
+        ?.[createdForGroup];
       const fixedStartWaypoint = this.options.visualSpacing
         ?.fixedStartWaypointByConfig?.[pending.config.id];
-      const candidates = fixedStartWaypoint === undefined
+      const forcedStartWaypoint = fixedStartWaypointRatio === undefined
+        ? fixedStartWaypoint
+        : Math.floor(
+          Math.min(1, Math.max(0, fixedStartWaypointRatio)) *
+          Math.max(0, waypointCount - 1),
+        );
+      const candidates = forcedStartWaypoint === undefined
         ? pending.config.randomPositions
           ? shuffledIndexes(waypointCount, random)
           : [0]
         : [Math.min(
-          Math.max(0, Math.floor(fixedStartWaypoint)),
+          Math.max(0, Math.floor(forcedStartWaypoint)),
           Math.max(0, waypointCount - 1),
         )];
       const startWaypointIndex = candidates.find((index) =>

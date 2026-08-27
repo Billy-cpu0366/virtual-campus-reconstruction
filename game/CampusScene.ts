@@ -126,9 +126,15 @@ import {
   type PhaserFogSceneLike,
 } from "./PhaserFogRuntime.js";
 import {
+  POLICE_COLLISION_SIZE,
+  POLICE_POSITIONS,
   PhaserVehicleRuntime,
   type PhaserVehicleSceneLike,
 } from "./PhaserVehicleRuntime.js";
+import {
+  PhaserConcertLightingRuntime,
+  type PhaserConcertLightingSceneLike,
+} from "./PhaserConcertLightingRuntime.js";
 import {
   PhaserFootstepRuntime,
   type PhaserFootstepSceneLike,
@@ -364,6 +370,7 @@ export class CampusScene extends Phaser.Scene {
   private bugCrowdRuntime: PhaserBugCrowdRuntime | undefined;
   private venueCrowdRuntime: PhaserVenueCrowdRuntime | undefined;
   private dancingCrowdRuntime: PhaserDancingCrowdRuntime | undefined;
+  private concertLightingRuntime: PhaserConcertLightingRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private stopAiSmokeRuntime: PhaserStopAiSmokeRuntime | undefined;
   private fogRuntime: PhaserFogRuntime | undefined;
@@ -694,6 +701,7 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime?.update(this.time.now);
     this.venueCrowdRuntime?.update();
     this.dancingCrowdRuntime?.update();
+    this.concertLightingRuntime?.update(this.time.now, this.smokeViewport());
     if (document.visibilityState !== "visible") {
       this.stopPlayerMovement();
       return;
@@ -1093,6 +1101,8 @@ export class CampusScene extends Phaser.Scene {
       routeCrowdStarted: this.routeCrowdRuntime?.started ?? false,
       routeCrowdTrainStarted: this.routeCrowdRuntime?.trainStarted ?? false,
       routeCrowdSpriteCount: this.routeCrowdRuntime?.spriteCount ?? 0,
+      concertLighting: this.concertLightingRuntime?.snapshot ?? null,
+      concertActions: this.venueCrowdRuntime?.concertActionSnapshot ?? [],
       staticNpc: this.staticNpcRuntime?.snapshot ?? null,
       staticNpcSpriteCount: this.staticNpcRuntime?.spriteCount ?? 0,
       staticCrowd: this.staticCrowdRuntime?.snapshot ?? null,
@@ -1194,6 +1204,7 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime?.shutdown();
     this.venueCrowdRuntime?.shutdown();
     this.dancingCrowdRuntime?.shutdown();
+    this.concertLightingRuntime?.shutdown();
     this.stopAiSmokeRuntime?.shutdown();
     this.fogRuntime?.shutdown();
     this.disconnectPoliceCollisions();
@@ -1271,6 +1282,7 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime = undefined;
     this.venueCrowdRuntime = undefined;
     this.dancingCrowdRuntime = undefined;
+    this.concertLightingRuntime = undefined;
     this.stopAiSmokeRuntime = undefined;
     this.fogRuntime = undefined;
     this.vehicleRuntime = undefined;
@@ -1533,15 +1545,30 @@ export class CampusScene extends Phaser.Scene {
     }
     const wallData = this.cache.json.get("walls-layer") as { grid?: readonly (readonly number[])[] } | undefined;
     if (wallData?.grid === undefined) throw new Error("route crowd walls grid unavailable");
+    const isPoliceBlocked = (point: { readonly x: number; readonly y: number }): boolean =>
+      POLICE_POSITIONS.some((police) =>
+        Math.abs(point.x - police.x) <= POLICE_COLLISION_SIZE.width / 2 + 24 &&
+        Math.abs(point.y - police.y) <= POLICE_COLLISION_SIZE.height / 2 + 24,
+      );
+    const pathProvider = new GridRouteCrowdPathProvider(
+      wallData.grid,
+      isPoliceBlocked,
+    );
+    this.concertLightingRuntime = new PhaserConcertLightingRuntime(
+      this as unknown as PhaserConcertLightingSceneLike,
+    );
+    if (!this.concertLightingRuntime.start()) {
+      this.recordSideFailure("concert-lighting:start-failed");
+    }
     this.routeCrowdRuntime = new PhaserRouteCrowdRuntime(
       this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
-      pathProvider: new GridRouteCrowdPathProvider(wallData.grid),
-      isBlocked: (point) => this.trainBlockingCells.includes(
+      pathProvider,
+      isBlocked: (point) => isPoliceBlocked(point) || this.trainBlockingCells.includes(
         `${Math.floor(point.x / 16)},${Math.floor(point.y / 16)}`,
       ),
       visualSpacing: {
         minDistance: 56,
-        isInScope: (point) => point.x >= 1_280 && point.x <= 1_520 &&
+        isInScope: (point) => point.x >= 1_200 && point.x <= 1_600 &&
           point.y >= 800 && point.y <= 1_080,
         externalPoints: () => this.staticCrowdRuntime?.snapshot.instances
           .filter((instance) => instance.regionIndex === 38 || instance.regionIndex === 61)
@@ -1549,11 +1576,17 @@ export class CampusScene extends Phaser.Scene {
         maxInstancesByConfig: {
           drinkers: 0,
           "vertical-crowd": 0,
-          "vertical-crowd-reverse": 2,
+          "vertical-crowd-reverse": 10,
         },
         allowedConfigIdsInScope: ["vertical-crowd-reverse"],
-        fixedStartWaypointByConfig: { "vertical-crowd-reverse": 0 },
-        fixedDelayByConfig: { "vertical-crowd-reverse": 0 },
+        fixedStartWaypointRatiosByConfig: {
+          "vertical-crowd-reverse": [
+            .80, .80, .80, .80,
+            .91, .91, .91, .91,
+            .99, .99,
+          ],
+        },
+        fixedDelayByConfig: { "vertical-crowd-reverse": 20_000 },
         checkMovement: false,
       },
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
@@ -1592,21 +1625,21 @@ export class CampusScene extends Phaser.Scene {
     if (!this.staticCrowdRuntime.start()) {
       this.recordSideFailure("static-crowd:start-failed");
     }
-    this.bugCrowdRuntime = new PhaserBugCrowdRuntime(
-      this as unknown as import("./PhaserBugCrowdRuntime.js").PhaserBugCrowdSceneLike,
-      { pathProvider: new GridRouteCrowdPathProvider(wallData.grid), viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
-    );
-    if (!this.bugCrowdRuntime.start(this.time.now)) this.recordSideFailure("bug-crowd:start-failed");
-    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
-    if (!this.venueCrowdRuntime.start()) this.recordSideFailure("venue-crowd:start-failed");
-    this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
-    if (!this.dancingCrowdRuntime.start()) this.recordSideFailure("dancing-crowd:start-failed");
     const vehicleStarted = this.vehicleRuntime?.start(this.time.now);
     if (vehicleStarted === undefined || !vehicleStarted.ok) {
       this.recordSideFailure(`vehicle:${vehicleStarted?.reason ?? "missing-owner"}`);
     } else {
       this.connectPoliceCollisions();
     }
+    this.bugCrowdRuntime = new PhaserBugCrowdRuntime(
+      this as unknown as import("./PhaserBugCrowdRuntime.js").PhaserBugCrowdSceneLike,
+      { pathProvider, viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
+    );
+    if (!this.bugCrowdRuntime.start(this.time.now)) this.recordSideFailure("bug-crowd:start-failed");
+    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
+    if (!this.venueCrowdRuntime.start()) this.recordSideFailure("venue-crowd:start-failed");
+    this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
+    if (!this.dancingCrowdRuntime.start()) this.recordSideFailure("dancing-crowd:start-failed");
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
       throw new Error(

@@ -12,7 +12,7 @@ class Sprite {
 
 describe("PhaserRouteCrowdRuntime",()=>{
  it("uses only source-backed route display offsets",()=>{
-  expect(ROUTE_CROWD_VISUAL_OFFSETS).toMatchObject({"main-crowd":16,"loop-crowd":8,drinkers:8,concert_crowd:10,beach_crowd_walk:8,"vertical-crowd":6,"vertical-crowd-reverse":6,"crowd-train":8});
+  expect(ROUTE_CROWD_VISUAL_OFFSETS).toMatchObject({"main-crowd":16,"loop-crowd":8,drinkers:8,concert_crowd:10,beach_crowd_walk:8,"vertical-crowd":6,"vertical-crowd-reverse":0,"crowd-train":8});
   expect(ROUTE_CROWD_VISUAL_OFFSETS["walking-crowd"] ?? 0).toBe(0);
   expect(ROUTE_CROWD_VISUAL_OFFSETS["hazmat-crowd"] ?? 0).toBe(0);
   expect(ROUTE_CROWD_VISUAL_OFFSETS.outside_concert1 ?? 0).toBe(0);

@@ -168,6 +168,7 @@ async function snapshot() {
         venue: capture(scene.venueCrowdRuntime, 32),
         route: capture(scene.routeCrowdRuntime, 24),
         static: capture(scene.staticCrowdRuntime, 24),
+        bug: capture(scene.bugCrowdRuntime, 20),
         venueSpeech: scene.venueCrowdRuntime?.protestSpeechSnapshot ?? [],
         vehicle: scene.vehicleRuntime?.snapshot ?? null,
         vehicleCollisionCount: scene.vehicleColliders?.size ?? null,
@@ -236,6 +237,130 @@ async function probePoliceCollision() {
     `player crossed police car: ${JSON.stringify(result)}`);
   return result;
 }
+async function probeConcertParty() {
+  assert.equal(await center(1_900, 632), true);
+  await waitForCameraCenter(1_900, 632);
+  const setRoofPosition = (x, y) => sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene?.player) continue;
+      scene.player.setPosition(${x}, ${y});
+      scene.updateConcertRoof?.();
+      return scene.worldRenderer?.getRoofState?.("concert") ?? null;
+    }
+    return null;
+  }`);
+  const bottomOutside = await setRoofPosition(1_900, 900);
+  const bottomInside = await setRoofPosition(1_900, 700);
+  const sideOutside = await setRoofPosition(1_550, 632);
+  const sideInside = await setRoofPosition(1_700, 632);
+  await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene) continue;
+      scene.player.setPosition(1_900, 632);
+      scene.updateConcertRoof?.();
+      scene.concertLightingRuntime?.update?.(
+        scene.time.now,
+        scene.cameras.main.worldView,
+      );
+      scene.venueCrowdRuntime?.update?.();
+      return true;
+    }
+    return false;
+  }`);
+  await sleep(2_000);
+  const party = await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene) continue;
+      return {
+        lighting: scene.concertLightingRuntime?.snapshot ?? null,
+        concertActions: scene.venueCrowdRuntime?.concertActionSnapshot ?? [],
+        roof: scene.worldRenderer?.getRoofState?.("concert") ?? null,
+      };
+    }
+    return null;
+  }`);
+  assert.deepEqual(bottomOutside?.state, "visible");
+  assert.deepEqual(bottomInside?.state, "faded");
+  assert.deepEqual(sideOutside?.state, "visible");
+  assert.deepEqual(sideInside?.state, "faded");
+  assert.ok(party?.lighting?.active, "concert lighting is not active in the room");
+  assert.deepEqual(party?.lighting?.objectCount, 11);
+  assert.deepEqual(party?.lighting?.spotlightCount, 2);
+  assert.deepEqual(party?.lighting?.colorLightCount, 2);
+  assert.deepEqual(party?.lighting?.laserCount, 6);
+  assert.ok((party?.concertActions ?? []).some((state) => state.actionCount > 0),
+    "concert NPC actions did not advance");
+  const partyScreen = await capture("party-room");
+  const barrierStart = await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene?.player) continue;
+      scene.player.setPosition(1_640, 632);
+      scene.player.setVelocity(0, 0);
+      scene.heldMovementKeys?.add?.("right");
+      return { x: scene.player.x, y: scene.player.y };
+    }
+    return null;
+  }`);
+  await sleep(2_500);
+  const barrier = await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene?.player) continue;
+      return {
+        x: scene.player.x,
+        y: scene.player.y,
+        velocityX: scene.player.body?.velocity?.x ?? null,
+      };
+    }
+    return null;
+  }`);
+  await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene) continue;
+      scene.heldMovementKeys?.delete?.("right");
+      scene.player?.setVelocity?.(0, 0);
+      return true;
+    }
+    return false;
+  }`);
+  assert.ok(barrierStart, "party barrier setup unavailable");
+  assert.ok(barrier?.x < 1_900,
+    `left party barrier was crossed: ${JSON.stringify(barrier)}`);
+  return { bottomOutside, bottomInside, sideOutside, sideInside, party, partyScreen, barrierStart, barrier };
+}
+
+async function probeBugArea() {
+  assert.equal(await center(240, 2_096), true);
+  await waitForCameraCenter(240, 2_096);
+  await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene?.player) continue;
+      document.getElementById("content-close")?.click();
+      scene.player.setPosition(240, 2_096);
+      scene.stopPlayerMovement?.();
+      return true;
+    }
+    return false;
+  }`);
+  await sleep(300);
+  const bug = (await snapshot()).bug;
+  const bugScreen = await capture("bug-area");
+  assert.ok(bug.length > 0, "bug area has no visible NPCs");
+  assert.ok(bug.every((item) => item.frame?.width === 38 &&
+    item.frame?.height === 38 && item.frame?.cutWidth === 38 &&
+    item.frame?.cutHeight === 38), "bug frame geometry drifted");
+  assert.ok(bug.every((item) => Math.abs(item.displayWidth - 38 * 0.63) < 0.1 &&
+    Math.abs(item.displayHeight - 38 * 0.63) < 0.1),
+  "bug display scale drifted");
+  return { sampleCount: bug.length, bugScreen };
+}
+
 async function capture(name, options = {}) {
   mkdirSync(screens, { recursive: true });
   const image = await command("Page.captureScreenshot", { format: "png" }, options);
@@ -425,8 +550,8 @@ try {
   const policeCollision = await probePoliceCollision();
 
   setPhase("coffee-route", "controlled route replay");
-  assert.equal(await center(1400, 888), true);
-  await waitForCameraCenter(1400, 888);
+  assert.equal(await center(1400, 960), true);
+  await waitForCameraCenter(1400, 960);
   await sleep(300);
   const coffeeBefore = await snapshot();
   const coffeeBeforeScreen = await capture("coffee-before");
@@ -449,6 +574,8 @@ try {
       let maxRouteCountInScope = 0;
       let maxRouteCountInVisualZone = 0;
       const spacingViolations = [];
+      const policeNpcViolations = [];
+      const wallViolations = [];
       const startNow = scene.time.now;
       const identity = (sprite) => {
         if (!sprite || typeof sprite !== "object") return null;
@@ -461,22 +588,49 @@ try {
       };
       const inView = (point) => point.x >= view.x && point.x <= view.x + view.width &&
         point.y >= view.y && point.y <= view.y + view.height;
+      const police = [...(scene.vehicleRuntime?.policeCollisionTargets ?? [])];
+      const wallGrid = scene.cache.json.get("walls-layer")?.grid ?? [];
+      const nearPolice = (point) => police.some((car) =>
+        Math.abs(point.x - car.x) <= 32 + 24 &&
+        Math.abs(point.y - car.y) <= 24 + 24);
+      const onWall = (point) => wallGrid[Math.floor(point.y / 16)]?.[
+        Math.floor(point.x / 16)
+      ] === 1;
       for (let elapsed = 0; elapsed <= 60_000; elapsed += 100) {
         scene.routeCrowdRuntime.update(startNow + elapsed);
+        scene.bugCrowdRuntime?.update(startNow + elapsed);
         const instances = scene.routeCrowdRuntime.snapshot.instances.filter((item) =>
           owners.some((owner) => item.id.startsWith(owner)));
-        const inSpacingScope = (point) => point.x >= 1_280 && point.x <= 1_520 &&
+        for (const item of instances) {
+          if (nearPolice(item.position) && policeNpcViolations.length < 20) {
+            policeNpcViolations.push({ elapsed, owner: "route", id: item.id, position: item.position });
+          }
+          if (item.id.startsWith("vertical-crowd-reverse:") &&
+            onWall(item.position) && wallViolations.length < 20) {
+            wallViolations.push({ elapsed, owner: "route", id: item.id, position: item.position });
+          }
+        }
+        for (const item of scene.bugCrowdRuntime?.snapshot.instances ?? []) {
+          if (nearPolice(item.position) && policeNpcViolations.length < 20) {
+            policeNpcViolations.push({ elapsed, owner: "bug", id: item.id, position: item.position });
+          }
+          if (onWall(item.position) && wallViolations.length < 20) {
+            wallViolations.push({ elapsed, owner: "bug", id: item.id, position: item.position });
+          }
+        }
+        const inSpacingScope = (point) => point.x >= 1_200 && point.x <= 1_600 &&
           point.y >= 800 && point.y <= 1_080;
         const routePoints = instances.map((item) => {
           const sprite = scene.routeCrowdRuntime.sprites?.get(item.id);
-          if (sprite?.visible === false) return null;
-          return sprite === undefined
+          if (!item.materialized || !item.visible || item.destroyed ||
+              sprite?.visible === false) return null;
+          const point = sprite === undefined
             ? item.position
             : { x: sprite.x, y: sprite.y };
-        }).filter((point) => point !== null && inSpacingScope(point));
+          return inView(point) && inSpacingScope(point) ? point : null;
+        }).filter((point) => point !== null);
         maxRouteCountInScope = Math.max(maxRouteCountInScope, routePoints.length);
-        const visualPoints = routePoints.filter((point) =>
-          point.y >= 864 && point.y <= 984);
+        const visualPoints = routePoints;
         maxRouteCountInVisualZone = Math.max(maxRouteCountInVisualZone, visualPoints.length);
         const staticPoints = (scene.staticCrowdRuntime?.snapshot?.instances ?? [])
           .filter((item) => item.regionIndex === 38 || item.regionIndex === 61)
@@ -518,7 +672,7 @@ try {
         }
         prior = current;
         if (elapsed % 1_000 === 0) samples.push({ elapsed, instances });
-        if (maxRouteCountInVisualZone >= 2 &&
+        if (maxRouteCountInVisualZone >= 10 &&
           firstReturning["vertical-crowd-reverse:"] !== undefined) break;
       }
       const configs = scene.routeCrowdRuntime.core?.options?.configs ?? [];
@@ -532,6 +686,8 @@ try {
         final: scene.routeCrowdRuntime.snapshot.instances.filter((item) =>
           owners.some((owner) => item.id.startsWith(owner))),
         staticSpacing: minSpacing(scene.staticCrowdRuntime?.snapshot?.instances ?? []),
+        policeNpcViolations,
+        wallViolations,
         combinedSpacing: {
           minimum: Number.isFinite(minimumCombinedSpacing) ? minimumCombinedSpacing : null,
           maxRouteCountInScope,
@@ -558,6 +714,10 @@ try {
   }
   assert.deepEqual(routeAudit.terminalGone, [], "completion-exit route held gone+visible at coffee endpoint");
   assert.deepEqual(routeAudit.identityBreaks, [], "route sprite identity changed while continuously visible");
+  assert.deepEqual(routeAudit.policeNpcViolations, [],
+    "mobile NPC entered a police collision rectangle");
+  assert.deepEqual(routeAudit.wallViolations, [],
+    "mobile NPC entered a blocked wall cell");
   assert.deepEqual(routeAudit.flags, [
     { id: "drinkers", completionExit: true, goBack: false, deleteAfterComplete: false },
     { id: "vertical-crowd-reverse", completionExit: true, goBack: false, deleteAfterComplete: false },
@@ -568,10 +728,21 @@ try {
     `coffee route/static spacing ${routeAudit.combinedSpacing.minimum} < 56`);
   assert.equal(routeAudit.combinedSpacing.violationCount, 0,
     "coffee route/static spacing violations recorded");
-  assert.ok(routeAudit.combinedSpacing.maxRouteCountInVisualZone >= 2,
-    "coffee route replay did not keep two NPCs in the visual zone");
+  assert.ok(routeAudit.combinedSpacing.maxRouteCountInVisualZone >= 10,
+    "coffee route replay did not keep ten NPCs in the camera view");
   const coffeeAfter = await snapshot();
   const coffeeAfterScreen = await capture("coffee-after");
+  await sceneCall(`function () {
+    for (const game of this) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene) continue;
+      scene.scene.resume?.();
+      return true;
+    }
+    return false;
+  }`);
+  const partyAudit = await probeConcertParty();
+  const bugAudit = await probeBugArea();
   assert.equal(events.console.length, 0, "console errors or warnings recorded");
   assert.equal(events.exceptions.length, 0, "runtime exceptions recorded");
   assert.equal(events.failedRequests.length, 0, "failed network requests recorded");
@@ -580,13 +751,17 @@ try {
   const result = {
     passed: true, url, stopBefore, stopSampleCount: stopSamples.length,
     stopAfter: stopSamples.at(-1), stopBeforeScreen, stopAfterScreen,
-    policeCollision, coffeeBefore, coffeeAfter, coffeeBeforeScreen, coffeeAfterScreen, routeAudit, events,
+    policeCollision, coffeeBefore, coffeeAfter, coffeeBeforeScreen, coffeeAfterScreen,
+    partyAudit, bugAudit, routeAudit, events,
   };
   writeFileSync(out, `${JSON.stringify(result, null, 2)}\n`);
   console.log(JSON.stringify({ passed: true, out, stopSampleCount: stopSamples.length,
     stopBeforeScreen, stopAfterScreen, coffeeBeforeScreen, coffeeAfterScreen, policeCollision,
-    routeAudit: { sampleCount: routeAudit.sampleCount, firstReturning: routeAudit.firstReturning,
-      staticSpacing: routeAudit.staticSpacing, combinedSpacing: routeAudit.combinedSpacing }, events }));
+    partyAudit: { roof: partyAudit.party.roof, lighting: partyAudit.party.lighting,
+      concertActionCount: partyAudit.party.concertActions.length, partyScreen: partyAudit.partyScreen },
+    bugAudit, routeAudit: { sampleCount: routeAudit.sampleCount,
+      firstReturning: routeAudit.firstReturning, staticSpacing: routeAudit.staticSpacing,
+      combinedSpacing: routeAudit.combinedSpacing }, events }));
   await command("Target.closeTarget", { targetId: target.id }, { ignoreDeadline: true, timeoutMs: 1_000 });
   activeTargetId = undefined;
   socket.close();

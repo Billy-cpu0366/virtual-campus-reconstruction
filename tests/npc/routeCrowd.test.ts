@@ -94,6 +94,7 @@ describe("RouteCrowdRuntime contract", () => {
         endTiles: [{ x: 87, y: 56 }, { x: 88, y: 56 }, { x: 89, y: 56 }],
         goBack: false,
         deleteAfterComplete: false,
+        ignoreWalls: false,
         completionExit: true,
       });
     expect(
@@ -413,6 +414,38 @@ describe("RouteCrowdRuntime contract", () => {
       instance.state === "moving" && instance.visible &&
       instance.alpha === 1 && !instance.destroyed,
     )).toBe(true);
+  });
+
+  it("phases scoped starts by normalized path progress", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        count: 2,
+        startTiles: [{ x: 2, y: 3 }, { x: 3, y: 3 }],
+        randomPositions: true,
+        delay: { minMs: 100, maxMs: 500 },
+      })],
+      pathProvider: () => [
+        { x: 0, y: 48 },
+        { x: 16, y: 48 },
+        { x: 32, y: 48 },
+        { x: 48, y: 48 },
+        { x: 64, y: 48 },
+      ],
+      visualSpacing: {
+        minDistance: 56,
+        isInScope: (point) => point.y === 48,
+        fixedStartWaypointRatiosByConfig: {
+          "test-crowd": [0.5, 0.9],
+        },
+        fixedDelayByConfig: { "test-crowd": 0 },
+        checkMovement: false,
+      },
+    });
+    runtime.start(0);
+    expect(runtime.snapshot.instances.map((instance) => instance.position))
+      .toEqual([{ x: 16, y: 48 }, { x: 32, y: 48 }]);
+    expect(runtime.snapshot.instances.every((instance) => instance.state === "delay"))
+      .toBe(true);
   });
 
   it("waits before entering a bounded visual spacing exclusion", () => {

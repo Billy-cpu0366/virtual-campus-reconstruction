@@ -204,7 +204,9 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
       .every((state) => state.actionCount === 0 && state.phase === "idle"))
       .toBe(true);
     expect(animations.length).toBeGreaterThan(0);
-    expect(animations.every((animation) => animation.repeat === 0)).toBe(true);
+    expect(animations
+      .filter((animation) => animation.key.startsWith("npc-protester"))
+      .every((animation) => animation.repeat === 0)).toBe(true);
 
     viewport = { left: 0, top: 0, width: 10, height: 10 };
     runtime.update();
@@ -212,6 +214,43 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     runtime.shutdown();
     expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
     expect(fixed.every((state) => state.actionCount === 0)).toBe(true);
+  });
+
+  it("animates concert venue NPCs with looping direction actions", () => {
+    let now = 0;
+    const viewport = { left: 1_600, top: 350, width: 640, height: 550 };
+    const sprites: Sprite[] = [];
+    const animations: { key: string; repeat: number }[] = [];
+    const runtime = new PhaserVenueCrowdRuntime({
+      add: { sprite: (x, y, texture) => {
+        const sprite = new Sprite(x, y, texture);
+        sprites.push(sprite);
+        return sprite;
+      } },
+      textures: { exists: () => true },
+      anims: {
+        exists: () => false,
+        create: (config) => {
+          animations.push({ key: config.key, repeat: config.repeat });
+          return config;
+        },
+        generateFrameNumbers: (_key, range) => [range.start, range.end],
+      },
+    }, () => viewport, () => now);
+
+    expect(runtime.start()).toBe(true);
+    expect(runtime.concertActionSnapshot.length).toBeGreaterThan(0);
+    expect(sprites.some((sprite) => sprite.played.some((key) =>
+      key.startsWith("concert-crowd-"),
+    ))).toBe(true);
+    for (now = 0; now <= 8_000; now += 100) runtime.update();
+    expect(runtime.concertActionSnapshot.some((state) => state.actionCount > 0))
+      .toBe(true);
+    expect(animations.some((animation) =>
+      animation.key.startsWith("concert-crowd-") && animation.repeat === -1,
+    )).toBe(true);
+    runtime.shutdown();
+    expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
   });
 
   it("keeps visible sprite identity through core culling and culls only when offscreen", () => {

@@ -58,6 +58,44 @@ describe("GridRouteCrowdPathProvider", () => {
     }
   });
 
+  it("avoids dynamic blocked cells while finding a route", () => {
+    const provider = new GridRouteCrowdPathProvider(
+      [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+      ],
+      (point) => point.x === 24 && point.y === 8,
+    );
+    const path = provider.findPath({
+      start: { x: 8, y: 8 },
+      end: { x: 72, y: 8 },
+    });
+    expect(path).toBeDefined();
+    expect(path?.some((point) => point.x === 24 && point.y === 8)).toBe(false);
+  });
+
+  it("applies dynamic blockers when snapping a blocked endpoint", () => {
+    const blocked = { x: 8, y: 8 };
+    const provider = new GridRouteCrowdPathProvider(
+      [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ],
+      (point) => point.x === blocked.x && point.y === blocked.y,
+    );
+    const path = provider.findPath({
+      start: blocked,
+      end: { x: 40, y: 40 },
+      allowBlockedEndpoints: true,
+    });
+    expect(path).toBeDefined();
+    expect(path?.[0]).not.toEqual(blocked);
+    expect(path?.some((point) => point.x === blocked.x && point.y === blocked.y))
+      .toBe(false);
+  });
+
   it("uses a stable seed to select diverse equal-cost paths", () => {
     const provider = new GridRouteCrowdPathProvider([
       [0, 0, 0, 0, 0],
