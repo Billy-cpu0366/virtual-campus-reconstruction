@@ -15,7 +15,7 @@ updated: 2026-08-27
 
 **当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，完整NPC专项仍未通过Human视觉；本次Human明确重新授权一个有界跨系统修复包，仅覆盖route连续性、Stop AI venue presentation和直升机/警车资源owner，其他NPC owner继续延期。
 
-**当前硬边界**：完整SYS-NPC专项仍按`DEC-SYS-NPC-DEFER-001`延期；本次仅按`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`修正route、Stop AI venue presentation和车辆资源owner的有界范围，不恢复完整B1视觉签字或B2-B5。烟雾、车辆和飞机已由Human验收；`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`已实施但coffee owner覆盖不足，当前只复审明确的`vertical-crowd-reverse`，不重做已通过owner。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
+**当前硬边界**：完整SYS-NPC专项仍按`DEC-SYS-NPC-DEFER-001`延期；本次仅按`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`修正route、Stop AI venue presentation和车辆资源owner的有界范围，不恢复完整B1视觉签字或B2-B5。烟雾、车辆和飞机已由Human验收；`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`已实施，Human又明确接受`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`，当前只修明确的`vertical-crowd-reverse`，不重做已通过owner。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
 
 ## 新增Human视觉证据（2026-08-25至2026-08-27，部分实施后仍待Human验收）
 
@@ -26,7 +26,7 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 - **行走后消失/固定点冒出（route高可信）**：`src/npc/routeCrowd.ts:557-593`在非`goBack`且非`deleteAfterComplete`完成时直接把NPC重置到`start`并将alpha置0；`PhaserRouteCrowdRuntime.ts:254-286`按materialized/destroyed清理sprite。公开Bundle的`fadeOut→hidden→reset/fadeIn`是来源事实，但不能直接作为产品修复：只要终点或起点在Human视口内，任何淡出、隐藏、destroy、presentation重建或瞬移都会违反当前验收约束；static/venue仍不能套用route结论。
 - **Human接受的视口连续性硬约束**：NPC在当前摄像机视口内必须保持连续的presentation身份与可见性；不得通过`alpha=0`、`destroy`、重建或瞬移消失/出现。NPC只能从视口外连续走入，或因自身连续移动走出视口后再回收。路线仍按各组`goBack`/`deleteAfterComplete`处理，不把所有NPC改成循环。Stop AI帧修正与`drinkers`退场已通过自动真实路径收据，但coffee整体视觉仍未通过，不能把局部PASS当作Human验收。
 
-**处理决定**：Human已接受以上四包一起实施，并已验收烟雾、车辆和飞机；NPC部分在产品分支`883faa2`的自动/真实路径收据及独立复核通过后仍未通过肉眼验收：Stop AI人物仍闪现且部分只显示半身，coffee路线NPC仍齐刷刷站成一坨。系统性审计后Human接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`并已实施：按实际64×64帧修正Stop AI专用人群；让`drinkers`沿连续出口走到屏外后再restart；只对coffee两个重叠静态region做局部去重。新build复审发现coffee实际堆积owner是`vertical-crowd-reverse`，该组尚未获扩展授权，因此当前重新停在owner审计Gate。static crowd的其他行为、rat、ghost、birds、sprayer、fixed special、dancing及B2-B5仍保持延期。实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
+**处理决定**：Human已接受以上四包一起实施，并已验收烟雾、车辆和飞机；NPC部分在产品分支`883faa2`的自动/真实路径收据及独立复核通过后仍未通过肉眼验收：Stop AI人物仍闪现且部分只显示半身，coffee路线NPC仍齐刷刷站成一坨。系统性审计后Human接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`并已实施：按实际64×64帧修正Stop AI专用人群；让`drinkers`沿连续出口走到屏外后再restart；只对coffee两个重叠静态region做局部去重。新build复审确认coffee实际堆积owner是`vertical-crowd-reverse`；Human随后接受`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`，只对该组沿已有路径增加连续屏外退场。static crowd的其他行为、rat、ghost、birds、sprayer、fixed special、dancing及B2-B5仍保持延期。实现的停止条件是“视口内零可见性断裂、零瞬移、零屏内创建/销毁”，不是“完成淡出后重置”。
 
 ## 本轮Human视觉回退（2026-08-25）
 
@@ -34,7 +34,7 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 - **未接受**：Stop AI人物仍闪现，部分人物只有半个身子；coffee路线仍出现多个NPC齐刷刷堆在同一处。
 - **分类**：保持`systemic-failure`。自动/真实路径收据与Human观察冲突，且问题同时涉及venue/呈现层与route/路径层；首次整体方案已实施但被新build视觉审计证明范围不足，停止零散修补并重新做owner审计。
 - **首次方案已验证部分**：Stop AI专用`npc_protester_rising.webp`按实际64×64加载；新build固定视口连续50帧的texture frame/cut/display均为64。`drinkers`已沿`forwardPath`连续退场，静态38/61最小间距为39.54px；这些是局部自动证据，不是Human整体验收。
-- **第二次审计根因簇**：coffee地点名仍UNKNOWN；新build固定视口`x≈1160..1640,y≈753..1023`中，`drinkers`已经在视口外，但9个`vertical-crowd-reverse`实例在约`(1400,904)`终点呈`gone+visible`，并与静态38/61的8个实例叠加。该组同样为`goBack:false/deleteAfterComplete:false`，是当前coffee堆积的真实route owner；是否沿连续出口退场及路径出口需单独复核。
+- **第二次审计根因簇**：coffee地点名仍UNKNOWN；新build固定视口`x≈1160..1640,y≈753..1023`中，`drinkers`已经在视口外，但9个`vertical-crowd-reverse`实例在约`(1400,904)`终点呈`gone+visible`，并与静态38/61的8个实例叠加。该组同样为`goBack:false/deleteAfterComplete:false`，是当前coffee堆积的真实route owner；Human已接受其沿已有forwardPath连续反向走到安全视口外再restart，待实现与复验。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
