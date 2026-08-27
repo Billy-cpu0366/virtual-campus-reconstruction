@@ -3,7 +3,9 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: implementation-authorized
+status: automated-verified-awaiting-human-visual
+result-commit: 9233b20
+verification-evidence: .pi/audit-evidence/05e-npc-visual-repair-005/
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
@@ -108,10 +110,10 @@ Human明确接受“全部四类问题一起处理”：
 - 车辆：产品提交`180865d`、Main接线`5ea711d`；资源白名单、preload、专用owner、直升机主体/双旋翼/high-res、3辆警车已接入；production快照与直升机截图通过。警灯和动态车辆行为保持UNKNOWN。
 - venue/static：产品提交`7341cc0`；可见region原子ready、屏内sprite不销毁；专项测试和Stop AI连续性采样通过。
 - probe：产品提交`883faa2`；真实Stop AI probe收集289次清雾样本、47次NPC连续性样本，route production probe通过。
-- 父回归：`npm test`（69个测试文件/389项测试）、`npm run typecheck`、`npm run check:runtime`和当前产品worktree build通过；无console/exception/failed request/bad response。
-- 独立`lightweight-verifier`复核：typecheck、全量389项测试、资源检查和build均PASS；视觉探针因其沙箱不能复用4182而标UNKNOWN。主会话真实4182生产探针已独立取得PASS。
-- Human部分验收已通过烟雾、车辆和飞机；Stop AI人物和coffee路线的历史视觉失败仍需Human最终复验。
-- 当前结果：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`与`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`已实施；产品提交`16c74bb`保存完整原始路径退场、随机起点回归测试及带看门狗的`browser:npc-visual-production`。4182生产探针PASS：Stop AI采样50帧，两个route owner均观察到可见连续退场，静态region 38/61最小间距35.35px，浏览器错误全为0。收据位于产品worktree`.pi/audit-evidence/05e-npc-visual-targeted/receipt.json`，SHA-256 `925c0c99f889361501fa5d95123b47f3b8e205ebcf3b8c508254c34200a9cff9`。
+- 父回归：`npm test`（69个测试文件/398项测试）、`npm run typecheck`、`npm run check:runtime`和当前产品worktree普通production build通过；普通入口`browser:smoke`与test-hooks `browser:chunk-smoke`均PASS；无console/exception/failed request/bad response。
+- 独立reviewer复核当前diff与005收据PASS；其结论只证明代码/客观条件，不代替Human视觉验收。
+- Human已验收烟雾、车辆和飞机；本轮警车阻挡、Stop AI两人/公开英文口号和coffee非空分道已通过自动与production验证，Stop AI与coffee仍需Human直接复验。
+- 当前结果：产品提交`9233b20`完成`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`的警车/Stop AI有界修复及`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`的coffee非空分道调度；保留`goBack:false/deleteAfterComplete:false`和连续退场。4182生产探针PASS：Stop AI采样50帧，coffee同时2个reverse route NPC，region 38/61均为0，组合最小中心距118.36277297772581px，警车`blockedRight=true`，浏览器错误全为0。收据位于产品worktree`.pi/audit-evidence/05e-npc-visual-repair-005/receipt.json`，SHA-256 `65c9dc41b52f970480d016d8071310cc6d62fff22491afb2328046646a283381`。
 - 父任务未关闭；Human最终视觉通过前不关闭05-E，不启动S2–S4或完整SYS-NPC B2–B5。
 
 ## 9. Human失败差异表（第二次审计后扩展已实施，等待Human复验）
@@ -154,3 +156,10 @@ Human在当前本地production预览中新增4条反馈：警车可站立/穿透
 - **视觉结果**：coffee-before/coffee-after截图中该区域没有可见NPC。原因是为满足`>=56px`而同时禁用了静态38/61并把coffee route并发压到只剩1个，形成了空场景；这不是可接受的“有间隙”。
 - **结论**：本轮自动PASS与视觉结果冲突，按`systemic-failure`退回audit；产品worktree保留未提交失败尝试，不创建新的零散修补。失败证据位于`.pi/audit-evidence/05e-npc-visual-repair-003-failed/`，receipt SHA-256 `ce1eb475f1d31df1c3b0a1831cf181b0d62aa492e1d4632c8f0bcaf5ee2a10d8`。
 - **下一Gate已接受**：coffee局部至少同时保留2个可见route NPC，任何同时可见中心距`>=56px`；静态38/61继续不生成，采用两条错峰/分道route或等价局部调度。当前按`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`重新实现。
+
+## 12. 非空coffee重实现结果（2026-08-27）
+
+- **已落盘**：产品提交`9233b20`完成警车静态Arcade阻挡、Stop AI背景2人和公开英文口号轮换；coffee局部只允许`vertical-crowd-reverse`，最多同时2个，静态region 38/61不生成；两条实例从屏外固定起点/延迟进入，并以±40px显示分道。未改变公开route配置的`goBack:false`、`deleteAfterComplete:false`，也未把安全退场语义扩展到其他route。
+- **已验证**：`npm test`为69个文件/398项，`npm run typecheck`、`npm run check:runtime`、普通production build、普通入口`browser:smoke`、test-hooks `browser:chunk-smoke`和独立reviewer均PASS。4182生产探针收据显示Stop AI连续50帧、三条口号、警车`blockedRight=true`、coffee同时2个route NPC、region38/61为0、组合最小中心距118.36277297772581px、console/exception/failed request/bad response均为0。
+- **证据**：`.pi/audit-evidence/05e-npc-visual-repair-005/receipt.json`，SHA-256 `65c9dc41b52f970480d016d8071310cc6d62fff22491afb2328046646a283381`；四张前后截图在同目录`screens/`下，清单见`SHA256SUMS`。005目录按仓库规则不纳入Git提交，保留在产品worktree供Human复验。
+- **当前状态**：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`的首次coffee尝试失败证据仍保留；`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`已实现并自动/生产验证，Human视觉Gate仍未签署。父任务继续停在`human-acceptance`，不关闭05-E，不启动S2–S4或SYS-NPC B2–B5。
