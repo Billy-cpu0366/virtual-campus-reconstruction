@@ -3,17 +3,17 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: audit
+correction-phase: batch-implement
 classification-trigger: human-found-police-collision-stop-ai-content-and-coffee-spacing-gaps-after-automated-pass
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-cross-system-npc-audit
-current-phase: p5.4-systemic-npc-audit
-current-gate: p5.4-new-human-difference-audit
-gate-status: human-visual-failure-reported-awaiting-audit
-authorization-ref: DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004
+work-item-status: active-cross-system-npc-batch-implement
+current-phase: p5.4-systemic-npc-batch-implement
+current-gate: p5.4-new-visual-repair-plan
+gate-status: human-new-plan-accepted-awaiting-implementation
+authorization-ref: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003
 preauthorized-next-work-item: none
 next-phase: p5.4-systemic-npc-full-regression
 updated: 2026-08-27
@@ -24,13 +24,13 @@ updated: 2026-08-27
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出多项新问题。烟雾已被Human验收，车辆和飞机画面也已被Human验收；当前Human反馈新增警车可站立、Stop AI对街5个NPC用途不明、Stop AI缺少公开语义气泡、coffee路线仍局部拥挤。此前`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`及`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`已在产品提交`16c74bb`落盘，但本轮范围重新进入只读audit，不能把旧PASS当作整体通过。
+- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出多项新问题。烟雾已被Human验收，车辆和飞机画面也已被Human验收；当前Human反馈新增警车可站立、Stop AI对街5个NPC用途不明、Stop AI缺少公开语义气泡、coffee路线仍局部拥挤。Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`：警车加入阻挡、对街背景减为2人、公开英文口号轮换气泡、coffee局部中心距至少56px；现在进入批量实现，旧PASS不替代新一轮Human视觉验收。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮Stop AI半身/闪现与coffee路线拥挤是对上一候选的新Human失败证据，不等于恢复完整授权。上一候选的route/venue有界实现保留为冻结对照；不启动B2-B5，先从同一差异表审计根因。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：Human此前接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`与`DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004`，产品提交`16c74bb`已通过原范围的自动与生产验证；但Human本轮又报告跨owner差异，新增警车碰撞、Stop AI内容/静态人群和coffee间距均尚未取得授权修复。先只读审计和根因聚类，再提出一次整体方案Gate；其他B2–B5仍未授权，S2–S4未启动。
+- **当前授权**：Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`，允许在既有有界范围内批量修复3辆静态警车碰撞、Stop AI对街背景人数与抗议气泡、coffee局部route/static间距；保留公开route flags、已修好的连续退场和其他owner边界。其他B2–B5仍未授权，S2–S4未启动。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：上一轮NPC route/Stop AI自动与生产收据仍保留，但Human本轮已报告新的跨owner视觉/行为差异；必须冻结零散修补，完成统一差异表、根因聚类、一次Human整体方案Gate、成批修复、完整回归，再由Human重新验收。Human通过前不得关闭本项或启动S2。警车碰撞期望、5个对街NPC用途、Stop AI气泡来源和coffee目标间距均先保持UNKNOWN，不能擅自删除、补文案或改碰撞。
+- **关闭门禁**：上一轮NPC route/Stop AI自动与生产收据仍保留；新一轮方案已由Human接受，必须完成批量修复、完整回归和新的生产视觉收据，再由Human确认警车碰撞、背景人数/气泡和coffee间距。Human通过前不得关闭本项或启动S2。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标

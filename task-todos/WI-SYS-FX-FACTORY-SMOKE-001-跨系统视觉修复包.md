@@ -3,11 +3,12 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: systemic-audit-awaiting-human-plan
+status: implementation-authorized
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
 extension-decision: DEC-P5.4-SYS-NPC-VERTICAL-EXIT-004
+follow-up-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003
 updated: 2026-08-27
 ---
 
@@ -130,19 +131,19 @@ Human明确接受“全部四类问题一起处理”：
 
 ## 10. 新一轮Human反馈与统一审计（2026-08-27）
 
-Human在当前本地production预览中新增4条反馈：警车可站立/穿透、Stop AI街对面5个NPC用途不明、Stop AI抗议口号气泡缺失、coffee街NPC仍在窄区聚集且间距不足。按修正协议，本轮保持`systemic-failure`，冻结零散补丁，先完成整体方案Gate。
+Human在当前本地production预览中新增4条反馈：警车可站立/穿透、Stop AI街对面5个NPC用途不明、Stop AI抗议口号气泡缺失、coffee街NPC仍在窄区聚集且间距不足。按修正协议，本轮保持`systemic-failure`；Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`，现在进入批量实现。
 
 | 差异 | 当前证据 | 状态与未知 |
 |---|---|---|
-| 警车可站立/穿透 | `PhaserVehicleRuntime`只创建3个`car-police`显示Sprite；`CampusScene`当前玩家碰撞只接Tilemap/walls/bridge，未接警车Body/collider。公开Bundle静态`staticCars`也以`add.sprite`创建；原站未直接证明静态警车应阻挡玩家。 | Human观察是实际行为事实；“警车必须不可穿透”是待确认的新产品验收期望；碰撞修复未获本轮新授权。 |
-| Stop AI街对面5个NPC | 该5人属于公开`crowd_up`静态区域（本地`regionIndex=64`，约`x=1480,y=1176..1304`），公开规则对退化边界使用`max(5, ...)`；当前实现按该规则生成5人。其原站该退化区域的实际运行时布点仍UNKNOWN。 | 不是无来源的随机NPC；其功能是环境背景，不承担交互。是否保留、减少或移除是Human视觉取舍。 |
-| Stop AI抗议口号气泡缺失 | 公开Bundle存在`People, not machines!`、`Jobs for humans!`、`Human > machine`及`speech-bubble`随机展示/回收机制；当前`PhaserVenueCrowdRuntime`没有口号、气泡节点、定位或清理。 | 同义公开文案和机制为FACT；用户所说中文语义不是公开原句；气泡首次触发路径、语言和DOM/Phaser呈现方式仍需方案Gate。 |
-| Coffee路线窄区拥挤 | `completionExit`已清除终点`gone+visible`；但`drinkers`、两组vertical路线与静态region 38/61仍在同一窄区叠加。当前静态跨区中心距为35.35px，而NPC显示尺寸为48px；公开Bundle没有coffee间隙、密度或最小距离数值。 | 路径几何、随机起点和静态叠加是高可信根因；精确间距是UNKNOWN。建议仅对coffee局部采用中心距`>=56px`（48px精灵外加8px空隙）作为重构DECISION，需Human接受。 |
+| 警车可站立/穿透 | `PhaserVehicleRuntime`只创建3个`car-police`显示Sprite；`CampusScene`当前玩家碰撞只接Tilemap/walls/bridge，未接警车Body/collider。公开Bundle静态`staticCars`也以`add.sprite`创建；原站未直接证明静态警车应阻挡玩家。 | Human观察是实际行为事实；Human已接受“警车必须不可穿透”的新产品验收期望；碰撞修复已获本轮授权。 |
+| Stop AI街对面5个NPC | 该5人属于公开`crowd_up`静态区域（本地`regionIndex=64`，约`x=1480,y=1176..1304`），公开规则对退化边界使用`max(5, ...)`；当前实现按该规则生成5人。其原站该退化区域的实际运行时布点仍UNKNOWN。 | 不是无来源的随机NPC；其功能是环境背景，不承担交互。Human已选择局部减少为2人，不迁移或删除整个owner。 |
+| Stop AI抗议口号气泡缺失 | 公开Bundle存在`People, not machines!`、`Jobs for humans!`、`Human > machine`及`speech-bubble`随机展示/回收机制；当前`PhaserVenueCrowdRuntime`没有口号、气泡节点、定位或清理。 | 同义公开文案和机制为FACT；用户所说中文语义不是公开原句；Human已选择公开英文轮换，本轮采用可见时显示、离屏/关闭/shutdown清理的有界呈现。 |
+| Coffee路线窄区拥挤 | `completionExit`已清除终点`gone+visible`；但`drinkers`、两组vertical路线与静态region 38/61仍在同一窄区叠加。当前静态跨区中心距为35.35px，而NPC显示尺寸为48px；公开Bundle没有coffee间隙、密度或最小距离数值。 | 路径几何、随机起点和静态叠加是高可信根因；Human已接受仅对coffee局部采用中心距`>=56px`（48px精灵外加8px空隙）作为重构DECISION。 |
 
-### Proposed batch plan（待Human方案Gate）
+### Accepted batch plan（Human已接受）
 
-1. **Vehicle collision packet（条件包）**：若Human确认警车必须不可穿透，只改`PhaserVehicleRuntime`、`CampusScene`和车辆/碰撞测试；保持警车路线、贴图、地图和玩家核心不变，并补shutdown清理。
-2. **Stop AI content/ambient packet**：只处理公开`crowd_up`背景5人的保留/减少/移除取舍，以及`protesters_rising`的公开英文口号气泡；不把背景5人误迁为抗议者，不改其他静态region或未授权NPC owner。
-3. **Coffee spacing packet**：只约束coffee局部route occupancy与静态38/61 placement，保留两个route的公开flags和已修好的连续退场；按Human接受的间距指标验证，不改全局offset、其他路线或地图。
+1. **Vehicle collision packet**：只改`PhaserVehicleRuntime`、`CampusScene`和车辆/碰撞测试；3辆静态警车接入玩家阻挡碰撞，保持警车路线、贴图、地图和玩家核心不变，并补shutdown清理。
+2. **Stop AI content/ambient packet**：将公开`crowd_up`背景从5人局部重构为2人，并为`protesters_rising`加入公开英文口号轮换气泡；不把背景人群误迁为抗议者，不改其他静态region或未授权NPC owner。
+3. **Coffee spacing packet**：仅约束coffee局部route occupancy与静态38/61 placement，使相关NPC中心距至少56px；保留两个route的公开flags和已修好的连续退场，不改全局offset、其他路线或地图。
 
-在Human接受上述范围、警车碰撞取舍、5人处理方式、口号呈现方式和coffee间距指标前，不进入实现。
+本轮已进入实现；完成后必须通过专项测试、全量回归、生产探针和Human视觉验收。
