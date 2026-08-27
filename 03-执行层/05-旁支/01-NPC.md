@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: systemic-reaudit-after-visual-failure
+audit-status: coffee-repair-004-implementation-authorized
 work-item: WI-SYS-NPC-SPECIAL-001
 updated: 2026-08-27
 ---
@@ -54,13 +54,13 @@ Human在当前本地production预览中报告：警车可站立/穿透；Stop AI
 - **FACT/UNKNOWN**：公开Bundle存在`People, not machines!`、`Jobs for humans!`、`Human > machine`和`speech-bubble`机制；当前venue owner没有口号、气泡定位或清理。公开首次触发路径仍UNKNOWN；本轮已接受公开英文轮换和可见/离屏/shutdown清理的重构实现。
 - **FACT/INFERRED**：coffee的`gone+visible`已由`16c74bb`修复，但`drinkers`、两组vertical路线与静态38/61仍叠加；当前静态最小中心距35.35px，小于48px精灵显示尺寸。公开Bundle没有coffee间隙数值；本轮已接受`>=56px`局部中心距的重构DECISION。
 
-Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`，首次尝试已实现静态警车阻挡碰撞、对街背景2人、公开英文抗议气泡和coffee局部占位规则；但coffee最终截图为空，自动间距形成空集合通过，不能视为视觉完成。当前按`systemic-failure`重新审计coffee的非空分散方案；完整SYS-NPC及其他owner仍延期。
+Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`，首次尝试已实现静态警车阻挡碰撞、对街背景2人、公开英文抗议气泡和coffee局部占位规则；但coffee最终截图为空，自动间距形成空集合通过，不能视为视觉完成。Human随后接受`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`：coffee局部至少同时保留2个可见route NPC且中心距至少56px，静态38/61继续不生成，采用错峰/分道route；完整SYS-NPC及其他owner仍延期。
 
 ## 新方案视觉结果（2026-08-27）
 
 - **已验证**：警车玩家阻挡、3条公开英文抗议口号、对街背景2人、无console/exception/failed request/bad response；专项/全量自动检查和编译通过。
 - **未通过**：coffee截图无可见NPC。首次实现同时禁用了静态38/61并将局部route并发限制为1，导致“满足56px”退化为空场景；这是自动检查与视觉目标冲突，不能保留为完成结论。
-- **当前处理**：保留失败证据并退回coffee audit；建议下一方案至少保留2个可见/交替route NPC，同时任何同时可见中心距≥56px，具体lane或时序待Human重新确认。
+- **当前处理**：`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`已接受并进入实现；保留失败证据，要求至少2个可见route NPC、同时中心距≥56px，静态38/61继续不生成。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
