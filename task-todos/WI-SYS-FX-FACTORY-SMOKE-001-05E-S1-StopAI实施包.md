@@ -4,7 +4,7 @@ subtask: 05E-S1-StopAI-smoke
 system: SYS-FX
 issue-class: systemic-failure
 correction-phase: batch-implement
-status: implementation-authorized-npc-correction
+status: systemic-visual-reaudit-required
 decision: DEC-P5.4-05E-S1-STOP-AI-001
 repair-decision: DEC-P5.4-05E-S1-SMOOTHNESS-001
 cross-system-repair-decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
@@ -42,7 +42,7 @@ updated: 2026-08-25
 - 证据：`.pi/worktrees/visible-product-integration/.pi/audit-evidence/05e-s1/receipt.json`（SHA-256 `b36e41537972e9e1331f65ea909f785d1013a912f01de6e5c883f8bd8577265e`）、`performance.json`（SHA-256 `8a188bc019f283b1bcd9889d0a6e0481622dbb22e028813ce8e439267c9a32a3`）及`screenshots/`。
 - 独立verifier：所有客观检查PASS，结论为`UNVERIFIED`，未代替Human视觉。
 - Human Gate结果（2026-08-25）：拒绝当前编译production视觉，明确反馈红烟运动“卡卡的，不知道怎么回事，很不丝滑”。该反馈覆盖整体视觉体验，自动PASS不能覆盖；S2–S4未授权。
-- 当前处理：quantity4→2的平滑度修复已自动/production验证；Human已验收烟雾、直升机和警车，但拒绝Stop AI人物闪现/半身与coffee路线拥挤。产品分支`883faa2`冻结为失败对照；Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`，后续只按统一NPC审计成批修复，不追加零散补丁。
+- 当前处理：quantity4→2的平滑度修复已自动/production验证；Human已验收烟雾、直升机和警车，但拒绝Stop AI人物闪现/半身与coffee路线拥挤。产品分支`883faa2`冻结为失败对照；`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`已部分实施，Stop AI帧与drinkers局部证据通过，但新build发现coffee实际失败owner为`vertical-crowd-reverse`，后续重新按统一NPC审计，不追加零散补丁。
 - Human Plan Gate已通过（2026-08-25）：接受`DEC-P5.4-05E-S1-SMOOTHNESS-001`，只优化`orange_smoke`呈现密度，将Phaser adapter的`quantity`从公开FACT `4`改为重构DECISION `2`；保留13-cell核心、清雾/respawn、owner/lifecycle和红烟9层公开参数。`quantity1`仅为诊断上限，不预授权。
 - 修复已落盘：代码提交`c4b2d6a`；公开FACT quantity4仍保留，Phaser presentation使用quantity2；Stop AI定点帧门禁已加入production probe。
 - 已验证基线：Stop AI编译production定点约10秒、600帧、p95 16.8ms、max16.8ms、longtask0、>34ms=0；9红/13fog、离屏/返回generation2/wind/shutdown通过。增强probe另收集289次清雾样本、47次NPC连续性样本，车辆owner为running且直升机/3辆警车可见。该收据仍不能替代Human最终视觉验收。

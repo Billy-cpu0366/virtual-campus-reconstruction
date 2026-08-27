@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: source-audit
 system: SYS-FX
 issue-class: systemic-failure
-status: implementation-authorized-npc-correction
+status: systemic-visual-reaudit-required
 decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 updated: 2026-08-25
 ---
@@ -243,7 +243,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。Human已验收烟雾、车辆和飞机，但拒绝Stop AI人物闪现/半身与coffee路线拥挤；系统性审计已完成，Human接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`，当前按两个有界NPC包实施，不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。Human已验收烟雾、车辆和飞机，但拒绝Stop AI人物闪现/半身与coffee路线拥挤；`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`已部分实施并通过局部自动证据，但新build确认coffee实际堆积owner为`vertical-crowd-reverse`，当前重新审计，不启动S2–S4。
 
 ### 实施收据
 

@@ -3,11 +3,11 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: implementation-authorized
+status: systemic-visual-reaudit-required
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
-updated: 2026-08-25
+updated: 2026-08-27
 ---
 
 # 05-E / SYS-NPC 跨系统视觉修复包
@@ -58,7 +58,7 @@ Human明确接受“全部四类问题一起处理”：
 
 允许修改`src/npc/routeCrowd.ts`、`game/PhaserRouteCrowdRuntime.ts`、对应route测试和必要probe。把route完成/回收变成视口安全生命周期：视口内保持同一presentation身份和连续可见性；只有屏外才可回收、重置或删除。不得把所有路线改为循环。
 
-本轮追加授权：仅对公开`drinkers`组增加终点后的连续安全出口；保持`goBack:false`与`deleteAfterComplete:false`字段，不用alpha/destroy/屏内重建/瞬移掩盖完成态。
+本轮追加授权：仅对公开`drinkers`组增加终点后的连续安全出口；保持`goBack:false`与`deleteAfterComplete:false`字段，不用alpha/destroy/屏内重建/瞬移掩盖完成态。新build审计发现coffee实际失败owner为`vertical-crowd-reverse`，该owner不在本轮已接受的追加授权内；扩展前必须重新形成方案并过Human Gate。
 
 ### D. Stop AI venue/static presentation
 
@@ -109,20 +109,20 @@ Human明确接受“全部四类问题一起处理”：
 - 父回归：`npm run typecheck`、全量69文件/384测试、`npm run check:runtime`、普通build、普通browser smoke、test-hooks chunk smoke通过；无console/exception/failed request/bad response。
 - 独立`lightweight-verifier`复核通过：HEAD、工作树、typecheck、全量测试、资源、build、两个production probe和静态边界均PASS；未运行build:test-hooks。
 - Human部分验收已通过烟雾、车辆和飞机；Stop AI人物仍闪现且部分只显示半个身子，coffee路线NPC仍齐刷刷站成一坨。
-- 当前处理：Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`；从冻结候选`883faa2`创建两个隔离实现包，分别实施专用64×64帧、`drinkers`屏外连续退场和coffee两个静态region局部去重；不对已验收Fog/车辆做回归性修改。
+- 当前处理：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`已实施专用64×64帧、`drinkers`屏外连续退场和coffee两个静态region局部去重；新build真实视口审计确认`drinkers`已离场，但`vertical-crowd-reverse`仍在coffee终点`gone+visible`成团。当前按systemic-failure重新审计owner，不对已验收Fog/车辆做回归性修改，也不在新方案Gate前扩展代码。
 - 父任务未关闭；不启动S2–S4或完整SYS-NPC B2–B5。
 
-## 9. Human失败差异表（审计完成，等待Human方案Gate）
+## 9. Human失败差异表（第二次审计，等待Human方案Gate）
 
 | 差异 | Expected source | Actual evidence | 根因簇 | 当前结论 |
 |---|---|---|---|---|
 | Stop AI人物闪现、部分半身 | Human要求视口内NPC完整、连续、不能错误帧或呈现断裂 | `npc_protester_rising.webp`实际为`512×1024`，即8×16个64×64格；`game/PhaserVenueCrowdRuntime.ts`当前preload按48×48切帧，运行时frame为48×48；Stop AI自动identity采样通过但未测像素/帧 | 专用spritesheet几何错误（高可信）；高层烟雾/地图前景遮挡为次要候选，尚未单独证伪 | 先修专用64×64帧合同并补逐帧/截图证据；不改已验收Fog语义 |
-| coffee路线NPC齐刷刷成坨 | Human要求路线人群视觉分散，不能在视口内堆成静止一团 | 对应公开`drinkers`路线（地点名coffee仍UNKNOWN）：4个实例最终到两个相距32px的终点；两个静态region又在同一终点区，实测为4 route + 9 static叠加 | 非往返路线完成态在终点视口内被连续性修复保留；终点本身与静态region重叠 | 推荐为`drinkers`增加终点后的屏外连续退场段，保持`goBack:false/deleteAfterComplete:false`，不alpha/destroy/瞬移；静态region先保留，若退场后仍成团再单独按证据处理 |
+| coffee路线NPC齐刷刷成坨 | Human要求路线人群视觉分散，不能在视口内堆成静止一团 | 新build固定coffee视口`(x≈1160..1640,y≈753..1023)`连续审计：`drinkers`已在视口外；实际画面为9个`vertical-crowd-reverse`实例在约`(1400,904)`终点变成`gone+visible`，另有静态38/61共8个实例 | 先前只修`drinkers`，漏掉同样为`goBack:false/deleteAfterComplete:false`且终点落在coffee视口内的`vertical-crowd-reverse`；这是同一类非往返完成态驻留，但owner和路径需单独复核 | 不直接套用旧方案；建议审计后只为明确coffee owner增加有界连续安全退场，保留该组公开flags，并验证静态去重与路线离场叠加效果；需Human新方案Gate |
 
-### 推荐整体修复方案（待Human接受）
+### 首次方案执行结果与第二次审计方案（待Human接受）
 
-1. **Stop AI专用帧合同**：将`npc_protester_rising`按64×64 spritesheet加载，继续使用8方向×8帧的独立动作映射；补texture尺寸、当前frame、可见边界和真实截图回归，确认不再半身/错误帧闪现。
-2. **coffee/`drinkers`安全退场**：保持公开起点、终点、`goBack`和`deleteAfterComplete`标志不变；仅在非往返路线完成且终点仍在视口时，沿经验证的连续出口走到视口安全范围外，再在屏外恢复原有restart。禁止alpha归零、destroy、presentation重建和瞬移。
-3. **停止条件**：固定Stop AI与`drinkers`路径，连续截图/逐帧收据确认专用人物完整、无闪现；coffee视口不再出现终点静止堆积；完整测试、build和真实路径回归通过后，再回Human视觉Gate。
+1. **Stop AI专用帧合同**：`npc_protester_rising`已按64×64 spritesheet加载；新build逐帧收据显示texture frame/cut/display均为64，固定视口连续50帧通过。Human视觉仍需确认没有半身/闪现。
+2. **首次coffee方案结果**：`drinkers`已保持公开起点、终点及`goBack:false/deleteAfterComplete:false`，沿`forwardPath`反向连续走到屏外再restart；静态38/61局部最小间距为32px以上。但这只证明`drinkers`根因，不证明coffee视口整体通过。
+3. **第二次owner审计Gate**：复核`vertical-crowd-reverse`的公开起点/终点、路径和flags；确认其终点约`(1400,904)`及9个实例为何在视口内`gone+visible`；形成是否同样增加安全退场、是否需要调整局部静态去重的单一方案，经Human确认后才能写代码。
 
-**代价与风险**：64×64会改变专用抗议者的显示边界，需要确认与普通48×48人物的视觉比例；安全退场是有界重构DECISION，会让`drinkers`在到达公开终点后继续走出画面，不能冒充原站FACT；若静态region自身仍显得过密，本包不得未经新证据扩大为全局静态人群重排。
+**当前结论**：Stop AI新build帧/边界审计已通过自动证据，`drinkers`退场和静态38/61间距也已通过；coffee总体Human问题仍未解决。不得把首次方案的自动PASS升级为Human视觉PASS，也不得扩展到其他route owner。
