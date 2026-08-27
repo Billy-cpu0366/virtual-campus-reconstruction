@@ -24,13 +24,13 @@ updated: 2026-08-27
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：按Human接受的006完成有界批量修复：coffee回到最小连续退场/真实路径，party撤销`0f3e646`新增灯光与concert动作，Stop AI气泡缩小；产品提交`50ab1ba`及完整自动回归通过，当前等待Human视觉验收。
+- **当前阶段**：按Human接受的006完成有界批量修复；产品提交`50ab1ba`通过后，针对Human指出的Stop AI字体发糊又完成`1d16393`粗体/整数定位小修，完整自动回归通过，当前等待Human复看字体清晰度。
 - **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；`0f3e646`保留为失败复现基线，`50ab1ba`只消费006范围，不恢复完整授权。不启动B2-B5，自动结果不代替Human视觉Gate。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
 - **当前授权**：Human已接受`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`：coffee移除10人强制车道/显示reservation/扩容候选，显示跟随真实墙格路径并保留连续退场；party只回到`fca08dd`的lighting/concert动作状态并保留roof；Stop AI气泡缩小为8px与较小留白。其他B2–B5仍未授权，S2–S4未启动。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：005、008收据及本次Human失败反馈均保留；017收据证明本次自动/production条件通过，但不能代替Human视觉验收。Human确认前不关闭05-E，不启动S2–S4。
+- **关闭门禁**：005、008、017和018收据及Human反馈均保留；018证明字体小修后的自动/production条件通过，但不能代替Human视觉验收。Human确认前不关闭05-E，不启动S2–S4。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -156,9 +156,9 @@ updated: 2026-08-27
 
 ## 当前工作项
 
-当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及上一候选`883faa2`继续冻结为代码和失败对照；`9233b20`、`0f3e646`和008收据均保留，`50ab1ba`为本次修复结果，017收据为当前自动验证证据。
+当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及上一候选`883faa2`继续冻结为代码和失败对照；`9233b20`、`0f3e646`和017收据均保留，`50ab1ba`为006主体修复，`1d16393`为字体清晰度修复，018收据为当前自动验证证据。
 
-Human此前已验收烟雾、直升机和警车画面；本次coffee/party/Stop AI回归已按006修复并完成全量自动回归。当前仅等待Human直接复验coffee连续性、party回退画面和Stop AI气泡大小，尚未关闭05-E。
+Human此前已验收烟雾、直升机和警车画面；本次coffee/party/Stop AI回归已按006修复并完成全量自动回归，Human反馈整体勉强可接受但字体发糊，现已完成粗体/整数定位修复。当前仅等待Human直接复看Stop AI字体，尚未关闭05-E。
 
 ## 已阻塞或暂停工作项
 
