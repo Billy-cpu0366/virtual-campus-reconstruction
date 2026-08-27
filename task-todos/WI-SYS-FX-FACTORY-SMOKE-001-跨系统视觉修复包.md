@@ -3,10 +3,10 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: implementation-authorized
-result-commit: 9233b20
-verification-evidence: .pi/audit-evidence/05e-npc-visual-repair-005/
-audit-status: human-plan-accepted
+status: automated-verified-awaiting-human-visual
+result-commit: 0f3e646
+verification-evidence: .pi/audit-evidence/05e-npc-cross-owner-repair-008/
+audit-status: automated-verified
 plan-decision: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-005
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
@@ -183,4 +183,11 @@ Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩
 2. **END OF THE WORLD PARTY venue包**：按公开Bundle已证实的dark zone、2 spotlight、红蓝移动灯、6 laser和concert loop动作建立专用owner；用下门/侧门固定路径验证同一300ms roof fade；先固定路径定位左侧栅栏，再接入准确碰撞；补灯光、动作、入口、障碍和shutdown验证，不凭截图猜视觉细节。
 3. **bug贴图包**：修正`npc-bug`的38×38/24帧/`.63`显示合同，补左下角固定视口截图和frame geometry验证；不顺带扩展bug AI。
 
-**当前Gate**：Human plan gate已通过，三包进入成批实现；完成后仍须完整回归和Human视觉Gate，不能把自动结果当最终验收。
+**当前Gate**：三包实现和完整自动回归已通过，当前等待Human视觉Gate；不能把自动结果当最终验收。
+
+## 14. 三包实现与最终自动验证结果（2026-08-27）
+
+- **已落盘**：产品提交`0f3e646`。A包让route/bug移动NPC消费警车动态阻塞与walls网格，reverse coffee使用10个camera内分道实例和最终sprite坐标reservation；B包新增party lighting owner（1 dark zone、2 spotlight、2 color light、6 laser）及concert loop动作，并验证下门/侧门roof状态；C包修正bug 38×38、24帧、`.63`和方向帧。
+- **已验证**：`npm test`为70个文件/405项，typecheck、runtime asset check、普通production build、普通入口`browser:smoke`、test-hooks `browser:chunk-smoke`和独立reviewer PASS。扩展production probe PASS：coffee camera内10人、最小中心距`65.03389289370136px`、route/bug警车违规0、墙格违规0；party双入口均300ms、11个灯光对象、concert动作计数30、固定左门障碍路径停在`x=1794`；bug实际采样10个，截图可见，console/exception/failed request/bad response均为0。
+- **证据**：`.pi/audit-evidence/05e-npc-cross-owner-repair-008/receipt.json`，SHA-256 `c7527df4a95050245b7a8fd89feb1d85668298e5e3c571c5ffc9e04a0dce7702`；前后截图在同目录`screens/`，清单见`SHA256SUMS`。证据目录按仓库规则不纳入Git提交，保留在产品worktree。
+- **当前状态**：自动验证已完成，Human尚未签署Stop AI、coffee、party和bug整体验收；完整SYS-NPC/B2–B5及S2–S4仍不启动、不关闭05-E。
