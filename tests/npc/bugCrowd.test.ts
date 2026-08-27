@@ -8,6 +8,17 @@ import {
   type BugCrowdPoint,
   type BugCrowdRuntimeOptions,
 } from "../../src/npc/index.js";
+import {
+  BUG_CROWD_DISPLAY_SCALE,
+  BUG_CROWD_FRAME_COUNT,
+  BUG_CROWD_FRAME_HEIGHT,
+  BUG_CROWD_FRAME_WIDTH,
+  BUG_CROWD_ORIGIN,
+  bugCrowdFrameForFacing,
+  PhaserBugCrowdRuntime,
+  preloadBugCrowdRuntimeAssets,
+  type PhaserBugCrowdSceneLike,
+} from "../../game/PhaserBugCrowdRuntime.js";
 
 const center = (x: number, y: number): BugCrowdPoint => ({
   x: x * BUG_CROWD_TILE_SIZE + 8,
@@ -33,7 +44,107 @@ function runtime(
   });
 }
 
+class BugSprite {
+  public frame = -1;
+  public scale = 1;
+  public origin = { x: 0, y: 0 };
+  public destroyed = false;
+
+  public constructor(public x: number, public y: number) {}
+
+  public setOrigin(x: number, y: number): this {
+    this.origin = { x, y };
+    return this;
+  }
+
+  public setScale(value: number): this {
+    this.scale = value;
+    return this;
+  }
+
+  public setFrame(value: number): this {
+    this.frame = value;
+    return this;
+  }
+
+  public setDepth(_value: number): this { return this; }
+  public destroy(): void { this.destroyed = true; }
+}
+
 describe("BugCrowdRuntime", () => {
+  it("uses the public 38px, 24-frame spritesheet contract", () => {
+    let loaded: {
+      key: string;
+      url: string;
+      config: {
+        frameWidth: number;
+        frameHeight: number;
+        startFrame?: number;
+        endFrame?: number;
+      };
+    } | undefined;
+    preloadBugCrowdRuntimeAssets({
+      spritesheet: (key, url, config) => {
+        loaded = { key, url, config: { ...config } };
+      },
+    });
+
+    expect(loaded).toEqual({
+      key: "npc-bug",
+      url: "/sprites/npc-bug.webp",
+      config: {
+        frameWidth: BUG_CROWD_FRAME_WIDTH,
+        frameHeight: BUG_CROWD_FRAME_HEIGHT,
+        startFrame: 0,
+        endFrame: BUG_CROWD_FRAME_COUNT - 1,
+      },
+    });
+    expect(loaded?.config.frameWidth).toBe(38);
+    expect(loaded?.config.frameHeight).toBe(38);
+    expect(loaded?.config.endFrame).toBe(23);
+  });
+
+  it("renders direction frames with the public scale and origin", () => {
+    const sprites: BugSprite[] = [];
+    const scene: PhaserBugCrowdSceneLike = {
+      textures: { exists: () => true },
+      add: {
+        sprite: (x, y) => {
+          const sprite = new BugSprite(x, y);
+          sprites.push(sprite);
+          return sprite;
+        },
+      },
+    };
+    const runtime = new PhaserBugCrowdRuntime(scene, {
+      pathProvider: pathProvider(),
+      viewport: () => ({ left: 0, top: 0, width: 2_240, height: 2_240 }),
+    });
+
+    expect(runtime.start(0)).toBe(true);
+    expect(sprites).toHaveLength(10);
+    expect(sprites.every((sprite) => sprite.scale === BUG_CROWD_DISPLAY_SCALE)).toBe(true);
+    expect(sprites.every((sprite) =>
+      sprite.origin.x === BUG_CROWD_ORIGIN.x && sprite.origin.y === BUG_CROWD_ORIGIN.y,
+    )).toBe(true);
+    expect(sprites.every((sprite) => sprite.frame >= 0 && sprite.frame < BUG_CROWD_FRAME_COUNT)).toBe(true);
+
+    runtime.update(100);
+    expect(sprites.every((sprite) => sprite.frame >= 0 && sprite.frame < 24)).toBe(true);
+    expect(bugCrowdFrameForFacing("south", 0)).toBe(0);
+    expect(bugCrowdFrameForFacing("south", 500)).toBe(5);
+    expect(bugCrowdFrameForFacing("north", 0)).toBe(6);
+    expect(bugCrowdFrameForFacing("west", 0)).toBe(12);
+    expect(bugCrowdFrameForFacing("east", 0)).toBe(18);
+    expect(bugCrowdFrameForFacing("east", 600)).toBe(18);
+    expect(bugCrowdFrameForFacing("east", 600, false)).toBe(18);
+    expect(BUG_CROWD_FRAME_WIDTH).not.toBe(48);
+    expect(BUG_CROWD_FRAME_HEIGHT).not.toBe(48);
+
+    runtime.shutdown();
+    expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
+  });
+
   it("publishes the immutable public bug-area configuration", () => {
     expect(BUG_CROWD_CONFIGS).toEqual([BUG_CROWD_CONFIG]);
     expect(BUG_CROWD_CONFIG).toMatchObject({
