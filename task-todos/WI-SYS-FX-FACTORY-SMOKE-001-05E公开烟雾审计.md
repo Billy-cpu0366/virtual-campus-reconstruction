@@ -3,7 +3,7 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: source-audit
 system: SYS-FX
 issue-class: systemic-failure
-status: automated-verified-awaiting-human-visual
+status: implementation-authorized-npc-correction
 decision: DEC-P5.4-05E-SMOKE-AUDIT-001
 updated: 2026-08-25
 ---
@@ -234,7 +234,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 - **RC-VIS-3：NPC视口/呈现生命周期与烟雾深度叠加**。Stop AI闪烁的具体owner尚未证实；route终点重启是另一条明确链，不能合并成一个“NPC闪烁修复”。
 - NPC仍按`DEC-SYS-NPC-DEFER-001`延期；本节是新增证据，不是B2–B5授权。若要修NPC，需先由Human重新接受NPC恢复方案，再按route/static/venue等owner分包。
 
-### Human接受的当前解决顺序（accepted，已实施，Human视觉待验收）
+### Human接受的当前解决顺序（accepted，部分Human验收通过，NPC修正冻结）
 
 1. **Fog clear presentation（已实施）**：只改Fog owner及对应测试/probe；清cell停止新粒子、保留存活粒子自然淡出，quantity2帧门禁不回归。
 2. **资源与车辆owner（已实施）**：冻结helicopter/police公开配置，完成资源白名单、preload、创建和附属部件链；不夹带route逻辑。
@@ -243,7 +243,7 @@ Human所说“Stop AI道路两边烟雾”与公开证据一致：
 
 ## Human Plan Gate
 
-Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。产品分支`883faa2`已完成并通过自动/真实路径回归；当前只等待Human视觉验收，不启动S2–S4。
+Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的、不丝滑”，并新增上述四类视觉问题（2026-08-25）。Human随后接受四个有界修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性。Human已验收烟雾、车辆和飞机，但拒绝Stop AI人物闪现/半身与coffee路线拥挤；系统性审计已完成，Human接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`，当前按两个有界NPC包实施，不启动S2–S4。
 
 ### 实施收据
 
@@ -253,4 +253,4 @@ Human已在编译production视觉Gate拒绝S1，反馈红烟运动“卡卡的�
 - `7341cc0`：venue/static可见region原子ready和屏内identity保护；相关NPC专项通过。
 - `883faa2`：生产probe更新；Stop AI清雾289次采样、NPC连续性47次采样、route production probe通过。
 - 父回归：全量69文件/384测试、typecheck、check:runtime、build、普通browser smoke和test-hooks chunk smoke通过；事件收集无console/exception/failed request/bad response。
-- `c4b2d6a`保留为上一轮quantity2 candidate；独立`lightweight-verifier`复核通过；本轮仍未取得Human最终视觉签字。
+- `c4b2d6a`保留为上一轮quantity2 candidate；独立`lightweight-verifier`复核通过，但Human对NPC呈现部分再次失败。烟雾、车辆和飞机已通过Human；Stop AI人物闪现/半身与coffee路线拥挤进入统一修正审计。

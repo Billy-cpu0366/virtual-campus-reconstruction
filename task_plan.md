@@ -3,19 +3,19 @@ workflow-ref: 03-执行层/README.md
 correction-ref: 03-执行层/修正任务分流协议.md
 issue-class: systemic-failure
 active-route: systemic-flow
-correction-phase: human-acceptance
-classification-trigger: human-rejected-smoke-clear-and-npc-visibility
+correction-phase: batch-implement
+classification-trigger: human-rejected-stop-ai-flashing-half-body-and-coffee-route-clumping-after-automated-pass
 classification-ref: DEC-AI-CORRECTION-ROUTING-001
 current-work-item: WI-SYS-FX-FACTORY-SMOKE-001
 work-item-level: system
 work-item-type: bounded-verification-and-repair
-work-item-status: active-cross-system-human-acceptance
-current-phase: p5.4-cross-system-human-acceptance
-current-gate: p5.4-cross-system-visual-gate
-gate-status: automated-verified-awaiting-human-visual
-authorization-ref: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
+work-item-status: active-cross-system-npc-batch-implement
+current-phase: p5.4-systemic-npc-batch-implement
+current-gate: p5.4-systemic-npc-repair-plan
+gate-status: human-plan-accepted-awaiting-batch-implementation
+authorization-ref: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
 preauthorized-next-work-item: none
-next-phase: p5.4-cross-system-completed-after-human-acceptance
+next-phase: p5.4-systemic-npc-full-regression
 updated: 2026-08-25
 ---
 
@@ -24,13 +24,13 @@ updated: 2026-08-25
 ## ⏱ 当前状态（一眼看懂）
 
 - **当前工作项**：`WI-SYS-FX-FACTORY-SMOKE-001`；按既定路线进入05-E工厂烟雾。
-- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题：烟雾穿行时整片突兀消失、直升机/警车缺贴图、Stop AI NPC闪烁、NPC行走后消失并在固定点冒出。四个有界修复包已实施并通过自动/真实路径回归，当前等待Human视觉验收。
-- **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮NPC闪烁/消失是新增视觉证据，不等于恢复授权。B1 candidate `b6a4e6c`自动PASS但Human未接受，不合并、不视觉签字、不启动B2-B5，待最后由Human重新授权并从统一差异表恢复。
+- **当前阶段**：S1初版`e07d2c7`曾被Human拒绝红烟平滑度，quantity4→2修复`c4b2d6a`虽自动/production验证通过，Human又指出四类新问题。烟雾已被Human验收，车辆和飞机也已被Human验收；但Stop AI人物仍闪现且出现半身，coffee路线NPC仍齐刷刷挤成一坨。系统性NPC呈现审计已完成，Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`，当前进入两个有界修复包的成批实施。
+- **NPC延期**：`WI-SYS-NPC-SPECIAL-001`整体仍延期；本轮Stop AI半身/闪现与coffee路线拥挤是对上一候选的新Human失败证据，不等于恢复完整授权。上一候选的route/venue有界实现保留为冻结对照；不启动B2-B5，先从同一差异表审计根因。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
-- **当前授权**：Human已接受并消费`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`。Fog clear、直升机/警车资源owner、Stop AI NPC presentation、route NPC视口连续性均已实施；只恢复NPC涉及的route与venue/Stop AI范围，其他B2–B5仍未授权；S2–S4未启动，cars清雾仍不声称production已集成。
+- **当前授权**：Human已部分验收`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`，并接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002`：Fog clear、直升机/警车已通过；现在只允许修Stop AI专用64×64帧、coffee/`drinkers`屏外连续退场和两个重叠静态region局部去重。其他B2–B5仍未授权，S2–S4未启动，cars清雾仍不声称production已集成。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
-- **关闭门禁**：四个修复包已分别通过专项检查、全量测试、build、资源检查、编译production固定路径和普通/test-hooks browser回归；最终仍必须由Human确认视口内无NPC消失/出现/瞬移、烟雾清除自然淡出、直升机/警车可见。Human视觉通过前不得关闭本项或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
+- **关闭门禁**：Fog/车辆包已通过Human视觉；NPC两个失败owner必须先完成统一差异表审计、Human确认一次整体修复方案、成批修复、完整回归，再由Human确认Stop AI无闪现/半身且coffee路线不成坨。Human通过前不得关闭本项或启动S2。单点`8586196`和旧`browser-side-smoke`火车坐标问题继续独立保留。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
 
 ## 目标
@@ -156,11 +156,9 @@ updated: 2026-08-25
 
 ## 当前工作项
 
-当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及此前失败candidate继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
+当前 active 为[05-E跨系统视觉修复包](task-todos/WI-SYS-FX-FACTORY-SMOKE-001-跨系统视觉修复包.md)。candidate `c4b2d6a`及上一候选`883faa2`继续冻结为代码和失败对照，不把自动PASS当作Human视觉通过。
 
-Human已接受四个修复包一起实施：Fog clear、直升机/警车资源owner、Stop AI NPC闪烁归因与连续性、route NPC连续性。实现已在产品分支`883faa2`完成并通过自动/真实路径回归及独立只读验证；NPC只在本包涉及的route和venue/Stop AI范围内恢复，其他专项继续延期。
-
-当前停止在Human视觉Gate：需要确认视口内NPC没有消失/出现/瞬移、清雾自然淡出、直升机和警车画面可见；Human通过前不关闭父任务。
+Human已部分验收四个修复包：烟雾、直升机和警车通过；Stop AI人物闪现/半身、coffee路线NPC拥挤未通过。系统性NPC呈现审计已形成统一差异表：Stop AI专用`npc_protester_rising.webp`为64×64格却按48×48切帧；公开`drinkers`路线的4个实例汇入两个终点并与9个静态NPC叠加，完成态被视口连续性逻辑保留。Human已接受整体修复方案：修正专用64×64帧；让`drinkers`沿连续出口走到屏外后再restart；仅对两个coffee重叠静态region做局部去重。当前进入成批实施。
 
 ## 已阻塞或暂停工作项
 
