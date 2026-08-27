@@ -3,11 +3,11 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: systemic-cluster
+status: implementation-authorized
 result-commit: 0f3e646
 verification-evidence: .pi/audit-evidence/05e-npc-cross-owner-repair-008/
-audit-status: human-visual-failed-clustered
-plan-decision: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-005
+audit-status: human-plan-accepted
+plan-decision: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
@@ -190,7 +190,7 @@ Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩
 - **已落盘**：产品提交`0f3e646`。A包让route/bug移动NPC消费警车动态阻塞与walls网格，reverse coffee使用10个camera内分道实例和最终sprite坐标reservation；B包新增party lighting owner（1 dark zone、2 spotlight、2 color light、6 laser）及concert loop动作，并验证下门/侧门roof状态；C包修正bug 38×38、24帧、`.63`和方向帧。
 - **已验证**：`npm test`为70个文件/405项，typecheck、runtime asset check、普通production build、普通入口`browser:smoke`、test-hooks `browser:chunk-smoke`和独立reviewer PASS。扩展production probe PASS：coffee camera内10人、最小中心距`65.03389289370136px`、route/bug警车违规0、墙格违规0；party双入口均300ms、11个灯光对象、concert动作计数30、固定左门障碍路径停在`x=1794`；bug实际采样10个，截图可见，console/exception/failed request/bad response均为0。
 - **证据**：`.pi/audit-evidence/05e-npc-cross-owner-repair-008/receipt.json`，SHA-256 `c7527df4a95050245b7a8fd89feb1d85668298e5e3c571c5ffc9e04a0dce7702`；前后截图在同目录`screens/`，清单见`SHA256SUMS`。证据目录按仓库规则不纳入Git提交，保留在产品worktree。
-- **当前状态**：自动验证已完成，但Human复验明确判定coffee仍闪现/穿墙且卡顿、当前party版本不可接受、Stop AI对话框过大；008不能作为视觉通过。已完成统一audit并进入cluster，完整SYS-NPC/B2–B5及S2–S4仍不启动、不关闭05-E。
+- **当前状态**：自动验证已完成，但Human复验明确判定coffee仍闪现/穿墙且卡顿、当前party版本不可接受、Stop AI对话框过大；008不能作为视觉通过。统一audit→cluster和整体方案Gate已完成，当前按006进入批量实现，完整SYS-NPC/B2–B5及S2–S4仍不启动、不关闭05-E。
 
 ## 15. Human复验失败与重新审计入口（2026-08-27）
 
@@ -198,14 +198,14 @@ Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩
 - **evidence-known**：Human直接反馈为coffee NPC闪现、穿墙、明显卡顿；party当前实现要求回退上一版本；Stop AI对话框尺寸过大。`0f3e646`保留为失败复现基线，旧`9233b20`及其party相关差异作为版本对照。
 - **scope-confidence**：`unknown`。目前不能假设coffee只是单个墙格判断，也不能假设party只需回滚一个文件；需要一次性审计启动/路径/呈现/性能和版本差异。
 - **work-stopped-at**：停止继续修改代码、停止关闭05-E和启动S2–S4；当前阶段为`cluster`。
-- **next-required-step**：统一差异表已聚类为三包，等待Human一次整体修复方案Gate；未Gate前不改产品代码。
+- **next-required-step**：Human已接受`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`，进入三包批量实现；完成后须完整回归和Human视觉Gate。
 
-## 16. 根因聚类与拟议一次性方案（proposed，待Human接受）
+## 16. 根因聚类与一次性方案（Human已接受）
 
-| 根因簇 | 已确认事实/证据 | 拟议处理 | 主要代价与未知 |
+| 根因簇 | 已确认事实/证据 | 已接受处理 | 主要代价与未知 |
 |---|---|---|---|
 | Coffee路径—显示脱节与启动负载 | `game/PhaserRouteCrowdRuntime.ts:24-90,352-426`将`vertical-crowd-reverse`显示X强制投影到`1288/1368/1448/1528`，没有对投影点再做walls检查；核心A*仍沿另一条路径。`src/npc/routeCrowd.ts:381-387`使有界coffee候选达到约95条，`gridPathProvider.ts:139-175`每条路径还检查8方向和警车阻塞。受控performance smoke的持续移动段p95为16.8ms，但入口出现一次50ms帧；这不能否定Human看到的NPC停顿/闪现。 | 回到`16c74bb`的最小连续退场/原路径显示语义：移除coffee强制车道、显示层reservation、20秒统一delay和为满足10人而扩大的候选池；NPC显示只跟随通过walls检查的实际`item.position`。保留完成态从屏外连续退场；对当前coffee owner显式保留必要的walls保护。 | 不再保证上一轮“10人同时可见”的重构偏好；需重新验证可见数量、连续性、墙格和真实帧时间。具体是否保留共享警车阻塞需在实现前按固定路径核对，不先猜。 |
 | Party过度新增呈现 | `0f3e646^=fca08dd`；`0f3e646`新增`game/PhaserConcertLightingRuntime.ts`、Main接线和`PhaserVenueCrowdRuntime` concert action；截图显示大面积紫色dark zone、彩色光晕和绿色laser覆盖房间。roof来自更早`18ee2d1`，不是本次新增。 | 仅回退party新增内容到`fca08dd`：删除lighting owner及接线、删除concert action分支；保留roof、警车/墙路径和Stop AI speech bubble，不整体回退`0f3e646`。 | party灯光/动作恢复为旧版；是否仍需后续更精确复刻另行授权。若Human说的“上一版”包含roof，则需另定早于`18ee2d1`的基线。 |
-| Stop AI speech-bubble规格 | `0f3e646`未新增气泡；气泡由`9233b20`引入，`game/PhaserVenueCrowdRuntime.ts:351-404`使用Phaser world `add.text`，`12px monospace`、左右5/上下2、无宽度约束；最长英文句子会自然扩宽。公开CSS仅证明原站有10px/桌面14px的Press Start气泡，不能直接替代Human当前尺寸偏好。 | 保留公开英文口号与清理/最多2人的语义，只将世界气泡缩小并限定最大宽度/留白；建议先采用8px字体、左右3/上下1的有界规格，随后用同一Stop AI视口截图验收。 | 8px是当前视觉修复建议，不是原站FACT；需Human确认是否接受该目标尺寸，不能以自动文本状态代替目视。 |
+| Stop AI speech-bubble规格 | `0f3e646`未新增气泡；气泡由`9233b20`引入，`game/PhaserVenueCrowdRuntime.ts:351-404`使用Phaser world `add.text`，`12px monospace`、左右5/上下2、无宽度约束；最长英文句子会自然扩宽。公开CSS仅证明原站有10px/桌面14px的Press Start气泡，不能直接替代Human当前尺寸偏好。 | 保留公开英文口号与清理/最多2人的语义，只将世界气泡缩小并限定最大宽度/留白；采用8px字体、左右3/上下1的有界规格，随后用同一Stop AI视口截图验收。 | 8px是本次Human接受的重构规格，不是原站FACT；不能以自动文本状态代替目视。 |
 
 **拟议停止条件**：coffee固定视口连续重放中，sprite坐标始终等于可行路径坐标（允许统一小于1像素的渲染误差）、墙格违规0、无身份/可见性断裂、无屏内重建；启动和移动固定帧采样无超过34ms长帧，且Human不再看到卡顿。party画面不再有当前新增的紫色覆盖/彩色大光晕/绿色laser；Stop AI气泡按新尺寸可读且不遮挡NPC。自动检查仍不能代替Human验收。
