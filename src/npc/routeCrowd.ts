@@ -154,7 +154,7 @@ export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 40),
   group("beach_crowd_walk", 4, [[96, 119]], [[68, 134]], 35, .2, { minMs: 0, maxMs: 0 }, { minMs: 0, maxMs: 0 }, true, false, true, 4),
   group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20, 0, true),
-  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20, .2, true),
+  group("vertical-crowd-reverse", 10, [[87, 86], [88, 86], [89, 86]], [[87, 56], [88, 56], [89, 56]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 20, .2, true, true),
   group("walking-crowd", 8, [[35, 108], [16, 115], [36, 121], [48, 120]], [[108, 99], [86, 104]], 45, .15, { minMs: 0, maxMs: 35_000 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, undefined, 1),
   group("hazmat-crowd", 8, [[13, 126], [19, 124]], [[5, 133], [11, 132], [8, 131]], 45, .15, { minMs: 0, maxMs: 10_000 }, { minMs: 2_000, maxMs: 2_000 }, true, false, true, undefined),
   group("outside_concert1", 10, [[115, 109], [123, 110], [130, 108]], [[120, 114], [137, 106], [138, 96]], 35, .5, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, undefined),
@@ -166,6 +166,9 @@ type CompletionAction = "delete" | "restart";
 type Item = RouteCrowdInstanceSnapshot & {
   readonly config: RouteCrowdConfig;
   readonly forwardPath: readonly RouteCrowdTile[];
+  readonly restartPath: readonly RouteCrowdTile[];
+  readonly exitPath: readonly RouteCrowdTile[];
+  readonly restartPosition: RouteCrowdTile;
   path: readonly RouteCrowdTile[];
   waypointIndex: number;
   delayAt: number;
@@ -308,6 +311,9 @@ export class RouteCrowdRuntime {
       instances: this.items.map(({
         config,
         forwardPath,
+        restartPath,
+        exitPath,
+        restartPosition,
         path,
         waypointIndex,
         delayAt,
@@ -457,6 +463,8 @@ export class RouteCrowdRuntime {
       ) ?? candidates[0]!;
       const start = { ...path[startWaypointIndex]! };
       const routePath = path.slice(startWaypointIndex);
+      const restartPath = path;
+      const exitPath = [...path].reverse();
       occupied.add(pointKey(start));
       const next = routePath[1];
       const pathId = `${startTile.x}_${startTile.y}_${endTile.x}_${endTile.y}_v${pending.index}`;
@@ -475,6 +483,9 @@ export class RouteCrowdRuntime {
         pathId,
         config: pending.config,
         forwardPath: routePath,
+        restartPath,
+        exitPath,
+        restartPosition: { ...path[0]! },
         path: routePath,
         waypointIndex: 1,
         delayAt: this.batchedStartNow + randomDelayIn(pending.config.delay, random),
@@ -610,9 +621,10 @@ export class RouteCrowdRuntime {
     viewport?: RouteCrowdViewport,
   ): void {
     if (item.state === "moving" && item.config.completionExit) {
-      // Coffee drinkers leave the endpoint by reversing immediately. Keep
-      // the same item alive until that reverse trip reaches its start.
-      item.path = [...item.forwardPath].reverse();
+      // Completion-exit routes reverse the full source path, not only the
+      // randomized visible suffix, so the restart point stays offscreen.
+      item.start = item.restartPosition;
+      item.path = item.exitPath;
       item.waypointIndex = 1;
       item.state = "returning";
       item.waitingFrom = undefined;
@@ -650,8 +662,9 @@ export class RouteCrowdRuntime {
     item.state = "delay";
     item.alpha = 1;
     item.generation += 1;
-    item.position = item.start;
-    item.path = item.forwardPath;
+    item.position = item.restartPosition;
+    item.start = item.restartPosition;
+    item.path = item.restartPath;
     item.waypointIndex = 1;
     item.waitingFrom = undefined;
     item.delayAt = now + randomDelayIn(

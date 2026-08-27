@@ -34,6 +34,7 @@
     "browser:route-crowd-production": "node scripts/browser-route-crowd-production.mjs",
     "browser:factory-smoke-production": "node scripts/browser-factory-smoke-production.mjs",
     "browser:stop-ai-smoke-production": "node scripts/browser-stop-ai-smoke-production.mjs",
+    "browser:npc-visual-production": "node scripts/browser-npc-visual-production.mjs",
     "browser:performance-smoke": "node scripts/browser-performance-smoke.mjs",
     "browser:perf-baseline": "node scripts/browser-perf-baseline.mjs",
     "check:perf-baseline-evidence": "node scripts/check-perf-baseline-evidence.mjs",

@@ -88,6 +88,14 @@ describe("RouteCrowdRuntime contract", () => {
         ignoreWalls: false,
         completionExit: true,
       });
+    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "vertical-crowd-reverse"))
+      .toMatchObject({
+        startTiles: [{ x: 87, y: 86 }, { x: 88, y: 86 }, { x: 89, y: 86 }],
+        endTiles: [{ x: 87, y: 56 }, { x: 88, y: 56 }, { x: 89, y: 56 }],
+        goBack: false,
+        deleteAfterComplete: false,
+        completionExit: true,
+      });
     expect(
       ROUTE_CROWD_CONFIGS
         .filter((config) => config.id !== "crowd-train")
@@ -276,6 +284,58 @@ describe("RouteCrowdRuntime contract", () => {
 
     const offscreenStart = { left: 1_000, top: 1_000, width: 100, height: 100 };
     runtime.tick(4_001, offscreenStart);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "delay",
+      position: { x: 32, y: 48 },
+      generation: 1,
+      materialized: false,
+      destroyed: true,
+    });
+  });
+
+  it("exits from the original path origin after a randomized start", () => {
+    const runtime = new RouteCrowdRuntime({
+      random: () => 0,
+      configs: [testConfig({
+        id: "randomized-exit",
+        randomPositions: true,
+        delay: { minMs: 0, maxMs: 0 },
+        afterDelay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+        completionExit: true,
+      })],
+      baseSpeed: 48,
+      pathProvider: () => [
+        { x: 32, y: 48 },
+        { x: 56, y: 48 },
+        { x: 80, y: 48 },
+        { x: 104, y: 48 },
+        { x: 128, y: 48 },
+      ],
+    });
+    const viewport = { left: 0, top: 0, width: 1_000, height: 1_000 };
+    runtime.start(0, viewport);
+    expect(runtime.snapshot.instances[0]?.position).toEqual({ x: 56, y: 48 });
+    runtime.tick(1_500, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "returning",
+      position: { x: 128, y: 48 },
+      generation: 0,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+    runtime.tick(3_500, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      position: { x: 32, y: 48 },
+      generation: 0,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+    runtime.tick(3_501, { left: 1_000, top: 1_000, width: 100, height: 100 });
     expect(runtime.snapshot.instances[0]).toMatchObject({
       state: "delay",
       position: { x: 32, y: 48 },
