@@ -132,10 +132,6 @@ import {
   type PhaserVehicleSceneLike,
 } from "./PhaserVehicleRuntime.js";
 import {
-  PhaserConcertLightingRuntime,
-  type PhaserConcertLightingSceneLike,
-} from "./PhaserConcertLightingRuntime.js";
-import {
   PhaserFootstepRuntime,
   type PhaserFootstepSceneLike,
 } from "./PhaserFootstepRuntime.js";
@@ -370,7 +366,6 @@ export class CampusScene extends Phaser.Scene {
   private bugCrowdRuntime: PhaserBugCrowdRuntime | undefined;
   private venueCrowdRuntime: PhaserVenueCrowdRuntime | undefined;
   private dancingCrowdRuntime: PhaserDancingCrowdRuntime | undefined;
-  private concertLightingRuntime: PhaserConcertLightingRuntime | undefined;
   private smokeRuntime: PhaserFactorySmokeRuntime | undefined;
   private stopAiSmokeRuntime: PhaserStopAiSmokeRuntime | undefined;
   private fogRuntime: PhaserFogRuntime | undefined;
@@ -701,7 +696,6 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime?.update(this.time.now);
     this.venueCrowdRuntime?.update();
     this.dancingCrowdRuntime?.update();
-    this.concertLightingRuntime?.update(this.time.now, this.smokeViewport());
     if (document.visibilityState !== "visible") {
       this.stopPlayerMovement();
       return;
@@ -1101,8 +1095,6 @@ export class CampusScene extends Phaser.Scene {
       routeCrowdStarted: this.routeCrowdRuntime?.started ?? false,
       routeCrowdTrainStarted: this.routeCrowdRuntime?.trainStarted ?? false,
       routeCrowdSpriteCount: this.routeCrowdRuntime?.spriteCount ?? 0,
-      concertLighting: this.concertLightingRuntime?.snapshot ?? null,
-      concertActions: this.venueCrowdRuntime?.concertActionSnapshot ?? [],
       staticNpc: this.staticNpcRuntime?.snapshot ?? null,
       staticNpcSpriteCount: this.staticNpcRuntime?.spriteCount ?? 0,
       staticCrowd: this.staticCrowdRuntime?.snapshot ?? null,
@@ -1204,7 +1196,6 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime?.shutdown();
     this.venueCrowdRuntime?.shutdown();
     this.dancingCrowdRuntime?.shutdown();
-    this.concertLightingRuntime?.shutdown();
     this.stopAiSmokeRuntime?.shutdown();
     this.fogRuntime?.shutdown();
     this.disconnectPoliceCollisions();
@@ -1282,7 +1273,6 @@ export class CampusScene extends Phaser.Scene {
     this.bugCrowdRuntime = undefined;
     this.venueCrowdRuntime = undefined;
     this.dancingCrowdRuntime = undefined;
-    this.concertLightingRuntime = undefined;
     this.stopAiSmokeRuntime = undefined;
     this.fogRuntime = undefined;
     this.vehicleRuntime = undefined;
@@ -1554,12 +1544,6 @@ export class CampusScene extends Phaser.Scene {
       wallData.grid,
       isPoliceBlocked,
     );
-    this.concertLightingRuntime = new PhaserConcertLightingRuntime(
-      this as unknown as PhaserConcertLightingSceneLike,
-    );
-    if (!this.concertLightingRuntime.start()) {
-      this.recordSideFailure("concert-lighting:start-failed");
-    }
     this.routeCrowdRuntime = new PhaserRouteCrowdRuntime(
       this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
       pathProvider,
@@ -1570,23 +1554,7 @@ export class CampusScene extends Phaser.Scene {
         minDistance: 56,
         isInScope: (point) => point.x >= 1_200 && point.x <= 1_600 &&
           point.y >= 800 && point.y <= 1_080,
-        externalPoints: () => this.staticCrowdRuntime?.snapshot.instances
-          .filter((instance) => instance.regionIndex === 38 || instance.regionIndex === 61)
-          .map((instance) => instance.position) ?? [],
-        maxInstancesByConfig: {
-          drinkers: 0,
-          "vertical-crowd": 0,
-          "vertical-crowd-reverse": 10,
-        },
         allowedConfigIdsInScope: ["vertical-crowd-reverse"],
-        fixedStartWaypointRatiosByConfig: {
-          "vertical-crowd-reverse": [
-            .80, .80, .80, .80,
-            .91, .91, .91, .91,
-            .99, .99,
-          ],
-        },
-        fixedDelayByConfig: { "vertical-crowd-reverse": 20_000 },
         checkMovement: false,
       },
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),

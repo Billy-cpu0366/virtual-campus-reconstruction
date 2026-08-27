@@ -121,6 +121,7 @@ export interface RouteCrowdRuntimeOptions {
 
 export const ROUTE_CROWD_BASE_SPEED = 48;
 export const ROUTE_CROWD_TILE_SIZE = 16;
+// Four small path slices keep startup moving without a large frame spike.
 export const ROUTE_CROWD_START_BATCH_SIZE = 4;
 
 const tiles = (values: readonly (readonly [number, number])[]) =>
@@ -378,11 +379,12 @@ export class RouteCrowdRuntime {
         const swap = Math.floor(random() * (index + 1));
         [startTiles[index], startTiles[swap]] = [startTiles[swap]!, startTiles[index]!];
       }
-      const scopedLimit = this.options.visualSpacing
-        ?.maxInstancesByConfig?.[config.id];
-      const candidateCount = scopedLimit === undefined
-        ? Math.min(config.count * 3, startTiles.length * config.endTiles.length)
-        : config.count * 3 + Math.max(0, Math.floor(scopedLimit)) * 2;
+      // Keep the source-sized candidate pool. Scoped spacing can reject a
+      // candidate, but must not multiply path jobs to manufacture capacity.
+      const candidateCount = Math.min(
+        config.count * 3,
+        startTiles.length * config.endTiles.length,
+      );
       const candidates: PendingStart[] = Array.from(
         { length: candidateCount },
         (_, index) => ({

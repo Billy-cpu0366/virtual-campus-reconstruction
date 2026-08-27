@@ -51,7 +51,7 @@ describe("GridRouteCrowdPathProvider", () => {
         allowBlockedEndpoints: true,
       };
       let path = provider.findPath(request);
-      for (let step = 0; path === undefined && step < 100; step += 1) {
+      for (let step = 0; path === undefined && step < 1_000; step += 1) {
         path = provider.findPath(request);
       }
       expect(path?.length).toBeGreaterThan(1);

@@ -7,7 +7,8 @@ import type {
 } from "./routeCrowd.js";
 
 const TILE_SIZE = 16;
-const ITERATIONS_PER_STEP = 512;
+// Keep route startup below a frame budget; unfinished jobs resume next frame.
+const ITERATIONS_PER_STEP = 64;
 const key = (point: RouteCrowdTile) => `${point.x},${point.y}`;
 const DIRECTIONS = Object.freeze([
   { dx: 0, dy: -1, cost: 1 },

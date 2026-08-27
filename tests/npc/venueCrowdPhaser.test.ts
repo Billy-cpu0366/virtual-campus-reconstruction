@@ -10,7 +10,12 @@ class Text {
   destroyed = false;
   depth = 0;
   origin = { x: 0, y: 0 };
-  constructor(public x: number, public y: number, public value: string) {}
+  constructor(
+    public x: number,
+    public y: number,
+    public value: string,
+    public style: Record<string, unknown> = {},
+  ) {}
   setDepth(value: number): this { this.depth = value; return this; }
   setOrigin(x: number, y: number): this { this.origin = { x, y }; return this; }
   setText(value: string): this { this.value = value; return this; }
@@ -126,8 +131,8 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
           sprites.push(sprite);
           return sprite;
         },
-        text: (x, y, text) => {
-          const bubble = new Text(x, y, text);
+        text: (x, y, text, style) => {
+          const bubble = new Text(x, y, text, style);
           bubbles.push(bubble);
           return bubble;
         },
@@ -136,6 +141,12 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     }, () => viewport, () => now);
 
     expect(runtime.start()).toBe(true);
+    expect(bubbles.length).toBeGreaterThan(0);
+    expect(bubbles[0]!.style).toMatchObject({
+      fontSize: "8px",
+      padding: { left: 3, right: 3, top: 1, bottom: 1 },
+      wordWrap: { width: 128, useAdvancedWrap: true },
+    });
     let sawVisible = false;
     let sawBubble = false;
     for (now = 0; now <= 4_000; now += 100) {
@@ -216,7 +227,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     expect(fixed.every((state) => state.actionCount === 0)).toBe(true);
   });
 
-  it("animates concert venue NPCs with looping direction actions", () => {
+  it("leaves concert venue NPCs on the pre-action presentation", () => {
     let now = 0;
     const viewport = { left: 1_600, top: 350, width: 640, height: 550 };
     const sprites: Sprite[] = [];
@@ -239,16 +250,14 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     }, () => viewport, () => now);
 
     expect(runtime.start()).toBe(true);
-    expect(runtime.concertActionSnapshot.length).toBeGreaterThan(0);
+    expect(sprites.length).toBeGreaterThan(0);
     expect(sprites.some((sprite) => sprite.played.some((key) =>
       key.startsWith("concert-crowd-"),
-    ))).toBe(true);
+    ))).toBe(false);
     for (now = 0; now <= 8_000; now += 100) runtime.update();
-    expect(runtime.concertActionSnapshot.some((state) => state.actionCount > 0))
-      .toBe(true);
     expect(animations.some((animation) =>
-      animation.key.startsWith("concert-crowd-") && animation.repeat === -1,
-    )).toBe(true);
+      animation.key.startsWith("concert-crowd-"),
+    )).toBe(false);
     runtime.shutdown();
     expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
   });

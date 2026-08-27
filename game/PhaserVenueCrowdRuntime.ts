@@ -85,22 +85,10 @@ type ProtestSpeechState = {
   nextChangeAt: number;
 };
 
-type ConcertActionState = {
-  readonly id: string;
-  directionIndex: number;
-  actionCount: number;
-  nextChangeAt: number;
-};
-
 const DIRECTIONS: readonly Direction[] = [
   "east", "north-east", "north-west", "north",
   "south-east", "south-west", "south", "west",
 ];
-const CONCERT_DIRECTIONS: readonly Direction[] = [
-  "south", "west", "north", "east",
-];
-const CONCERT_ACTION_INTERVAL_MS = 1_500;
-
 const ACTION_DURATION_MS = WALK_FRAMES_PER_DIRECTION / ANIMATION_FRAME_RATE * 1_000;
 
 const stableHash = (value: string): number =>
@@ -152,7 +140,6 @@ export class PhaserVenueCrowdRuntime {
   private readonly core = new VenueCrowdRuntime();
   private readonly sprites = new Map<string, Sprite>();
   private readonly protestStates = new Map<string, ProtestActionState>();
-  private readonly concertStates = new Map<string, ConcertActionState>();
   private readonly speechBubbles = new Map<string, SpeechBubble>();
   private readonly speechStates = new Map<string, ProtestSpeechState>();
   private readonly createdAnimations = new Set<string>();
@@ -190,7 +177,6 @@ export class PhaserVenueCrowdRuntime {
     for (const bubble of this.speechBubbles.values()) bubble.destroy();
     this.speechBubbles.clear();
     this.protestStates.clear();
-    this.concertStates.clear();
     this.speechStates.clear();
   }
 
@@ -198,10 +184,6 @@ export class PhaserVenueCrowdRuntime {
   get snapshot() { return this.core.snapshot; }
   get protestActionSnapshot(): readonly Readonly<ProtestActionState>[] {
     return Object.freeze([...this.protestStates.values()].map((state) =>
-      Object.freeze({ ...state })));
-  }
-  get concertActionSnapshot(): readonly Readonly<ConcertActionState>[] {
-    return Object.freeze([...this.concertStates.values()].map((state) =>
       Object.freeze({ ...state })));
   }
   get protestSpeechSnapshot(): readonly Readonly<ProtestSpeechState>[] {
@@ -274,8 +256,6 @@ export class PhaserVenueCrowdRuntime {
         if (isInViewportForRegion(readySprite.x, readySprite.y, instance.regionId, viewport)) {
           this.updateProtesterSpeech(instance.id, readySprite, now, activeSpeechIds);
         }
-      } else if (instance.regionId.startsWith("concert")) {
-        this.updateConcert(instance.id, readySprite, now);
       }
       this.sprites.set(instance.id, readySprite);
     }
@@ -289,48 +269,11 @@ export class PhaserVenueCrowdRuntime {
         state.phase = "idle";
         state.nextChangeAt = now + this.idleDelay(id, state.actionCount);
       }
-      this.concertStates.delete(id);
       this.clearSpeech(id);
     }
     for (const id of this.speechBubbles.keys()) {
       if (!activeSpeechIds.has(id)) this.clearSpeech(id);
     }
-  }
-
-  private updateConcert(id: string, sprite: Sprite, now: number): void {
-    const index = Number(id.split(":").at(-1)) || 0;
-    const state = this.concertStates.get(id) ?? {
-      id,
-      directionIndex: index % CONCERT_DIRECTIONS.length,
-      actionCount: 0,
-      nextChangeAt: this.startedAt + stableHash(`${id}:concert`) % 1_501,
-    };
-    this.concertStates.set(id, state);
-    if (now >= state.nextChangeAt) {
-      state.directionIndex = (state.directionIndex + 1) % CONCERT_DIRECTIONS.length;
-      state.actionCount += 1;
-      state.nextChangeAt = now + CONCERT_ACTION_INTERVAL_MS +
-        stableHash(`${id}:concert:${state.actionCount}`) % 2_001;
-    }
-    const direction = CONCERT_DIRECTIONS[state.directionIndex]!;
-    const key = `concert-crowd-${direction}`;
-    this.ensureConcertAnimation(direction, key);
-    sprite.anims?.play(key, true);
-  }
-
-  private ensureConcertAnimation(direction: Direction, key: string): void {
-    if (this.createdAnimations.has(key) || this.scene.anims?.exists?.(key)) return;
-    const start = walkFrameStart(direction);
-    this.scene.anims?.create({
-      key,
-      frames: this.scene.anims.generateFrameNumbers(
-        "npc-man",
-        { start, end: start + WALK_FRAMES_PER_DIRECTION - 1 },
-      ),
-      frameRate: ANIMATION_FRAME_RATE,
-      repeat: -1,
-    });
-    this.createdAnimations.add(key);
   }
 
   private initializeProtester(id: string, sprite: Sprite): void {
@@ -388,10 +331,11 @@ export class PhaserVenueCrowdRuntime {
     if (bubble === undefined) {
       bubble = this.scene.add.text(sprite.x, sprite.y - PROTESTER_HALF_SIZE - 8, state.text, {
         fontFamily: "monospace",
-        fontSize: "12px",
         color: "#111111",
         backgroundColor: "#ffffff",
-        padding: { left: 5, right: 5, top: 2, bottom: 2 },
+        padding: { left: 3, right: 3, top: 1, bottom: 1 },
+        fontSize: "8px",
+        wordWrap: { width: 128, useAdvancedWrap: true },
         align: "center",
       });
       bubble.setOrigin?.(0.5, 1);

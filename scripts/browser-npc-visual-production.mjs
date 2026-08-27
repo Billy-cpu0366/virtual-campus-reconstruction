@@ -166,6 +166,14 @@ async function snapshot() {
         time: scene.time.now,
         view: { x: view.x, y: view.y, width: view.width, height: view.height },
         venue: capture(scene.venueCrowdRuntime, 32),
+        speechBubbles: [...(scene.venueCrowdRuntime?.speechBubbles ?? new Map())]
+          .map(([id, bubble]) => ({
+            id: String(id),
+            text: bubble.text ?? null,
+            width: bubble.width ?? null,
+            height: bubble.height ?? null,
+            fontSize: bubble.style?.fontSize ?? null,
+          })),
         route: capture(scene.routeCrowdRuntime, 24),
         static: capture(scene.staticCrowdRuntime, 24),
         bug: capture(scene.bugCrowdRuntime, 20),
@@ -286,13 +294,10 @@ async function probeConcertParty() {
   assert.deepEqual(bottomInside?.state, "faded");
   assert.deepEqual(sideOutside?.state, "visible");
   assert.deepEqual(sideInside?.state, "faded");
-  assert.ok(party?.lighting?.active, "concert lighting is not active in the room");
-  assert.deepEqual(party?.lighting?.objectCount, 11);
-  assert.deepEqual(party?.lighting?.spotlightCount, 2);
-  assert.deepEqual(party?.lighting?.colorLightCount, 2);
-  assert.deepEqual(party?.lighting?.laserCount, 6);
-  assert.ok((party?.concertActions ?? []).some((state) => state.actionCount > 0),
-    "concert NPC actions did not advance");
+  assert.equal(party?.lighting, null,
+    "rolled-back party lighting owner is still connected");
+  assert.deepEqual(party?.concertActions ?? [], [],
+    "rolled-back concert action owner is still connected");
   const partyScreen = await capture("party-room");
   const barrierStart = await sceneCall(`function () {
     for (const game of this) {
@@ -576,6 +581,8 @@ try {
       const spacingViolations = [];
       const policeNpcViolations = [];
       const wallViolations = [];
+      const displayWallViolations = [];
+      const displayPositionMismatches = [];
       const startNow = scene.time.now;
       const identity = (sprite) => {
         if (!sprite || typeof sprite !== "object") return null;
@@ -605,9 +612,30 @@ try {
           if (nearPolice(item.position) && policeNpcViolations.length < 20) {
             policeNpcViolations.push({ elapsed, owner: "route", id: item.id, position: item.position });
           }
-          if (item.id.startsWith("vertical-crowd-reverse:") &&
-            onWall(item.position) && wallViolations.length < 20) {
-            wallViolations.push({ elapsed, owner: "route", id: item.id, position: item.position });
+          if (item.id.startsWith("vertical-crowd-reverse:")) {
+            if (onWall(item.position) && wallViolations.length < 20) {
+              wallViolations.push({ elapsed, owner: "route", id: item.id, position: item.position });
+            }
+            const sprite = scene.routeCrowdRuntime.sprites?.get(item.id);
+            if (sprite !== undefined && item.materialized && item.visible && !item.destroyed) {
+              const mismatch = Math.hypot(
+                sprite.x - item.position.x,
+                sprite.y - item.position.y,
+              );
+              if (mismatch > 1 && displayPositionMismatches.length < 20) {
+                displayPositionMismatches.push({
+                  elapsed, id: item.id, logical: item.position,
+                  display: { x: sprite.x, y: sprite.y }, mismatch,
+                });
+              }
+              if (onWall({ x: sprite.x, y: sprite.y }) &&
+                displayWallViolations.length < 20) {
+                displayWallViolations.push({
+                  elapsed, owner: "route-display", id: item.id,
+                  position: { x: sprite.x, y: sprite.y },
+                });
+              }
+            }
           }
         }
         for (const item of scene.bugCrowdRuntime?.snapshot.instances ?? []) {
@@ -688,6 +716,8 @@ try {
         staticSpacing: minSpacing(scene.staticCrowdRuntime?.snapshot?.instances ?? []),
         policeNpcViolations,
         wallViolations,
+        displayWallViolations,
+        displayPositionMismatches,
         combinedSpacing: {
           minimum: Number.isFinite(minimumCombinedSpacing) ? minimumCombinedSpacing : null,
           maxRouteCountInScope,
@@ -718,18 +748,18 @@ try {
     "mobile NPC entered a police collision rectangle");
   assert.deepEqual(routeAudit.wallViolations, [],
     "mobile NPC entered a blocked wall cell");
+  assert.deepEqual(routeAudit.displayWallViolations, [],
+    "mobile NPC display entered a blocked wall cell");
+  assert.deepEqual(routeAudit.displayPositionMismatches, [],
+    "coffee display position diverged from the wall-safe route");
   assert.deepEqual(routeAudit.flags, [
     { id: "drinkers", completionExit: true, goBack: false, deleteAfterComplete: false },
     { id: "vertical-crowd-reverse", completionExit: true, goBack: false, deleteAfterComplete: false },
   ]);
   assert.ok(routeAudit.staticSpacing.minimum === null || routeAudit.staticSpacing.minimum >= 56,
     `coffee static regions 38/61 spacing ${routeAudit.staticSpacing.minimum} < 56`);
-  assert.ok(routeAudit.combinedSpacing.minimum === null || routeAudit.combinedSpacing.minimum >= 56,
-    `coffee route/static spacing ${routeAudit.combinedSpacing.minimum} < 56`);
-  assert.equal(routeAudit.combinedSpacing.violationCount, 0,
-    "coffee route/static spacing violations recorded");
-  assert.ok(routeAudit.combinedSpacing.maxRouteCountInVisualZone >= 10,
-    "coffee route replay did not keep ten NPCs in the camera view");
+  // The previous ten-person spacing target was intentionally removed by
+  // DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006. Keep spacing as diagnostics only.
   const coffeeAfter = await snapshot();
   const coffeeAfterScreen = await capture("coffee-after");
   await sceneCall(`function () {
@@ -761,7 +791,9 @@ try {
       concertActionCount: partyAudit.party.concertActions.length, partyScreen: partyAudit.partyScreen },
     bugAudit, routeAudit: { sampleCount: routeAudit.sampleCount,
       firstReturning: routeAudit.firstReturning, staticSpacing: routeAudit.staticSpacing,
-      combinedSpacing: routeAudit.combinedSpacing }, events }));
+      combinedSpacing: routeAudit.combinedSpacing,
+      displayWallViolations: routeAudit.displayWallViolations,
+      displayPositionMismatches: routeAudit.displayPositionMismatches }, events }));
   await command("Target.closeTarget", { targetId: target.id }, { ignoreDeadline: true, timeoutMs: 1_000 });
   activeTargetId = undefined;
   socket.close();
