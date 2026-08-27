@@ -2,7 +2,7 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: bounded-repair-automated-verified-awaiting-human-visual
+audit-status: systemic-reaudit-human-feedback-awaiting-plan-gate
 work-item: WI-SYS-NPC-SPECIAL-001
 updated: 2026-08-27
 ---
@@ -44,6 +44,17 @@ Human在同一编译production路径新增观察：Stop AI附近NPC会闪烁/闪
 - 看门狗：总墙钟30秒、单次CDP调用5秒；超时自动暂停页面、尝试截图并写出`TIMEOUT`收据，不会无限等待。
 - 收据：产品worktree `.pi/audit-evidence/05e-npc-visual-targeted/receipt.json`，SHA-256 `925c0c99f889361501fa5d95123b47f3b8e205ebcf3b8c508254c34200a9cff9`；独立复核的自动检查全部PASS，视觉项因其沙箱不能复用4182而标UNKNOWN。
 - 当前状态：自动与生产验证已完成；Human最终视觉验收仍待进行，不能关闭SYS-NPC或05-E。
+
+## 新一轮Human反馈（2026-08-27；systemic audit）
+
+Human在当前本地production预览中报告：警车可站立/穿透；Stop AI街对面有5个用途不明的NPC；Stop AI缺少“需要人类而不是AI”语义的抗议气泡；coffee街NPC虽不再突然消失/生成，但仍在窄区聚集、间距不足。
+
+- **FACT/INFERRED**：当前静态警车是`PhaserVehicleRuntime`创建的显示Sprite，未进入玩家Arcade碰撞链；公开Bundle未直接证明静态警车应阻挡玩家。因此“能站在车上”是Human实际观察，“警车必须不可穿透”仍是待确认的新验收期望。
+- **FACT**：Stop AI对街5人属于公开`crowd_up`静态区域（本地`regionIndex=64`），当前按公开`max(5, ...)`规则生成；其原站退化边界的真实布点仍UNKNOWN。它们是环境背景，不承担交互；保留、减少或移除需Human取舍。
+- **FACT/UNKNOWN**：公开Bundle存在`People, not machines!`、`Jobs for humans!`、`Human > machine`和`speech-bubble`机制；当前venue owner没有口号、气泡定位或清理。公开首次触发路径、语言和DOM/Phaser实现方式仍需方案Gate。
+- **FACT/INFERRED**：coffee的`gone+visible`已由`16c74bb`修复，但`drinkers`、两组vertical路线与静态38/61仍叠加；当前静态最小中心距35.35px，小于48px精灵显示尺寸。公开Bundle没有coffee间隙数值；建议的`>=56px`局部中心距是待Human接受的重构DECISION。
+
+本轮不进入代码实现。待Human一次性确认警车碰撞、5人处理、抗议气泡呈现和coffee间距指标后，再按少数根因包批量修复；完整SYS-NPC及其他owner仍延期。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
