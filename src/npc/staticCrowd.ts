@@ -3903,6 +3903,15 @@ function emptySnapshot(): StaticCrowdSnapshot {
 
 type Placement = Omit<StaticCrowdInstanceSnapshot, "materialized">;
 
+function crossRegionMinSpacing(
+  firstRegionIndex: number,
+  secondRegionIndex: number,
+): number | undefined {
+  const isTargetPair = (firstRegionIndex === 38 && secondRegionIndex === 61) ||
+    (firstRegionIndex === 61 && secondRegionIndex === 38);
+  return isTargetPair ? 32 : undefined;
+}
+
 function makePlacements(
   regions: readonly StaticCrowdRegion[],
   random: () => number,
@@ -3930,6 +3939,17 @@ function makePlacements(
         if (regionPlacements.some((placed) =>
           Math.hypot(placed.x - candidate.x, placed.y - candidate.y) <
             STATIC_CROWD_MIN_SPACING)) continue;
+        if (placements.some((placed) => {
+          const minimum = crossRegionMinSpacing(
+            region.regionIndex,
+            placed.regionIndex,
+          );
+          return minimum !== undefined &&
+            Math.hypot(
+              placed.position.x - candidate.x,
+              placed.position.y - candidate.y,
+            ) < minimum;
+        })) continue;
         position = candidate;
         break;
       }

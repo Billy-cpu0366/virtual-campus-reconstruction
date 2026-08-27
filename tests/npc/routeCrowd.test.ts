@@ -23,6 +23,7 @@ const testConfig = (overrides: Partial<RouteCrowdConfig> = {}): RouteCrowdConfig
   ...overrides,
   pathRandomFactor: overrides.pathRandomFactor ?? .8,
   ignoreWalls: overrides.ignoreWalls ?? false,
+  completionExit: overrides.completionExit ?? false,
 });
 
 const pathFor = (request: RouteCrowdPathRequest) => [
@@ -68,6 +69,24 @@ describe("RouteCrowdRuntime contract", () => {
         deleteAfterComplete: true,
         randomPositions: false,
         maxActiveInViewport: 10,
+      });
+    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "drinkers"))
+      .toEqual({
+        id: "drinkers",
+        count: 5,
+        startTiles: [{ x: 55, y: 86 }, { x: 50, y: 85 }],
+        endTiles: [{ x: 87, y: 55 }, { x: 85, y: 55 }],
+        movementSpeed: 45,
+        speedVariation: { min: .8, max: 1.2 },
+        delay: { minMs: 4_000, maxMs: 10_000 },
+        afterDelay: { minMs: 4_000, maxMs: 10_000 },
+        goBack: false,
+        deleteAfterComplete: false,
+        randomPositions: true,
+        maxActiveInViewport: 5,
+        pathRandomFactor: 1,
+        ignoreWalls: false,
+        completionExit: true,
       });
     expect(
       ROUTE_CROWD_CONFIGS
@@ -206,6 +225,63 @@ describe("RouteCrowdRuntime contract", () => {
       generation: 1,
       position: { x: 32, y: 48 },
       destroyed: false,
+    });
+  });
+
+  it("reverses drinkers immediately and restarts only after an offscreen return", () => {
+    const runtime = new RouteCrowdRuntime({
+      configs: [testConfig({
+        id: "drinkers",
+        delay: { minMs: 0, maxMs: 0 },
+        afterDelay: { minMs: 0, maxMs: 0 },
+        goBack: false,
+        deleteAfterComplete: false,
+        completionExit: true,
+      })],
+      baseSpeed: 48,
+      pathProvider: (request) => [
+        request.start,
+        { x: request.start.x + 96, y: request.start.y },
+      ],
+    });
+    const viewport = { left: 0, top: 0, width: 2240, height: 2240 };
+    runtime.start(0, viewport);
+    runtime.tick(2_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "returning",
+      position: { x: 128, y: 48 },
+      generation: 0,
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+
+    runtime.tick(3_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "returning",
+      position: { x: 80, y: 48 },
+      generation: 0,
+    });
+    runtime.tick(4_000, viewport);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "gone",
+      position: { x: 32, y: 48 },
+      generation: 0,
+      materialized: true,
+      visible: true,
+      alpha: 1,
+      destroyed: false,
+    });
+
+    const offscreenStart = { left: 1_000, top: 1_000, width: 100, height: 100 };
+    runtime.tick(4_001, offscreenStart);
+    expect(runtime.snapshot.instances[0]).toMatchObject({
+      state: "delay",
+      position: { x: 32, y: 48 },
+      generation: 1,
+      materialized: false,
+      destroyed: true,
     });
   });
 

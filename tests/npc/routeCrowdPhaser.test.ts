@@ -147,6 +147,52 @@ describe("PhaserRouteCrowdRuntime",()=>{
   expect(sprites.every((sprite)=>!sprite.destroyed&&sprite.alpha===1)).toBe(true);
  });
 
+ it("reuses a drinker sprite through its immediate reverse trip",()=>{
+  const sprites:Sprite[]=[];
+  const viewport={left:0,top:0,width:2240,height:2240};
+  const runtime=new PhaserRouteCrowdRuntime({
+   add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
+  },{
+   pathProvider:{findPath:r=>{
+    const drinker = (r.start.x===880 || r.start.x===800) &&
+     (r.start.y===1376 || r.start.y===1360);
+    return [r.start,{x:r.start.x+(drinker?72:32),y:r.start.y}];
+   }},
+   viewport:()=>viewport,random:()=>0,
+  });
+  runtime.start(0);
+  const drinkerIndex=runtime.snapshot.instances.findIndex(
+   item=>item.id==="drinkers:0",
+  );
+  const materializedBefore=runtime.snapshot.instances
+   .slice(0,drinkerIndex).filter(item=>item.materialized).length;
+  const drinkerSprite=sprites[materializedBefore]!;
+  const created=sprites.length;
+
+  runtime.update(6_000);
+  const terminal=runtime.snapshot.instances.find(item=>item.id==="drinkers:0")!;
+  expect(terminal).toMatchObject({
+   state:"returning",position:{x:952,y:1376},generation:0,
+   materialized:true,visible:true,alpha:1,destroyed:false,
+  });
+  const terminalX=drinkerSprite.x;
+  expect(sprites.length).toBe(created);
+  expect(drinkerSprite.destroyed).toBe(false);
+
+  runtime.update(7_000);
+  const returning=runtime.snapshot.instances.find(item=>item.id==="drinkers:0")!;
+  expect(returning.position.x).toBe(916);
+  expect(drinkerSprite.x).toBeLessThan(terminalX);
+  expect(sprites.length).toBe(created);
+  expect(drinkerSprite.destroyed).toBe(false);
+
+  runtime.update(8_000);
+  expect(runtime.snapshot.instances.find(item=>item.id==="drinkers:0"))
+   .toMatchObject({state:"gone",position:{x:880,y:1376},generation:0});
+  expect(sprites.length).toBe(created);
+  expect(drinkerSprite.destroyed).toBe(false);
+ });
+
  it("keeps a completed on-screen route sprite at its terminal position",()=>{
   const sprites:Sprite[]=[];
   const runtime=new PhaserRouteCrowdRuntime({

@@ -5,6 +5,8 @@ import {
   STATIC_CROWD_MIN_SPACING,
   StaticCrowdRuntime,
   staticCrowdRequestedCount,
+  type StaticCrowdPoint,
+  type StaticCrowdRegion,
 } from "../../src/npc/index.js";
 import { PhaserStaticCrowdRuntime } from "../../game/PhaserStaticCrowdRuntime.js";
 
@@ -61,6 +63,68 @@ describe("StaticCrowdRuntime", () => {
     first.tick({ left: 0, top: 0, width: 10, height: 10 });
     expect(first.snapshot.instances.every((item) => !item.materialized)).toBe(true);
     expect(first.snapshot.instances.map((item) => item.position)).toEqual(original);
+  });
+
+  it("applies 32px spacing only to the exact 38/61 region pair", () => {
+    const region = (regionIndex: number, left: number): StaticCrowdRegion => ({
+      regionIndex,
+      tileCount: 5,
+      type: "crowd",
+      outline: [
+        { x: left, y: 0 },
+        { x: left + 80, y: 0 },
+        { x: left + 80, y: 8 },
+        { x: left + 40, y: 16 },
+        { x: left, y: 16 },
+      ],
+    });
+    const values = [
+      .2, .5, .5, .5,
+      .999, .999, .999, .999,
+      .2, .5, .8, .5, .5, .5,
+      .999, .999, .999, .999,
+      .2, .5, .5, .5,
+      .999, .999, .999, .999,
+    ];
+    const snapshot = new StaticCrowdRuntime({
+      regions: [region(38, 0), region(61, 20), region(62, 20)],
+      random: seeded(values),
+      viewportMargin: 0,
+      maxPlacementAttemptsPerInstance: 2,
+    }).start({ left: -100, top: -100, width: 300, height: 300 });
+    const positionsByRegion = new Map<number, StaticCrowdPoint[]>();
+    for (const item of snapshot.instances) {
+      const positions = positionsByRegion.get(item.regionIndex) ?? [];
+      positions.push(item.position);
+      positionsByRegion.set(item.regionIndex, positions);
+    }
+    const positions38 = positionsByRegion.get(38) ?? [];
+    const positions61 = positionsByRegion.get(61) ?? [];
+    const positions62 = positionsByRegion.get(62) ?? [];
+    expect(positions38.length).toBeGreaterThan(0);
+    expect(positions61.length).toBeGreaterThan(0);
+    expect(positions62.length).toBeGreaterThan(0);
+
+    for (const first of positions38) {
+      for (const second of positions61) {
+        expect(Math.hypot(first.x - second.x, first.y - second.y))
+          .toBeGreaterThanOrEqual(32);
+      }
+    }
+    expect(positions38.some((first) => positions62.some((second) =>
+      Math.hypot(first.x - second.x, first.y - second.y) < 32,
+    ))).toBe(true);
+
+    for (const positions of [positions38, positions61, positions62]) {
+      for (let left = 0; left < positions.length; left += 1) {
+        for (let right = left + 1; right < positions.length; right += 1) {
+          expect(Math.hypot(
+            positions[left]!.x - positions[right]!.x,
+            positions[left]!.y - positions[right]!.y,
+          )).toBeGreaterThanOrEqual(20);
+        }
+      }
+    }
   });
 
   it("keeps visible sprite identity through core culling and culls only when offscreen", () => {

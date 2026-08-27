@@ -34,6 +34,8 @@ export interface RouteCrowdConfig {
   readonly maxActiveInViewport: number | undefined;
   readonly pathRandomFactor: number;
   readonly ignoreWalls: boolean;
+  /** Keep a completed one-way item alive while it exits offscreen. */
+  readonly completionExit: boolean;
 }
 
 export interface RouteCrowdPathRequest {
@@ -125,6 +127,7 @@ const group = (
   maxActiveInViewport: number | undefined,
   pathRandomFactor = .8,
   ignoreWalls = false,
+  completionExit = false,
 ): RouteCrowdConfig => Object.freeze({
   id,
   count,
@@ -140,13 +143,14 @@ const group = (
   maxActiveInViewport,
   pathRandomFactor,
   ignoreWalls,
+  completionExit,
 });
 
 // FACT: `chunk-WMFY56ZM.js` byte 328000–332000 public crowd registration.
 export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("main-crowd", 10, [[31, 81], [32, 81], [33, 81]], [[73, 133]], 45, .25, { minMs: 0, maxMs: 0 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 25),
   group("loop-crowd", 10, [[55, 18], [62, 18]], [[21, 86], [55, 86], [112, 48], [116, 85]], 45, .2, { minMs: 0, maxMs: 0 }, { minMs: 1_000, maxMs: 1_000 }, true, false, true, 10),
-  group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false, false, true, 5, 1),
+  group("drinkers", 5, [[55, 86], [50, 85]], [[87, 55], [85, 55]], 45, .2, { minMs: 4_000, maxMs: 10_000 }, { minMs: 4_000, maxMs: 10_000 }, false, false, true, 5, 1, false, true),
   group("concert_crowd", 40, [[105, 51], [135, 50], [136, 36], [106, 37]], [[108, 45], [128, 47], [129, 39]], 40, .25, { minMs: 0, maxMs: 3_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 40),
   group("beach_crowd_walk", 4, [[96, 119]], [[68, 134]], 35, .2, { minMs: 0, maxMs: 0 }, { minMs: 0, maxMs: 0 }, true, false, true, 4),
   group("vertical-crowd", 10, [[85, 56], [86, 56], [87, 56]], [[85, 86], [86, 86], [87, 86]], 40, .2, { minMs: 0, maxMs: 7_000 }, { minMs: 1_000, maxMs: 1_000 }, false, false, true, 20, 0, true),
@@ -605,10 +609,19 @@ export class RouteCrowdRuntime {
     now: number,
     viewport?: RouteCrowdViewport,
   ): void {
-    if (item.state === "moving" && item.config.goBack) {
-      item.state = "delay";
+    if (item.state === "moving" && item.config.completionExit) {
+      // Coffee drinkers leave the endpoint by reversing immediately. Keep
+      // the same item alive until that reverse trip reaches its start.
       item.path = [...item.forwardPath].reverse();
       item.waypointIndex = 1;
+      item.state = "returning";
+      item.waitingFrom = undefined;
+      return;
+    }
+    if (item.state === "moving" && item.config.goBack) {
+      item.path = [...item.forwardPath].reverse();
+      item.waypointIndex = 1;
+      item.state = "delay";
       item.waitingFrom = "returning";
       item.delayAt = now + randomDelayIn(
         item.config.afterDelay,
@@ -657,8 +670,9 @@ export class RouteCrowdRuntime {
     );
 
     for (const item of this.items) {
-      if (item.completionAction !== undefined &&
-          !safe(item) && !pointInSafeRange(item.start, viewport)) {
+      const completionOffscreen = !safe(item) &&
+        !pointInSafeRange(item.start, viewport);
+      if (item.completionAction !== undefined && completionOffscreen) {
         this.resolveCompletion(item, this.last);
       }
     }
