@@ -3,9 +3,11 @@ work-item: WI-SYS-FX-FACTORY-SMOKE-001
 type: systemic-batch-implementation
 system: SYS-FX + SYS-NPC
 issue-class: systemic-failure
-status: automated-verified-awaiting-human-visual
+status: implementation-authorized
 result-commit: 9233b20
 verification-evidence: .pi/audit-evidence/05e-npc-visual-repair-005/
+audit-status: human-plan-accepted
+plan-decision: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-005
 workflow-ref: 03-执行层/修正任务分流协议.md
 decision: DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001
 correction-decision: DEC-P5.4-SYS-NPC-VISUAL-REPAIR-002
@@ -162,4 +164,23 @@ Human在当前本地production预览中新增4条反馈：警车可站立/穿透
 - **已落盘**：产品提交`9233b20`完成警车静态Arcade阻挡、Stop AI背景2人和公开英文口号轮换；coffee局部只允许`vertical-crowd-reverse`，最多同时2个，静态region 38/61不生成；两条实例从屏外固定起点/延迟进入，并以±40px显示分道。未改变公开route配置的`goBack:false`、`deleteAfterComplete:false`，也未把安全退场语义扩展到其他route。
 - **已验证**：`npm test`为69个文件/398项，`npm run typecheck`、`npm run check:runtime`、普通production build、普通入口`browser:smoke`、test-hooks `browser:chunk-smoke`和独立reviewer均PASS。4182生产探针收据显示Stop AI连续50帧、三条口号、警车`blockedRight=true`、coffee同时2个route NPC、region38/61为0、组合最小中心距118.36277297772581px、console/exception/failed request/bad response均为0。
 - **证据**：`.pi/audit-evidence/05e-npc-visual-repair-005/receipt.json`，SHA-256 `65c9dc41b52f970480d016d8071310cc6d62fff22491afb2328046646a283381`；四张前后截图在同目录`screens/`下，清单见`SHA256SUMS`。005目录按仓库规则不纳入Git提交，保留在产品worktree供Human复验。
-- **当前状态**：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`的首次coffee尝试失败证据仍保留；`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`已实现并自动/生产验证，Human视觉Gate仍未签署。父任务继续停在`human-acceptance`，不关闭05-E，不启动S2–S4或SYS-NPC B2–B5。
+- **当前状态**：`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`的首次coffee尝试失败证据仍保留；`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`已实现并自动/生产验证，但被本次Human复验的新问题重新阻塞。父任务退回统一`human-plan-gate`，不关闭05-E，不启动S2–S4或SYS-NPC B2–B5。
+
+## 13. 新一轮Human反馈统一审计与授权（2026-08-27）
+
+Human在复验`9233b20`后新增四组观察：警车已挡住玩家但NPC仍踩车；coffee路线希望至少10个NPC且有NPC走墙；END OF THE WORLD PARTY的下门/侧门淡入淡出不一致、房内无原站灯光和NPC动作、左侧门栅栏可穿过；左下角bug贴图像“1.1个”。按修正协议，本轮保持`systemic-failure`，先完成统一审计，不按症状直接改代码。
+
+| 差异 | 已确认事实与当前代码 | 根因/状态 |
+|---|---|---|
+| 警车上的NPC | `PhaserVehicleRuntime`为3辆警车创建静态64×48 body；`CampusScene`当前只注册player×police collider。`PhaserRouteCrowdRuntime`的`isBlocked`只检查火车占格，`BugCrowdRuntime`只消费静态walls grid。 | 动态警车未进入移动NPC寻路阻塞链，根因已确认；Human已接受本次审计覆盖的route/bug移动NPC统一避让。 |
+| coffee数量与走墙 | 当前coffee白名单仅允许`vertical-crowd-reverse`且上限2，静态38/61为0；该公开配置当前`ignoreWalls=true`。因此“至少10”曾是新目标，“走墙”是独立的墙格语义缺陷候选。 | Human已接受至少10个同时可见且任意中心距继续≥56px；实现不得保留`ignoreWalls=true`。 |
+| END OF THE WORLD PARTY | 公开Bundle的`concert_venue`为dark zone，含2个spotlight、red/blue color light和6条laser；`concert_crowd`为loop route。当前产品只有统一矩形`CONCERT_ROOF_BOUNDS`的300ms roof tween；`PhaserVenueCrowdRuntime`只对protesters做动作，`PhaserDancingCrowdRuntime`位置在另一处，未接concert灯光owner。当前walls碰撞虽存在，但左侧栅栏准确格坐标尚未确认。 | 灯光/party concert动作缺失已确认；Human已接受公开Bundle最小复刻，双入口roof和左侧栅栏继续按固定路径验证后实现。 |
+| 左下角bug贴图 | 当前`PhaserBugCrowdRuntime`以48×48裁切`npc-bug`，不设公开`.63`缩放/24帧动画；公开Bundle加载该资源为38×38、frame0–23并约`.63`显示。 | 贴图合同错误已确认；Human已接受38×38/24帧/`.63`最小修复，完整bug行为仍不扩展。 |
+
+### Accepted repair packages（Human已接受）
+
+1. **动态NPC导航与coffee包**：本次审计覆盖的route/bug移动NPC统一消费警车动态阻塞与walls网格；`vertical-crowd-reverse`不得穿墙；coffee按至少10个同时可见且任意中心距继续≥56px重新做容量/分道/起点调度，并为警车、墙格和数量补固定production probe。
+2. **END OF THE WORLD PARTY venue包**：按公开Bundle已证实的dark zone、2 spotlight、红蓝移动灯、6 laser和concert loop动作建立专用owner；用下门/侧门固定路径验证同一300ms roof fade；先固定路径定位左侧栅栏，再接入准确碰撞；补灯光、动作、入口、障碍和shutdown验证，不凭截图猜视觉细节。
+3. **bug贴图包**：修正`npc-bug`的38×38/24帧/`.63`显示合同，补左下角固定视口截图和frame geometry验证；不顺带扩展bug AI。
+
+**当前Gate**：Human plan gate已通过，三包进入成批实现；完成后仍须完整回归和Human视觉Gate，不能把自动结果当最终验收。

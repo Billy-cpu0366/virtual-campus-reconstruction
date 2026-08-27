@@ -2,10 +2,11 @@
 tags: [虚拟校园, 执行层, 系统卡]
 system: SYS-NPC
 status: designed
-audit-status: coffee-repair-004-automated-verified-awaiting-human-visual
+audit-status: cross-owner-repair-005-implementation-authorized
 work-item: WI-SYS-NPC-SPECIAL-001
 result-commit: 9233b20
 verification-evidence: .pi/audit-evidence/05e-npc-visual-repair-005/
+authorization-ref: DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-005
 updated: 2026-08-27
 ---
 
@@ -15,7 +16,7 @@ updated: 2026-08-27
 
 **当前结论候选**：SYS-NPC不是一个统一运行时，而是多类独立owner组成的家族：路线/事件群众、区域静态群众、venue人群、固定special、sprayer、encounter、ghost和moving-sprite。不同owner的激活、动作、视口、回收和失败路径有实质差异，不能再用一套“NPC出现/移动/消失”模型统一修补。
 
-**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，完整NPC专项仍未通过Human视觉；本次Human明确重新授权一个有界跨系统修复包，仅覆盖route连续性、Stop AI venue presentation和直升机/警车资源owner。产品提交`9233b20`已完成本轮警车、Stop AI和coffee局部修复并通过自动/生产验证，其他NPC owner继续延期，当前等待Human视觉Gate。
+**当前状态**：Human已接受[Phase A机制与覆盖报告](../../task-todos/WI-SYS-NPC-SPECIAL-001-Phase-A审计报告.md)中的owner家族、六状态、RC-NPC-1..6与`B0→B5`顺序；[B0证据收口](../../task-todos/WI-SYS-NPC-SPECIAL-001-B0证据收口.md)已完成。B1候选`b6a4e6c`虽通过自动门禁，完整NPC专项仍未通过Human视觉；本次Human明确重新授权一个有界跨系统修复包，仅覆盖route连续性、Stop AI venue presentation和直升机/警车资源owner。产品提交`9233b20`已完成上一轮警车、Stop AI和coffee局部修复并通过自动/生产验证；本次Human复验新增警车动态阻塞、coffee数量/墙格、party venue和bug贴图差异，统一审计已完成，Human已接受`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-005`并授权三包成批实现，其他NPC owner继续延期。
 
 **当前硬边界**：完整SYS-NPC专项仍按`DEC-SYS-NPC-DEFER-001`延期；本次仅按`DEC-P5.4-CROSS-SYSTEM-VISUAL-REPAIR-001`及已接受的`DEC-P5.4-SYS-NPC-COFFEE-REPAIR-004`修正route、Stop AI venue presentation和车辆资源owner的有界范围，不恢复完整B1视觉签字或B2-B5。烟雾、车辆和飞机已由Human验收；本轮警车阻挡、Stop AI背景2人/公开口号、coffee reverse白名单与分道已自动/生产验证通过，Human最终视觉仍待确认，不重做已通过owner。rat、ghost、birds正常产品入口，铁路合法性、完整shutdown和resource-only对象身份仍是UNKNOWN；不建立通用NPC/Entity框架。
 
@@ -69,7 +70,18 @@ Human已接受`DEC-P5.4-SYS-NPC-VISUAL-REPAIR-003`，首次尝试已实现静态
 
 - **已落盘**：产品提交`9233b20`；coffee局部只允许`vertical-crowd-reverse`，最多同时2个route NPC，静态region38/61不生成；两条实例从屏外固定起点/延迟进入，并用±40px显示分道。其他route不套用该安全退场语义，公开`goBack:false/deleteAfterComplete:false`保持不变。
 - **已验证**：4182 production探针显示同时2个route NPC、组合最小中心距118.36277297772581px、region38/61计数0；三辆警车阻挡玩家，Stop AI背景2人且三条公开口号出现；398项全量测试、typecheck、资源检查、build、普通入口Smoke、test-hooks跨块Smoke和独立reviewer均PASS。
-- **证据与状态**：`.pi/audit-evidence/05e-npc-visual-repair-005/receipt.json`，SHA-256 `65c9dc41b52f970480d016d8071310cc6d62fff22491afb2328046646a283381`；Human视觉验收仍待，完整SYS-NPC/B2–B5不恢复。
+- **证据与状态**：`.pi/audit-evidence/05e-npc-visual-repair-005/receipt.json`，SHA-256 `65c9dc41b52f970480d016d8071310cc6d62fff22491afb2328046646a283381`；上一轮Human视觉验收未签，本次新三包已授权但尚未实现/回归，完整SYS-NPC/B2–B5不恢复。
+
+## 新一轮Human反馈统一审计与授权（2026-08-27）
+
+| 差异 | 已确认事实与当前代码 | 状态 |
+|---|---|---|
+| 警车上的NPC | 3辆警车已有静态body，但`CampusScene`只接player×police collider；route `isBlocked`只检查火车格，bug只消费静态walls grid。 | 动态警车未进入移动NPC阻塞链已确认；本次接受route/bug移动NPC统一避让。 |
+| coffee数量与走墙 | 当前局部白名单只允许`vertical-crowd-reverse`、上限2、静态38/61为0；该配置`ignoreWalls=true`。 | Human已接受至少10个同时可见且中心距≥56px；实现需修正墙格语义。 |
+| party room | 公开concert owner有loop crowd和单独lighting机制；当前venue只给protesters动作，dancing owner在另一坐标，未接concert light。 | 灯光/动作缺失已确认；Human已接受公开Bundle最小复刻，下门/侧门roof与左侧栅栏按固定路径实现验证。 |
+| bug区域 | 当前Phaser适配以48×48裁切`npc-bug`且无`.63`缩放/公开24帧合同；公开资源合同为38×38、24帧、约`.63`。 | 贴图裁切/缩放错误已确认；Human已接受38×38/24帧/`.63`修复，完整bug AI不扩展。 |
+
+**已接受修复包**（`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-005`）：A动态NPC阻塞+coffee数量/墙格，按至少10个同时可见且中心距≥56px；B END OF THE WORLD PARTY双入口roof、公开lighting、concert动作和先固定路径定位后的栅栏碰撞；C bug 38×38/24帧/`.63`贴图合同。当前进入成批实现，完成后仍需完整回归和Human视觉Gate。
 
 ## 1. 逆向结论（从 sample 读出来的事实）
 
