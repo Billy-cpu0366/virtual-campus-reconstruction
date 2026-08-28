@@ -19,7 +19,7 @@
   },
   "transport": {
     "sandbox-outbox": ".pi/handoff/outbox",
-    "external-staging": "C:/Users/inertnet/.pi/agent/github-handoff-staging/virtual-campus-reconstruction"
+    "external-staging": "C:/Users/inertnet/.pi/agent/gh-stage/vc"
   },
   "checks": {
     "external": [
