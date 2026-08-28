@@ -9,13 +9,13 @@ classification-ref: none
 current-work-item: WI-VISIBLE-CONTENT-INTEGRATION-001
 work-item-level: managed
 work-item-type: selective-integration
-work-item-status: audit-complete-awaiting-implementation-authorization
-current-phase: P4-selective-integration-package-review
-current-gate: implementation-authorization
-gate-status: audit-complete-awaiting-human-approval
-authorization-ref: DEC-CONTENT-ENGLISH-INTEGRATION-001
+work-item-status: implementation-authorized-in-progress
+current-phase: P4-selective-integration-implementation
+current-gate: implementation
+gate-status: implementation-authorized
+authorization-ref: DEC-CONTENT-ENGLISH-INTEGRATION-IMPLEMENT-001
 preauthorized-next-work-item: none
-next-phase: P4-selective-integration-implementation
+next-phase: verification-human-gate
 updated: 2026-08-28
 ---
 
@@ -23,14 +23,14 @@ updated: 2026-08-28
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **当前状态**：05-E跨系统视觉修复包已按006完成并通过Human最终视觉验收；已启用英文内容波也通过Human验收，`WI-VISIBLE-CONTENT-INTEGRATION-001`依赖审计已完成，当前等待Human批准精确实现包。
+- **当前状态**：05-E跨系统视觉修复包已按006完成并通过Human最终视觉验收；已启用英文内容波也通过Human验收，`WI-VISIBLE-CONTENT-INTEGRATION-001`实现包已获Human批准，当前进入隔离worktree实施。
 - **已关闭范围**：coffee真实路径/连续退场、party新增lighting/concert回退、Stop AI气泡清晰度和bug/警车等既定有界修复均已收口；完整SYS-NPC和S2–S4不随本包完成。
 - **NPC延期**：完整`SYS-NPC`专项仍延期；`0f3e646`保留为失败复现基线，`50ab1ba`和`1d16393`只消费006范围，不恢复完整授权。不启动B2–B5。
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
 - **已接受范围**：`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`覆盖coffee、party和Stop AI本次有界修复；其他B2–B5仍未授权，S2–S4未启动。
 - **内容线已启用英文内容波**：候选`integration/visible-product-wave@1d16393`的About、Projects、Memo1–6已完成自动验证与Human视觉Gate；Memo6含正常Play真实步行，候选尚未集成根`master`。Slovak、CV/Contact/Tech和完整内容系统仍未授权。
-- **当前工作项**：`WI-VISIBLE-CONTENT-INTEGRATION-001`已完成只读依赖审计；当前只审查实现包，批准前不写代码、不合并候选。
+- **当前工作项**：`WI-VISIBLE-CONTENT-INTEGRATION-001`已获实现授权；只在专用worktree实施内容核心、独立地图运行时和必要共享接线，不整条合并候选。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：005、008、017和018收据、Human反馈及最终视觉接受均保留；05-E已关闭，但不代表完整SYS-NPC、S2–S4或远端交付完成。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -65,7 +65,7 @@ updated: 2026-08-28
 | 确认事项 | Human 状态 | 当前允许 | 当前禁止 | 通过后的下一步 |
 |---|---|---|---|---|
 | SYS-NPC完整专项 | `systemic-failure`；B0已完成，B1完整专项仍延期；本次有界跨系统修复包已通过Human视觉并关闭 | 维护已关闭的route/Stop AI/车辆有界结果；未来完整NPC需重新授权 | 合并回根基线、恢复完整B1视觉签字、启动其他B2-B5、route/train/special/rat/ghost/birds以外范围、`sample/`、地图/玩家/相机/30FPS/火车、远端 | 重新选择并授权后，再从剩余owner进入专项 |
-| 内容英文波选择性集成 | `audit-complete-awaiting-human-approval`（路线已选择，审计完成，2026-08-28） | 审查实现包：内容核心、地图入口的最小手工接线、10项资源manifest和定向验证 | Human批准前写入代码、整条候选合并、带入NPC/相机/车辆/动效、Slovak或禁用入口、merge/push/PR | Human批准后进入P4-selective-integration-implementation；若依赖越界则停止并回报UNKNOWN |
+| 内容英文波选择性集成 | `implementation-authorized-in-progress`（实现包已获Human批准，2026-08-28） | 在专用worktree实现内容核心、独立地图运行时、10项资源manifest和必要共享接线；随后定向/全量验证 | 整条候选合并、带入NPC/相机/车辆/动效、Slovak或禁用入口、修改sample、merge/push/PR；若依赖越界立即停止 | 实现完成后进入verification-human-gate；自动通过不能替代新的普通production Human Gate |
 | 文档框架验收 | 已通过 | 审查已完成的现有复刻代码基线 | 在 `src/` 写入正式实现、修改或迁移现有 Phaser 项目 | 继续遵守系统详细设计门禁 |
 | 阶段1现有代码全局盘点 | 已通过 | 审查阶段6B的P0对照和首个系统建议 | 修改或清理任何旧Worktree、写入正式 `src/` | 继续遵守系统详细设计门禁 |
 | 阶段6B系统差距映射 | 已通过 | 开始 SYS-CHUNK 的有界详细逆向与设计 | 写入正式 `src`、修改或迁移现有 Phaser 项目、宣布可复用模块 | 形成 SYS-CHUNK 详细设计与验收包，交 Human 审查 |
@@ -159,7 +159,7 @@ updated: 2026-08-28
 
 ## 当前工作项：WI-VISIBLE-CONTENT-INTEGRATION-001
 
-当前阶段为`P4-selective-integration-package-review`：依赖审计已完成，形成了内容核心、地图入口必要接线、资源manifest和验证门禁的实现包；当前不写产品代码，不整条合并候选，等待Human批准实现包。
+当前阶段为`P4-selective-integration-implementation`：实现包已获Human批准，正在专用worktree写入内容核心、独立地图运行时、资源manifest和必要共享接线；不整条合并候选。
 
 ## 最近关闭工作项
 
@@ -167,7 +167,7 @@ updated: 2026-08-28
 
 Human此前已验收烟雾、直升机和警车画面，并在最终复看中确认本包“ok”；coffee、party和Stop AI均按006有界范围收口。完整SYS-NPC、B2–B5和S2–S4保持延期/未授权。
 
-内容线已完成已启用英文About、Projects、Memo1–6的bounded Human视觉验收；当前工作项已完成候选到根`master`的选择性集成审计，等待实现授权，Slovak和禁用入口仍不在范围。
+内容线已完成已启用英文About、Projects、Memo1–6的bounded Human视觉验收；当前工作项已完成选择性集成审计并获实现授权，正在专用worktree实施，Slovak和禁用入口仍不在范围。
 
 ## 已阻塞或暂停工作项
 
@@ -185,7 +185,7 @@ Human此前已验收烟雾、直升机和警车画面，并在最终复看中确
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| `WI-VISIBLE-CONTENT-INTEGRATION-001` | 审计完成，等待Human批准实现包 | 根`master@66b9fd6`与候选`integration/visible-product-wave@1d16393`的内容最小依赖闭包已审计；实现包要求手工接线共享入口，不整条合并候选 |
+| `WI-VISIBLE-CONTENT-INTEGRATION-001` | 实现已授权，正在专用worktree实施 | 根`master@66b9fd6`与候选`integration/visible-product-wave@1d16393`的内容最小依赖闭包已审计；按批准包手工接线共享入口，不整条合并候选 |
 | `WI-VISIBLE-CONTENT-WAVE-001` | 已启用英文内容波Human通过，等待集成授权 | 候选`integration/visible-product-wave@1d16393`；About、Projects、Memo1–6已自动与Human验证，Memo6含正常Play真实步行；候选及完整内容系统尚未集成根`master` |
 | `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；后续有界实现已进入 `8ae7692b` |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 已完成，结果提交 `c82aa4a` | SYS-LAYER 证据与有界运行时设计已接受、落盘并验证；不代表代码或完整系统完成 |

@@ -3,8 +3,8 @@ work-item: WI-VISIBLE-CONTENT-INTEGRATION-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 03-content
 phase: P4-selective-integration-audit
-status: audit-complete-awaiting-implementation-authorization
-authorization: DEC-CONTENT-ENGLISH-INTEGRATION-001
+status: implementation-authorized-in-progress
+authorization: DEC-CONTENT-ENGLISH-INTEGRATION-IMPLEMENT-001
 root-branch: master
 root-baseline-commit: 66b9fd6ba9cb37947a4bd169998a76c6ecef94b6
 root-baseline-tree: f0138fd74b7a0fca9cb617acc7bf7c33f58e7d99
@@ -12,7 +12,7 @@ candidate-branch: integration/visible-product-wave
 candidate-commit: 1d163939c6b57cc9dcdab9d3dd98dd5c2c7e187e
 candidate-tree: e051be264b4ce152e238406da806191f82968abd
 merge-base: 638d4c60347d6adf323e612b61595e73afb2bd05
-human-gate: route-accepted-awaiting-implementation-authorization
+human-gate: implementation-authorized
 updated: 2026-08-28
 ---
 
@@ -102,6 +102,10 @@ Human选择“选择性集成英文内容”，接受先建立独立集成工作
 - 明确所有不能在当前证据下安全选择的依赖，并转为UNKNOWN；
 - 若发现内容无法与未授权owner隔离，立即停止并报告冲突，不扩大范围。
 
+## 实施状态
+
+Human已选择“按实现包执行”，批准写入内容核心、10项资源manifest、独立地图运行时和必要DOM/共享接线；实现将在专用worktree中进行，不整条合并候选。
+
 ## 下一道门
 
-只有依赖审计、实现包和范围差异经Main复核后，才能提出代码实现授权；实现完成后还必须通过定向/全量自动验证和新的普通production Human Gate。候选不会自动合并到根`master`。
+实现完成后必须通过定向/全量自动验证、资源hash、普通production content/map Smoke和新的Human视觉Gate。候选不会自动合并到根`master`；若实现中发现依赖越过未授权owner，立即停止并回报UNKNOWN。
