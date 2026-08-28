@@ -6,8 +6,8 @@ phase: P4-selective-integration-audit
 status: accepted-read-only-audit
 authorization: DEC-CONTENT-ENGLISH-INTEGRATION-001
 root-branch: master
-root-baseline-commit: 0cbf995e2ef916c274b3e1297a31eee3a1f6db3d
-root-baseline-tree: 0b91c954da05c6734bf059e557dcbcfccd16ffee
+root-baseline-commit: a2042acb6f1466ec7f8209e3531e6da57b974c1b
+root-baseline-tree: 0f4c48fccd2a60aece9eb1de98b1b1f7fdff13a1
 candidate-branch: integration/visible-product-wave
 candidate-commit: 1d163939c6b57cc9dcdab9d3dd98dd5c2c7e187e
 candidate-tree: e051be264b4ce152e238406da806191f82968abd
@@ -27,6 +27,8 @@ Human选择“选择性集成英文内容”，接受先建立独立集成工作
 从根`master`建立可审查的内容集成方案，只把已通过Human Gate的About、Projects、Memo1–6及其必要运行时依赖带入；保持NPC、相机、车辆、动效和其他未授权范围的边界。
 
 ## 当前阶段：只读依赖审计
+
+- **基线说明**：根工作树保留5个既有未跟踪文件（3张PNG、2个规则脚本），本任务不读取其内容、不修改、不纳入提交；它们不属于本次审计变更。
 
 1. 对照根基线`0cbf995`和候选`1d16393`的提交、文件与运行时入口；
 2. 划分内容最小依赖闭包、Main共享接线、候选中无关历史改动；

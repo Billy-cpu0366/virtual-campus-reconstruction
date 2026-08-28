@@ -185,7 +185,7 @@ Human此前已验收烟雾、直升机和警车画面，并在最终复看中确
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| `WI-VISIBLE-CONTENT-INTEGRATION-001` | 路线已接受，正在只读依赖审计 | 根`master@0cbf995`与候选`integration/visible-product-wave@1d16393`的内容最小依赖闭包审计；不写代码、不整条合并候选 |
+| `WI-VISIBLE-CONTENT-INTEGRATION-001` | 路线已接受，正在只读依赖审计 | 根`master@a2042ac`与候选`integration/visible-product-wave@1d16393`的内容最小依赖闭包审计；不写代码、不整条合并候选 |
 | `WI-VISIBLE-CONTENT-WAVE-001` | 已启用英文内容波Human通过，等待集成授权 | 候选`integration/visible-product-wave@1d16393`；About、Projects、Memo1–6已自动与Human验证，Memo6含正常Play真实步行；候选及完整内容系统尚未集成根`master` |
 | `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；后续有界实现已进入 `8ae7692b` |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 已完成，结果提交 `c82aa4a` | SYS-LAYER 证据与有界运行时设计已接受、落盘并验证；不代表代码或完整系统完成 |
