@@ -38,7 +38,7 @@ Human：审查后确认推送
 - WSL 交付出口：`.pi/handoff/outbox/<delivery-id>/`。
 - WSL 基线入口：`.pi/handoff/inbox/<sync-id>/`。
 - Windows 中转区：`C:\Users\inertnet\.pi\agent\github-handoff\<project>\<delivery-id>\`。
-- alpha.4 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；外部隔离 staging 与中转区分离，固定为 `C:\Users\inertnet\.pi\agent\github-handoff-staging\virtual-campus-reconstruction`。
+- alpha.5 项目 adapter：`03-执行层/git-handoff.adapter.v1.json`；外部隔离 staging 与中转区分离，固定为 `C:\Users\inertnet\.pi\agent\github-handoff-staging\virtual-campus-reconstruction`。
 - `main` 必须保持 clean 并只跟随 `origin/main`；不在 `main` 上开发、commit 或直接 push。
 - 不执行 `reset`、`clean`、覆盖、擅自 `pull`、force-push；不自动创建/合并 PR。
 - `task_plan.md` 仍是项目动态状态唯一权威；handoff 包只负责运输和收据，不建立第二套项目状态。

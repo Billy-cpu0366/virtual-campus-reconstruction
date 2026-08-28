@@ -1,6 +1,6 @@
 {
   "schema-version": 1,
-  "required-package-version": "0.1.0-alpha.4",
+  "required-package-version": "0.1.0-alpha.5",
   "project-id": "example-project",
   "repositories": {
     "sandbox-root": ".",

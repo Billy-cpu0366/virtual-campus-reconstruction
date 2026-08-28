@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
@@ -25,7 +26,20 @@ import {
 
 const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WORKSPACE_ROOT = path.resolve(PACKAGE_ROOT, "../..");
-const RUNTIME_ROOT = path.join(WORKSPACE_ROOT, ".pi", "git-handoff-tests");
+const RUNTIME_ROOT = process.platform === "win32"
+  ? path.join(tmpdir(), "pi-git-handoff-tests")
+  : path.join(WORKSPACE_ROOT, ".pi", "git-handoff-tests");
+
+function normalizedPath(value) {
+  const resolved = path.resolve(value);
+  return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+}
+
+function isInside(root, candidate) {
+  const relative = path.relative(normalizedPath(root), normalizedPath(candidate));
+  return relative === "" || (!relative.startsWith(`..${path.sep}`)
+    && relative !== ".." && !path.isAbsolute(relative));
+}
 const REMOTE = "https://example.invalid/acme/example-project.git";
 const BASE_COMMIT = "a".repeat(40);
 const BASE_TREE = "b".repeat(40);
@@ -379,13 +393,13 @@ test("snapshot verification completes with a dirty Windows-style formal worktree
   assert.deepEqual(verification.verifyReceipt["unresolved-risks"], [
     "snapshot delivery is not directly mergeable into main",
   ]);
-  assert.ok(checkCwd.startsWith(fixture.externalStaging));
-  assert.ok(verification.receiptDir.startsWith(fixture.externalStaging));
+  assert.ok(isInside(fixture.externalStaging, checkCwd));
+  assert.ok(isInside(fixture.externalStaging, verification.receiptDir));
   assert.equal(verification.preview.nonMergeMainRisk, "snapshot delivery is not directly mergeable into main");
   assert.equal(verification.preview.targetBranch, "wip/example-wip-0001");
-  const formalForbidden = operations.filter(({ repo, args }) => repo === fixture.externalRoot && ["checkout", "add", "reset", "clean", "merge", "rebase"].includes(args[0]));
+  const formalForbidden = operations.filter(({ repo, args }) => normalizedPath(repo) === normalizedPath(fixture.externalRoot) && ["checkout", "add", "reset", "clean", "merge", "rebase"].includes(args[0]));
   assert.deepEqual(formalForbidden, []);
-  assert.ok(operations.some(({ repo, args }) => repo === fixture.externalRoot && args.join(" ") === "status --porcelain"));
+  assert.ok(operations.some(({ repo, args }) => normalizedPath(repo) === normalizedPath(fixture.externalRoot) && args.join(" ") === "status --porcelain"));
 });
 
 test("manifest history mode is adapter-derived", async () => {
@@ -655,7 +669,11 @@ test("prepare rejects an outbox symlink that escapes the repository", async () =
   await mkdir(projectRoot, { recursive: true });
   await mkdir(externalRoot, { recursive: true });
   await mkdir(escaped);
-  await symlink(escaped, path.join(projectRoot, ".handoff"), "dir");
+  await symlink(
+    escaped,
+    path.join(projectRoot, ".handoff"),
+    process.platform === "win32" ? "junction" : "dir",
+  );
   const adapter = adapterFor(projectRoot, externalRoot, externalStaging);
   adapter.transport["sandbox-outbox"] = ".handoff";
   const adapterPath = path.join(projectRoot, "git-handoff.json");

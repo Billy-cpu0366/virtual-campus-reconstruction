@@ -12,7 +12,7 @@ import {
 import path from "node:path";
 
 export const PACKAGE_NAME = "pi-git-handoff";
-export const PACKAGE_VERSION = "0.1.0-alpha.4";
+export const PACKAGE_VERSION = "0.1.0-alpha.5";
 export const PROTOCOL_VERSION = "0.1";
 
 export class HandoffError extends Error {

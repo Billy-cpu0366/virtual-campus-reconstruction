@@ -10,8 +10,8 @@ verifying and pushing the exact result with versioned receipts.
 |---|---|
 | Human direction | design and executor implementation accepted |
 | Design persistence | persisted in `683ea17` |
-| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 in `4c92f2d`; alpha.4 snapshot/WIP by the containing result commit |
-| Local validation | alpha.4 verified: 28 tests, schema duplicate-key scan, real offline bundle, independent review; Windows/GitHub remains unverified |
+| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 in `4c92f2d`; alpha.4 snapshot/WIP by the containing result commit; alpha.5 adds Windows-compatible validation and portable test paths |
+| Local validation | alpha.5 verified: 28 tests, schema duplicate-key scan, real offline bundle, and native Windows `npm run validate`; Windows/GitHub remains unverified |
 | Prepare implementation | implemented; sandbox-local operations only |
 | External verify/push implementation | implemented; WSL tests use a fake Git runner |
 | Global or project installation | not authorized |
@@ -66,6 +66,7 @@ examples/                    Generic cross-project examples
 scripts/core.mjs             Shared deterministic implementation
 scripts/prepare.mjs          Sandbox-only preparation entry point
 scripts/verify-push.mjs      External verification and push entry point
+scripts/validate-package.mjs Cross-platform Python validation launcher
 scripts/validate-package.py  Standard-library static validation
 tests/executors.test.mjs     Fake-runner and artifact tests
 ```

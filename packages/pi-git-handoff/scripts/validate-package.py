@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_VERSION = "0.1.0-alpha.4"
+PACKAGE_VERSION = "0.1.0-alpha.5"
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 
 EXPECTED_FILES = {
@@ -37,6 +37,7 @@ EXPECTED_FILES = {
     "scripts/core.mjs",
     "scripts/prepare.mjs",
     "scripts/verify-push.mjs",
+    "scripts/validate-package.mjs",
     "scripts/validate-package.py",
     "tests/executors.test.mjs",
 }
@@ -75,6 +76,7 @@ GENERIC_SCAN_FILES = {
     "scripts/core.mjs",
     "scripts/prepare.mjs",
     "scripts/verify-push.mjs",
+    "scripts/validate-package.mjs",
     "tests/executors.test.mjs",
     *SCHEMA_FILES,
 }

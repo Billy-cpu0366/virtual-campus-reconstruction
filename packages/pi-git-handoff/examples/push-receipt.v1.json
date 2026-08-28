@@ -9,7 +9,7 @@
   "created-at": "2026-08-23T00:03:00Z",
   "producer": {
     "package": "pi-git-handoff",
-    "version": "0.1.0-alpha.4",
+    "version": "0.1.0-alpha.5",
     "command": "verify-push",
     "environment": "external"
   },

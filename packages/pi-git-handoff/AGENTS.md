@@ -8,10 +8,11 @@ This directory is the machine entry for the independent cross-project
 - Design decision: accepted under `DEC-PI-GIT-HANDOFF-DESIGN-001`.
 - Executor authorization: accepted under `DEC-PI-GIT-HANDOFF-EXECUTORS-001`.
 - Persistence: alpha.2 is persisted in `c6eee9f`; alpha.3 full-ref behavior is
-  persisted in `4c92f2d`. Alpha.4 snapshot/WIP behavior is persisted by the
-  containing result commit.
-- Verification: alpha.4 local-verified by 28 tests, schema duplicate-key scan,
-  real offline artifacts, package validation, and independent review;
+  persisted in `4c92f2d`; alpha.4 snapshot/WIP behavior is persisted by the
+  containing result commit. Alpha.5 adds the Windows-compatible validation
+  launcher and portable executor tests.
+- Verification: alpha.5 is local-verified by 28 tests, schema duplicate-key
+  scan, real offline artifacts, and WSL plus native Windows package validation;
   Windows/GitHub remains remote-unverified.
 - Execution: `prepare` and `verify-push` exist. Snapshot mode requires an
   explicit adapter profile, a fresh target ref, external staging, external
@@ -22,7 +23,7 @@ This directory is the machine entry for the independent cross-project
 1. Read `README.md`.
 2. Read `skills/git-handoff/SKILL.md` and only its named references.
 3. Read `schemas/` before changing adapter, manifest, or receipt fields.
-4. Run `python3 scripts/validate-package.py` after any change.
+4. Run `npm run validate` after any change.
 
 ## Fixed boundaries
 
