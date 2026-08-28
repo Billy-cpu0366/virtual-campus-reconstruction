@@ -24,6 +24,11 @@
   "checks": {
     "external": [
       {
+        "id": "dependencies",
+        "argv": ["npm", "ci"],
+        "timeout-seconds": 1200
+      },
+      {
         "id": "state-consistency",
         "argv": ["python", "scripts/check-state-consistency.py"],
         "timeout-seconds": 120
