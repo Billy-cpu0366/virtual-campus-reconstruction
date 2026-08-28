@@ -10,8 +10,8 @@ verifying and pushing the exact result with versioned receipts.
 |---|---|
 | Human direction | design and executor implementation accepted |
 | Design persistence | persisted in `683ea17` |
-| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 in `4c92f2d`; alpha.4 snapshot/WIP by the containing result commit; alpha.5 adds Windows-compatible validation and portable test paths |
-| Local validation | alpha.5 verified: 28 tests, schema duplicate-key scan, real offline bundle, and native Windows `npm run validate`; Windows/GitHub remains unverified |
+| Executor persistence | alpha.2 in `c6eee9f`; alpha.3 in `4c92f2d`; alpha.4 snapshot/WIP by the containing result commit; alpha.7 adds Windows-compatible validation and portable test paths |
+| Local validation | alpha.7 verified: 28 tests, schema duplicate-key scan, real offline bundle, and native Windows `npm run validate`; Windows/GitHub remains unverified |
 | Prepare implementation | implemented; sandbox-local operations only |
 | External verify/push implementation | implemented; WSL tests use a fake Git runner |
 | Global or project installation | not authorized |

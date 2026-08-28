@@ -27,11 +27,11 @@ WSL 本地对象核对保存在 `task-todos/WI-GITHUB-HANDOFF-V1-001-WSL-CORRELA
 
 Human 已明确当前只要求把 WSL 完整成果备份到新的非保护 WIP 分支，不要求可直接合并 `main`。因此 reconciliation 不再是当前前置；审计收据只证明 remote 身份和 Windows 正式工作树不得被触碰。alpha.4 snapshot profile 已通过28项本地测试、schema duplicate-key scan、真实离线bundle与最终独立安全终审。当前 WSL delivery readiness 已通过 typecheck、32文件/168测试、build、临时preview browser smoke和状态一致性；prepare 已生成新的不可变 outbox，等待 Windows external Preview。
 
-## Alpha.5 Windows 兼容修复（已接受）
+## Alpha.7 Windows 兼容修复（已接受）
 
-`vc-wip-snapshot-20260828-01` 的 alpha.4 artifact、adapter 和 Preview 请求保持冻结；Windows 原生 package validation 曾因 `python3` alias、路径格式、symlink 权限和长 fixture 路径失败，故不得继续使用该请求生成 Preview。Human 于 2026-08-28 选择`升级 alpha.5（推荐）`。
+`vc-wip-snapshot-20260828-01` 的 alpha.4 artifact、adapter 和 Preview 请求保持冻结；Windows 原生 package validation 曾因 `python3` alias、路径格式、symlink 权限和长 fixture 路径失败，故不得继续使用该请求生成 Preview。Human 于 2026-08-28 选择`升级 alpha.7（推荐）`。
 
-alpha.5 仅修复 package 验证入口与跨平台测试，并将项目 adapter 的 required version 同步为 `0.1.0-alpha.5`。新 package commit 后必须从原 delivery commit 之上生成新的 delivery-id、bundle、manifest、prepare receipt、SHA256SUMS 和新的 Windows Preview 请求；不复用或改写 alpha.4 的冻结 payload。此修复不授权 push、PR、merge、main 更新或 Windows 正式仓库 dirty 处理。
+alpha.7 仅修复 package 验证入口与跨平台测试，并将项目 adapter 的 required version 同步为 `0.1.0-alpha.7`。新 package commit 后必须从原 delivery commit 之上生成新的 delivery-id、bundle、manifest、prepare receipt、SHA256SUMS 和新的 Windows Preview 请求；不复用或改写 alpha.4 的冻结 payload。此修复不授权 push、PR、merge、main 更新或 Windows 正式仓库 dirty 处理。
 
 ## alpha.3 初始 Adapter 接入历史
 

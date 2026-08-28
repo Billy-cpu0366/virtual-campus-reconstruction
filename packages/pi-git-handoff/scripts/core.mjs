@@ -12,7 +12,7 @@ import {
 import path from "node:path";
 
 export const PACKAGE_NAME = "pi-git-handoff";
-export const PACKAGE_VERSION = "0.1.0-alpha.5";
+export const PACKAGE_VERSION = "0.1.0-alpha.7";
 export const PROTOCOL_VERSION = "0.1";
 
 export class HandoffError extends Error {
@@ -325,7 +325,10 @@ export async function runCommand(argv, options = {}) {
   const started = Date.now();
   const timeoutMs = (options.timeoutSeconds ?? 600) * 1000;
   return await new Promise((resolve, reject) => {
-    const child = spawn(argv[0], argv.slice(1), {
+    const npmCli = path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
+    const executable = process.platform === "win32" && argv[0] === "npm" ? process.execPath : argv[0];
+    const commandArgs = process.platform === "win32" && argv[0] === "npm" ? [npmCli, ...argv.slice(1)] : argv.slice(1);
+    const child = spawn(executable, commandArgs, {
       cwd: options.cwd,
       env: options.env ?? process.env,
       shell: false,

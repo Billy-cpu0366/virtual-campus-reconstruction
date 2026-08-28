@@ -9,9 +9,9 @@ This directory is the machine entry for the independent cross-project
 - Executor authorization: accepted under `DEC-PI-GIT-HANDOFF-EXECUTORS-001`.
 - Persistence: alpha.2 is persisted in `c6eee9f`; alpha.3 full-ref behavior is
   persisted in `4c92f2d`; alpha.4 snapshot/WIP behavior is persisted by the
-  containing result commit. Alpha.5 adds the Windows-compatible validation
+  containing result commit. Alpha.7 adds the Windows-compatible validation
   launcher and portable executor tests.
-- Verification: alpha.5 is local-verified by 28 tests, schema duplicate-key
+- Verification: alpha.7 is local-verified by 28 tests, schema duplicate-key
   scan, real offline artifacts, and WSL plus native Windows package validation;
   Windows/GitHub remains remote-unverified.
 - Execution: `prepare` and `verify-push` exist. Snapshot mode requires an

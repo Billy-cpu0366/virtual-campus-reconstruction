@@ -3,7 +3,7 @@
   "protocol-version": "0.1",
   "producer": {
     "package": "pi-git-handoff",
-    "version": "0.1.0-alpha.5",
+    "version": "0.1.0-alpha.7",
     "command": "prepare"
   },
   "adapter-sha256": "1111111111111111111111111111111111111111111111111111111111111111",
