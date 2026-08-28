@@ -3,16 +3,16 @@ work-item: WI-VISIBLE-CONTENT-INTEGRATION-001
 program: PROGRAM-THREE-BOARD-VISIBLE-001
 workstream: 03-content
 phase: P4-selective-integration-audit
-status: accepted-read-only-audit
+status: audit-complete-awaiting-implementation-authorization
 authorization: DEC-CONTENT-ENGLISH-INTEGRATION-001
 root-branch: master
-root-baseline-commit: a2042acb6f1466ec7f8209e3531e6da57b974c1b
-root-baseline-tree: 0f4c48fccd2a60aece9eb1de98b1b1f7fdff13a1
+root-baseline-commit: 66b9fd6ba9cb37947a4bd169998a76c6ecef94b6
+root-baseline-tree: f0138fd74b7a0fca9cb617acc7bf7c33f58e7d99
 candidate-branch: integration/visible-product-wave
 candidate-commit: 1d163939c6b57cc9dcdab9d3dd98dd5c2c7e187e
 candidate-tree: e051be264b4ce152e238406da806191f82968abd
 merge-base: 638d4c60347d6adf323e612b61595e73afb2bd05
-human-gate: route-accepted-awaiting-implementation-scope
+human-gate: route-accepted-awaiting-implementation-authorization
 updated: 2026-08-28
 ---
 
@@ -26,7 +26,7 @@ Human选择“选择性集成英文内容”，接受先建立独立集成工作
 
 从根`master`建立可审查的内容集成方案，只把已通过Human Gate的About、Projects、Memo1–6及其必要运行时依赖带入；保持NPC、相机、车辆、动效和其他未授权范围的边界。
 
-## 当前阶段：只读依赖审计
+## 当前阶段：审计完成，待实现授权
 
 - **基线说明**：根工作树保留5个既有未跟踪文件（3张PNG、2个规则脚本），本任务不读取其内容、不修改、不纳入提交；它们不属于本次审计变更。
 
@@ -35,6 +35,51 @@ Human选择“选择性集成英文内容”，接受先建立独立集成工作
 3. 检查是否存在必须一起移植的`CampusScene`、入口、构建资源、测试或运行时依赖；
 4. 形成实现包：允许文件、禁止文件、移植顺序、验证命令、停止条件和剩余风险；
 5. 审计完成后停在`implementation-authorization`，由Main复核并另行进入代码实现Gate。
+
+## 审计结果（Main复核，2026-08-28）
+
+- **Git边界**：根固定为`master@66b9fd6`/tree=`f0138fd`，候选为`integration/visible-product-wave@1d16393`/tree=`e051be2`，merge-base=`638d4c6`；候选工作树干净，根tracked/index干净，5个已登记未跟踪例外保持原样。
+- **差异结论**：merge-base到候选的差异为159个文件、约38912行；直接比较当前根与候选为469个路径差异。候选整体混入NPC、车辆、相机、火车、烟雾、动效、应用入口和地图/UI历史改动，不能整条合并。
+- **内容隔离结论**：`src/content/**`、`src/zone/**`、`src/interact/**`、`src/game-ui/dom-modal.ts`及其内容/区域/交互测试没有发现对NPC、车辆或动效的静态依赖。
+
+### 实现包草案（尚未授权代码）
+
+**A. 内容核心（允许移植）**
+
+- `src/content/contract.ts`、`src/content/index.ts`、`src/content/registry.ts`；
+- `src/zone/index.ts`、`src/zone/runtime.ts`；
+- `src/interact/index.ts`、`src/interact/runtime.ts`；
+- `src/game-ui/dom-modal.ts`；`src/game-ui/index.ts`暂不移植，因为它会通过`app-shell.ts`牵出未授权`src/app/**`；
+- `game/CampusContentResolver.ts`、`game/GameplayControlLeaseRuntime.ts`、`game/AppGameUiBridge.ts`；
+- 对应的`tests/content/**`、`tests/zone/runtime.test.ts`、`tests/interact/runtime.test.ts`、`tests/game-ui/dom-modal*.test.ts`。
+
+**B. 已接受入口的必要地图接线（允许移植，但必须手工接入）**
+
+- `game/PhaserCampusMapRuntime.ts`及`tests/game-ui/campus-map-runtime.test.ts`：该运行时只静态依赖内容合同，用于保留已验收的正常地图UI入口；
+- 根`game/CampusScene.ts`：只手工接入11个marker中已启用的About、Projects、Memo1–6、100ms Zone检查、Interact/lease/receipt、地图选择和shutdown；不得复制候选整文件；
+- 根`index.html`：只补地图HUD/marker和`content-ui-root`/modal所需DOM与样式；
+- 根`package.json`及`scripts/browser-content-smoke.mjs`、必要的`browser-map-production.mjs`测试接线：只补内容验证命令，不带入候选其他Smoke套件。
+
+**C. 公开资源闭包**
+
+- `scripts/runtime-content-assets.json`及现有`prepare-runtime-assets.mjs`/`check-runtime-assets.mjs`的内容manifest接线；
+- 10项已登记公开资源由现有sample镜像派生并验SHA-256，不手工猜路径、不修改`sample/`，生成的`public/assets/images/**`只按仓库现有跟踪/生成规则处理。
+
+### 明确排除与UNKNOWN
+
+- 排除`src/npc/**`、`src/route/**`、`src/fx/**`、`src/app/**`、相机/车辆/火车/Stop-AI/工厂/粒子运行时，以及`ProductEntry*`和无关Smoke/证据/历史任务卡；
+- 排除`src/game-ui/app-shell.ts`及候选`src/game-ui/index.ts`，避免静态引入未授权应用层；
+- `CampusScene.ts`的现有玩家控制、相机和动态地图结构与候选不同，必须由Main手工重接；若内容或地图接线被证明必须引入未授权owner，立即停止并把依赖标为UNKNOWN；
+- 本包不授权Slovak、CV/Contact/Tech、完整顶部菜单、NPC、S2–S4、merge、push或PR。
+
+### 实施顺序与门禁
+
+1. Human接受本实现包后，在当前根基线建立干净的专用实现worktree；
+2. 先移植A和测试，再接入C资源检查；
+3. Main手工修改B中的`CampusScene.ts`、`index.html`、package/scripts，保持共享入口单一；
+4. 运行内容/地图定向测试、typecheck、全量测试、build、资源hash、普通production content/map Smoke；
+5. 重新进行Memo6正常Play真实步行和About/Projects/Memo1–5普通production Human Gate；
+6. 通过后停在新的交付/集成Gate，不自动合并根`master`。
 
 ## 允许读取
 
