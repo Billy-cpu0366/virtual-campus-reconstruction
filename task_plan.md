@@ -29,7 +29,7 @@ updated: 2026-08-28
 - **NPC视觉连续性硬约束（Human明确修正）**：当前摄像机视口内的NPC不得通过`alpha=0`、`destroy`、重建或瞬移而消失/出现；只能从视口外连续走入，或因自身连续移动走出视口后再回收。该约束保留各组`goBack`/`deleteAfterComplete`行为差异，不把所有路线改成循环。
 - **同步内容**：此前C3、04-A、03-A与05-A等已签结果保持；NPC的Phase A/B0结论、失败candidate和B1收据均保留。
 - **已接受范围**：`DEC-P5.4-CROSS-OWNER-VISUAL-REPAIR-006`覆盖coffee、party和Stop AI本次有界修复；其他B2–B5仍未授权，S2–S4未启动。
-- **内容线Memo6纵切片**：候选`integration/visible-product-wave@1d16393`已完成正常Play→真实步行→Memo6弹窗→关闭恢复的Human视觉Gate；只确认Memo6 bounded slice，候选尚未集成根`master`，完整About/Projects/其余Memo仍待另行授权。
+- **内容线已启用英文内容波**：候选`integration/visible-product-wave@1d16393`的About、Projects、Memo1–6已完成自动验证与Human视觉Gate；Memo6含正常Play真实步行，候选尚未集成根`master`。Slovak、CV/Contact/Tech和完整内容系统仍未授权。
 - **相机硬边界**：六点约111秒序列存在，但正常入口触发关系为UNKNOWN；禁止接入正常入口。
 - **关闭门禁**：005、008、017和018收据、Human反馈及最终视觉接受均保留；05-E已关闭，但不代表完整SYS-NPC、S2–S4或远端交付完成。
 - **远端边界**：本轮WIP分支推送由Human报告完成；仍不授权PR、merge、修改`main`或新的远端操作。
@@ -161,7 +161,7 @@ updated: 2026-08-28
 
 Human此前已验收烟雾、直升机和警车画面，并在最终复看中确认本包“ok”；coffee、party和Stop AI均按006有界范围收口。完整SYS-NPC、B2–B5和S2–S4保持延期/未授权。
 
-内容线下一项已完成Memo6 bounded slice的Human视觉验收，但仍停在候选worktree；未关闭完整内容波，也未自动启动根基线集成。
+内容线已完成已启用英文About、Projects、Memo1–6的bounded Human视觉验收，但仍停在候选worktree；未自动启动根基线集成，Slovak和禁用入口仍不在范围。
 
 ## 已阻塞或暂停工作项
 
@@ -179,7 +179,7 @@ Human此前已验收烟雾、直升机和警车画面，并在最终复看中确
 
 | 候选 | 来源 | 当前处置 |
 |---|---|---|
-| `WI-VISIBLE-CONTENT-WAVE-001` | Memo6 bounded slice Human通过，等待后续授权 | 候选`integration/visible-product-wave@1d16393`；正常Play真实步行、Memo6正文/卡图、关闭恢复已自动与Human验证；完整内容波及根`master`集成未完成 |
+| `WI-VISIBLE-CONTENT-WAVE-001` | 已启用英文内容波Human通过，等待后续授权 | 候选`integration/visible-product-wave@1d16393`；About、Projects、Memo1–6已自动与Human验证，Memo6含正常Play真实步行；候选及完整内容系统尚未集成根`master` |
 | `WI-SYS-ZONE-DESIGN-001` | 已完成，结果提交 `05c2274` | SYS-ZONE 公开证据逆向与设计已完成；后续有界实现已进入 `8ae7692b` |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-001` | 已完成，结果提交 `c82aa4a` | SYS-LAYER 证据与有界运行时设计已接受、落盘并验证；不代表代码或完整系统完成 |
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | 已完成，结果提交 `10c7d88` | 有界 visual/roof/marker/footsteps 运行时语义、失败诊断、particles3 未消费保留和 sanitizer 边界已验证；完整地图生命周期仍不在范围 |
