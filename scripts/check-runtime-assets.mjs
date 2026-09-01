@@ -2,7 +2,7 @@
 // Check the runtime files and sanitized map expected by game/CampusScene.ts.
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -179,9 +179,17 @@ function sha256(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-function safeResolve(root, relative) {
-  const path = resolve(root, relative);
-  return path === root || path.startsWith(`${root}/`) ? path : undefined;
+function safeResolve(root, relativePath) {
+  const path = resolve(root, relativePath);
+  const relativeToRoot = relative(root, path);
+  if (
+    isAbsolute(relativeToRoot) ||
+    relativeToRoot === ".." ||
+    relativeToRoot.startsWith(`..${sep}`)
+  ) {
+    return undefined;
+  }
+  return path;
 }
 
 const errors = [];

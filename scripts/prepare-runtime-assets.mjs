@@ -4,7 +4,7 @@
 import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { dirname, resolve } from "node:path";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -86,10 +86,15 @@ function sha256(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-function safeResolve(root, relative, label) {
-  const path = resolve(root, relative);
-  if (path !== root && !path.startsWith(`${root}/`)) {
-    throw new Error(`${label} escapes its root: ${relative}`);
+function safeResolve(root, relativePath, label) {
+  const path = resolve(root, relativePath);
+  const relativeToRoot = relative(root, path);
+  if (
+    isAbsolute(relativeToRoot) ||
+    relativeToRoot === ".." ||
+    relativeToRoot.startsWith(`..${sep}`)
+  ) {
+    throw new Error(`${label} escapes its root: ${relativePath}`);
   }
   return path;
 }
