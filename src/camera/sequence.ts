@@ -20,6 +20,10 @@ export function cameraSequenceTotalDuration(
   );
 }
 
+export const CAMERA_SEQUENCE_DURATION_MS = cameraSequenceTotalDuration(
+  CAMERA_SEQUENCE,
+);
+
 // 航拍结束落回玩家（FACT：tween scrollX/Y duration 3000、ease Power2）。
 export const CAMERA_END_TWEEN_DURATION_MS = 3000;
 export const CAMERA_END_TWEEN_EASE = "Power2";

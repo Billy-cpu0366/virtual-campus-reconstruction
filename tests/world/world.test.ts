@@ -71,25 +71,55 @@ describe("applyChunk 放块", () => {
     expect(world.renderedChunks).toEqual([]);
   });
 
-  it("写入任一层失败则整块回滚", () => {
+  it("写入任一层失败则带原数据整块回滚", () => {
     let writes = 0;
-    let clears = 0;
+    const cleared: number[] = [];
+    const layers = makeChunkLayers();
+    const first = layers[0];
+    if (first === undefined) throw new Error("unreachable");
+    layers[0] = { name: first.name, data: [17, ...first.data.slice(1)] };
     const world = readyWorld(makeSpec(), {
       hooks: {
-        writeLayer: (name) => {
+        writeLayer: (layer) => {
           writes += 1;
-          if (name === "layer5") throw new Error("写入失败");
+          if (layer.name === "layer5") throw new Error("写入失败");
         },
-        clearLayer: () => {
-          clears += 1;
+        clearLayer: (layer) => {
+          cleared.push(layer.data[0] ?? -1);
         },
       },
     });
-    const result = world.applyChunk(makeChunk(0, 0));
+    const result = world.applyChunk({ coordinate: { x: 0, y: 0 }, layers });
     expect(result).toEqual({ kind: "failure", reason: "写入失败" });
     expect(world.renderedChunks).toEqual([]);
     expect(writes).toBe(5);
-    expect(clears).toBe(4);
+    expect(cleared).toEqual([17, 0, 0, 0, 0]);
+  });
+
+  it("异步写入当前层抛错也回滚当前层", async () => {
+    const cleared: string[] = [];
+    const world = readyWorld(makeSpec(), {
+      hooks: {
+        writeLayerAsync: async (layer) => {
+          if (layer.name === "layer5") {
+            throw new Error("异步写入失败");
+          }
+        },
+        clearLayerAsync: async (layer) => {
+          cleared.push(layer.name);
+        },
+      },
+    });
+    const result = await world.applyChunkAsync!(makeChunk(0, 0));
+    expect(result).toEqual({ kind: "failure", reason: "异步写入失败" });
+    expect(cleared).toEqual([
+      "layer1",
+      "layer2",
+      "layer3",
+      "layer4",
+      "layer5",
+    ]);
+    expect(world.renderedChunks).toEqual([]);
   });
 
   it("5×5 全图 25 块可全部放满且已排序", () => {
@@ -145,26 +175,64 @@ describe("removeChunk 撤块", () => {
     expect(world.renderedChunks).toEqual([{ x: 0, y: 0 }]);
   });
 
-  it("清除部分层后失败则回滚已清层、仍登记", () => {
+  it("清除部分层后失败则用原层数据回滚、仍登记", () => {
     let writes = 0;
+    const restored: number[] = [];
+    const layers = makeChunkLayers();
+    const first = layers[0];
+    if (first === undefined) throw new Error("unreachable");
+    layers[0] = { name: first.name, data: [42, ...first.data.slice(1)] };
     const world = readyWorld(makeSpec(), {
       hooks: {
-        clearLayer: (name) => {
-          if (name === "layer5") throw new Error("清除失败");
+        clearLayer: (layer) => {
+          if (layer.name === "layer5") throw new Error("清除失败");
         },
-        writeLayer: () => {
+        writeLayer: (layer) => {
           writes += 1;
+          if (layer.name === "layer1") {
+            restored.push(layer.data[0] ?? -1);
+          }
         },
       },
     });
-    world.applyChunk(makeChunk(0, 0));
+    world.applyChunk({ coordinate: { x: 0, y: 0 }, layers });
     writes = 0; // 只看回滚重写次数，不把 applyChunk 的 24 次写入算进去
     expect(world.removeChunk({ x: 0, y: 0 })).toEqual({
       kind: "failure",
       reason: "清除失败",
     });
     expect(world.renderedChunks).toEqual([{ x: 0, y: 0 }]);
-    expect(writes).toBe(4); // layer1–4 已清，回滚重写这 4 层
+    expect(writes).toBe(5); // layer1–5 已尝试清除，回滚重写这 5 层
+    expect(restored).toEqual([42, 42]);
+  });
+
+  it("异步清除当前层抛错也回滚当前层", async () => {
+    const restored: string[] = [];
+    const world = readyWorld(makeSpec(), {
+      hooks: {
+        writeLayerAsync: async (layer) => {
+          restored.push(layer.name);
+        },
+        clearLayerAsync: async (layer) => {
+          if (layer.name === "layer5") {
+            throw new Error("异步清除失败");
+          }
+        },
+      },
+    });
+    await world.applyChunkAsync!(makeChunk(0, 0));
+    restored.length = 0;
+
+    const result = await world.removeChunkAsync!({ x: 0, y: 0 });
+    expect(result).toEqual({ kind: "failure", reason: "异步清除失败" });
+    expect(restored).toEqual([
+      "layer1",
+      "layer2",
+      "layer3",
+      "layer4",
+      "layer5",
+    ]);
+    expect(world.renderedChunks).toEqual([{ x: 0, y: 0 }]);
   });
 });
 

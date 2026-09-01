@@ -52,8 +52,16 @@ export type WorldLifecycle =
 
 // 模拟 Tilemap 层写入/清除的注入点（默认空操作）。抛错用于触发并测试回滚路径。
 export interface WorldWriteHooks {
-  writeLayer?(layerName: string, coordinate: ChunkCoordinate): void;
-  clearLayer?(layerName: string, coordinate: ChunkCoordinate): void;
+  writeLayer?(layer: ChunkLayer, coordinate: ChunkCoordinate): void;
+  clearLayer?(layer: ChunkLayer, coordinate: ChunkCoordinate): void;
+  writeLayerAsync?(
+    layer: ChunkLayer,
+    coordinate: ChunkCoordinate,
+  ): Promise<void>;
+  clearLayerAsync?(
+    layer: ChunkLayer,
+    coordinate: ChunkCoordinate,
+  ): Promise<void>;
 }
 
 export interface CreateWorldOptions {
@@ -67,7 +75,9 @@ export interface World {
   readonly state: WorldLifecycle;
   readonly renderedChunks: readonly ChunkCoordinate[];
   applyChunk(chunk: ValidatedChunk): ApplyResult;
+  applyChunkAsync?(chunk: ValidatedChunk): Promise<ApplyResult>;
   removeChunk(coordinate: ChunkCoordinate): RemoveResult;
+  removeChunkAsync?(coordinate: ChunkCoordinate): Promise<RemoveResult>;
   destroy(): void;
 }
 

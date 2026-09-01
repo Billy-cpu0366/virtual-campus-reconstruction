@@ -19,4 +19,12 @@ function jsToTs(): Plugin {
 
 export default defineConfig({
   plugins: [jsToTs()],
+  server: {
+    port: 4175,
+    strictPort: true,
+  },
+  preview: {
+    port: 4175,
+    strictPort: true,
+  },
 });

@@ -5,6 +5,7 @@ import { validateChunk, validateCoordinate } from "./chunk.js";
 import { validateWorldSpec } from "./spec.js";
 import type {
   ApplyResult,
+  ChunkLayer,
   CreateWorldOptions,
   RemoveResult,
   ValidatedChunk,
@@ -45,7 +46,7 @@ function errorMessage(error: unknown): string {
 class WorldImpl implements World {
   readonly spec: WorldSpec;
   #state: WorldLifecycle = "ready";
-  #rendered = new Map<string, ChunkCoordinate>();
+  #rendered = new Map<string, ValidatedChunk>();
   #layerPlan: readonly LayerStrategy[];
   #hooks: WorldWriteHooks;
 
@@ -59,14 +60,44 @@ class WorldImpl implements World {
     this.#hooks = hooks;
   }
 
+  #writeLayer(layer: ChunkLayer, coordinate: ChunkCoordinate): void {
+    this.#hooks.writeLayer?.(layer, coordinate);
+  }
+
+  #clearLayer(layer: ChunkLayer, coordinate: ChunkCoordinate): void {
+    this.#hooks.clearLayer?.(layer, coordinate);
+  }
+
+  async #writeLayerAsync(
+    layer: ChunkLayer,
+    coordinate: ChunkCoordinate,
+  ): Promise<void> {
+    if (this.#hooks.writeLayerAsync !== undefined) {
+      await this.#hooks.writeLayerAsync(layer, coordinate);
+      return;
+    }
+    this.#writeLayer(layer, coordinate);
+  }
+
+  async #clearLayerAsync(
+    layer: ChunkLayer,
+    coordinate: ChunkCoordinate,
+  ): Promise<void> {
+    if (this.#hooks.clearLayerAsync !== undefined) {
+      await this.#hooks.clearLayerAsync(layer, coordinate);
+      return;
+    }
+    this.#clearLayer(layer, coordinate);
+  }
+
   get state(): WorldLifecycle {
     return this.#state;
   }
 
   get renderedChunks(): readonly ChunkCoordinate[] {
-    return [...this.#rendered.values()].sort(
-      (left, right) => left.y - right.y || left.x - right.x,
-    );
+    return [...this.#rendered.values()]
+      .map((chunk) => chunk.coordinate)
+      .sort((left, right) => left.y - right.y || left.x - right.x);
   }
 
   applyChunk(chunk: ValidatedChunk): ApplyResult {
@@ -87,16 +118,19 @@ class WorldImpl implements World {
     }
 
     // 原子写入：24 层全部成功才登记；任一层失败回滚本次已写层，不登记。
-    const written: string[] = [];
+    const written: ChunkLayer[] = [];
     try {
       for (const layer of validated.layers) {
-        this.#hooks.writeLayer?.(layer.name, validated.coordinate);
-        written.push(layer.name);
+        // Register the attempted layer before invoking the hook. A real
+        // renderer can mutate state and then throw; that layer still needs a
+        // compensating clear during rollback.
+        written.push(layer);
+        this.#writeLayer(layer, validated.coordinate);
       }
     } catch (error) {
-      for (const name of written) {
+      for (const layer of written) {
         try {
-          this.#hooks.clearLayer?.(name, validated.coordinate);
+          this.#clearLayer(layer, validated.coordinate);
         } catch {
           // 回滚尽力而为，不覆盖原始失败原因。
         }
@@ -104,7 +138,55 @@ class WorldImpl implements World {
       return { kind: "failure", reason: errorMessage(error) };
     }
 
-    this.#rendered.set(key, validated.coordinate);
+    this.#rendered.set(key, validated);
+    return { kind: "applied" };
+  }
+
+  async applyChunkAsync(
+    chunk: ValidatedChunk,
+  ): Promise<ApplyResult> {
+    if (this.#state !== "ready") {
+      return { kind: "failure", reason: "世界未就绪，拒绝写入" };
+    }
+
+    let validated: ValidatedChunk;
+    try {
+      validated = validateChunk(chunk, this.spec, this.#layerPlan);
+    } catch (error) {
+      return { kind: "failure", reason: errorMessage(error) };
+    }
+
+    const key = coordinateKey(validated.coordinate);
+    if (this.#rendered.has(key)) {
+      return { kind: "already-applied" };
+    }
+
+    const written: ChunkLayer[] = [];
+    try {
+      for (const layer of validated.layers) {
+        if (this.#state !== "ready") {
+          throw new Error("世界生命周期已改变，停止异步写入");
+        }
+        // Register before await for the same partial-write compensation
+        // guarantee as the synchronous path.
+        written.push(layer);
+        await this.#writeLayerAsync(layer, validated.coordinate);
+      }
+      if (this.#state !== "ready") {
+        throw new Error("世界生命周期已改变，停止异步写入");
+      }
+    } catch (error) {
+      for (const layer of written) {
+        try {
+          await this.#clearLayerAsync(layer, validated.coordinate);
+        } catch {
+          // 回滚尽力而为，不覆盖原始失败原因。
+        }
+      }
+      return { kind: "failure", reason: errorMessage(error) };
+    }
+
+    this.#rendered.set(key, validated);
     return { kind: "applied" };
   }
 
@@ -120,22 +202,74 @@ class WorldImpl implements World {
     }
 
     const key = coordinateKey(coordinate);
-    if (!this.#rendered.has(key)) {
-      return { kind: "already-absent" };
-    }
 
     // 按显式策略清除全部 24 层（不复制发布 Bundle 只清 11 层的遗漏行为）。
     // 与 applyChunk 对称：任一层清除失败则回滚本次已清层，仍登记、不半清。
-    const cleared: string[] = [];
+    const rendered = this.#rendered.get(key);
+    if (rendered === undefined) {
+      return { kind: "already-absent" };
+    }
+
+    const cleared: ChunkLayer[] = [];
     try {
-      for (const layer of this.#layerPlan) {
-        this.#hooks.clearLayer?.(layer.name, coordinate);
-        cleared.push(layer.name);
+      for (const layer of rendered.layers) {
+        // Clearing can remove a resource before reporting an error. Include
+        // the attempted layer so rollback can restore it as well.
+        cleared.push(layer);
+        this.#clearLayer(layer, coordinate);
       }
     } catch (error) {
-      for (const name of cleared) {
+      for (const layer of cleared) {
         try {
-          this.#hooks.writeLayer?.(name, coordinate);
+          this.#writeLayer(layer, coordinate);
+        } catch {
+          // 回滚尽力而为，不覆盖原始失败原因。
+        }
+      }
+      return { kind: "failure", reason: errorMessage(error) };
+    }
+
+    this.#rendered.delete(key);
+    return { kind: "removed" };
+  }
+
+  async removeChunkAsync(
+    coordinate: ChunkCoordinate,
+  ): Promise<RemoveResult> {
+    if (this.#state !== "ready") {
+      return { kind: "failure", reason: "世界未就绪，拒绝清除" };
+    }
+
+    try {
+      validateCoordinate(coordinate, this.spec);
+    } catch (error) {
+      return { kind: "failure", reason: errorMessage(error) };
+    }
+
+    const key = coordinateKey(coordinate);
+    const rendered = this.#rendered.get(key);
+    if (rendered === undefined) {
+      return { kind: "already-absent" };
+    }
+
+    const cleared: ChunkLayer[] = [];
+    try {
+      for (const layer of rendered.layers) {
+        if (this.#state !== "ready") {
+          throw new Error("世界生命周期已改变，停止异步清除");
+        }
+        // Register before await so a partially completed async clear is
+        // included in compensation.
+        cleared.push(layer);
+        await this.#clearLayerAsync(layer, coordinate);
+      }
+      if (this.#state !== "ready") {
+        throw new Error("世界生命周期已改变，停止异步清除");
+      }
+    } catch (error) {
+      for (const layer of cleared) {
+        try {
+          await this.#writeLayerAsync(layer, coordinate);
         } catch {
           // 回滚尽力而为，不覆盖原始失败原因。
         }

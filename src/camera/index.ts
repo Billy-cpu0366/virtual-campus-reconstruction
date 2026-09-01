@@ -1,4 +1,17 @@
-export type { CameraBounds, CameraPoint } from "./contract.js";
+export type {
+  CameraBounds,
+  CameraPoint,
+  CameraPosition,
+  CameraRuntimeCameraSettings,
+  CameraRuntimeCallbacks,
+  CameraRuntimeDriver,
+  CameraRuntimeStartOptions,
+  CameraRuntimeTimer,
+  CameraRuntimeTween,
+  CameraRuntimeTweenOptions,
+  CameraRunResult,
+  CameraViewport,
+} from "./contract.js";
 export {
   CAMERA_BOUNDS,
   CAMERA_ZOOM,
@@ -15,6 +28,7 @@ export {
   CAMERA_END_TWEEN_DURATION_MS,
   CAMERA_END_TWEEN_EASE,
   CAMERA_SEQUENCE,
+  CAMERA_SEQUENCE_DURATION_MS,
   cameraSequenceTotalDuration,
 } from "./sequence.js";
 export {
@@ -22,3 +36,10 @@ export {
   chunkRenderBlockSize,
   scaleFactor,
 } from "./native-scale.js";
+export {
+  CAMERA_RUNTIME_SETTINGS,
+  CameraRuntime,
+  CameraRuntimeShutdownError,
+  createTimeoutCameraRuntimeDriver,
+  type CameraRuntimePhase,
+} from "./runtime.js";

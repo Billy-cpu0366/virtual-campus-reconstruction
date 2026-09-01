@@ -1,10 +1,9 @@
 node_modules/
 dist/
-public/*
-!public/assets/
-!public/assets/**
+public/
 build/
 coverage/
+.pi/
 __pycache__/
 *.py[cod]
 *.log

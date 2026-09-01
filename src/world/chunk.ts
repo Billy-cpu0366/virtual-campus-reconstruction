@@ -52,7 +52,10 @@ export function validateChunk(
         `层 ${layer.name} data 长度应为 ${tilesPerLayer}（实际 ${layer.data.length}）`,
       );
     }
-    return Object.freeze({ name: layer.name, data: layer.data });
+    return Object.freeze({
+      name: layer.name,
+      data: Object.freeze([...layer.data]),
+    });
   });
 
   return Object.freeze({

@@ -1,0 +1,18 @@
+export {
+  TRAIN_COLLISION_BOTTOM,
+  TRAIN_COLLISION_TOP,
+  TRAIN_COLLISION_X_ZONES,
+  TRAIN_DEPARTURE_DURATION,
+  TRAIN_END_X,
+  TRAIN_ENTRY_DURATION,
+  TRAIN_EXIT_DISTANCE,
+  TRAIN_HOLD_DURATION,
+  TRAIN_START_X,
+  TRAIN_TILE_SIZE,
+  TRAIN_Y,
+  TrainRouteRuntime,
+  type TrainCollisionRect,
+  type TrainRouteOptions,
+  type TrainRouteSnapshot,
+  type TrainRouteState,
+} from "./train.js";

@@ -80,6 +80,27 @@ function tileSize(tilesets: readonly unknown[]): {
   return result;
 }
 
+export function tilesetFirstGid(
+  master: ChunkMaster,
+  name: string,
+): number {
+  const tileset = master.tilesets.find(
+    (candidate) => isRecord(candidate) && candidate.name === name,
+  );
+  if (!isRecord(tileset)) {
+    throw new ChunkMasterContractError(
+      `tileset ${name} must be present in master`,
+    );
+  }
+  const firstGid = tileset.firstgid;
+  if (!Number.isInteger(firstGid) || (firstGid as number) <= 0) {
+    throw new ChunkMasterContractError(
+      `tileset ${name} must define a positive firstgid`,
+    );
+  }
+  return firstGid as number;
+}
+
 export function parseChunkMaster(value: unknown): ChunkMaster {
   if (!isRecord(value)) {
     throw new ChunkMasterContractError("master must be an object");

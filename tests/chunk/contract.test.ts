@@ -5,6 +5,7 @@ import {
   ChunkMasterContractError,
   geometryFromMaster,
   parseChunkMaster,
+  tilesetFirstGid,
 } from "../../src/chunk/index.js";
 
 function publicMaster(): unknown {
@@ -30,6 +31,8 @@ describe("parseChunkMaster", () => {
       tileHeight: 16,
     });
     expect(master.tilesets).toHaveLength(3);
+    expect(tilesetFirstGid(master, "exterior")).toBe(1);
+    expect(tilesetFirstGid(master, "collisions-objects")).toBe(69345);
     expect(geometryFromMaster(master)).toEqual({
       chunkWidthTiles: 28,
       chunkHeightTiles: 28,
@@ -50,6 +53,18 @@ describe("parseChunkMaster", () => {
 
     expect(() => parseChunkMaster(value)).toThrow(
       "originalWidth must equal chunkWidth * nbChunksHorizontal",
+    );
+  });
+
+  it("rejects a tileset without a usable firstgid", () => {
+    const master = parseChunkMaster(publicMaster());
+    const invalid = {
+      ...master,
+      tilesets: [{ name: "exterior", tilewidth: 16, tileheight: 16 }],
+    };
+
+    expect(() => tilesetFirstGid(invalid, "exterior")).toThrow(
+      "tileset exterior must define a positive firstgid",
     );
   });
 

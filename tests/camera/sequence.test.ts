@@ -4,6 +4,7 @@ import {
   CAMERA_END_TWEEN_DURATION_MS,
   CAMERA_END_TWEEN_EASE,
   CAMERA_SEQUENCE,
+  CAMERA_SEQUENCE_DURATION_MS,
   cameraSequenceTotalDuration,
 } from "../../src/camera/index.js";
 
@@ -19,8 +20,15 @@ describe("开场航拍序列", () => {
     ]);
   });
 
-  it("总时长 ≈ 111 秒（111000ms）", () => {
+  it("默认 6 点的 tween/stay 总和为 111 秒，返回另计 3 秒", () => {
+    const sequenceDuration = CAMERA_SEQUENCE.reduce(
+      (total, point) => total + point.duration + point.stayDuration,
+      0,
+    );
+    expect(sequenceDuration).toBe(111000);
     expect(cameraSequenceTotalDuration(CAMERA_SEQUENCE)).toBe(111000);
+    expect(CAMERA_SEQUENCE_DURATION_MS).toBe(111000);
+    expect(CAMERA_END_TWEEN_DURATION_MS).toBe(3000);
   });
 
   it("总时长按 飞到+停留 逐点累加", () => {
@@ -30,6 +38,8 @@ describe("开场航拍序列", () => {
         { x: 10, y: 10, duration: 200, stayDuration: 150 },
       ]),
     ).toBe(500);
+    expect(CAMERA_SEQUENCE_DURATION_MS).toBe(111000);
+    expect(CAMERA_SEQUENCE).toHaveLength(6);
   });
 
   it("结束落回玩家 tween 3 秒 Power2", () => {
