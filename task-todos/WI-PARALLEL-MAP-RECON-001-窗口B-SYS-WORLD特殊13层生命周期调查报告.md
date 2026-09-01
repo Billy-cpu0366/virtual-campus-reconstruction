@@ -144,7 +144,7 @@ layer1–layer10
 walls
 ```
 
-### INFERRED：最可能是混合原因
+### 推断：最可能是混合原因
 
 有两种证据同时存在：
 
@@ -201,7 +201,7 @@ footsteps
 | 4 个 `roof` | 场景内全图层候选，有直接淡隐消费者 |
 | 4 个 `bridge` | 场景内全图层候选，有直接碰撞和深度消费者 |
 | `particles`、`particles2` | 原始优化层存在，但直接消费者未定位 |
-| `particles3` | 优化运行时未创建；消费者链 UNKNOWN |
+| `particles3` | 优化运行时未创建；消费者链未确认 |
 | `footsteps` | 优化运行时未创建，行为由独立 `footstepsGrid` 驱动 |
 
 运行证据：`sample/analysis/layer-visual-evidence/observations.json`
@@ -214,7 +214,7 @@ footsteps
 
 所以只能报告：
 
-> 原站表现为“chunk unload 不清理这 13 层”，但不能报告为“13 层全部全局持久”。其中只有 cars、roof、bridge 具备较强的场景级依赖证据；其余层仍需保留 UNKNOWN。
+> 原站表现为“chunk unload 不清理这 13 层”，但不能报告为“13 层全部全局持久”。其中只有 cars、roof、bridge 具备较强的场景级依赖证据；其余层仍需保留未确认。
 
 ## 4. Scene shutdown 与 chunk unload 的区别
 
@@ -228,7 +228,7 @@ footsteps
 | JSON 缓存 | 不清 Manager 缓存 | 未定位统一清理 |
 | 动态对象 | 不处理 | 未定位统一销毁 |
 | idle callback | 不取消 | 未定位取消 |
-| 状态 | 删除 Scene `loadedChunks` 坐标 | 应由 Phaser 生命周期处理，但具体行为 UNKNOWN |
+| 状态 | 删除 Scene `loadedChunks` 坐标 | 应由 Phaser 生命周期处理，但具体行为未确认 |
 
 Bundle 中唯一定位到的显式 shutdown 监听：
 
@@ -255,7 +255,7 @@ Phaser 是否隐式清理部分 Scene-owned 对象，当前静态证据不足。
 - Scene shutdown：`game/CampusScene.ts:174-191`、`game/CampusScene.ts:434-467`；
 - renderer teardown：`game/PhaserWorldRenderer.ts:298-345`、`game/PhaserWorldRenderer.ts:559-615`。
 
-这是当前重构 DECISION，不是原站事实。
+这是当前重构设计决定，不是原站事实。
 
 ## 5. 这些层是否被动态对象依赖
 
@@ -338,7 +338,7 @@ particles3
 
 `initProtestersRisingNPCs()` 约 byte `564770`，消费的是 `particleRegions`。`protesters_rising` 的数量与 GID 69361 数量吻合，但没有找到 marker → trajectory 的转换步骤。
 
-状态仍为 `UNKNOWN`，对应 `Q-LAYER-002`。
+状态仍为 未确认，对应 `Q-LAYER-002`。
 
 #### `footsteps`
 
@@ -357,9 +357,9 @@ particles3
 - **动态对象消费者**：车辆、NPC、粒子、脚印等对象应有独立创建、更新和销毁责任；不能因为某层未被 `unloadChunk` 清理，就默认动态对象也应永久存在。
 - **Scene**：负责 shutdown 编排、监听器、定时器、collider、动态对象和 renderer 的最终收敛。
 
-## 7. 候选 DECISION（未接受、未落盘）
+## 7. 候选设计决定（未接受、未落盘）
 
-> 不把原站 11 层卸载列表当作重构合同，也不把剩余 13 层直接定义为全局持久。重构对 24 层逐层声明 apply/remove 责任；若某层或其动态消费者确实是场景级资源，必须显式登记 owner、生命周期和 shutdown 验收。particles3 等消费者未证实的层保留 UNKNOWN，不通过“未找到卸载代码”关闭问题。
+> 不把原站 11 层卸载列表当作重构合同，也不把剩余 13 层直接定义为全局持久。重构对 24 层逐层声明 apply/remove 责任；若某层或其动态消费者确实是场景级资源，必须显式登记 owner、生命周期和 shutdown 验收。particles3 等消费者未证实的层保留未确认，不通过“未找到卸载代码”关闭问题。
 
 当前代码已经部分采用这个方向：
 
@@ -379,7 +379,7 @@ particles3
 5. 在 idle 写入排队时触发 unload，观察是否有晚到写入；
 6. 触发 Scene shutdown，记录 Tilemap、动态对象、监听器、定时器和请求是否收敛；
 7. 对 cars、roof、bridge 做调用覆盖或运行时拦截，验证直接消费者；
-8. 对 particles3/footsteps 只在找到直接数据流后再关闭 UNKNOWN。
+8. 对 particles3/footsteps 只在找到直接数据流后再关闭未确认。
 
 ### 当前重构验收
 

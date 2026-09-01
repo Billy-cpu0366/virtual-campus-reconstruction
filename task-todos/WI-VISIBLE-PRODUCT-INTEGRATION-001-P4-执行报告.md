@@ -136,7 +136,7 @@ P4 commit 预期只包含：
 
 - 未发现第二个稳定 Entity 生命周期消费者；`Q-ENTITY-001` 继续 NO-GO。
 - 本次只增加窄 `AppGameUiBridge`、train arrival/collider connector，没有提取未经 Human 确认的通用框架。
-- production 约 111 秒六点相机序列的真实产品触发仍为 `UNKNOWN`；正常入口继续禁用，仅显式 camera Smoke 可执行。
+- production 约 111 秒六点相机序列的真实产品触发仍为 未确认；正常入口继续禁用，仅显式 camera Smoke 可执行。
 - CV/Contact/Tech 仍为 P4 授权的既有最小 fallback，不冒充 03 已提供真实内容。
 - 尚待 Human 在同一提交基线上完成桌面 `1920×1080` 与移动 `375×667` 视觉 Gate。
 - 未 push、未创建 PR、未合并、未操作 Windows 正式仓库。

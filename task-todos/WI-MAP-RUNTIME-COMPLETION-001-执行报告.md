@@ -95,9 +95,9 @@
 
 ## 5. UNKNOWN 与风险
 
-### 继续 UNKNOWN
+### 继续未确认
 
-- `69360` 的语义和消费者仍为 UNKNOWN（`Q-LAYER-003`）；本次仅按已接受运行资源合同清零，不关闭未知。
+- `69360` 的语义和消费者仍未确认（`Q-LAYER-003`）；本次仅按已接受运行资源合同清零，不关闭未知。
 - `particles3` / GID `69361` 到 `protesters_rising` 或其他动态消费者的直接链路仍未证明（`Q-LAYER-002`）。
 - 原站 HTTP cache/响应头、真实资源故障画面及完整 GPU/Scene teardown 仍未由本工作项证明。
 

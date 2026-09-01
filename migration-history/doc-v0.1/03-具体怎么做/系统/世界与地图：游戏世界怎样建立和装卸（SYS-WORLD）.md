@@ -26,20 +26,20 @@ updated: 2026-08-11
 
 > **一句话：世界系统拥有一个全局Tilemap和图层实例，使用master与chunk作为正式数据来源，并向分块系统提供可回滚的写入、清除和销毁能力。**
 
-> 本文是`SYS-WORLD`唯一主定义，所列重构方案均为`DECISION（accepted）`。详细设计已接受，但不自动授权正式代码。
+> 本文是`SYS-WORLD`唯一主定义，所列重构方案均为`设计决定（accepted）`。详细设计已接受，但不自动授权正式代码。
 
 调查依据：[[世界与地图：从原站查到了什么（SYS-WORLD 调查记录）]]。
 
 ## 1. 需求依据
 
-- FACT：master、25个chunk和整图表达同一张140×140、24层世界；
-- FACT：发布Bundle先建立空Tilemap，再写入地图数据；
-- FACT：SYS-CHUNK正式设计已将目标集合、请求数据和场景渲染状态分开；
-- FACT：发布优化路径使用完整整图；普通fallback按chunk区域但只写`layer1`，两条不完整对称的路径并存；
-- UNKNOWN：特殊13层不卸载和缺少显式统一teardown是否为有意策略；
+- 原站证实：master、25个chunk和整图表达同一张140×140、24层世界；
+- 原站证实：发布Bundle先建立空Tilemap，再写入地图数据；
+- 原站证实：SYS-CHUNK正式设计已将目标集合、请求数据和场景渲染状态分开；
+- 原站证实：发布优化路径使用完整整图；普通fallback按chunk区域但只写`layer1`，两条不完整对称的路径并存；
+- 未确认：特殊13层不卸载和缺少显式统一teardown是否为有意策略；
 - 项目约束：先实现最小、可验证的原站复刻，不提前建立通用地图引擎。
 
-## 2. 负责与不负责（DECISION，accepted）
+## 2. 负责与不负责
 
 ### 负责
 
@@ -58,7 +58,7 @@ updated: 2026-08-11
 - 不定义玩家、相机、NPC或车辆行为；
 - 不抽象成跨项目通用Tilemap引擎。
 
-## 3. 状态所有权（DECISION，accepted）
+## 3. 状态所有权
 
 | 状态 | 唯一拥有者 | 说明 |
 |---|---|---|
@@ -72,7 +72,7 @@ updated: 2026-08-11
 
 这些是职责名称，不预先要求每行对应独立类或目录。
 
-## 4. 数据来源选择（DECISION，accepted）
+## 4. 数据来源选择
 
 第一版正式实现建议：
 
@@ -92,7 +92,7 @@ final_map.json / final_map_small.json = 证据Oracle和兼容验证材料
 
 代价：第一版不会逐字复刻发布Bundle的整图优化写法；需要用行为验证证明可见结果一致。
 
-## 5. 概念接口（DECISION，accepted）
+## 5. 概念接口
 
 ```text
 createWorld(worldSpec, worldResources, layerPlan)
@@ -133,7 +133,7 @@ destroyWorld()
 3. 完成后删除已渲染标记；
 4. 重复删除返回AlreadyAbsent，不制造错误状态。
 
-## 6. 生命周期（DECISION，accepted）
+## 6. 生命周期
 
 ```text
 uninitialized

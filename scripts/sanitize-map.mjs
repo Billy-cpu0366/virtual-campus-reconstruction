@@ -1,6 +1,6 @@
 // 联网+渲染雏形：把 Tiled 导出的 final_map.json 规整成 Phaser 3.90 可解析的形态。
 //
-// 原因（FACT）：final_map.json 的 tilesets 含一个外部 tileset
+// 原因：final_map.json 的 tilesets 含一个外部 tileset
 //   { "firstgid": 69355, "source": "tileset-particles.tsx" }
 // Phaser 3.90 的 ParseToTilemap 对「source 型外部 tileset」是空分支（不建 Tileset），
 // 但地图数据里仍有 GID >= 69355 的 tile（layer3 49 个 + particles/particles2/particles3 层），

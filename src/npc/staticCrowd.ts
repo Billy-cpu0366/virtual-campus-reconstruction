@@ -69,7 +69,7 @@ export const STOP_AI_BACKGROUND_REGION_INDEX = 64;
 export const STOP_AI_BACKGROUND_COUNT = 2;
 export const STATIC_CROWD_MAX_PLACEMENT_ATTEMPTS_PER_INSTANCE = 20;
 
-// DECISION: the public API is one source-region projection plus one local
+// the public API is one source-region projection plus one local
 // lifecycle owner. Placement records are generated once and only their
 // materialization flag changes during culling.
 const DEFAULT_SPRITE_POOLS: StaticCrowdSpritePools = Object.freeze({

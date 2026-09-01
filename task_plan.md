@@ -32,7 +32,7 @@ updated: 2026-08-21
 ## 范围
 - 建立需求分析、概要设计、详细设计、验证和逆向计划五类文档。
 - 建立系统、对象、事件、数据与约定的统一模板和索引。
-- 明确 `FACT / INFERRED / DECISION / UNKNOWN`，避免将推断写成事实。
+- 明确区分原站事实、推断、设计决定和未确认，避免将推断写成事实。
 - 世界装配与图层详细设计已由Human接受、验证并关闭；执行层16卡与历史归档迁移已验证关闭，当前恢复5场景视觉证据的Human结论审查。
 
 ## 阶段
@@ -84,7 +84,7 @@ updated: 2026-08-21
 | 浏览器视觉验收 | 已接受、已落盘、已验证（编译预览与截图由Human确认，2026-08-19） | 确认构建产物的地图、玩家、视口和基础画面可接受 | 自动扩展功能、自动修改缩放、代替Human签署后续视觉结论 | 已关闭；下一项需重新选择和授权 |
 | 运行时安全有界修复 | 已接受、已落盘、已验证；结果提交 `632a0c9` | 处理 World 部分写入回滚、production 诊断/hooks 限制、入口 rejected 收敛、test hook 清理和 favicon 入口清理 | 不扩展完整 Phaser teardown、完整图层、粒子、NPC、交互、验证器或远端 Git 操作 | 普通 production build、普通/跨块/安全 Smoke 与 test-hooks 碰撞 Smoke均通过；工作项已关闭 |
 | SYS-ZONE 区域触发逆向与设计 | 已接受、已落盘、已验证；结果提交 `05c2274` | 核对公开 marker/区域触发来源、坐标/区域边界、进入/离开和防重复行为；补 `04-内容层/作品集内容.md` 内容索引、SYS-ZONE 七格、接口和未知队列 | 不写 `src/`/`game/` 正式代码；不实现 SYS-INTERACT 弹窗；不猜未证实文案、资源或触发器 | 设计已通过 Human review；工作项关闭，正式实现需另行授权 |
-| SYS-LAYER 图层运行时语义收束 | 设计与有界实现均已完成 | 证据、`Q-LAYER-002`/`003`、24 层策略、apply/remove 边界和 World/Chunk 职责已收敛；设计关闭提交 `c82aa4a`，有界实现提交 `10c7d88`；完整节点仍为 `designed` | 不把有界实现误报为完整系统；不擅自关闭 particles3 或特殊13层 UNKNOWN | 当前回到工作项选择；后续完整语义需另行授权 |
+| SYS-LAYER 图层运行时语义收束 | 设计与有界实现均已完成 | 证据、`Q-LAYER-002`/`003`、24 层策略、apply/remove 边界和 World/Chunk 职责已收敛；设计关闭提交 `c82aa4a`，有界实现提交 `10c7d88`；完整节点仍为 `designed` | 不把有界实现误报为完整系统；不擅自关闭 particles3 或特殊13层未确认事项 | 当前回到工作项选择；后续完整语义需另行授权 |
 | SYS-WORLD + SYS-CHUNK 地图生命周期收口 | 已完成，结果提交 `d61faa1` | 可取消请求、过期回写守卫、异步 mutation 等待、Phaser Tilemap/collider 显式 teardown 和固定场景资源边界指标已验证 | 不把固定场景指标写成完整 FPS/内存结论；不实现 NPC/车辆/粒子/完整24层消费者或原站13层事实 | 当前转入 SYS-INPUT 真实运行时接入 |
 | SYS-CHUNK + SYS-WORLD 动态运行时集成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 | 已接受、已落盘、自动验证和Human视觉验收均通过；结果提交 `b707553` | 在隔离 worktree 中实现 master/chunk 动态目标、请求缓存/去重、World 原子 apply/remove/回滚、销毁守卫和 Phaser 适配；已修正 tileset firstgid 与空 GID 映射 | 修改 `sample/`、旧 Phaser 项目；纳入粒子/NPC/完整交互；绕过 SYS-LAYER；自动替Human签署视觉 Gate | typecheck、145项测试、build、资源检查、browser Smoke和跨块 Smoke均通过；墙体/桥碰撞由后续独立工作项完成 |
 
@@ -127,7 +127,7 @@ updated: 2026-08-21
 1. 复核 `master.json`、25 个 chunk、Bundle 调用链和既有 Network 基线的可定位证据；
 2. 明确数据契约、坐标/索引换算、目标集合、加载/卸载、缓存、失败、取消和销毁边界；
 3. 明确分块与世界装配、图层、资源加载、玩家和相机的职责边界；
-4. 将未证实内容保留为 `UNKNOWN` 并登记后续调查；
+4. 将未证实内容保留为未确认并登记后续调查；
 5. 建立[SYS-CHUNK历史调查记录](migration-history/doc-v0.1/03-具体怎么做/系统/地图分块：从原站查到了什么（SYS-CHUNK 调查记录）.md)，更新证据追踪和验证计划；在Human审查前不登记为唯一详细主定义；
 6. 做只读独立复核，确认没有写入正式 `src`、没有修改旧 Phaser、没有提前抽取复用模块；
 7. 交 Human 审查工作稿、正式详细设计候选和验收标准。
@@ -170,7 +170,7 @@ updated: 2026-08-21
 - `WI-BROWSER-STARTUP-001`：自动启动验证已通过并关闭，结果提交 `7c5a738`；视觉 Gate 不自动签署，转由 `WI-RENDER-PLAYABLE-001` 等待Human。
 - `WI-DOC-COLLABORATION-ADOPT-001`：PR #2 核心规则已吸收，结果提交 `9bd475b`。
 - `WI-API-COLLABORATION-REVIEW-001`：PR #3 审查理念已融合，结果提交 `6da5755`；不改变当前 API 事实。
-- 当前没有技术阻塞；`Q-LAYER-002/003` 继续保持 UNKNOWN。请求取消和当前重构 teardown 已有界验证；最终硬件性能阈值、完整动态消费者和完整玩法线不并入本设计项。
+- 当前没有技术阻塞；`Q-LAYER-002/003` 继续保持未确认。请求取消和当前重构 teardown 已有界验证；最终硬件性能阈值、完整动态消费者和完整玩法线不并入本设计项。
 
 ## 近期候选
 

@@ -33,22 +33,22 @@ updated: 2026-08-11
 
 > **一句话：24层使用一张完整策略表；每层明确是视觉层、碰撞层还是marker数据，并统一规定写入、清除、depth和动态状态。**
 
-> 本文是`SYS-LAYER`唯一主定义，所列重构方案均为`DECISION（accepted）`。详细设计已接受，但不自动授权正式代码。
+> 本文是`SYS-LAYER`唯一主定义，所列重构方案均为`设计决定（accepted）`。详细设计已接受，但不自动授权正式代码。
 
 调查依据：[[图层与遮挡：从原站查到了什么（SYS-LAYER 调查记录）]]。
 
 ## 1. 需求依据
 
-- FACT：25个chunk和两份整图均包含同顺序24层；
-- FACT：发布Bundle覆盖了基础层、walls、cars、roof、bridge和部分particles，但优化写入固定22层、卸载只清11层；
-- FACT：地图visible会被运行时代码覆盖；
-- FACT：玩家depth动态变化，桥、怪物和龙卷风会覆盖常态depth；
-- FACT：footsteps grid与footsteps tilelayer位置完全一致；
-- FACT：1280×720公开运行补证已验证layer8遮挡、roof淡隐、bridge切换和footsteps生成；
-- UNKNOWN：particles3 marker到trajectory消费者的直接链路，以及特殊13层为何不随原站chunk卸载；
+- 原站证实：25个chunk和两份整图均包含同顺序24层；
+- 原站证实：发布Bundle覆盖了基础层、walls、cars、roof、bridge和部分particles，但优化写入固定22层、卸载只清11层；
+- 原站证实：地图visible会被运行时代码覆盖；
+- 原站证实：玩家depth动态变化，桥、怪物和龙卷风会覆盖常态depth；
+- 原站证实：footsteps grid与footsteps tilelayer位置完全一致；
+- 原站证实：1280×720公开运行补证已验证layer8遮挡、roof淡隐、bridge切换和footsteps生成；
+- 未确认：particles3 marker到trajectory消费者的直接链路，以及特殊13层为何不随原站chunk卸载；
 - 项目约束：不能只实现11层却宣称24层完成，也不能把未来可能复用当作当前抽象理由。
 
-## 2. 负责与不负责（DECISION，accepted）
+## 2. 负责与不负责
 
 ### 负责
 
@@ -67,7 +67,7 @@ updated: 2026-08-11
 - 不定义玩家移动、相机或区域触发系统；
 - 不提前拆出通用图层框架。
 
-## 3. 24层策略（DECISION，accepted）
+## 3. 24层策略
 
 | 层 | 分类 | 运行时可见 | depth设计默认 | chunk移除 | 输出 |
 |---|---|---|---:|---|---|
@@ -89,7 +89,7 @@ updated: 2026-08-11
 - 第一版不复制“特殊13层永不卸载”的发布代码表现；所有来源于chunk的数据都必须有对称移除策略；
 - roof/bridge目前作为SYS-LAYER内部子能力，不因名称特殊就提前建立独立系统。
 
-## 4. 图层策略数据（DECISION，accepted）
+## 4. 图层策略数据
 
 每个策略至少表达：
 
@@ -110,7 +110,7 @@ unknownHandling
 
 这是一份逻辑合同，不要求第一版建立通用注册框架。实现可以先用一个本项目内的明确表完成。
 
-## 5. 写入与清除（DECISION，accepted）
+## 5. 写入与清除
 
 ### 写入
 
@@ -129,7 +129,7 @@ unknownHandling
 4. walls和bridge碰撞区域重新计算；
 5. 重复清除必须安全，不遗留半个chunk状态。
 
-## 6. 动态遮挡（DECISION，accepted）
+## 6. 动态遮挡
 
 ### 玩家depth
 
@@ -155,14 +155,14 @@ SYS-LAYER保存每座桥当前上下状态，并以一次状态切换同时更�
 
 桥状态来源和玩家移动规则不归图层系统。
 
-## 7. markers与重复数据（DECISION，accepted）
+## 7. markers与重复数据
 
 - cars、particles和footsteps数据先保留在SYS-LAYER提供的marker视图中；具体消费者后续按实际实现归属；
 - footsteps tilelayer与`footsteps-layer.json`位置完全一致。第一版建议以chunk中的footsteps层作为运行来源，外部grid只做一致性Oracle，不维护两份可变运行状态；
 - particles三层与`particle-trajectories.json`只有有限关联。不得根据不完整映射自动生成轨迹；轨迹JSON继续作为独立资源输入，tile marker保留用于验证或未识别消费者；
 - particles3没有消费者时必须报告为未消费，不得静默删除后宣称完成。
 
-## 8. 失败与诊断（DECISION，accepted）
+## 8. 失败与诊断
 
 | 条件 | 结果 |
 |---|---|

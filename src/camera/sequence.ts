@@ -1,6 +1,6 @@
 import type { CameraPoint } from "./contract.js";
 
-// 开场航拍 6 点序列（FACT：cameraSequence 字段 @333500；坐标 = 16 × 格坐标）。
+// 开场航拍 6 点序列。
 export const CAMERA_SEQUENCE: readonly CameraPoint[] = [
   { x: 944, y: 928, duration: 0, stayDuration: 7000 }, // (59, 58)
   { x: 1552, y: 1216, duration: 15000, stayDuration: 7000 }, // (97, 76)
@@ -10,7 +10,7 @@ export const CAMERA_SEQUENCE: readonly CameraPoint[] = [
   { x: 944, y: 928, duration: 15000, stayDuration: 5000 }, // (59, 58)
 ];
 
-// 航拍总时长 = Σ(飞到耗时 + 停留)，≈ 111 秒（FACT：7+22+20+20+22+20 秒）。
+// 航拍总时长 = Σ(飞到耗时 + 停留)，≈ 111 秒。
 export function cameraSequenceTotalDuration(
   sequence: readonly CameraPoint[],
 ): number {
@@ -24,6 +24,6 @@ export const CAMERA_SEQUENCE_DURATION_MS = cameraSequenceTotalDuration(
   CAMERA_SEQUENCE,
 );
 
-// 航拍结束落回玩家（FACT：tween scrollX/Y duration 3000、ease Power2）。
+// 航拍结束落回玩家。
 export const CAMERA_END_TWEEN_DURATION_MS = 3000;
 export const CAMERA_END_TWEEN_EASE = "Power2";

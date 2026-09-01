@@ -1,6 +1,6 @@
 // Prepare the final-map and master/chunk documents for the runtime prototype.
 // Inline the evidence-backed particle tileset. Particles/particles2 retain
-// only their confirmed raw visual GIDs; 69360 stays an UNKNOWN raw GID and
+// only their confirmed raw visual GIDs; 69360 stays an 未确认 raw GID and
 // is zeroed. Cars, particles3, and footsteps remain chunk-owned marker data.
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

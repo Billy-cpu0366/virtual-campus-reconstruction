@@ -73,7 +73,7 @@ Main 抽查：地图、玩家、列车/遮挡和场景布局无明显视觉破�
 ## 5. 边界与尚未解决
 
 - 本报告只验证第一波 M1+P1 集成，不宣称完整 SYS-ASSET/LAYER/PLAYER/CAMERA 完成。
-- `Q-LAYER-002`、`Q-LAYER-003` 继续 UNKNOWN；不实现车辆、NPC、trajectory、footprint、抗议者。
+- `Q-LAYER-002`、`Q-LAYER-003` 继续未确认；不实现车辆、NPC、trajectory、footprint、抗议者。
 - 性能收据仍是当前环境 baseline，不是最终 FPS/GPU/纹理内存门槛。
 - SYS-CAMERA 虽已接受范围，但必须等本集成结果经 Human 接受、Main 接线 commit 和状态同步后才能启动。
 - integration 未 push、未带回 master；WSL 结果不会自动同步到 Windows/Obsidian。

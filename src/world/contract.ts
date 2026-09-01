@@ -40,7 +40,7 @@ export interface ValidatedChunk {
   readonly layers: readonly ChunkLayer[];
 }
 
-// 完整生命周期（FACT，见 SYS-WORLD 卡 §3）。纯逻辑 CORE 只可观察 ready 与 destroyed；
+// 完整生命周期（见 SYS-WORLD 卡 §3）。纯逻辑 CORE 只可观察 ready 与 destroyed；
 // uninitialized/creating/failed/destroying 为异步或瞬态，正式 Phaser 实现前不进入。
 export type WorldLifecycle =
   | "uninitialized"

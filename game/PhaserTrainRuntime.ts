@@ -94,9 +94,9 @@ export interface PhaserTrainRuntimeOptions {
   readonly blockingZone?: PhaserTrainBlockingZonePort;
   readonly connectCollision?: PhaserTrainCollisionConnector;
   readonly viewport?: () => PhaserTrainViewport | undefined;
-  /** DECISION: emitted once when the existing route enters departure. */
+  /** 设计决定：emitted once when the existing route enters departure. */
   readonly onDeparture?: () => void;
-  /** DECISION: emitted when the train leaves the current viewport or completes. */
+  /** 设计决定：emitted when the train leaves the current viewport or completes. */
   readonly onLeaveViewport?: () => void;
   readonly onComplete?: () => void;
   readonly onError?: (reason: string) => void;

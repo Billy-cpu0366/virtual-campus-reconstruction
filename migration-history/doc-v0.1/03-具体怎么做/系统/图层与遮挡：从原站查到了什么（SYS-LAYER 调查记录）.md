@@ -52,7 +52,7 @@ updated: 2026-08-11
 
 Bundle搜索锚点：`let b=["layer1"`、`["layer1","layer2","layer3"`、`createBlankLayer("walls"`、`getLayer("cars")`、`initRoofAreas()`、`activateBridgeUpWall`、`footsteps-layer`、`unloadChunk(e,t)`。
 
-## 3. 24层确定性清单（FACT）
+## 3. 24层确定性清单
 
 25个chunk的层名、顺序、`tilelayer`类型、28×28尺寸和784项data完全一致。按行主序拼接后，24层与`final_map.json`的470400个格子逐格差异为0。
 
@@ -85,7 +85,7 @@ Bundle搜索锚点：`let b=["layer1"`、`["layer1","layer2","layer3"`、`create
 
 所有层实际字段只包含`data/height/id/name/opacity/type/visible/width/x/y`；没有`properties`或offset字段。地图文件中的visible是发布数据字段，Bundle会主动覆盖多个层的运行时可见性，因此不能仅凭该字段判断最终显示。
 
-## 4. 已证实运行规则（FACT）
+## 4. 已证实运行规则
 
 ### 4.1 基础层和depth
 
@@ -148,7 +148,7 @@ layer6–10 = 1500, 1600, 1700, 1800, 1900
 
 采集使用内存探针暴露既有GameScene，并用warp到达远距离场景；bridge和footsteps关键切换由原站方向输入触发。因此这些是对应坐标下的运行FACT，不证明自然步行路线耗时。
 
-## 5. 暂定边界（INFERRED）
+## 5. 暂定边界
 
 - 图层系统应拥有“图层定义到运行时策略”的映射，而不是让SYS-CHUNK硬编码所有名称；
 - SYS-CHUNK只负责目标坐标和触发写入/清除，具体每层怎样过滤GID、设置depth、碰撞和动态可见性应由SYS-LAYER提供；

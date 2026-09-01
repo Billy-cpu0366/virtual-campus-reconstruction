@@ -44,7 +44,7 @@ export interface StaticNpcRuntimeOptions {
 export const STATIC_NPC_TILE_SIZE = 16;
 export const STATIC_NPC_VIEWPORT_MARGIN = 300;
 
-// DECISION: these are the only accepted static NPCs; no other public NPC
+// these are the only accepted static NPCs; no other public NPC
 // configuration is inferred into this runtime.
 export const STATIC_NPC_CONFIGS = Object.freeze([
   Object.freeze({

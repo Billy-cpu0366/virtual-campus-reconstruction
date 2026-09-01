@@ -68,7 +68,7 @@ npm test -- tests/content/registry.test.ts tests/content/contract.test.ts tests/
 
 - **已实现/已验证**：03 内容 registry、sections、body fallback、资源收据、Memo 6 只读候选模型和定向/全量自动验证。
 - **待 Main integration 验证**：默认 resolver 消费 registry 的最终接线、真实 DOM rich renderer、资源实际可服务性、正常 Play 后真人移动到 Memo 6、About/Projects/Memo 三类实际可见性。
-- **保持 UNKNOWN**：完整 Slovak modal 正文、`card5_foil.webp` 的视觉降级、真人路径与实际碰撞的最终一致性。
+- **保持未确认**：完整 Slovak modal 正文、`card5_foil.webp` 的视觉降级、真人路径与实际碰撞的最终一致性。
 - **禁止宣称**：本分支不使用 test hook 冒充真人可发现性，不把自动测试或本报告当作 Human 视觉 Gate。
 
 ## 5. 交付停止点

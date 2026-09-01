@@ -1,6 +1,6 @@
 import type { Direction, DirectionVector } from "./contract.js";
 
-// 速度（FACT：单轴 150、对角 150×0.707≈106）。
+// 速度。
 export const SPEED = 150;
 export const SPEED_DIAGONAL = 106;
 

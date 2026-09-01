@@ -11,7 +11,7 @@ export const FACTORY_SMOKE_RUNTIME_ASSET = Object.freeze({
 });
 
 // Presentation-only correction: the reconstruction's factory roof layers use
-// depths 3200/3300, while the public smoke config retains its depth=500 FACT.
+// depths 3200/3300, while the public smoke config retains its 从原站确认 depth=500。
 export const FACTORY_SMOKE_PRESENTATION_DEPTH = 3_400;
 
 type SmokeListener = (...args: unknown[]) => void;

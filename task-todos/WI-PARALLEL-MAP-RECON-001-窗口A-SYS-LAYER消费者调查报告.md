@@ -8,9 +8,9 @@
 
 ## 结论先行
 
-1. **cars：FACT，直接消费者已定位**。`cars` 图层进入 `carTraffic()`，再进入道路寻路、路线创建和车辆 NPC。
-2. **footsteps：FACT，直接消费者已定位**。独立 `footsteps-layer.json` grid 被玩家移动逻辑读取，生成 depth 450 的 footprint Sprite。
-3. **particles / particles2：部分 FACT**。原站优化路径把两层写入可见 Tilemap，并保留 GID `69355–69359`；它们不是已证明的纯 marker，也没有找到 raw layer 到动态 trajectory 的直接链路。
+1. **cars：原站证实，直接消费者已定位**。`cars` 图层进入 `carTraffic()`，再进入道路寻路、路线创建和车辆 NPC。
+2. **footsteps：原站证实，直接消费者已定位**。独立 `footsteps-layer.json` grid 被玩家移动逻辑读取，生成 depth 450 的 footprint Sprite。
+3. **particles / particles2：部分原站证实**。原站优化路径把两层写入可见 Tilemap，并保留 GID `69355–69359`；它们不是已证明的纯 marker，也没有找到 raw layer 到动态 trajectory 的直接链路。
 4. **particles3：FACT + UNKNOWN**。原始 GID `69361` 共 86 个，但优化路径不创建 `particles3` 层；独立 trajectory 系统消费 `protesters_rising`，两者直接转换链未定位，`Q-LAYER-002` 保持 open。
 5. **GID 69360：FACT + UNKNOWN**。原始 `particles` / `particles2` 数据中出现 206 次，但优化路径过滤掉它，Bundle 中没有找到其直接读取或创建链，`Q-LAYER-003` 保持 open。
 
@@ -58,7 +58,7 @@ SYS-LAYER / SYS-WORLD
 - cars marker 与车辆实体是否具备完整 chunk-local 生命周期。
 - 原站 `unloadChunk` 不清理 cars 是有意的场景级设计还是实现遗漏。
 
-### 候选 DECISION（未接受）
+### 候选设计决定（未接受）
 
 保留 `cars` 为 chunk-owned marker；后续由独立 `SYS-ROUTE` / `SYS-NPC` 工作项消费，不把车辆逻辑塞回 SYS-LAYER。
 
@@ -125,13 +125,13 @@ particle-trajectories.json
 - `69360` 是未公开粒子类型、发布残留，还是被有意过滤。
 - raw Tilemap 层的最终视觉效果是否完全依赖这些 GID。
 
-### 候选 DECISION（未接受）
+### 候选设计决定（未接受）
 
 不要把 `particles` / `particles2` 原站事实直接定义成“纯 marker”。应拆分为：
 
 1. raw Tilemap 视觉路径：`69355–69359`；
 2. 独立 trajectory 动态粒子路径；
-3. `69360` 未知路径，保持 UNKNOWN。
+3. `69360` 未知路径，保持未确认。
 
 ## 3. particles3 / Q-LAYER-002
 
@@ -172,7 +172,7 @@ particles3 GID 69361
 
 目前 Bundle 未定位到直接读取或转换代码。
 
-### 候选 DECISION（未接受）
+### 候选设计决定（未接受）
 
 继续保留 `69361` marker 和“消费者未接入”诊断；不得用 86 数量吻合或画面出现抗议人群来关闭 Q-LAYER-002。
 
@@ -234,7 +234,7 @@ SYS-LAYER 只应提供地图 marker / grid 来源，不拥有脚印 Sprite 生�
 - 具体脚印贴图和自然移动路径的全部边界行为。
 - 脚印池与场景销毁、传送、重复触发的完整清理细节。
 
-### 候选 DECISION（未接受）
+### 候选设计决定（未接受）
 
 后续由 SYS-FX 负责脚印效果；SYS-PLAYER / SYS-MOVE 只提供移动、朝向和 depth 输入。不要把脚印 Sprite 逻辑写回 SYS-LAYER。
 
@@ -264,7 +264,7 @@ SYS-LAYER 只应提供地图 marker / grid 来源，不拥有脚印 Sprite 生�
 - 创建可见 Tilemap 层；
 - 加载 `tileset-particles`。
 
-因此，“marker-only”是当前重构 DECISION / 实现边界，不是原站 FACT。应作为行为差距保留，不能写成原站语义。
+因此，“marker-only”是当前重构设计决定 / 实现边界，不是原站事实。应作为行为差距保留，不能写成原站语义。
 
 ## 6. 职责边界建议
 
@@ -276,9 +276,9 @@ SYS-LAYER 只应提供地图 marker / grid 来源，不拥有脚印 Sprite 生�
 - **SYS-PLAYER / SYS-MOVE**：向 footsteps 提供移动、朝向和 depth 输入。
 - **SYS-NPC**：负责 `protesters_rising` 动态抗议者；不得假设其必然来自 particles3。
 
-## 7. 候选 DECISION（未接受、未落盘）
+## 7. 候选设计决定（未接受、未落盘）
 
-> 保留 `cars`、`particles`、`particles2`、`particles3`、`footsteps` 的层来源和 chunk 坐标记录；SYS-LAYER 不直接创建车辆、NPC、粒子或脚印。对原站已经证明的 raw particles/particles2 Tilemap 路径和当前重构的 marker-only 方案分开记录；对 `particles3` 与 GID `69360` 保持 UNKNOWN，不通过数量吻合或过滤结果关闭 Q-LAYER-002/003。
+> 保留 `cars`、`particles`、`particles2`、`particles3`、`footsteps` 的层来源和 chunk 坐标记录；SYS-LAYER 不直接创建车辆、NPC、粒子或脚印。对原站已经证明的 raw particles/particles2 Tilemap 路径和当前重构的 marker-only 方案分开记录；对 `particles3` 与 GID `69360` 保持未确认，不通过数量吻合或过滤结果关闭 Q-LAYER-002/003。
 
 ## 8. 推荐后续工作项
 
@@ -288,7 +288,7 @@ SYS-LAYER 只应提供地图 marker / grid 来源，不拥有脚印 Sprite 生�
 
 1. 对 `particles3`、`69360` 做直接读取/转换查找；
 2. 对 raw Tilemap 写入和 trajectory 初始化做运行时关联采样；
-3. 停止条件是“找到直接链路”或“保留 UNKNOWN”，不得用计数吻合关闭问题。
+3. 停止条件是“找到直接链路”或“保留未确认”，不得用计数吻合关闭问题。
 
 ### `WI-SYS-ROUTE-DESIGN-001`（P1）
 
@@ -306,7 +306,7 @@ SYS-LAYER 只应提供地图 marker / grid 来源，不拥有脚印 Sprite 生�
 
 - 已确认：只读完成 Bundle、地图、trajectory、运行采样和当前代码检索。
 - 推断：particles3 与 protesters_rising 存在数据关联；particles/particles2 的 raw Tilemap 路径与动态 trajectory 路径分离。
-- UNKNOWN：`Q-LAYER-002`、`Q-LAYER-003`，以及完整 cars/footsteps/particles 消费生命周期。
+- 未确认：`Q-LAYER-002`、`Q-LAYER-003`，以及完整 cars/footsteps/particles 消费生命周期。
 - 已落盘：本调查报告，仅位于 `task-todos/`，不是项目权威定义。
-- 未落盘：任何新的 DECISION、系统卡变更、`task_plan.md` 工作项或正式实现授权。
+- 未落盘：任何新的设计决定、系统卡变更、`task_plan.md` 工作项或正式实现授权。
 - 本窗口没有修改 sample、正式 src/game、测试或权威状态文件；调查结束时主工作树已有其他 dirty 状态，未触碰或回滚。

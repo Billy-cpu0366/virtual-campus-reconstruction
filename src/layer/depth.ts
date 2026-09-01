@@ -2,7 +2,7 @@ import type { RoofState } from "./contract.js";
 import { layerStrategy } from "./strategy.js";
 
 // 玩家常态 depth（SYS-LAYER 为深度 SSOT）。
-// 注：契约表 / SYS-PLAYER 卡写的是 `500 + y*0.1`（差 +24），待对账；本 CORE 以本卡 DECISION 为准。
+// 注：契约表 / SYS-PLAYER 卡写的是 `500 + y*0.1`（差 +24），待对账；本 CORE 以本卡设计决定为准。
 export function playerDepth(worldY: number): number {
   return 500 + (worldY + 24) * 0.1;
 }
@@ -18,7 +18,7 @@ if (wallsDepth === undefined) {
 }
 export const WALLS_DEPTH = wallsDepth;
 
-// walls 碰撞 GID（FACT：69345 强制碰撞、69346 强制不碰撞）。
+// walls 碰撞 GID。
 export const COLLISION_GID_FORCED = 69345;
 export const NON_COLLISION_GID_FORCED = 69346;
 

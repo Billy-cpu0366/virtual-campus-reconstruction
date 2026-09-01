@@ -124,12 +124,12 @@ task_plan.md
 建议纳入：
 
 1. 将原站事实写清：`particles` / `particles2` 是 GID `69355–69359` 的可见 raw Tilemap 路径，不是已证明的纯 marker。
-2. 使用公开 `tileset-particles` 资源恢复 raw visual；`69360` 继续 UNKNOWN，不猜含义。
+2. 使用公开 `tileset-particles` 资源恢复 raw visual；`69360` 继续未确认，不猜含义。
 3. 保持当前重构 24 层对称 apply/remove，不复制原站只卸载 11 层的不完整路径。
 4. cars、roof、bridge 保持明确 owner；cars 只输出 marker，不在地图包创建车辆。
 5. footsteps 保持数据来源，不在地图包创建 footprint Sprite。
 6. particles3 保留 marker/未消费诊断，`Q-LAYER-002` 不关闭。
-7. 当前完整 exterior atlas + sanitized chunk 合同继续作为重构 DECISION；暂不为“打包形式一致”替换成 16 张 exterior-small。粒子公开资源是本次唯一必要新增 tileset。
+7. 当前完整 exterior atlas + sanitized chunk 合同继续作为重构设计决定；暂不为“打包形式一致”替换成 16 张 exterior-small。粒子公开资源是本次唯一必要新增 tileset。
 8. 补资源失败、apply/remove、shutdown 和有界 baseline 回归；这里只比较目标集合、生命周期和当前观测是否明显退化，不制定最终 FPS/内存阈值。
 
 明确排除：车辆/NPC、trajectory 动态粒子、脚印 Sprite、抗议者、完整原站 Loader 时序、最终硬件性能阈值。

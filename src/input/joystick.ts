@@ -2,12 +2,12 @@ import type { DeviceKind, Direction, JoystickParams } from "./contract.js";
 import { directionFromVector } from "./direction.js";
 
 export const JOYSTICK_MAIN_AXIS_RATIO = 1.5;
-// 阈值（FACT 值；作用单位 UNKNOWN，见 SYS-INPUT 卡 §4）：本 CORE 只登记常量，不在此断言其语义。
+// 阈值（原站值；作用单位未确认，见 SYS-INPUT 卡 §4）：本 CORE 只登记常量，不在此断言其语义。
 export const JOYSTICK_THRESHOLD_AXIS = 0.3;
 export const JOYSTICK_THRESHOLD_DIAGONAL = 0.5;
 export const JOYSTICK_FORCE_MIN = 16;
 
-// 摇杆归一化（FACT：主轴判定 |fx|/|fy| > 1.5 或反之 → 单轴，否则对角 → 8 方向）。
+// 摇杆归一化。
 // forceX/forceY 为手指相对摇杆中心的像素偏移；原点返回 null。
 export function joystickDirection(
   forceX: number,
@@ -32,7 +32,7 @@ export function joystickDirection(
   return directionFromVector(dx, dy);
 }
 
-// 摇杆参数（FACT：tablet 与其他设备两档；桌面居中底部、平板/手机右下角）。
+// 摇杆参数。
 export function joystickParams(device: DeviceKind): JoystickParams {
   if (device === "tablet") {
     return {

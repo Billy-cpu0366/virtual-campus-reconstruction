@@ -28,7 +28,7 @@ Human已通过`DEC-SYS-WORLD-LAYER-INVESTIGATION-001`选择本工作项。它是
 
 1. 建立24个chunk图层的完整清单、顺序、数据特征和证据位置；
 2. 查清原站怎样建立世界、写入和清除chunk数据，以及已能证明的图层处理；
-3. 区分`FACT / INFERRED / DECISION / UNKNOWN`；
+3. 区分`原站证实/推断/设计决定/未确认`；
 4. 划清`SYS-CHUNK`、`SYS-WORLD`、`SYS-LAYER`和`SYS-ASSET`的职责；
 5. 说明创建、部分失败、卸载和销毁边界；
 6. 形成可交Human审查的调查记录、设计候选和验证计划；
@@ -81,7 +81,7 @@ Human已通过`DEC-SYS-WORLD-LAYER-INVESTIGATION-001`选择本工作项。它是
 
 ## 7. 退出标准
 
-- 24个图层逐项有名称、顺序、证据位置和`FACT / INFERRED / UNKNOWN`状态，无遗漏或重复；
+- 24个图层逐项有名称、顺序、证据位置和`原站证实/推断/未确认`状态，无遗漏或重复；
 - 世界创建、chunk写入、清除和销毁链路达到可审查程度；
 - `SYS-CHUNK / SYS-WORLD / SYS-LAYER / SYS-ASSET`责任表无明显重叠或空洞；
 - 图层渲染、遮挡和碰撞顺序已回答，或残余未知及最小补证方法明确；

@@ -4,7 +4,7 @@ import type {
   ChunkGeometry,
 } from "../chunk/coordinates.js";
 
-// 原站资源 URL 约定（FACT，见 SYS-ASSET 卡 §2）。
+// 原站资源 URL 约定（见 SYS-ASSET 卡 §2）。
 // 地图 / 分块 / 切块瓦片都以 /assets/maps 为根。
 export const MAP_BASE_URL = "/assets/maps";
 

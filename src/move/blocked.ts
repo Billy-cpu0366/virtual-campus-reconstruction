@@ -1,7 +1,7 @@
 import type { Direction } from "../input/index.js";
 import type { BlockedFlags } from "./contract.js";
 
-// 撞墙反馈（FACT：方向 → body.blocked 轴映射；north→up、south→down、east→right、west→left，对角取两轴与）。
+// 撞墙反馈。
 export function blockedInDirection(
   direction: Direction,
   blocked: BlockedFlags,

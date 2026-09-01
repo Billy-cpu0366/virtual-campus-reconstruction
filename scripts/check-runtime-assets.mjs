@@ -154,7 +154,7 @@ function checkLayerContracts(layers, label) {
         errors.push(`${label} has unsupported raw ${layer.name} GID ${unknown}`);
       }
       if (layer.data.includes(69360)) {
-        errors.push(`${label} still contains UNKNOWN raw GID 69360`);
+        errors.push(`${label} still contains 未确认 raw GID 69360`);
       }
       continue;
     }

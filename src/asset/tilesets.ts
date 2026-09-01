@@ -1,7 +1,7 @@
 import type { DiscoveredTileset, TilesetEntry } from "./contract.js";
 import { tilesetImageUrl } from "./urls.js";
 
-// 固定加载 key（原站显式加载，FACT 见 SYS-ASSET 卡 §2）。
+// 固定加载 key（原站显式加载，见 SYS-ASSET 卡 §2）。
 export const MAP_METADATA_KEY = "final-map-small";
 export const MAP_ORIGINAL_KEY = "final-map-original";
 export const TILESET_BASE_KEY = "exterior";

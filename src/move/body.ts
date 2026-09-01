@@ -1,4 +1,4 @@
-// 玩家碰撞体（FACT：20×8 贴脚小扁块，头部可与墙/屋檐重叠）。
+// 玩家碰撞体。
 // 深度归 SYS-LAYER（playerDepth 公式），本 CORE 不重复定义。
 
 export const PLAYER_BODY_WIDTH = 20;

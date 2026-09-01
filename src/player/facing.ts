@@ -1,9 +1,9 @@
 import type { Direction } from "../input/index.js";
 
-// 默认朝南（FACT）。
+// 默认朝南。
 export const DEFAULT_FACING: Direction = "south";
 
-// 朝向 = 最后请求方向，无则默认朝南（FACT：lastRequestedDirection || "south"）。
+// 朝向 = 最后请求方向，无则默认朝南。
 export function facingDirection(
   lastRequested: Direction | undefined,
 ): Direction {

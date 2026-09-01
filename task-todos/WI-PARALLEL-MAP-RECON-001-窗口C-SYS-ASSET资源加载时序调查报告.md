@@ -8,7 +8,7 @@
 ## 结论先行
 
 1. 原站资源链路分两段：HTML preload 预加载地图 JSON 和独立层；Phaser Loader 完成静态资源后，HttpClient 再加载 `master.json` 与 chunk。
-2. 原站成功后的 chunk 有内存缓存，但没有完成请求级 in-flight 去重；浏览器 HTTP 缓存是否命中仍 UNKNOWN。
+2. 原站成功后的 chunk 有内存缓存，但没有完成请求级 in-flight 去重；浏览器 HTTP 缓存是否命中仍未确认。
 3. 原站的地图 tileset、地图 JSON、独立层和动态资源存在多条依赖链；缺少 `final_map_small`、优化 tileset、collision 或 master 都可能影响地图正确性。
 4. 原站 chunk 卸载主要清理 Tilemap 数据，不显式移除静态纹理；动态资源和 Scene shutdown 的完整收敛边界未被证明。
 5. 当前重构已有更健壮的 `ChunkDataStore` CORE，但 `src/asset/` 尚未接入 Phaser 静态资源加载、完整优化 tileset、失败体验和纹理所有权。
@@ -183,7 +183,7 @@ particle-trajectories.json
 - `game/PhaserWorldRenderer.ts:298-345,559-615`
 - `game/CampusScene.ts:174-192,306-352`
 
-这些是当前重构 DECISION，不是原站 FACT。
+这些是当前重构设计决定，不是原站事实。
 
 ## 5. 失败体验
 
@@ -294,6 +294,6 @@ particle-trajectories.json
 
 - 已确认：资源依赖、代码时序、原站成功缓存、缺少 in-flight 去重、chunk 清理边界、当前重构差距。
 - 推测：浏览器 preload 复用、重复请求风险、失败时空白/缺碰撞体验。
-- UNKNOWN：HTTP cache 命中、响应头、真实故障画面、完整 GPU/Scene teardown。
+- 未确认：HTTP cache 命中、响应头、真实故障画面、完整 GPU/Scene teardown。
 - 已落盘：本调查报告，仅位于 `task-todos/`，不是项目权威定义。
-- 未落盘：任何新的 DECISION、系统卡变更、`task_plan.md` 工作项或正式实现授权。
+- 未落盘：任何新的设计决定、系统卡变更、`task_plan.md` 工作项或正式实现授权。

@@ -107,7 +107,7 @@ Production build（隔离 preview `4214`，CDP `9223`）：
 - 03：未导入真实 registry，`CAMPUS_CONTENT_PAYLOADS` 真实内容未改；
 - 04：未导入 App generation/Retry 或 rich DOM renderer；当前 Main 页面只提供可替换的最小入口壳；
 - 05：未导入真实 train/NPC/Route/FX；当前 train adapter 无 Sprite、碰撞带、blocking zone、depart timer 或视觉成果；
-- production 六点约111秒序列仍未调用，真实产品触发继续为 `UNKNOWN`；
+- production 六点约111秒序列仍未调用，真实产品触发继续为 未确认；
 - 未修改 `sample/`，未增加资源路径，未猜 Slovak/内容/NPC/FX；
 - 未发现第二个稳定 Entity 生命周期消费者，`Q-ENTITY-001` 继续 NO-GO，未提取通用框架；
 - 未 merge 03/04/05，未 push、PR 或同步 Windows。

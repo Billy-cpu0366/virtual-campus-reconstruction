@@ -49,7 +49,7 @@ Bundle可用搜索锚点：`this.make.tilemap({tileWidth:`、`USE_OPTIMIZED_TILE
 
 公开Bundle只能证明发布后的实现，不能证明原始TypeScript目录或类边界。
 
-## 3. 已证实事实（FACT）
+## 3. 已证实事实
 
 ### 3.1 世界数据是同一张140×140地图
 
@@ -117,7 +117,7 @@ make.tilemap(tileWidth=16, tileHeight=16, width=140, height=140)
 - 应用Bundle中`putTilesAt`只有优化写入、普通chunk写入和卸载清空3个调用点，未定位特殊13层的其他tile清空；
 - GameScene已定位的shutdown监听只移除一个document keydown handler；优化图层批写不保存idle callback ID，Bundle中没有`cancelIdleCallback`或`tilemap.destroy`调用。Phaser是否在场景生命周期中隐式释放部分资源仍未知。
 
-## 4. 暂定研究边界（INFERRED）
+## 4. 暂定研究边界
 
 以下只是根据证据收敛的设计输入，尚未获得正式设计接受：
 
@@ -130,7 +130,7 @@ make.tilemap(tileWidth=16, tileHeight=16, width=140, height=140)
 
 `WorldRenderer`是SYS-CHUNK正式设计中的职责名称，不预先等于一个可复用类。后续设计需要决定它由SYS-WORLD还是更小的内部协作者承担，不能在调查记录中提前固定代码目录。
 
-## 5. 仍未知（UNKNOWN）
+## 5. 仍未知
 
 1. 优化路径为何在每次`loadChunk`回调中使用完整`final_map_small`，以及实际运行时是否重复写完整世界；普通fallback为何只允许`layer1`；
 2. 其余13层不随chunk卸载，是有意作为全局持久层，还是发布实现的不完整路径；

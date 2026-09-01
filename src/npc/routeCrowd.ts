@@ -161,7 +161,7 @@ const group = (
   completionExit,
 });
 
-// FACT: `chunk-WMFY56ZM.js` byte 328000–332000 public crowd registration.
+// `chunk-WMFY56ZM.js` byte 328000–332000 public crowd registration.
 export const ROUTE_CROWD_CONFIGS = Object.freeze([
   group("main-crowd", 10, [[31, 81], [32, 81], [33, 81]], [[73, 133]], 45, .25, { minMs: 0, maxMs: 0 }, { minMs: 2_000, maxMs: 2_000 }, false, false, true, 25),
   group("loop-crowd", 10, [[55, 18], [62, 18]], [[21, 86], [55, 86], [112, 48], [116, 85]], 45, .2, { minMs: 0, maxMs: 0 }, { minMs: 1_000, maxMs: 1_000 }, true, false, true, 10),

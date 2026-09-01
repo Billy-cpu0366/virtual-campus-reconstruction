@@ -1,6 +1,6 @@
 import { BRIDGES } from "../layer/index.js";
 
-// 玩家碰撞墙层（FACT：walls + 4 桥墙层，共 5 层）。
+// 玩家碰撞墙层。
 // 层名/深度 SSOT 在 SYS-LAYER（LAYER_STRATEGIES / BRIDGES）；本常量只登记「玩家 collide 这 5 层」的关系。
 export const COLLISION_WALL_LAYER_NAMES: readonly string[] = [
   "walls",
@@ -10,7 +10,7 @@ export const COLLISION_WALL_LAYER_NAMES: readonly string[] = [
   BRIDGES.bridge2.down,
 ];
 
-// walls-layer.json 网格（FACT：0=可走、1=墙，grid[y][x] 行优先，16px 一格）。
+// walls-layer.json 网格。
 // 消费方是 NPC 寻路，不是玩家碰撞。
 export const WALKABLE = 0;
 export const BLOCKED = 1;

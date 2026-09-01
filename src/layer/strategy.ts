@@ -6,8 +6,8 @@ import type {
 } from "./contract.js";
 
 // 24 层策略表 = 唯一图层合同（SYS-LAYER 卡 §2）。
-// 顺序与 chunk JSON 的层顺序一致（FACT：24 个 chunk 层名/顺序完全一致）。
-// role 与 depth 为设计默认；roof 逐层 depth 未逐一定位，按 FACT 范围 3000–3300 顺序取值。
+// 顺序与 chunk JSON 的层顺序一致（24 个 chunk 层名/顺序完全一致）。
+// role 与 depth 为设计默认；roof 逐层 depth 未逐一定位，按 3000–3300 顺序取值。
 const CARS_MARKER_GIDS = [69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352];
 const PARTICLE_RAW_GIDS = [69355, 69356, 69357, 69358, 69359];
 
@@ -76,7 +76,7 @@ export function isKnownRawVisualGid(name: string, gid: number): boolean {
   return layerRole(name) === "visual" && rawVisualGids(name).includes(gid);
 }
 
-// 桥：上下墙层名（FACT，chunk 数据层名）。
+// 桥：上下墙层名（chunk 数据层名）。
 export const BRIDGES = {
   bridge1: { up: "bridge1_up_wall", down: "bridge1_down_wall" },
   bridge2: { up: "bridge2_up_wall", down: "bridge2_down_wall" },
@@ -89,7 +89,7 @@ export function activeBridgeWallLayer(
   return state === "up" ? bridge.up : bridge.down;
 }
 
-// 屋顶：4 个 roof 层名（FACT）。
+// 屋顶：4 个 roof 层名。
 export const ROOF_LAYERS: readonly string[] = [
   "roof_concert",
   "roof_concert2",

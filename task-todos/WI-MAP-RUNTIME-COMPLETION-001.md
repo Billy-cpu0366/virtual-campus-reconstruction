@@ -18,7 +18,7 @@ updated: 2026-08-21
 ## 必须实现
 
 1. `particles` / `particles2` 使用公开 `tileset-particles`，只显示已证实 GID `69355–69359`。
-2. GID `69360` 保持 UNKNOWN；不得猜语义或静默当成已解决。
+2. GID `69360` 保持未确认；不得猜语义或静默当成已解决。
 3. `particles3` 保留 marker 和未消费诊断；不关闭 `Q-LAYER-002`。
 4. 24 层继续按当前重构合同对称 apply/remove；不复制原站只卸载 11 层的路径。
 5. cars 只保留 marker/坐标输出；不创建路线或车辆。
