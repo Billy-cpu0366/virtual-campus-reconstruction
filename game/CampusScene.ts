@@ -37,7 +37,9 @@ export class CampusScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.tilemapTiledJSON("map", "/assets/maps/final_map.json");
+    // 运行版地图只保留当前雏形能显示的普通图块。
+    // 原始 final_map.json 还引用了尚未接入 Phaser 的粒子 TSX，留在 sample/ 作为证据。
+    this.load.tilemapTiledJSON("map", "/assets/maps/playable-map.json");
     this.load.image("exterior", "/assets/maps/exterior-final.webp");
     this.load.image(
       "collisions-objects",
