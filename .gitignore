@@ -1,5 +1,6 @@
 node_modules/
 dist/
+win-ia32-unpacked/
 public/
 build/
 coverage/
