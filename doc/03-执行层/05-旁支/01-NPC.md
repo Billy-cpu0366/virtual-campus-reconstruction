@@ -74,21 +74,21 @@ shutdown()
 
 **代码在哪**：
 
-| 做什么 | 文件路径 | 关键类/方法 |
-|---|---|---|
-| 静态 NPC 生命周期 | [src/npc/staticNpc.ts](src/npc/staticNpc.ts) | `StaticNpcRuntime` → `start(tick) → tick() → cancel() → shutdown()` |
-| 静态人群生命周期 | [src/npc/staticCrowd.ts](src/npc/staticCrowd.ts) | `StaticCrowdRuntime` → `start(tick) → tick() → cancel() → shutdown()` |
-| 路线人群生命周期 | [src/npc/routeCrowd.ts](src/npc/routeCrowd.ts) | `RouteCrowdRuntime` → `start() → tick() → cancel() → shutdown()` |
-| 跳舞人群生命周期 | [src/npc/dancingCrowd.ts](src/npc/dancingCrowd.ts) | `DancingCrowdRuntime` → `start() → tick() → shutdown()` |
-| 虫子群生命周期 | [src/npc/bugCrowd.ts](src/npc/bugCrowd.ts) | `BugCrowdRuntime` → `start() → tick() → cancel() → shutdown()` |
-| 场馆人群生命周期 | [src/npc/venueCrowdRuntime.ts](src/npc/venueCrowdRuntime.ts) | `VenueCrowdRuntime` → `start() → tick() → shutdown()` |
-| 喷水器生命周期 | [src/npc/sprayer.ts](src/npc/sprayer.ts) | `SprayerGroupRuntime` → `start() → tick() → cancel() → shutdown()` |
-| Phaser 适配层 | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts) | 六个 Phaser Runtime，每个包裹一个 src Runtime |
-| Phaser 适配层 | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) | 同步 snapshot → 创建/销毁 sprite |
-| Phaser 适配层 | [game/PhaserRouteCrowdRuntime.ts](game/PhaserRouteCrowdRuntime.ts) | 同上，额外处理 17 种纹理 |
-| Phaser 适配层 | [game/PhaserDancingCrowdRuntime.ts](game/PhaserDancingCrowdRuntime.ts) | 8 方向跳舞动画 |
-| Phaser 适配层 | [game/PhaserBugCrowdRuntime.ts](game/PhaserBugCrowdRuntime.ts) | 虫子 4 方向爬行动画 |
-| Phaser 适配层 | [game/PhaserVenueCrowdRuntime.ts](game/PhaserVenueCrowdRuntime.ts) | 抗议者 + 对话框 |
+| 做什么         | 文件路径                                                                   | 关键类/方法                                                                |
+| ----------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 静态 NPC 生命周期 | [src/npc/staticNpc.ts](src/npc/staticNpc.ts)                           | `StaticNpcRuntime` → `start(tick) → tick() → cancel() → shutdown()`   |
+| 静态人群生命周期    | [src/npc/staticCrowd.ts](src/npc/staticCrowd.ts)                       | `StaticCrowdRuntime` → `start(tick) → tick() → cancel() → shutdown()` |
+| 路线人群生命周期    | [src/npc/routeCrowd.ts](src/npc/routeCrowd.ts)                         | `RouteCrowdRuntime` → `start() → tick() → cancel() → shutdown()`      |
+| 跳舞人群生命周期    | [src/npc/dancingCrowd.ts](src/npc/dancingCrowd.ts)                     | `DancingCrowdRuntime` → `start() → tick() → shutdown()`               |
+| 虫子群生命周期     | [src/npc/bugCrowd.ts](src/npc/bugCrowd.ts)                             | `BugCrowdRuntime` → `start() → tick() → cancel() → shutdown()`        |
+| 场馆人群生命周期    | [src/npc/venueCrowdRuntime.ts](src/npc/venueCrowdRuntime.ts)           | `VenueCrowdRuntime` → `start() → tick() → shutdown()`                 |
+| 喷水器生命周期     | [src/npc/sprayer.ts](src/npc/sprayer.ts)                               | `SprayerGroupRuntime` → `start() → tick() → cancel() → shutdown()`    |
+| Phaser 适配层  | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts)       | 六个 Phaser Runtime，每个包裹一个 src Runtime                                  |
+| Phaser 适配层  | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts)   | 同步 snapshot → 创建/销毁 sprite                                            |
+| Phaser 适配层  | [game/PhaserRouteCrowdRuntime.ts](game/PhaserRouteCrowdRuntime.ts)     | 同上，额外处理 17 种纹理                                                        |
+| Phaser 适配层  | [game/PhaserDancingCrowdRuntime.ts](game/PhaserDancingCrowdRuntime.ts) | 8 方向跳舞动画                                                              |
+| Phaser 适配层  | [game/PhaserBugCrowdRuntime.ts](game/PhaserBugCrowdRuntime.ts)         | 虫子 4 方向爬行动画                                                           |
+| Phaser 适配层  | [game/PhaserVenueCrowdRuntime.ts](game/PhaserVenueCrowdRuntime.ts)     | 抗议者 + 对话框                                                             |
 
 ---
 

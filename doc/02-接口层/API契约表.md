@@ -1223,21 +1223,21 @@ updated: 2026-09-11
 
 #### API-FX-001 粒子发射
 
-| 字段 | 定义 |
-|---|---|
-| 接口ID | API-FX-001 |
-| 调用方 | SYS-ZONE / SYS-ENTITY |
-| 提供方 | SYS-FX |
-| 触发条件 | 进入粒子区域（particles/particles2/particles3 marker）或实体事件 |
-| 输入 | `emitter: ParticleEmitterConfig`（`{ type, position, count, duration, depth }`） |
-| 输出 | `void` |
-| 类型约束 | `(emitter: ParticleEmitterConfig) => void` |
-| 单位与坐标系 | 世界像素坐标 |
-| 同步/异步 | 同步（启动发射器）；异步（粒子持续播放） |
-| 异常处理 | 纹理缺失 → 圆形占位或跳过 |
-| 副作用 | 创建 Phaser particle emitter |
-| 生命周期 | 发射器启动后至 duration 结束或手动停止 |
-| 证据 | 原站有 particles/particles2/particles3 三个 marker 层；particles3 消费者未确认 |
+| 字段     | 定义                                                                             |
+| ------ | ------------------------------------------------------------------------------ |
+| 接口ID   | API-FX-001                                                                     |
+| 调用方    | SYS-ZONE / SYS-ENTITY                                                          |
+| 提供方    | SYS-FX                                                                         |
+| 触发条件   | 进入粒子区域（particles/particles2/particles3 marker）或实体事件                            |
+| 输入     | `emitter: ParticleEmitterConfig`（`{ type, position, count, duration, depth }`） |
+| 输出     | `void`                                                                         |
+| 类型约束   | `(emitter: ParticleEmitterConfig) => void`                                     |
+| 单位与坐标系 | 世界像素坐标                                                                         |
+| 同步/异步  | 同步（启动发射器）；异步（粒子持续播放）                                                           |
+| 异常处理   | 纹理缺失 → 圆形占位或跳过                                                                 |
+| 副作用    | 创建 Phaser particle emitter                                                     |
+| 生命周期   | 发射器启动后至 duration 结束或手动停止                                                       |
+| 证据     | 原站有 particles/particles2/particles3 三个 marker 层；particles3 消费者未确认              |
 
 #### API-FX-002 后处理管线
 
@@ -1441,110 +1441,8 @@ Phase 1 的逆向和复刻验证重点是**恢复系统知识和建立骨架**�
 
 ---
 
-## 十一、专有名词速查（本表所有英文术语中文对照）
+## 十一、专有名词速查
 
-> 本表使用了大量游戏开发和项目专属英文词，这里一次性列出中文含义和上下文，方便阅读 L1/L2 时对照。
-> 术语的完整定义见 [术语表.md](../术语表.md)，本节只列出本文档中出现的词。
-
-### 游戏引擎与框架
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **Phaser** | Phaser 游戏框架 | 本项目使用的开源 2D 游戏引擎（TypeScript/JS） |
-| **Tilemap** | 瓦片地图 | Phaser 内置的地图数据类型——由一个个小格子（tile）拼成的完整地图 |
-| **Arcade** | Arcade 物理引擎 | Phaser 内置的轻量物理引擎，处理碰撞和移动 |
-| **DOM** | 文档对象模型 / 页面元素 | 浏览器里的 HTML 元素（弹窗、按钮等），和游戏 Canvas 是两个层 |
-
-### 地图与坐标
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **chunk** | 地图分块 | 大世界切成的小块，每块 28×28 tile。25 个 chunk 拼成完整世界（5×5 网格） |
-| **tile** | 瓦片 | 地图的最小网格单元——16×16 px 的小方格 |
-| **GID** | 全局瓦片 ID | tileset 里每个 tile 的唯一编号。用 GID 区分墙、地面、装饰 |
-| **tileset** | 瓦片集 | 一堆 tile 的图片集合（一张大图切成很多小图），每个 tile 有唯一 GID |
-| **tileset firstgid** | 瓦片集起始 GID | tileset 的第一个 tile 的 GID——后续 tile 依次 +1 |
-| **world / pixel coordinates** | 世界 / 像素坐标 | 以世界左上角为原点 (0,0) 的像素坐标。世界 2240×2240 px |
-| **tile coordinates** | 瓦片坐标 | 以 tile 为单位的坐标，范围 0-139（140×140 格），换算：`pixel = tile × 16` |
-
-### 图层与渲染
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **layer** | 图层 | 地图的一层——像透明胶片叠起来，共 24 层（visual/collision/marker/dynamic 四种角色） |
-| **depth** | 渲染排序深度值 | 数字越大越靠前显示。玩家 depth 在 500-726 之间，桥墙层 3500 |
-| **alpha** | 透明度 | 0=全透明、1=不透明。屋顶淡隐就是 alpha 从 1 渐变到 0 |
-| **roof** | 屋顶（层） | 4 个 roof 层（factory×2 + concert×2），玩家进入下方区域时淡隐 |
-| **bridge** | 桥（层） | 4 个桥上下墙层（bridge1/2），玩家上桥/下桥时切换碰撞和可见性 |
-| **visual** | 视觉层 | 给人看的——直接写入 Tilemap 显示 |
-| **collision** | 碰撞层 | 不显示，只供物理引擎检测碰撞（如 walls 层） |
-| **marker** | 标记层 | 不显示，存坐标数据——供车、粒子、脚印等系统读出世界位置 |
-| **dynamic-visual / dynamic-collision** | 动态视觉 / 动态碰撞层 | 比 static 多一个动态状态（如 roof alpha 变化、bridge 上下切换） |
-| **walls** | 墙壁碰撞层 | 第 19 层（索引 19），GID 69345=墙=不可走、69346=不碰撞 |
-| **particles / particles2 / particles3** | 粒子 1/2/3 层 | 3 个粒子特效标记层。particles3 消费者仍未知（Q-LAYER-002 待解） |
-| **footsteps** | 脚印层 | 第 24 层（索引 23），记录脚下沙地 368 个 GID 位置 |
-| **cars** | 车辆标记层 | 第 11 层（索引 10），存放车辆路线 marker（8 个 GID） |
-
-### 实体与行为
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **NPC** | 非玩家角色 | 游戏里自动行为的角色（幽灵、老鼠等），不由玩家控制 |
-| **sprite** | 精灵 / 游戏对象 | Phaser 里所有可显示、可移动的东西（玩家、NPC、车、脚印等）都是 sprite |
-| **idle** | 待机 / 发呆动作 | 玩家/NPC 长时间没操作时的自动动画（如坐下、挠头） |
-| **walk** | 走路动画 | 移动中的动画帧序列 |
-| **body** | 物理体 | 精灵在物理引擎里的"碰撞盒子"——玩家碰撞体 20×8 px |
-| **blocked** | 卡住标志 | Phaser body.blocked 的四个方向标志——碰上墙就变 true |
-| **collider** | 碰撞器 | Phaser Arcade 的一种碰撞检测对象（两个 body 碰到就触发） |
-
-### 动画与特效
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **tween** | 补间动画 | Phaser 内置的"从 A 渐变成 B"动画。屋顶 300ms alpha 渐变就是 tween |
-| **lerp** | 线性插值 | "在两个值之间匀速过渡"。相机 lerp=1 就是逐帧直接贴到目标（不平滑） |
-| **post-processing / pipeline** | 后处理 / 渲染管线 | 画面渲染完之后再叠加的效果滤镜（热浪 HeatHaze/火焰 Fire/变形 Morph） |
-| **emitter** | 粒子发射器 | 持续产生粒子精灵的对象——如烟雾、火花 |
-| **keyframe / animation** | 关键帧 / 动画序列 | 按顺序播放的精灵贴图帧——走路动效就是一系列关键帧 |
-
-### 路径与寻路
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **pathfinding** | 寻路 | 在网格地图上找到从 A 到 B 的最短可走路径 |
-| **walls-layer.json** | 墙壁网格文件 | 140×140 的 0/1 矩阵——0=可走（12121 格）、1=墙（7479 格） |
-| **bbox** | 边界框 / bounding box | 用左上角和右下角坐标定义的矩形区域 |
-| **marker route** | 标记路线 | 从 cars 层 marker GID 解析出的车辆行驶路径节点序列 |
-
-### UI 与交互
-
-| 英文 | 中文 | 一句话解释 |
-|---|---|---|
-| **HUD** | 抬头显示器 | 游戏画面上叠加的调试信息（坐标、速度、FPS 等） |
-| **joystick / 摇杆** | 虚拟摇杆 | 移动端触摸屏上的模拟摇杆控件 |
-| **interaction / dialog** | 交互弹窗 | 玩家进入区域后弹出的内容窗口（卡牌、文字、图片） |
-| **canvas** | 画布 | HTML5 `<canvas>` 元素——Phaser 画的游戏世界就在这张画布上 |
-| **lifecycle / 生命周期** | 生命周期 | 一个东西从创建到销毁的完整阶段：创建→运行中→暂停→销毁 |
-
-### 坐标换算速记
-
-| 问题 | 答案 |
-|---|---|
-| tile 坐标 → 世界像素坐标 | `pixelX = tileX × 16`，`pixelY = tileY × 16` |
-| 世界像素坐标 → chunk 坐标 | `chunkX = floor(pixelX / (28×16))`，`chunkY = floor(pixelY / (28×16))` |
-| chunk 坐标 → 文件索引 | `index = chunkY × 5 + chunkX`，文件名 `{chunkX}_{chunkY}.json` |
-| 世界 tile 坐标 | 范围 0-139（140×140 格），左上角是 (0,0) |
-| chunk 坐标范围 | cx∈[0,4]，cy∈[0,4]，共 25 个 chunk |
-
-### 项目专属缩写
-
-| 缩写          | 全称 / 中文                                | 含义                                       |
-| ----------- | -------------------------------------- | ---------------------------------------- |
-| **SYS-**    | System / 系统                            | 一个独立的功能系统（如 SYS-CHUNK）                   |
-| **API-**    | Application Programming Interface / 接口 | 一个系统对外的调用契约                              |
-| **BRIDGE-** | 桥接接口                                   | 连接两条不同流水线的接口                             |
-| **WI-**     | Work Item / 工作项                        | 一个可执行的开发任务单元                             |
-| **Q-**      | Question / 未解问题                        | 待调查或待确认的未知项                              |
-| **L1 / L2** | Level 1 / Level 2                      | L1=索引总表，L2=每个接口的 14 字段精确定义               |
-| **CORE**    | 核心 / 确定性逻辑                             | 纯 TypeScript 逻辑——不依赖 Phaser/网络/浏览器就能跑和测试 |
-| **皮 / 骨架**  | Skin / Skeleton                        | 皮=换校园要改的具体值；骨架=换校园不变的接口形状和语义             |
+> 全部专有名词（224 个）已统一收进独立名词文档 → **[名词解释表.md](../名词解释表.md)**。该文档覆盖全项目 16 系统 + API 契约 + 跨系统数据流 + 治理体系的全部术语，按 23 个大类组织，每个名词含英文原文、中文译名、一句话定义、所在系统和详细文件链接。
+>
+> 命名约定（SYS-/API-/WI-/Q-/DEC- 等编号体系原定义）仍在 **[术语表.md](../术语表.md)** 维护。
