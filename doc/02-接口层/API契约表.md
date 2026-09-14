@@ -116,7 +116,7 @@ updated: 2026-09-14
 | API-GAME-UI-002 | 摇杆UI | INPUT → GAME-UI | 创建/显示/隐藏虚拟摇杆 DOM 元素 | 皮（位置/尺寸） |
 | API-GAME-UI-003 | 对话框UI | INTERACT → GAME-UI | 渲染弹窗 UI（标题/正文/按钮/卡牌） | 皮（DOM 位置） |
 | API-ENTITY-001 | 实体清理接口 | 关停编排 → 各 Runtime | 关停时逐个调用 Runtime 自己的 `shutdown()` / `destroy()`，各自清理名下的精灵、碰撞器、发射器、计时器、监听器 | 骨架 |
-| API-ENTITY-002 | 关停编排（有序清理序列） | APP → ENTITY | 按写死的顺序逐个清理 23 个 Runtime，并返回 18 字段清理收据（重复调用幂等） | 骨架 |
+| API-ENTITY-002 | 关停编排（有序清理序列） | APP → ENTITY | 按写死的顺序跑 30 个 `cleanup()` 步骤，单步失败不中断后续、全部跑完后统一抛 `AggregateError`；无失败时返回 18 字段清理收据（重复调用幂等） | 骨架 |
 | API-ENTITY-003 | 游戏控制租约 | INTERACT / GAME-UI → ENTITY | 弹窗等来源停住/恢复玩家控制；用引用计数，最后一个释放者才恢复 | 骨架 |
 
 ### 旁支（3 系统，世界盖好后并行）
@@ -923,7 +923,7 @@ updated: 2026-09-14
 ## 四、独立件（SYS-APP / SYS-GAME-UI / SYS-ENTITY）
 
 > ✅ **SYS-APP / SYS-GAME-UI** 状态：已定稿（`status: designed`）。两个系统卡均已按写作规范重写（9-1 文档重写周），接口签名/语义和原站可观察行为一致；运行时安全有界修复（`632a0c9`）和 Loading/Ready/Play 三状态已验证。
-> ⚠️ **SYS-ENTITY** 状态：undesign（保留）。实体生命周期由各实体系统（NPC/ROUTE/FX）自治，尚未抽出独立职责；接口基于系统架构推断，正式授权前不进入设计态。
+> ✅ **SYS-ENTITY** 状态：已定稿（`status: designed`，2026-09-14）。三条接口按**复刻代码的实际设计**改写——各 Runtime 自治清理 + 场景集中编排 + 引用计数租约，原"全局实体注册表"设计从未实现、已作废。2026-09-14 又按当前代码重对了一次（清理步骤 23 → 30、清理失败由"不继续"改为"逐项兜错后统一抛 `AggregateError`"、租约来源 1 → 4 种）。
 
 ### 4.1 SYS-APP 应用启动与页面
 
@@ -1056,48 +1056,50 @@ updated: 2026-09-14
 | 类型约束 | `shutdown(): void \| Snapshot` 或 `destroy(): void` |
 | 单位与坐标系 | 无 |
 | 同步/异步 | 同步 |
-| 异常处理 | **无统一兜底**——某个 Runtime 抛错会中断后续清理，收据不产出 |
+| 异常处理 | **由调用方逐项兜底**——`performShutdown()` 把每次调用包在 `cleanup(name, op)` 里，抛错只记一笔并继续下一步（2026-09-14 起） |
 | 副作用 | 清理该 Runtime 名下的精灵/碰撞器/粒子发射器/计时器/监听器 |
 | 生命周期 | 调用后该 Runtime 的业务方法不可再用 |
-| 证据 | 复刻实现：`game/CampusScene.ts` 第 1191-1232 行共 23 个调用；各 Runtime 定义见 SYS-ENTITY 卡 §一·骨架1。原站**无**此统一接口（公开 Bundle 13 个类均直接继承 Phaser 内置类） |
+| 证据 | 复刻实现：`game/CampusScene.ts` 第 1214-1257 行共 30 个 `cleanup()` 步骤；各 Runtime 定义见 SYS-ENTITY 卡 §一·骨架1。原站**无**此统一接口（公开 Bundle 13 个类均直接继承 Phaser 内置类） |
 
 #### API-ENTITY-002 关停编排（有序清理序列）
 
 | 字段 | 定义 |
 |---|---|
 | 接口ID | API-ENTITY-002 |
-| 调用方 | SYS-APP（`pagehide`、Retry 代际切换） |
+| 调用方 | SYS-APP（`pagehide`，`persisted` 时除外；Retry 代际切换） |
 | 提供方 | SYS-ENTITY（`CampusScene.performShutdown()`） |
 | 触发条件 | 场景销毁、代际切换；重复调用幂等 |
 | 输入 | 无 |
-| 输出 | `CampusSceneShutdownReceipt`（18 字段、`Object.freeze` 冻结） |
+| 输出 | `CampusSceneShutdownReceipt`（18 字段、`Object.freeze` 冻结）；**有失败时不产出，改为 reject `AggregateError`** |
 | 类型约束 | `() => Promise<CampusSceneShutdownReceipt>` |
 | 单位与坐标系 | 无 |
 | 同步/异步 | 异步（末段 `await shutdownDynamicWorld()`） |
-| 异常处理 | 幂等靠 `shutdownTask` 缓存 Promise；主体无逐项 try/catch；异步段用 `rememberError` 跑完再抛第一个错 |
-| 副作用 | 按写死顺序清理 23 个 Runtime、摘 4 个原生监听器、销毁世界数据、`scene.stop()` |
+| 异常处理 | 幂等靠 `shutdownTask` 缓存 Promise（失败时清空以允许补跑）；30 步逐项 `cleanup()` 兜错、失败不断链；异步段用 `rememberError` 跑完再抛第一个错；全部跑完后若有失败统一抛 `AggregateError` |
+| 副作用 | 按写死顺序跑 30 个 `cleanup()` 步骤、摘 4 个原生监听器、销毁世界数据、`scene.stop()` |
 | 生命周期 | 关停是**终态**，之后拒绝新的写入和请求 |
-| 证据 | `game/CampusScene.ts` 第 1176 行入口、第 1186-1282 行实现、第 313-332 行收据类型；`npm run browser:lifecycle-smoke` |
+| 证据 | `game/CampusScene.ts` 第 1186 行入口、第 1199-1315 行实现、第 315-334 行收据类型；`npm run browser:lifecycle-smoke`、`tests/app/campus-scene-lifecycle.test.ts` |
 
 #### API-ENTITY-003 游戏控制租约
 
 | 字段 | 定义 |
 |---|---|
 | 接口ID | API-ENTITY-003 |
-| 调用方 | SYS-INTERACT / SYS-GAME-UI（弹窗打开与关闭） |
+| 调用方 | SYS-INTERACT / SYS-GAME-UI / SYS-ZONE / SYS-ROUTE（弹窗、地图、相机航拍、入场转场） |
 | 提供方 | SYS-ENTITY（`GameplayControlLeaseRuntime`） |
 | 触发条件 | 弹窗等需要停住玩家的来源出现或消失 |
-| 输入 | `acquire(reason)`；`release(token)` |
+| 输入 | `acquire(reason)`；`release(token)`；`reason` 目前 4 种：`modal-open` / `map-open` / `camera-tour` / `entry-transition` |
 | 输出 | `acquire` → `{ ok: true, token }` 或 `{ ok: false, reason }`；`release` → 结果对象 |
-| 类型约束 | `GameplayControlLeasePort`（`src/content/contract.ts` 第 124 行） |
+| 类型约束 | `GameplayControlLeasePort`（`src/content/contract.ts` 第 149 行；来源联合类型第 137-141 行） |
 | 单位与坐标系 | 无 |
 | 同步/异步 | 同步 |
-| 异常处理 | `disable` 失败时**不发凭证**；未知/过期 token 安全返回；`shutdown` 后拒绝一切新凭证 |
+| 异常处理 | `disable` 失败时**不发凭证**；未知/过期 token 安全返回（历史凭证用 `WeakSet` 记，不阻垃圾回收）；`shutdown` 后拒绝一切新凭证 |
 | 副作用 | 首次 acquire 调 `disableControls`；最后一个 release 调 `enableControls` |
 | 生命周期 | 引用计数；`shutdown()` 是终态，强制释放全部凭证 |
-| 证据 | `game/GameplayControlLeaseRuntime.ts`（全文 123 行）；`tests/content/gameplay-control-lease-runtime.test.ts` 7 用例；原站租约机制属推断，无直接证据 |
+| 证据 | `game/GameplayControlLeaseRuntime.ts`（全文 123 行）；`tests/content/gameplay-control-lease-runtime.test.ts` 8 用例；原站租约机制属推断，无直接证据 |
 
 > **口径变更说明（2026-09-14）**：本节原三个接口（实体注册 / 实体销毁 / 生命周期钩子）描述的是"全局实体注册表 + `EntityDefinition` + pause/resume/destroy 广播"设计，标记为 `骨架（undesign）`，证据列自述为"统一管理推断"。该设计**从未实现**，复刻代码走的是"各 Runtime 自治清理 + 场景集中编排"路线。本次按实际代码改写为上面三条，并与 `Q-ENTITY-001` 的查证结论（原站无统一实体基类）对齐。原站对照与证据边界见 [SYS-ENTITY 执行层卡](../03-执行层/04-独立件/03-实体生命周期.md) §八。
+>
+> **同日二次重对**：上面三条接口写完后，`game/` 侧两轮有界运行时修复（`DEC-RUNTIME-REPAIR-20260914` / `-02`）落地，接口语义随之变化——清理步骤 23 → 30、异常处理由"无统一兜底、遇错即中断"改为"逐项兜错、跑完统一抛 `AggregateError`"、租约来源 1 → 4 种。上表已按当前代码刷新。
 
 ---
 

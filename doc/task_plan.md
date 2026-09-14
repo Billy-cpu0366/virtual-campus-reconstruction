@@ -19,7 +19,7 @@ collaboration-mode: single-person
 ## ⏱ 当前状态（一眼看懂）
 
 - **正在做**：无（`current-work-item: none`）。执行层 16 张系统卡**全部**已完成详细设计（SYS-ENTITY 于 2026-09-14 补齐，16/16 `designed`）；8 个确定性 CORE 已实现并验证。
-- **最近完成**：两波并行设计（M1 地图 + P1 玩家 + SYS-CAMERA 范围已定稿）、碰撞集成、运行时安全修复、SYS-ZONE 设计、SYS-LAYER 运行时收束、地图生命周期收口、SYS-ENTITY 实体生命周期设计（已关闭工作项索引末条）。
+- **最近完成**：两波并行设计（M1 地图 + P1 玩家 + SYS-CAMERA 范围已定稿）、碰撞集成、运行时安全修复、SYS-ZONE 设计、SYS-LAYER 运行时收束、地图生命周期收口、SYS-ENTITY 实体生命周期设计（已关闭工作项索引末条）、两轮有界运行时修复、网络协议层独立成层、SYS-ENTITY 卡按当前代码重对。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/轨迹/脚印/内容线，不自动合并或推送。
 - **阻塞项**：**无技术阻塞**。原记载的两项经 2026-09-14 复核均已不成立：仓库无任何 rebase/merge 残留状态（`git ls-files -u` 为 0），全仓只有一个 worktree，`impl/gameplay-serial` 分支从未创建。真正阻止正式代码写入的是**没有已授权的工作项**，不是环境。
 - **下一步**：Human 自主选择下一工作项（候选见「近期候选」列表）；选择后从 `doc/03-执行层/` 对应系统卡读取范围，取得 Human 签字后才能写 `src/` 正式代码。
@@ -31,7 +31,7 @@ collaboration-mode: single-person
 - Human 授权：第二轮审查后的 `自己修复`（`DEC-RUNTIME-REPAIR-20260914-02`）；范围为竖屏摇杆、动画碰撞框、缓存页面恢复、交互历史回收四项。
 - 已落盘：摇杆使用 Phaser ScaleManager 可见 viewport；特殊动画按原始世界坐标碰撞尺寸/偏移补偿；持久化 pagehide 保留游戏并在 pageshow 刷新缩放；历史令牌改弱引用、物理驻留 leave 清理去重记录、地图弹窗关闭补齐虚拟 leave。
 - 验证：新增 9 项回归（含仓库 Phaser 真正的 Body 变换函数）；typecheck、生产构建通过；`npx vitest run --maxWorkers=2 --reporter=dot` 全量 74 文件、426 测试通过。本地启动页已观察到 READY/Play；移动触控与真实浏览器往返缓存仍以模拟回归验证为准。默认并发跑曾有 1 项 5 秒超时，低并发全量复验通过。
-- 边界：本地修改，保留已有用户变更；系统卡工程状态保持既有值，提交与推送待独立授权。
+- 边界：系统卡工程状态保持既有值；已随第一轮一起提交（`3bede12`），推送待独立授权。
 
 ### 2026-09-14 有界运行时修复完成记录
 
@@ -39,7 +39,7 @@ collaboration-mode: single-person
 - 已修复：异步地图 mutation 串行与 idle 释放、场景清理异常隔离及旧代退役、玩家动画统一场景时钟、游戏内失败分块退避重试、JSON 请求 15 秒 deadline、可选玩家动画素材降级。
 - 验证：类型检查通过；73 个测试文件、417 项测试通过（新增 12 项）；生产构建与运行资源检查通过；状态一致性检查通过。
 - 浏览器交互复验：工具额度限制阻断，本轮以自动化回归验证为准；原本地服务地址为 `http://localhost:4175/`。
-- 交付状态：本地修改保留，原有用户变更保留；提交、推送和完整系统状态晋升保持独立授权。
+- 交付状态：已提交（`3bede12`）；推送和完整系统状态晋升保持独立授权。
 
 ### 2026-09-14 网络协议层独立成层完成记录
 
@@ -51,8 +51,32 @@ collaboration-mode: single-person
 - 验证：本轮涉及的 6 份文档 267 条相对链接 0 失效；`doc-charset-scan` / `doc-splitword-scan` / `doc-tradchar-scan` 干净；`check-state-consistency.py` PASS；名词表 257 条 / 24 大类无缺号无重复。
 - 顺带订正：`决策记录.md`、`task_plan.md` 里 3 条 HEAD 就已存在的相对链接层级笔误（`README.md` → `../README.md` 等）。
 - ⚠️ 未处理（**只报不改**）：`doc/` 全树另有 15 条失效相对链接，集中在 `01-理解层/写作规范.md`、`03-执行层/00-总账.md`、`03-执行层/README.md`（多数写成 `virtual-campus-reconstruction/01-理解层/…` 前缀，疑为 9-7 目录迁移残留）和 `05-素材/README.md → ../README.md`。不属本轮范围，未动。
-- 交付状态：仅文档，未提交 Git；提交与推送保持独立授权。
+- 交付状态：仅文档，已提交 Git（`8a57396`）；推送保持独立授权。
 - 未授权：不改 `game/`、`src/`、`public/`、`scripts/`、`tests/`；不扩大 `sample/` 采集；**地图资源根收口**（本层 §四①、§7.3 第 6 项）待单独裁决。
+
+### 2026-09-14 已提交三堆并回填提交号
+
+- Human 授权原文：`都提交，先别推到远程别推main`（2026-09-14）；同轮 AskUserQuestion 选择「分堆提交」「bak/ 不进仓库」「卡过时了 → 现在重新对一遍」。
+- 已提交四笔（均为本地提交，**未推送、未推 main**；当前分支 `docs/api-skin-readability-20260911`）：
+  - `b640ef4` 文档笔误/编码订正 14 份 + 5 个扫描脚本 + `.gitignore` 加 `bak/`
+  - `8a57396` 网络协议层独立成层（`DEC-DOC-LAYER-NETPROTO-001`）
+  - `3bede12` 两轮有界运行时修复代码 + 测试（`DEC-RUNTIME-REPAIR-20260914` / `-02`）
+  - `081dca3` 上述三项的决策记录与计划状态台账
+- 提交前门禁：`npx tsc --noEmit` 退出 0；`npx vitest run` 74 文件 / 426 用例全过。
+- 备份目录 `bak/doc-fix-2026-09-14/` 按 Human 决定**不进仓库**，已写入 `.gitignore`。
+
+### 2026-09-14 SYS-ENTITY 卡按当前代码重对
+
+- Human 授权原文：`卡过时了` → AskUserQuestion 选择「**现在重新对一遍**」（2026-09-14）。
+- 起因：SYS-ENTITY 两卡于当日 16:10 定稿（`ec3df47`、`c68b971`），但 `game/` 侧 20:55 又落了两轮有界运行时修复，导致卡上三项结论与行号**失效**。
+- 重对后的三处**结论性**修正：
+  1. 清理调用数 **23 → 30**（30 个 `cleanup()` 步骤 = 25 个对象 + 5 个方法调用；新增 `entryCameraRuntime`、`entryTrainAdapter`）
+  2. 清理失败行为 **"不继续" → "继续"**——逐项 try/catch，失败不断链，跑完统一抛 `AggregateError`（旧卡写的"主体无逐项 try/catch"已作废）
+  3. 控制租约来源 **1 种 → 4 种**（`modal-open` / `map-open` / `camera-tour` / `entry-transition`）
+- 顺带：行号全面刷新（`performShutdown` 1186-1282 → 1199-1315、收据 313-332 → 315-334、`shutdownDynamicWorld` 1751-1788 → 1784-1821、`sceneDestroyed` 413 → 404 且检查点 10 → 20 处、`main.ts` pagehide 315 → 318 并拆出 pageshow 322、`coordinator.destroy` 174 → 190）；测试基线 70/405 → **74/426**；租约用例 7 → 8。
+- 新增残余未知两条：**有失败时收据不产出**、**重试是"补跑"非"重跑"**。
+- 同步范围（《定稿落地清单》10 处）：执行卡、理解卡、总账、进度总览、API 契约表（含 §四 抬头一处此前遗漏的 `undesign` 残留）、换皮配置总表、决策记录、task_plan。系统地图无需改动（SYS-ENTITY 不涉及三条桥）。
+- 边界：**仅文档**，不改 `game/`、`src/`、`tests/`、`sample/`；不推送。
 
 - **整体大目标**：逆向 + 后端 + 后台 + 换皮做各校园网站（Human 9-7 复述）。
 - **Phase 1（当前）**：逆向 + 复刻验证 + 16 系统骨架准备。
