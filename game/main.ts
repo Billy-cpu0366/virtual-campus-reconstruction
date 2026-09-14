@@ -251,12 +251,15 @@ appRuntime = new AppRuntime({
         receipt = await active.scene.shutdownForGeneration();
       } finally {
         active.game?.destroy(true);
+        // Once Phaser accepts destruction this generation is retired, even
+        // if an individual scene owner reported a cleanup error. Retry can
+        // create a fresh generation instead of reusing a rejected cleanup.
+        if (currentGeneration === active) currentGeneration = undefined;
+        latestEntrySnapshot = undefined;
+        guide.hidden = true;
+        guide.textContent = "";
       }
       latestCleanupReceipt = Object.freeze({ generation, receipt });
-      if (currentGeneration === active) currentGeneration = undefined;
-      latestEntrySnapshot = undefined;
-      guide.hidden = true;
-      guide.textContent = "";
     },
     enterGame: (generation, onEntered, onError) => {
       const active = currentGeneration;
@@ -312,6 +315,12 @@ if (appTestHooksEnabled) {
   });
 }
 
-window.addEventListener("pagehide", () => appRuntime.shutdown(), { once: true });
+window.addEventListener("pagehide", (event) => {
+  // A persisted page keeps its live generation for back/forward restoration.
+  if (!event.persisted) appRuntime.shutdown();
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) currentGeneration?.game?.scale?.refresh();
+});
 installRuntimeDiagnostics();
 appRuntime.start();

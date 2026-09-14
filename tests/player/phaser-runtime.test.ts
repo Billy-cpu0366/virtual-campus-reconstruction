@@ -96,6 +96,7 @@ class FakeAnimations implements PhaserPlayerAnimationManagerLike {
 
 function makeAdapter(
   textureExists: (key: string) => boolean = () => true,
+  now: () => number = () => 0,
 ) {
   const animations = new FakeAnimations();
   const loads: Array<{
@@ -120,7 +121,7 @@ function makeAdapter(
   const sprite = new FakeSprite();
   const calls: string[] = [];
   const adapter = new PhaserPlayerRuntime(scene, sprite, {
-    now: () => 0,
+    now,
     random: () => 0,
     effects: {
       resetKeyboard: () => calls.push("keyboard"),
@@ -132,6 +133,17 @@ function makeAdapter(
 }
 
 describe("Phaser 玩家有界适配器", () => {
+  it("动画结束使用场景时钟并恢复后续 idle 动作", () => {
+    let time = 0;
+    const { adapter, sprite } = makeAdapter(undefined, () => time);
+    adapter.createAnimations();
+    adapter.enableControls(time);
+    expect(adapter.update(null, 8_000).status).toBe("idle-action");
+    time = 11_000;
+    sprite.complete(PLAYER_RUNTIME_ANIMATIONS.eating);
+    expect(adapter.update(null, 18_999).status).toBe("normal-idle");
+    expect(adapter.update(null, 19_000).status).toBe("idle-action");
+  });
   it("注册四个公开 128x128/16帧 webp 并创建原站参数动画", () => {
     const { adapter, animations, loads } = makeAdapter();
     adapter.preload();

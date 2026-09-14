@@ -52,6 +52,7 @@ export class ChunkCoordinator {
   #requesting = new Map<string, Promise<void>>();
   #mutating = new Map<string, Promise<void>>();
   #worldFailures = new Map<string, ChunkCoordinatorFailure>();
+  #retryBackoff = new Map<string, { nextAt: number; delay: number }>();
   #destroyed = false;
   #destroyPromise: Promise<void> | undefined;
   #scheduleMutation: ChunkMutationScheduler;
@@ -168,7 +169,22 @@ export class ChunkCoordinator {
     if (this.#destroyed || !this.#targets.has(coordinateKey(coordinate))) {
       return Promise.resolve();
     }
+    const existing = this.#requesting.get(coordinateKey(coordinate));
+    if (existing !== undefined) return existing;
     return this.#request(coordinate, true, attempts);
+  }
+
+  /** Called by the playable scene; initial-load errors retain the App Retry UI. */
+  async retryFailedTargets(): Promise<void> {
+    if (this.#destroyed) return;
+    const now = Date.now();
+    await Promise.all(this.store.failures
+      .filter((failure) => {
+        const key = coordinateKey(failure.coordinate);
+        const backoff = this.#retryBackoff.get(key);
+        return this.#targets.has(key) && backoff !== undefined && now >= backoff.nextAt;
+      })
+      .map((failure) => this.retry(failure.coordinate)));
   }
 
   destroy(): void {
@@ -183,6 +199,7 @@ export class ChunkCoordinator {
     this.#destroyed = true;
     this.#targets.clear();
     this.#worldFailures.clear();
+    this.#retryBackoff.clear();
     this.store.destroy();
     this.world.destroy();
 
@@ -207,8 +224,15 @@ export class ChunkCoordinator {
       ? this.store.retryChunk(coordinate, attempts)
       : this.store.loadChunk(coordinate)
     )
-      .then((chunk) => this.#applyIfCurrent(chunk))
-      .catch(() => undefined);
+      .then((chunk) => {
+        this.#retryBackoff.delete(key);
+        return this.#applyIfCurrent(chunk);
+      })
+      .catch(() => {
+        if (this.#destroyed || this.store.getFailure(coordinate) === undefined) return;
+        const delay = Math.min((this.#retryBackoff.get(key)?.delay ?? 2_500) * 2, 30_000);
+        this.#retryBackoff.set(key, { delay, nextAt: Date.now() + delay });
+      });
     this.#requesting.set(key, request);
     void request.then(() => {
       if (this.#requesting.get(key) === request) {

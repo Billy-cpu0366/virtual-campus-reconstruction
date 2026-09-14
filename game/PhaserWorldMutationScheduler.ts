@@ -13,6 +13,7 @@ interface PendingMutation {
 export class PhaserWorldMutationScheduler {
   #queue: PendingMutation[] = [];
   #frameRequested = false;
+  #frameId: number | undefined;
   #active: Promise<void> | undefined;
   #idleWaiters: Array<() => void> = [];
   #destroyed = false;
@@ -33,6 +34,11 @@ export class PhaserWorldMutationScheduler {
       return;
     }
     this.#destroyed = true;
+    if (this.#frameId !== undefined) {
+      cancelAnimationFrame(this.#frameId);
+      this.#frameId = undefined;
+      this.#frameRequested = false;
+    }
     const pending = this.#queue.splice(0);
     for (const item of pending) {
       item.resolve();
@@ -55,13 +61,15 @@ export class PhaserWorldMutationScheduler {
     if (
       this.#destroyed ||
       this.#frameRequested ||
+      this.#active !== undefined ||
       this.#queue.length === 0
     ) {
       return;
     }
 
     this.#frameRequested = true;
-    requestAnimationFrame(() => {
+    this.#frameId = requestAnimationFrame(() => {
+      this.#frameId = undefined;
       this.#frameRequested = false;
       const item = this.#queue.shift();
       if (item === undefined) {
@@ -74,16 +82,10 @@ export class PhaserWorldMutationScheduler {
         return;
       }
 
-      let result: void | Promise<void>;
-      try {
-        result = item.mutation();
-      } catch (error) {
-        item.reject(error);
-        this.#requestFrame();
-        return;
-      }
-
-      const active = Promise.resolve(result)
+      // Publish the active promise before invoking user work (including
+      // synchronous throws and reentrant schedule calls).
+      const active = Promise.resolve()
+        .then(() => item.mutation())
         .then(
           () => {
             item.resolve();

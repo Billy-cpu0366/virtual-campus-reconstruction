@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   ChunkCoordinator,
@@ -65,6 +65,39 @@ function deferred<T>(): {
 }
 
 describe("ChunkCoordinator", () => {
+  it("失败目标按退避重试并在网络恢复后写入", async () => {
+    const clock = vi.spyOn(Date, "now").mockReturnValue(0);
+    try {
+      let online = false;
+      let calls = 0;
+      const store = new ChunkDataStore("https://test.invalid/master.json", async (url) => {
+        if (url.endsWith("master.json")) return master();
+        calls += 1;
+        if (!online) throw new Error("offline");
+        return chunk();
+      }, { maxAttempts: 1 });
+      await store.loadMaster();
+      const coordinator = new ChunkCoordinator(store, readyWorld());
+      await coordinator.updateTargets([{ x: 0, y: 0 }]);
+      await coordinator.retryFailedTargets();
+      expect(calls).toBe(1);
+      clock.mockReturnValue(5_000);
+      await coordinator.retryFailedTargets();
+      expect(calls).toBe(2);
+      online = true;
+      clock.mockReturnValue(14_999);
+      await coordinator.retryFailedTargets();
+      expect(calls).toBe(2);
+      clock.mockReturnValue(15_000);
+      await Promise.all([coordinator.retryFailedTargets(), coordinator.retryFailedTargets()]);
+      expect(calls).toBe(3);
+      expect(coordinator.rendered).toEqual([{ x: 0, y: 0 }]);
+      await coordinator.destroyAsync();
+      clock.mockReturnValue(100_000);
+      await coordinator.retryFailedTargets();
+      expect(calls).toBe(3);
+    } finally { clock.mockRestore(); }
+  });
   it("公开 target/requesting/cached/rendered 状态并应用缓存", async () => {
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();

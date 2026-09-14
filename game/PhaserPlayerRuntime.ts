@@ -52,6 +52,17 @@ export interface PhaserPlayerAnimationControllerLike {
 }
 
 export interface PhaserPlayerVisualLike {
+  readonly scaleX?: number;
+  readonly scaleY?: number;
+  readonly displayOriginX?: number;
+  readonly displayOriginY?: number;
+  readonly body?: {
+    readonly width: number;
+    readonly height: number;
+    readonly offset: { readonly x: number; readonly y: number };
+    setSize(width: number, height: number, center?: boolean): unknown;
+    setOffset(x: number, y: number): unknown;
+  };
   readonly x: number;
   readonly y: number;
   readonly anims: PhaserPlayerAnimationControllerLike;
@@ -160,6 +171,7 @@ function animationKeyFromEvent(value: unknown): string | undefined {
 }
 
 export class PhaserPlayerRuntime {
+  private readonly bodyShape: { width: number; height: number; left: number; top: number } | undefined;
   private readonly state: PlayerRuntimeStateMachine;
   private readonly createdAnimations = new Set<string>();
   private animationListenerInstalled = false;
@@ -208,6 +220,13 @@ export class PhaserPlayerRuntime {
     const runtimeOptions: PlayerRuntimeOptions =
       effects === undefined ? stateOptions : { ...stateOptions, effects };
     this.state = new PlayerRuntimeStateMachine(runtimeOptions);
+    const body = sprite.body;
+    this.bodyShape = body === undefined ? undefined : {
+      width: body.width,
+      height: body.height,
+      left: (sprite.scaleX ?? 1) * (body.offset.x - (sprite.displayOriginX ?? 0)),
+      top: (sprite.scaleY ?? 1) * (body.offset.y - (sprite.displayOriginY ?? 0)),
+    };
   }
 
   preload(): void {
@@ -434,6 +453,7 @@ export class PhaserPlayerRuntime {
         .setFrame(0)
         .setDisplaySize(SPECIAL_DISPLAY_SIZE, SPECIAL_DISPLAY_SIZE);
       if (!this.playAnimation(key)) return false;
+      this.preserveBodyShape();
       this.renderedStatus = "idle-action";
       this.renderedIdleAnimation = animation;
       return true;
@@ -457,6 +477,7 @@ export class PhaserPlayerRuntime {
         .setFrame(reverse ? 15 : 0)
         .setDisplaySize(SPECIAL_DISPLAY_SIZE, SPECIAL_DISPLAY_SIZE);
       if (!this.playAnimation(key)) return false;
+      this.preserveBodyShape();
       this.renderedStatus = status;
       this.renderedIdleAnimation = undefined;
       return true;
@@ -488,6 +509,21 @@ export class PhaserPlayerRuntime {
       .setTexture(NORMAL_TEXTURE)
       .setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE)
       .setFrame(walkFrameStart(this.state.facing));
+    this.preserveBodyShape();
+  }
+
+  private preserveBodyShape(): void {
+    const shape = this.bodyShape;
+    const body = this.sprite.body;
+    if (shape === undefined || body === undefined) return;
+    const sx = this.sprite.scaleX ?? 1;
+    const sy = this.sprite.scaleY ?? 1;
+    if (sx === 0 || sy === 0) return;
+    body.setSize(shape.width / Math.abs(sx), shape.height / Math.abs(sy), false);
+    body.setOffset(
+      (this.sprite.displayOriginX ?? 0) + shape.left / sx,
+      (this.sprite.displayOriginY ?? 0) + shape.top / sy,
+    );
   }
 
   private snapshotResult(

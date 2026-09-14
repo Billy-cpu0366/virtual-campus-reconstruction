@@ -1,4 +1,5 @@
 import Phaser from "./phaser.js";
+import { fetchJson } from "./fetchJson.js";
 
 import {
   ChunkCoordinator,
@@ -39,6 +40,7 @@ import {
 } from "../src/player/index.js";
 import {
   PhaserPlayerRuntime,
+  PLAYER_RUNTIME_ASSETS,
   preloadPhaserPlayerRuntimeAssets,
   type PhaserPlayerSceneLike,
   type PhaserPlayerVisualLike,
@@ -331,17 +333,6 @@ export interface CampusSceneShutdownReceipt {
   readonly physicsColliderCount: number | null;
 }
 
-async function fetchJson(
-  url: string,
-  signal?: AbortSignal,
-): Promise<unknown> {
-  const response =
-    signal === undefined ? await fetch(url) : await fetch(url, { signal });
-  if (!response.ok) {
-    throw new Error(`请求 ${url} 失败：HTTP ${response.status}`);
-  }
-  return response.json();
-}
 
 export class CampusScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -483,8 +474,14 @@ export class CampusScene extends Phaser.Scene {
         Math.max(0, Math.min(1, progress)) * PHASER_ASSET_PROGRESS_WEIGHT,
       );
     });
-    this.load.once("loaderror", (file: { readonly key?: unknown }) => {
+    this.load.on("loaderror", (file: { readonly key?: unknown }) => {
+      if (this.sceneDestroyed) return;
       const key = typeof file?.key === "string" ? file.key : "required asset";
+      if (PLAYER_RUNTIME_ASSETS.some((asset) => asset.key === key)) {
+        this.recordSideFailure(`optional-player-asset:${key}`);
+        return;
+      }
+      if (this.requiredLoadError !== undefined) return;
       this.requiredLoadError = new Error(`required asset failed: ${key}`);
       this.entryCallbacks.onError?.(this.requiredLoadError);
     });
@@ -808,6 +805,7 @@ export class CampusScene extends Phaser.Scene {
       this as unknown as PhaserPlayerSceneLike,
       this.player as unknown as PhaserPlayerVisualLike,
       {
+        now: () => this.time.now,
         effects: {
           resetKeyboard: () => {
             this.heldMovementKeys.clear();
@@ -914,6 +912,18 @@ export class CampusScene extends Phaser.Scene {
       onVisitReceipt: (receipt) => {
         zone?.acceptVisitReceipt(receipt);
       },
+    });
+    // Map selections have no physical zone that can emit a leave event.
+    // Subscribe after Interact so its successful close is committed first.
+    ui.subscribeUserClose((event) => {
+      if (!event.residenceId.startsWith("map-residence-") || interact.active !== undefined) return;
+      const marker = CAMPUS_MAP_MARKERS.find((item) => item.menuId === event.menuId);
+      if (marker !== undefined) interact.handleResidenceEvent({
+        markerId: marker.markerId,
+        menuId: event.menuId,
+        residenceId: event.residenceId,
+        phase: "leave",
+      });
     });
     zone = new ZoneRuntime({
       markers: CONTENT_MARKERS,
@@ -1179,7 +1189,10 @@ export class CampusScene extends Phaser.Scene {
 
   private beginShutdown(): Promise<CampusSceneShutdownReceipt> {
     if (this.shutdownTask !== undefined) return this.shutdownTask;
-    this.shutdownTask = this.performShutdown();
+    this.shutdownTask = this.performShutdown().catch((error: unknown) => {
+      this.shutdownTask = undefined;
+      throw error;
+    });
     return this.shutdownTask;
   }
 
@@ -1188,48 +1201,60 @@ export class CampusScene extends Phaser.Scene {
     this.sceneReady = false;
     this.entryChunkTargetLock = undefined;
 
-    this.entryRuntime?.shutdown();
-    this.sprayerRuntime?.shutdown();
-    this.routeCrowdRuntime?.shutdown();
-    this.staticNpcRuntime?.shutdown();
-    this.staticCrowdRuntime?.shutdown();
-    this.bugCrowdRuntime?.shutdown();
-    this.venueCrowdRuntime?.shutdown();
-    this.dancingCrowdRuntime?.shutdown();
-    this.stopAiSmokeRuntime?.shutdown();
-    this.fogRuntime?.shutdown();
-    this.disconnectPoliceCollisions();
-    this.vehicleRuntime?.shutdown();
-    this.smokeRuntime?.shutdown();
-    this.trainRuntime?.shutdown(this.time?.now);
+    const failures: unknown[] = [];
+    const cleanup = (name: string, operation: () => unknown): void => {
+      try {
+        operation();
+      } catch (error) {
+        failures.push(error);
+        this.recordSideFailure(`cleanup:${name}`);
+      }
+    };
+
+    cleanup("entry", () => this.entryRuntime?.shutdown());
+    cleanup("sprayer", () => this.sprayerRuntime?.shutdown());
+    cleanup("route-crowd", () => this.routeCrowdRuntime?.shutdown());
+    cleanup("static-npc", () => this.staticNpcRuntime?.shutdown());
+    cleanup("static-crowd", () => this.staticCrowdRuntime?.shutdown());
+    cleanup("bug-crowd", () => this.bugCrowdRuntime?.shutdown());
+    cleanup("venue-crowd", () => this.venueCrowdRuntime?.shutdown());
+    cleanup("dancing-crowd", () => this.dancingCrowdRuntime?.shutdown());
+    cleanup("stop-ai-smoke", () => this.stopAiSmokeRuntime?.shutdown());
+    cleanup("fog", () => this.fogRuntime?.shutdown());
+    cleanup("police-colliders", () => this.disconnectPoliceCollisions());
+    cleanup("vehicle", () => this.vehicleRuntime?.shutdown());
+    cleanup("factory-smoke", () => this.smokeRuntime?.shutdown());
+    cleanup("train", () => this.trainRuntime?.shutdown(this.time?.now));
+    cleanup("entry-camera", () => this.entryCameraRuntime?.shutdown());
+    cleanup("entry-train", () => this.entryTrainAdapter?.shutdown());
     this.entryRuntime = undefined;
     this.entryCameraRuntime = undefined;
     this.entryTrainAdapter = undefined;
 
-    this.cameraRuntime?.shutdown();
-    this.releaseCameraControlLease();
+    cleanup("camera", () => this.cameraRuntime?.shutdown());
+    cleanup("camera-lease", () => this.releaseCameraControlLease());
     this.cameraRuntime = undefined;
     this.pendingCameraViewport = undefined;
 
-    this.mapRuntime?.destroy();
-    this.zoneRuntime?.destroy();
-    this.interactRuntime?.destroy();
-    this.contentLeaseRuntime?.shutdown();
+    cleanup("map", () => this.mapRuntime?.destroy());
+    cleanup("zone", () => this.zoneRuntime?.destroy());
+    cleanup("interact", () => this.interactRuntime?.destroy());
+    cleanup("content-lease", () => this.contentLeaseRuntime?.shutdown());
     this.mapRuntime = undefined;
     this.zoneRuntime = undefined;
     this.interactRuntime = undefined;
     this.contentUi = undefined;
     this.contentLeaseRuntime = undefined;
 
-    this.stopRoofTweens();
-    this.footstepRuntime?.shutdown();
-    this.playerRuntime?.shutdown();
-    this.playerVisualInterpolator?.shutdown();
+    cleanup("roof", () => this.stopRoofTweens());
+    cleanup("footstep", () => this.footstepRuntime?.shutdown());
+    cleanup("player", () => this.playerRuntime?.shutdown());
+    cleanup("player-visual", () => this.playerVisualInterpolator?.shutdown());
     this.playerVisualInterpolator = undefined;
-    this.joystick?.shutdown();
-    this.stopPlayerMovement();
-    this.mutationScheduler.destroy();
-    this.clearRuntimeTestHooks();
+    cleanup("joystick", () => this.joystick?.shutdown());
+    cleanup("movement", () => this.stopPlayerMovement());
+    cleanup("scheduler", () => this.mutationScheduler.destroy());
+    cleanup("test-hooks", () => this.clearRuntimeTestHooks());
     window.removeEventListener("keydown", this.handleKeyDown);
     window.removeEventListener("keyup", this.handleKeyUp);
     window.removeEventListener("blur", this.handleWindowBlur);
@@ -1239,11 +1264,19 @@ export class CampusScene extends Phaser.Scene {
     );
 
     this.dynamicWorldShutdown = this.shutdownDynamicWorld();
-    await this.dynamicWorldShutdown;
+    try {
+      await this.dynamicWorldShutdown;
+    } catch (error) {
+      failures.push(error);
+      this.recordSideFailure("cleanup:dynamic-world");
+    }
     try {
       this.scene.stop();
     } catch {
       // A generation can fail during preload before ScenePlugin is active.
+    }
+    if (failures.length > 0) {
+      throw new AggregateError(failures, "Scene cleanup reported failures");
     }
     const physicsColliderCount =
       (this.physics?.world?.colliders as any)?.getActive?.().length ?? null;
@@ -2145,6 +2178,9 @@ export class CampusScene extends Phaser.Scene {
         ? currentTargets
         : mergeChunkTargets(currentTargets, this.entryChunkTargetLock),
     );
+    if (this.sceneReady && !this.sceneDestroyed) {
+      await coordinator.retryFailedTargets();
+    }
     await this.mutationScheduler.waitForIdle();
   }
 }

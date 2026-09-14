@@ -24,6 +24,19 @@ const payload: GameUiContentPayload = {
   body: ["Evidence-backed content"],
 };
 
+it("结束的驻留回收去重和抑制记录", () => {
+  const ui = new FakeUi();
+  const interact = runtime(ui, new RecordingLease());
+  for (let index = 0; index < 1000; index += 1) {
+    const id = `residence-${index}`;
+    expect(interact.handleResidenceEvent(event("about", id))).toBe("shown");
+    ui.emitClose({ menuId: "about", residenceId: id, source: "close-button" });
+    interact.handleResidenceEvent(event("about", id, "leave"));
+  }
+  expect((interact as any).committedResidences.size).toBe(0);
+  expect(interact.suppressedResidenceIds).toEqual([]);
+});
+
 function event(
   menuId: ZoneResidenceEvent["menuId"],
   residenceId: string,
