@@ -9,7 +9,7 @@ gate-status: idle
 authorization-ref: not-applicable
 preauthorized-next-work-item: none
 next-phase: implementation
-updated: 2026-09-10
+updated: 2026-09-14
 retrospective-ref: doc/复盘-2026-09-07.md
 collaboration-mode: single-person
 ---
@@ -21,7 +21,7 @@ collaboration-mode: single-person
 - **正在做**：无（`current-work-item: none`）。执行层 16 张系统卡中 15 张已完成详细设计，仅 SYS-ENTITY 仍 undesign；8 个确定性 CORE 已实现并验证。
 - **最近完成**：两波并行设计（M1 地图 + P1 玩家 + SYS-CAMERA 范围已定稿）、碰撞集成、运行时安全修复、SYS-ZONE 设计、SYS-LAYER 运行时收束、地图生命周期收口。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/轨迹/脚印/内容线，不自动合并或推送。
-- **阻塞项**：WSL 沙箱拦截 `git worktree` 命令（需 Human 在 WSL 终端中转）；9-7 rebase 冲突待 Human 决定策略。这些阻塞项阻止了后续正式代码写入，但不影响文档设计层工作（15/16 已定稿）。
+- **阻塞项**：**无技术阻塞**。原记载的两项经 2026-09-14 复核均已不成立：仓库无任何 rebase/merge 残留状态（`git ls-files -u` 为 0），全仓只有一个 worktree，`impl/gameplay-serial` 分支从未创建。真正阻止正式代码写入的是**没有已授权的工作项**，不是环境。
 - **下一步**：Human 自主选择下一工作项（候选见「近期候选」列表）；选择后从 `doc/03-执行层/` 对应系统卡读取范围，取得 Human 签字后才能写 `src/` 正式代码。
 
 ## 项目目标（9-7 复盘后定调）
