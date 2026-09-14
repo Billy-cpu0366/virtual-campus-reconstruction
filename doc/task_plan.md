@@ -181,7 +181,7 @@ collaboration-mode: single-person
 | `WI-SYS-INPUT-TOUCH-001` | 已完成，结果提交 `66a20f8` | 接入移动端原生 Phaser pointer 摇杆；桌面隐藏、单指、键盘优先级切换、释放恢复和移动端浏览器验收已验证；不代表完整 SYS-INPUT 节点完成 |
 | `WI-PARALLEL-MAP-RECON-001` | 已完成，结果基线 `85af370` | A-D 报告和 D 可复核收据已提交；`Q-LAYER-002/003` 保留；转入两波并行设计 |
 | `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | 已完成，结果提交 `a16ae54` | 接口、所有权、两波门禁 和三个实施包已获 Human 接受 |
-| `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` | Human 已授权，当前实现环境准备中（因 WSL 阻塞暂停） | M1 地图与 P1 玩家并行；SYS-CAMERA 已授权暂缓 |
+| `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001` | Human 已授权；原记载的「因 WSL 阻塞暂停」经 2026-09-14 复核不成立，当前不是 work-item 状态而是等待 Human 选定下一项 | M1 地图与 P1 玩家并行；SYS-CAMERA 已授权暂缓 |
 | `WI-RUNTIME-SAFETY-001` | 已完成，结果提交 `632a0c9` | World 同步/异步部分写入回滚、生产环境诊断/钩子限制、入口启动失败收敛、测试钩子清理和网站图标入口均已验证；完整资源清理、完整图层、粒子/NPC/交互和验证器仍不在范围 |
 | `WI-VERIFY-CURRENT-WORK-ITEM-001` | 已接受但只读验证器文件尚未落地 | 作为后续协作交付门禁候选；不与运行时安全工作项混写 |
 | `WI-API-COLLABORATION-REVIEW-001` | PR #3 审查理念已融合，结果提交 `6da5755`；实际外部文档未进入项目事实源 | 若未来取得源文档，按已落盘流程单独审查；当前不合并PR #3、不宣称外部规范已验证 |
