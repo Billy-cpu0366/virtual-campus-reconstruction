@@ -195,7 +195,7 @@ collaboration-mode: single-person
 
 | 工作项 ID | 结果 | 涉及节点 | 产物 | result-commit | Human 决定 |
 |---|---|---|---|---|---|
-| `WI-SYS-ENTITY-DESIGN-001` | completed | SYS-ENTITY | SYS-ENTITY 执行层卡（5 骨架落地 + 皮 + 配置点 + 验收标准 + 残余未知 + 原站证据边界）；理解层卡按代码修正三处；`Q-ENTITY-001` 关闭；API 契约表三条接口按实际设计改写；总账/进度总览同步 | `PENDING` | `DEC-SYS-ENTITY-DESIGN-001` |
+| `WI-SYS-ENTITY-DESIGN-001` | completed | SYS-ENTITY | SYS-ENTITY 执行层卡（5 骨架落地 + 皮 + 配置点 + 验收标准 + 残余未知 + 原站证据边界）；理解层卡按代码修正三处；`Q-ENTITY-001` 关闭；API 契约表三条接口按实际设计改写；总账/进度总览同步 | `ec3df47` | `DEC-SYS-ENTITY-DESIGN-001` |
 | `WI-MAP-GAMEPLAY-PARALLEL-DESIGN-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK; SYS-PLAYER; SYS-CAMERA | 两波并行设计、皮/骨架接口、文件所有权、M1/P1/Camera 候选包和验收门禁 | `a16ae54` | `DEC-MAP-GAMEPLAY-PARALLEL-DESIGN-001` |
 | `WI-PARALLEL-MAP-RECON-001` | completed | SYS-ASSET; SYS-WORLD; SYS-LAYER; SYS-CHUNK | A-D 四份 `task-todos/` 报告；D 可复跑探针、27 样本原始收据和确定性校验 | `85af370` | `DEC-PARALLEL-WORKTREE-001` |
 | `WI-SYS-CHUNK-WORLD-INTEGRATION-001` | completed | SYS-CHUNK; SYS-WORLD; SYS-ASSET; SYS-LAYER | master/chunk 运行时、World事务、Phaser动态装卸、GID兼容修复、验证器页面清理和视觉验收 | `b707553` | `DEC-SYS-CHUNK-WORLD-INTEGRATION-001` |
