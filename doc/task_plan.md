@@ -26,6 +26,34 @@ collaboration-mode: single-person
 
 ## 项目目标（9-7 复盘后定调）
 
+### 2026-09-14 第二轮有界修复
+
+- Human 授权：第二轮审查后的 `自己修复`（`DEC-RUNTIME-REPAIR-20260914-02`）；范围为竖屏摇杆、动画碰撞框、缓存页面恢复、交互历史回收四项。
+- 已落盘：摇杆使用 Phaser ScaleManager 可见 viewport；特殊动画按原始世界坐标碰撞尺寸/偏移补偿；持久化 pagehide 保留游戏并在 pageshow 刷新缩放；历史令牌改弱引用、物理驻留 leave 清理去重记录、地图弹窗关闭补齐虚拟 leave。
+- 验证：新增 9 项回归（含仓库 Phaser 真正的 Body 变换函数）；typecheck、生产构建通过；`npx vitest run --maxWorkers=2 --reporter=dot` 全量 74 文件、426 测试通过。本地启动页已观察到 READY/Play；移动触控与真实浏览器往返缓存仍以模拟回归验证为准。默认并发跑曾有 1 项 5 秒超时，低并发全量复验通过。
+- 边界：本地修改，保留已有用户变更；系统卡工程状态保持既有值，提交与推送待独立授权。
+
+### 2026-09-14 有界运行时修复完成记录
+
+- Human 授权原文：`自己修复`、`继续修复`；范围为本轮代码审查发现的 6 项问题（`DEC-RUNTIME-REPAIR-20260914`）。本轮已完成本地修复，当前工作项保持 `none`。
+- 已修复：异步地图 mutation 串行与 idle 释放、场景清理异常隔离及旧代退役、玩家动画统一场景时钟、游戏内失败分块退避重试、JSON 请求 15 秒 deadline、可选玩家动画素材降级。
+- 验证：类型检查通过；73 个测试文件、417 项测试通过（新增 12 项）；生产构建与运行资源检查通过；状态一致性检查通过。
+- 浏览器交互复验：工具额度限制阻断，本轮以自动化回归验证为准；原本地服务地址为 `http://localhost:4175/`。
+- 交付状态：本地修改保留，原有用户变更保留；提交、推送和完整系统状态晋升保持独立授权。
+
+### 2026-09-14 网络协议层独立成层完成记录
+
+- Human 授权原文：`既然这个和api文档不一样，那就把它单拎出来`；`是和理解层同级的`；`加一个对这个板块的人话说明…`；`你自己修订`；`登记`（`DEC-DOC-LAYER-NETPROTO-001`）。本轮**纯文档**，当前工作项保持 `none`，门禁状态不变。
+- 新增：`doc/06-网络协议层/README.md` —— 与 `01-理解层/` 平级的独立层，含人话说明、原站实测、本机实测、六项传输契约（地址 / 复用 / 配额 / 时限 / 失败定性 / 撤回）、骨架与皮、后台下发清单、缺口与未确认。
+- 订正：`名词解释表.md` #20 分块文件名 `{cx}_{cy}.json` → `chunk{index}.json`；`API契约表.md` §十 标题改「已独立成层」并加跳转入口、订正「无缓存」→「无持久缓存」；§十一 名词计数 226 → 257 条、23 → 24 大类。
+- 新增词条：`名词解释表.md` §二十四（#227–#257，共 31 条）。新增板块：`换皮配置总表.md` §六「网络协议层（补充板块）」。
+- 前提订正：本层 §四① 原写「同一个地图资源三处异名」**不成立** —— 原站 `/assets/maps/` 是 30 文件**全集**，我们 `/maps/` 是 5 文件 **sanitize 子集**，另有 2 张页面图在 `public/assets/maps/`。改述为「两个资产世界」，并给出 A / B 收口方案。
+- 验证：本轮涉及的 6 份文档 267 条相对链接 0 失效；`doc-charset-scan` / `doc-splitword-scan` / `doc-tradchar-scan` 干净；`check-state-consistency.py` PASS；名词表 257 条 / 24 大类无缺号无重复。
+- 顺带订正：`决策记录.md`、`task_plan.md` 里 3 条 HEAD 就已存在的相对链接层级笔误（`README.md` → `../README.md` 等）。
+- ⚠️ 未处理（**只报不改**）：`doc/` 全树另有 15 条失效相对链接，集中在 `01-理解层/写作规范.md`、`03-执行层/00-总账.md`、`03-执行层/README.md`（多数写成 `virtual-campus-reconstruction/01-理解层/…` 前缀，疑为 9-7 目录迁移残留）和 `05-素材/README.md → ../README.md`。不属本轮范围，未动。
+- 交付状态：仅文档，未提交 Git；提交与推送保持独立授权。
+- 未授权：不改 `game/`、`src/`、`public/`、`scripts/`、`tests/`；不扩大 `sample/` 采集；**地图资源根收口**（本层 §四①、§7.3 第 6 项）待单独裁决。
+
 - **整体大目标**：逆向 + 后端 + 后台 + 换皮做各校园网站（Human 9-7 复述）。
 - **Phase 1（当前）**：逆向 + 复刻验证 + 16 系统骨架准备。
 - **Phase 2（远期）**：在 Phase 1 骨架上补后端、后台、换皮能力。
@@ -156,7 +184,7 @@ collaboration-mode: single-person
 
 当前没有 active 工作项（`current-work-item: none`）。上一项 `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001`（两波并行集成：M1 地图运行时收口 + P1 玩家运行时）的设计阶段已完成并通过 Human 签字，但 WSL 沙箱拦截 `git worktree` 命令导致正式代码窗口尚未创建——所以暂停了实现阶段。并行设计的产出（接口文档、文件所有权划分、M1/P1/CAMERA 范围）已落盘于 `task-todos/` 和 API 契约表。
 
-皮/骨架接口仍以 [`02-接口层/API契约表.md`](../02-接口层/API契约表.md) 为唯一索引；SYS-CAMERA 正式实现当前禁止开工（需等 M1+P1 先跑通）。
+皮/骨架接口仍以 [`02-接口层/API契约表.md`](02-接口层/API契约表.md) 为唯一索引；SYS-CAMERA 正式实现当前禁止开工（需等 M1+P1 先跑通）。
 
 ## 已阻塞或暂停工作项
 
@@ -215,7 +243,7 @@ collaboration-mode: single-person
 | `WI-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` | completed | SYS-LAYER; SYS-WORLD; SYS-CHUNK | 视觉/屋顶/标记/脚印 有界运行时、marker 回滚诊断、粒子3层 未消费保留、数据清洗 边界和浏览器 验收 | `10c7d88` | `DEC-SYS-LAYER-RUNTIME-SEMANTICS-IMPLEMENT-001` |
 | `WI-SYS-MAP-LIFECYCLE-CLOSURE-001` | completed | SYS-WORLD; SYS-CHUNK | 取消信号 请求取消、过期 数据变更 补偿、协调器/调度器 异步销毁、碰撞器/Tilemap 清理、生命周期 验收 与固定数量上界 | `d61faa1` | `DEC-SYS-MAP-LIFECYCLE-CLOSURE-001` |
 | `WI-SYS-INPUT-TOUCH-001` | completed | SYS-INPUT; SYS-MOVE | 原生 Phaser pointer 摇杆、桌面隐藏、移动端显示、单指 所有权、最小力度 死区、键盘优先级/释放恢复、适配器测试和移动输入 验收 | `66a20f8` | `DEC-SYS-INPUT-TOUCH-001` |
-| `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](README.md)；历史任务卡在`migration-history/doc-v0.1/` | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
+| `WI-DOC-PORTAL-MIGRATION-001` | completed | not-applicable | 五层人话文档与三份人话入口；[根README](../README.md)；历史任务卡在`migration-history/doc-v0.1/` | `cda98173a24df1b605019d3b7126ea092dd4b6cf` | `DEC-DOC-PORTAL-MIGRATION-001` |
 | `WI-DOC-PORTAL-CLEANUP-001` | completed | not-applicable | 旧目录跳转README；`migration-history/`原件；历史任务卡在`migration-history/doc-v0.1/` | `b2319041fc85974694d29fc607d60678bc139d33` | `DEC-DOC-PORTAL-CLEANUP-001` |
 | `WI-DOC-EXEC-LAYER-MIGRATION-001` | completed | not-applicable | [当前执行层](03-执行层/README.md)；[16系统总账](03-执行层/00-总账.md)；[历史治理记录](migration-history/执行层迁移任务卡（治理记录）.md) | `293cbeb2d9bcf99f28c2a7cb62de10ee0e08f0c5` | `DEC-DOC-EXEC-LAYER-MIGRATION-001` |
 | `WI-SYS-LAYER-VISUAL-EVIDENCE-001` | completed | SYS-LAYER | [SYS-LAYER卡](03-执行层/01-地图线/03-图层与遮挡.md)；证据在`sample/analysis/layer-visual-evidence/`；任务卡在`migration-history/doc-v0.1/` | `f1652629d436ce7f8a7821c760036fdf071ef397` | `DEC-SYS-LAYER-VISUAL-EVIDENCE-001` |
