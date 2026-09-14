@@ -303,7 +303,7 @@ Runtime 独立生命周期：
 | 喷水器（4 个） | sprayer-60-25/67-25/71-25/78-25，escapeRoute 长度 3~59 点，frameRate=6，scale=0.9，depth=500 | [src/npc/sprayer.ts:27-136](src/npc/sprayer.ts) `SPRAYER_CONFIGS` |
 | 寻路算法 | 自定义 A*，8 方向（对角 cost 1.41），每帧 64 迭代，max 50000 迭代，seeded random 打破对称 | [src/npc/gridPathProvider.ts](src/npc/gridPathProvider.ts) |
 | Phaser 适配-静态 NPC | 3 个精灵图 key: npc-special-reading/eating, npc-cat-licking，depth=500+y*0.1 | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts) |
-| Phaser 适配-静态人群 | walk 动画帧起点按方向映射(walkFrameStart)，trackBand 避开 | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) |
+| Phaser 适配-静态人群 | walk 动画帧起点按方向映射(walkFrameStart)，keepStaticCrowdOffTrack 避开 | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) |
 | Phaser 适配-路线人群 | 17 种 NPC 纹理分 normal/train 两组，各组有 spriteKey+offset+visualOffset | [game/PhaserRouteCrowdRuntime.ts](game/PhaserRouteCrowdRuntime.ts) |
 | Phaser 适配-跳舞者 | 8 方向 × 16 帧，frameRate=6，depth=500，scale=0.9 | [game/PhaserDancingCrowdRuntime.ts](game/PhaserDancingCrowdRuntime.ts) |
 | Phaser 适配-虫子 | 24 帧，10fps，38×38 帧尺寸，scale=0.63，origin(0.5,0.85)，4 方向面对 | [game/PhaserBugCrowdRuntime.ts](game/PhaserBugCrowdRuntime.ts) |
