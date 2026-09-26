@@ -1,443 +1,392 @@
 ---
-tags: [虚拟校园, 网络协议层, 传输契约, 骨架/皮]
+tags:
+  - 虚拟校园
+  - 网络协议层
+  - 传输契约
+  - 骨架/皮
+  - 配置下发
 type: design
 status: draft
 knowledge-status: partial
 created: 2026-09-14
-updated: 2026-09-14
+updated: 2026-09-17
 ---
 
-# 网络协议层
+# 网络协议层 —— 传输侧设计
 
-> **一句话**：接口层管「系统 A 怎么调系统 B」；网络协议层管「这些调用最终怎么从服务器把字节拿回来」——地址怎么写、能不能用上次的、一次问几个、多久没回话就放弃、不要了怎么撤回。
-
-> **本层的来由**：`02-接口层/API契约表.md` §十 把「网络协议细节」声明为**独立于接口层的另一个设计层**并列为未覆盖。本文件把那一节列出的四项未覆盖内容正式立起来，同时补上第一性原理和高频遗漏项。
+> 本层**没有原站对照**——查过原站网络证据（`sample/analysis/runtime-network.json`），六项契约里五项拿不到，其中时限 / 失败定性 / 撤回**原理上就查不到**（那是客户端逻辑，不是网络行为）。所以本篇不从逆向出发，而是从第一性原理出发，把六项传输契约逐一落到**代码位置**与**后台要求**。
 
 ---
 
 ## 👀 先看这里（给 Human 的人话总结）
 
-**为什么现在才建这一层**：Phase 2 要补后端和后台管理系统。后台要下发的东西里，有一大半**不是接口签名，而是传输参数**——CDN（内容分发网络）前缀、缓存时长、超时、并发上限。这些原先只在接口层 §十里被标成「不在本表范围」，没有一个正式的家。本文件就是那个家。
+**当前状态**：六项契约里 **① 地址、⑥ 撤回已实现**；**② 复用**实现了两层（在途去重 + 页内缓存，HTTP 缓存没有）；**④ 时限**只做了 JSON（图片无超时）；**⑤ 失败定性**四类已分开、**两套重试机制在跑**；**③ 配额完全没有**。
 
-**这一层现在做到哪了**：
+**还没做的**：并发上限与优先级队列（③）；图片超时（④）；单次循环内退避（⑤）；HTTP 缓存策略（②的第三层）；以及把六项参数收进**一个 `TransportConfig`**——现在全是散落的模块常量，没有一处能整体调参。
 
-| 契约项 | 状态 | 落点 |
-|---|---|---|
-| ① 地址（URL 模板） | 已实现 | `src/asset/urls.ts`、`game/CampusScene.ts:174,582-585` |
-| ② 复用（去重 + 内存缓存） | 部分实现 | `ChunkDataStore` 的 `#inFlight` / `#cache` / `#failures` |
-| ③ 配额（并发上限） | **未实现** | 无任何代码 |
-| ④ 时限（超时） | 已实现 | `game/fetchJson.ts` —— 15s |
-| ⑤ 失败定性（分类 + 重试） | 部分实现 | 重试 3 次已实现；**无退避** |
-| ⑥ 撤回（取消） | 已实现 | `AbortController`（取消遥控器）—— `fetchJson` + `ChunkDataStore` |
+**你审的就认这几条**：
 
-**要收口的一处不一致**：地图资源根。原站在 `/assets/maps/`，我们跑起来的站在 `/maps/`，而 `src/asset/urls.ts` 里写的是 `/assets/maps/`。
+1. 六项契约的**形状**是骨架、**数字**是皮——换校园骨架一个字不动，只换数字（本篇的「一、契约落地」是骨架，「二、皮落地」是数字）。
+2. 地址契约能压成**一个必下发值 + 三条推导**，换校园只改一个字符串（§一 契约 1）。
+3. 六项参数收进**一个 `TransportConfig`**，启动时读一次、整场冻结（§三）。
 
-> **前提要拧一下**：这**不是**「同一个地图资源在三处叫三个名」。原站 `/assets/maps/` 是 30 个文件的**全集**，我们 `/maps/` 是 5 个文件的 **sanitize 子集**，另有两张页面图单独在 `public/assets/maps/`。所以是**两个资产世界**。地图数据只能待在一个根下，而现在 `/maps/`（实际）和 `/assets/maps/`（声明）在抢这个根——今天不炸只因为 `src/asset/` 还没接进运行期。收口方案 A / B 见 §四①。
-
-**最要紧的未知**：原站抓取记录里**没有响应头字段**，所以「原站的分块文件用什么缓存策略」这件事**从现有证据根本推不出来**，只能标未确认。
+**最要紧的一处**：将来按 ③ 加并发队列时，会多出一种「**已排队但还没发出**」的请求——`abort()` 够不着它们，必须让队列条目**自己可丢弃**，否则取消会静默失效（§一 契约 6）。
 
 ---
 
-## 这个板块是干嘛的（人话说明）
-
-### 一句话讲清楚
-
-**接口层是公司内部的 SOP（部门之间怎么交代），网络协议层是车队怎么把货送出去。**
-
-想象一家快递公司。公司内部有明确的章程：仓库收到货要 30 分钟内通知分拣中心，分拣中心按区域分好交给配送站——这些**部门之间的交代**，就是「接口层」管的事。
-
-但章程序里不会写「卡车走哪条高速」「纸箱用多厚的瓦楞纸」「一次最多装几箱」「客户楼下等几分钟没人下来就走」。这些是**货出了围墙之后的事**，属于「网络协议层」。
-
-本板块（网络协议层）就是干这个的：把「系统之间要什么」翻译成「字节怎么过网络」。
-
-### 它管哪些事
-
-| 管的事 | 大白话 | 不管的事 |
-|---|---|---|
-| 地址怎么写 | 「这份地图数据放在哪个网址上」 | 系统之间谁调谁（→ 接口层） |
-| 能不能用上次的 | 「同样一块地图，刚才拿过了，还要再跑一趟吗」 | 拿到数据之后怎么用（→ 各系统卡） |
-| 一次最多问几个 | 「25 块地图一起要，还是排队要」 | 系统内部怎么处理失败（→ `03-执行层/统一失败处理策略.md`） |
-| 多久算超时 | 「等 15 秒还没回来，就当它丢了」 | 后台的业务逻辑、数据库、登录鉴权（→ Phase 2 后台系统） |
-| 失败了算谁的账 | 「没人接 / 说没这东西 / 送错了」，三种账不一样 | 具体某个游戏功能怎么设计（→ 16 张系统卡） |
-| 不要了怎么撤回 | 「玩家走开了，之前发出去的请求怎么喊停」 | |
-
-### 走一遍：玩家点开网页，字节是怎么过来的
-
-> 这一段不出现技术名词，给完全不懂技术的人看。
+## 总览图：六项契约 → 代码 对照
 
 ```
-玩家打开网页 / 点 Play
-      │
-      ▼
-① 先要一张「目录」
-   上面写着：这个世界切成几块、每块叫什么名字
-      │
-      ▼
-② 拿到目录，算出「玩家现在站哪、周围哪几块该看」
-      │
-      ▼
-③ 按算出来的清单，一块一块去要
-   ❓ 同时最多要几块？—— 本层要回答的问题之一
-      │
-      ▼
-④ 要回来的东西，可能有好几种情况：
-   ├─ 好好的 ────────────→ 摆到世界里，玩家看到地图
-   ├─ 半天不回话 ─────────→ ❓ 等多久算丢？（超时）
-   ├─ 回话说「没这东西」──→ ❓ 算谁的错？还试不试？（失败定性）
-   └─ 回来了，但不是我要的那块 → ❓ 会不会污染下一轮？（撤回 / 代际）
-      │
-      ▼
-⑤ 玩家走开了 / 点了 Retry / 关了页面
-   └─→ ❓ 之前发出去还没回来的，怎么喊停？（取消）
+契约                     代码
+────────────────────    ────────────────────────────────────────────────
+① 地址                  src/asset/urls.ts         (MAP_BASE_URL / chunkMasterUrl / tilesetImageUrl)
+                        src/chunk/coordinates.ts  (chunkFileName)
+                        src/chunk/data-store.ts   (resolveRelativeUrl)
+
+② 复用                  src/chunk/data-store.ts   (#inFlight / #cache / #failures)
+                        （HTTP 缓存：无）
+
+③ 配额                  （无）
+
+④ 时限                  game/fetchJson.ts         (JSON_REQUEST_TIMEOUT_MS)
+
+⑤ 失败定性              game/fetchJson.ts         (TimeoutError / AbortError / 非 2xx)
+                        src/chunk/data-store.ts   (#loadChunk 重试循环 / maxAttempts)
+                        src/chunk/coordinator.ts  (#retryBackoff / retryFailedTargets)
+
+⑥ 撤回                  src/chunk/data-store.ts   (#abortController)
+                        src/chunk/coordinator.ts  (#applyIfCurrent 过期丢弃)
+                        game/main.ts              (pagehide → shutdown)
 ```
 
-**一句话**：④⑤ 里那四个 ❓，就是本层要写的全部内容。
-
-### 它和接口层什么关系
-
-打个比方：接口层写的是「**我要第 3 排货架上的那个箱子**」，网络协议层写的是「**这个箱子走哪条线、用多大箱、多久到算丢**」。
-
-| | 接口层（`doc/02-接口层/`） | 网络协议层（本文件） |
-|---|---|---|
-| **回答的问题** | 谁调谁、传什么、返回什么 | 这些调用的字节怎么过网络 |
-| **典型条目** | `API-CHUNK-004`：给定相机视口，返回可见分块坐标集合 | 分块文件请求带什么缓存头、资源前缀怎么拼 |
-| **单位** | 系统 → 系统（软件内部） | 浏览器进程 → 服务端进程（跨机器） |
-| **换校园时** | 骨架不动 | 大部分参数要变（属于「皮」，见 §五） |
-| **权威位置** | `02-接口层/API契约表.md` | 本文件 |
-
 ---
 
-## 一、第一性原理：为什么必须回答这六个问题
+## 一、契约落地
 
-不是设计偏好，是物理约束逼出来的。
+### 契约 1：地址——字节在哪个网址上
 
-浏览器和服务器是**两个进程**，中间只有一根不完美的管子。这根管子有五条改不掉的性质：
+> 第一性原理：字节在某个网址上，网址 = 源 + 路径 + 查询。换校园时**变的是值，不变的是结构**，所以能压成「一个根 + 三条推导」。
 
-| 管子性质 | 逼出来的契约 |
-|---|---|
-| 字节在某个地址上，不在你手里 | ① **地址**——网址怎么写 |
-| 同一个字节搬两次要花两份成本（带宽、内存、电） | ② **复用**——能不能用上次的 |
-| 浏览器对同一个源（origin）的并发连接有硬上限 | ③ **配额**——一次最多问几个 |
-| 有延迟，且延迟无上界（对方可能永远不回） | ④ **时限**——多久算失败 |
-| 会失败：丢包、超时、服务器报错、返回的不是你要的东西 | ⑤ **失败定性**——各算什么账 |
-| 用户会中途不要了（关页面、点 Retry、走出加载范围） | ⑥ **撤回**——怎么喊停 |
+**它怎么工作的**：
 
-> **名词**：**源（origin）**= 协议 + 域名 + 端口三样合起来，比如 `https://peteroravec.com` 就是一个源。浏览器按「源」来限制并发，不是按网址限制。
+根值 `/assets/maps` 只在 `src/asset/urls.ts:9` 的 `MAP_BASE_URL` 定义一次；`game/CampusScene.ts` 的 5 处地图资源加载（181、589-592 行）全部调那里的拼装函数，代码里不再出现字面量路径。分块地址**相对 `master.json` 解析**（`resolveRelativeUrl`），不硬编码根路径。
 
-**核心推论**：这六项**互相制约**，不能各自为政。
+```
+        ┌─ 根（唯一必下发值）──────────────────────────┐
+        │  mapBaseUrl = "https://cdn.x.edu/maps"       │
+        └──────────────────────────────────────────────┘
+                          │
+      ┌───────────────────┴───────────────────┐
+      ▼ 推导一：索引文件名固定                 ▼ 推导二：瓦片图 = 根 + image 名
+   {根}/chunks/master.json                  {根}/{tileset.image}
+      │
+      ▼ 推导三：分块 = 相对索引地址解析
+   {根}/chunks/chunk{index}.json
+```
 
-- 想「更快」→ 提高并发 → 撞上配额上限 → 反而更慢，所以③是①②④的调参前提。
-- 想「更省流量」→ 加长缓存 → 后台换校园后资源变了 → 玩家拿到旧图，所以②必须和「资源文件是否带内容指纹命名」绑定。
-- 想「更可靠」→ 多重试几次 → 服务器被打垮 / 玩家白等 → 所以⑤必须配④的时限和退避。
-- 想「省事」→ 不写取消 → 玩家点 Retry 时旧请求还在跑，回来时污染新状态 → 所以⑥是状态机正确性的前提（`AppRuntime` 的「代」机制就是在收拾这个）。
+**为什么推导比清单好**：若后台下发一张「完整资源清单」，那张清单就得人为维护，早晚和磁盘实际文件对不上。而**推导不会不一致**——`master.json` 本身就是那份清单（它写着有几块、用什么瓦片集），它是唯一的真相源。
 
-**一句话**：接口层定义「要什么」，网络协议层定义「怎么要、要不到怎么办」。
-
----
-
-## 二、原站实测（证据）
-
-**证据文件**：`sample/analysis/runtime-network.json`（采集于 2026-08-09T08:38:45Z，源 `https://peteroravec.com/`，视口 1920×1080）
-
-### 2.1 请求总量与结果
-
-| 项                           | 实测值                                                        |
-| --------------------------- | ---------------------------------------------------------- |
-| 记录条目                        | 396 条（文件声明 `responseCount: 404`，实际记录 396 条，差 8 条未记录，原因未确认） |
-| 其中真实可寻址网址                   | **227 条**（http / 相对路径）                                     |
-| 其中 `data:`（内联数据）            | 7 条（base64 内嵌在页面里，**不产生网络请求**）                             |
-| 其中 `blob:`（内存对象）            | **162 条**（页面在内存里合成的贴图对象，**不产生网络请求**）                       |
-| 状态码                         | **396 条全部 200**，0 条 4xx / 5xx                              |
-| 重复网址                        | **0 条**（227 条可寻址网址全部唯一）                                    |
-| 磁盘缓存命中                      | 0 次                                                        |
-| Service Worker（浏览器后台缓存脚本）命中 | 0 次                                                        |
-
-> **名词**：
-> - **base64**：把二进制数据（如图片）转成纯文本的一种编码方式，好处是能直接塞进文本文件里。
-> - **`data:`**：内联在页面文件里的数据，浏览器读它不走网络，等于「自带的不算快递」。
-> - **`blob:`**：浏览器内存里的临时对象，页面自己算出来的图片挂在这里，同样不走网络。
-> - **状态码 200**：服务器说「拿到了，一切正常」。**4xx** 是「你这边的问题」（如 404 = 没这东西），**5xx** 是「服务器那边的问题」。
-
-> **口径说明**：`blob:` 那 162 条容易被误读成「原站发了 396 个请求」。实际上真实过网络的只有 227 条，其余是内存里合成的贴图。**做性能基准时不要把内存对象算进请求数**，否则会把原站的请求量高估近一倍。
-
-### 2.2 地址约定（原站事实）
-
-| 资源类别 | 路径模板 | 实测条数 |
-|---|---|---|
-| 地图主数据 | `/assets/maps/final_map.json`（完整地图文件）、`/assets/maps/final_map_small.json`（优化版地图元数据） | 各 1 |
-| 分块索引 | `/assets/maps/chunks/master.json`（地图总索引文件） | 1 |
-| 分块数据 | `/assets/maps/chunks/chunk{N}.json`，N = 0…24 | 25 |
-| 独立图层 | `/assets/maps/walls-layer.json`、`/assets/maps/footsteps-layer.json`、`/assets/maps/particle-trajectories.json` | 各 1 |
-| 大图 | `/assets/maps/big-map.webp` | 1 |
-| 精灵 | `/assets/sprites/*.webp`、`/assets/sprites/*.png` | 多条 |
-| 图片 | `/assets/images/**`（logos / cards / portfolio / ui / 头像） | 多条 |
-| 引擎 | `/assets/js/phaser.min.js`（Phaser 游戏框架的压缩版） | 1 |
-| 前端产物 | `main-RV3Z53H4.js`、`polyfills-A7F7OIKC.js`、`chunk-*.js`、`styles-DVTBSD34.css` | 多条 |
-
-- `/assets/maps/` 一个根下承载了 **52 个不同文件**。
-- 外部域**只有两个**：`fonts.googleapis.com`（Press Start 2P 字体）、`fonts.gstatic.com`（woff2 字体文件）。其余全部同源。
-- 另有一条同源分析信标 `/.netlify/scripts/rum`（Netlify 的 RUM = Real User Monitoring，真实用户监控），不属于游戏资源。
-
-> **名词**：**WebP / PNG / woff2** 都是文件格式——WebP 是一种图片格式（比 PNG 小），woff2 是一种网页字体格式。
-
-### 2.3 分块几何（原站数据）
-
-来自 `public/maps/chunks/master.json`（原站镜像经 `sanitize-runtime-maps.mjs` 清洗后的版本）：
-
-| 项 | 值 |
-|---|---|
-| 每块瓦片数 | 28 × 28 |
-| 分块网格 | 5 × 5 = **25 块** |
-| 单瓦片像素 | 16 × 16 |
-| 单块像素 | 28 × 16 = **448 × 448** |
-| 世界原始尺寸 | 140 × 140 瓦片 = **2240 × 2240 像素** |
-| 分块文件名 | `chunk{index}.json`，`index = y × 5 + x` |
-
-> **名词**：
-> - **tile（瓦片）**：地图的最小网格单元，16×16 像素的小方格。
-> - **chunk（地图分块）**：大世界切成的小块，每块含 28×28 瓦片 × 24 层数据。
-> - **sanitize（清洗）**：把原站文件改成本地能用的版本（比如去掉多余字段），不改内容语义。
-
-> ⚠️ **文档不一致（待收口）**：`doc/名词解释表.md` 第 20 条和 `02-接口层/API契约表.md` §十 都把分块文件写成 `{cx}_{cy}.json`（如 `0_0.json`）。但**实际证据里没有这种命名**——原站实测是 `chunk0.json`…`chunk24.json`，本地 `public/maps/chunks/` 也是同样。**以 `chunk{index}.json` 为准**，上述两处文档的描述需要订正。
-
-### 2.4 从这份证据**推不出来**的东西
-
-这两条是诚实边界，不能靠猜：
-
-1. **原站的缓存策略未知**。响应记录只有 `url / status / mimeType / fromDiskCache / fromServiceWorker / timestamp` **六个字段，没有响应头（response headers）**。所以 `Cache-Control` / `ETag` / `Expires` 到底设了什么，**这份证据里没有**。
-   > **名词**：**响应头**是服务器随数据一起回的一小段说明，内容如「这个文件你能存 1 小时」（`Cache-Control`）、「这文件的指纹是 abc123，下次拿这个来问」（`ETag`）、「这文件到某日过期」（`Expires`）。
-   - 旁证（不能当结论）：磁盘缓存命中 0 次，说明**这次单次采集里浏览器没有从磁盘缓存取任何东西**——但单次首访本来就不会命中，这既不能证明原站没设缓存头，也不能证明设了。
-   - 一致的已知结论见 `doc/task-todos/WI-PARALLEL-MAP-RECON-001-窗口C-SYS-ASSET资源加载时序调查报告.md`：「记录需要响应头才能确认的 HTTP cache 结论，不凭单次快照下结论」。
-2. **原站的并发度与时序未知**。396 条的时间戳跨度只有 **14.6 ms**，而且 396 条里只有 295 个不同时间戳——这个分辨率**不足以做请求时序分析**（真实页面加载不可能 15 毫秒内跑完 227 个请求）。所以「原站同时开了几个分块请求」「有没有排队」**无法从这份证据回答**。
-
----
-
-## 三、我们自己跑出来的站（实测）
-
-**当前可玩雏形**（Vite（Vite 构建工具）开发服务器，端口 4175，`strictPort` —— 端口被占就直接报错，不自动换端口）。
-
-### 3.1 实际地址约定
-
-`game/` 运行时里去重后共 **16 条**资源路径：
+**运行期实际用到的路径**（去重后 16 条）：
 
 | 类别 | 路径 | 出处 |
 |---|---|---|
-| 分块索引 | `/maps/chunks/master.json` | `game/CampusScene.ts:174`（`CHUNK_MASTER_URL`） |
-| 地图底图 | `/maps/exterior-final.webp` | `game/CampusScene.ts:582` |
-| 碰撞图 | `/maps/collisions-objects.png` | `game/CampusScene.ts:583` |
-| 墙体图层 | `/maps/walls-layer.json` | `game/CampusScene.ts:584` |
-| 粒子瓦片集 | `/maps/tileset-particles.png` | `game/CampusScene.ts:585` |
+| 分块索引 | `/assets/maps/chunks/master.json` | `game/CampusScene.ts:181`（`CHUNK_MASTER_URL`，值来自 `chunkMasterUrl()`） |
+| 地图底图 | `/assets/maps/exterior-final.webp` | `game/CampusScene.ts:589`（`tilesetImageUrl()`） |
+| 碰撞图 | `/assets/maps/collisions-objects.webp` | `game/CampusScene.ts:590` |
+| 墙体图层 | `/assets/maps/walls-layer.json` | `game/CampusScene.ts:591` |
+| 粒子瓦片集 | `/assets/maps/tileset-particles.webp` | `game/CampusScene.ts:592` |
 | 精灵 | `/sprites/**`、`/sprites/special/**`、`/sprites/cars/**` | 各 Runtime 的 `preload()` |
 | 引擎 | `/vendor/phaser.min.js` | `public/vendor/` |
 | 页面图片 | `/assets/images/**` | `public/assets/images/` |
-| 页面地图缩略图 | `/assets/maps/mini-map.webp`、`/assets/maps/big-map.webp` | `index.html:676,705`（硬编码 `<img src>`，**与游戏地图根不同**） |
+| 页面地图缩略图 | `/assets/maps/mini-map.webp`、`/assets/maps/big-map.webp` | `index.html:676,705`（硬编码 `<img src>`） |
 
-磁盘对应关系：`public/maps/`、`public/assets/maps/`（仅上述 2 图）、`public/sprites/`、`public/assets/images/`、`public/vendor/`。
+磁盘对应：`public/assets/maps/`（地图资源**全部**在此，含 `chunks/`）、`public/sprites/`、`public/assets/images/`、`public/vendor/`。`public/` **整个目录不进版本库**（`.gitignore:4`），由 `npm run prepare:runtime` → `scripts/prepare-runtime-assets.mjs` 从 `sample/` 镜像生成；脚本注释写明这是「创建 `public/` 的唯一受支持方式」。
 
-> `public/` **整个目录不进版本库**（`.gitignore:4`），由 `npm run prepare:runtime` → `scripts/prepare-runtime-assets.mjs` 从 `sample/` 镜像生成。脚本注释写明这是「创建 `public/` 的唯一受支持方式」。
+**不在这个根里的两类**：① **页面地图缩略图**（`mini-map.webp`、`big-map.webp`）——网页 chrome，跟着 `index.html` 走；② **精灵与引擎**（`/sprites/**`、`/vendor/phaser.min.js`）——现在仍与原站不同名（原站是 `/assets/sprites/**`、`/assets/js/phaser.min.js`，见 §六）。
 
-### 3.2 已经实现的网络行为
+**代码在哪**：
 
-**统一 JSON（一种纯文本数据格式）取数器** `game/fetchJson.ts`：
+| 做什么 | 文件路径 + 行号 | 关键函数/类型 |
+|---|---|---|
+| 地图资源根 | [src/asset/urls.ts](../../src/asset/urls.ts) 第 9 行 | `MAP_BASE_URL` |
+| 索引 / 瓦片图 / 图层地址 | [src/asset/urls.ts](../../src/asset/urls.ts) | `chunkMasterUrl()` / `tilesetImageUrl()` / `independentLayerUrl()` |
+| 运行期调用点 | [game/CampusScene.ts](../../game/CampusScene.ts) 第 181、589-592 行 | 5 处地图资源加载 |
+| 分块文件名 | [src/chunk/coordinates.ts](../../src/chunk/coordinates.ts) 第 74-79 行 | `chunkFileName()` |
+| 分块索引公式 | [src/chunk/coordinates.ts](../../src/chunk/coordinates.ts) 第 55-61 行 | `chunkCoordinateToIndex()` |
+| 相对地址解析 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) | `resolveRelativeUrl()` |
+| 瓦片集现场推导 | `scripts/` 与 `src/asset/` | `discoverOptimizedTilesets()` |
 
-| 行为 | 实现 |
-|---|---|
-| 超时 | `JSON_REQUEST_TIMEOUT_MS = 15_000`（15 秒） |
-| 超时覆盖范围 | **一个截止时刻同时管响应头和 JSON 正文的读取**（注释明确写了这一点） |
-| 取消 | 内部自建 `AbortController`（浏览器提供的「取消遥控器」），把调用方的 `signal`（取消信号）桥接进来；`{ once: true }` 只监听一次 + `finally` 里摘掉监听 |
-| 超时 vs 取消的区分 | 超时 → `TimeoutError`（超时错误）；生命周期取消 → `AbortError`（中止错误）。**两者名字不同，可分别处理** |
-| 非 2xx | `!response.ok` → 抛错，错误信息里带 `HTTP <状态码>` |
+**设计动作**：`MAP_BASE_URL` 常量 → 改为从 `TransportConfig.mapBaseUrl` 取值。**改 `src/`，按 `AGENTS.md` §7 需要已授权的正式工作项**；在此之前根值仍是模块常量。
 
-**分块取数器** `src/chunk/data-store.ts`：
-
-| 行为 | 实现 |
-|---|---|
-| 重试次数 | `maxAttempts ?? 3` |
-| 在途去重 | `#inFlight`（一个键值对容器）—— 同一坐标的并发请求合并成同一个 Promise（「将来会有结果」的占位对象） |
-| 成功缓存 | `#cache` —— 命中直接返回，不再过网络 |
-| 失败记忆 | `#failures` —— 失败后不自动重发，除非显式调 `retryChunk()` |
-| 取消 | 一个 `#abortController` 管全部请求；`destroy()` 时 `abort()` |
-| 取消语义 | `isChunkRequestAbortedError()` 只认 `AbortError` → **`TimeoutError` 不被当成取消，仍然是可重试的失败** |
-| 地址推导 | `resolveRelativeUrl(masterUrl, "chunk{N}.json")` —— 分块地址**相对 master.json 的地址解析**，不硬编码根路径 |
-
-**上层编排** `src/chunk/coordinator.ts`：目标集合变了才发请求；按坐标串行化 mutation（对数据的一次修改）；销毁时 `Promise.allSettled`（等一组异步操作全部结束，不管成功失败）等所有在途请求落地。
-
-### 3.3 与原站/文档的不一致（要收口）
-
-| # | 项 | 原站 | 我们跑的站 | 文档写的 | 判断 |
-|---|---|---|---|---|---|
-| 1 | **地图资源根** | `/assets/maps/`（30 文件全集） | `/maps/`（5 文件派生子集） | `src/asset/urls.ts` 写 `/assets/maps/` | **两个资产世界，非同一资源的三处异名**，见 §四① |
-| 2 | **分块超时** | 未确认 | 15s | `统一失败处理策略.md` §二 建议 10s；`API契约表.md` §十 说默认 10s | 代码 15s ≠ 文档 10s，需对齐 |
-| 3 | **并发上限** | 未确认 | **无实现** | `API契约表.md` §十 说「最多 6 个并发」 | 文档有、代码无 |
-| 4 | **缓存** | 未确认 | 只有内存缓存，无 HTTP 缓存策略 | `API契约表.md` §十 说「无缓存」 | 措辞歧义，见 §四② |
-| 5 | **重试退避** | 未确认 | **无退避**（循环里立即重发） | `统一失败处理策略.md` §四 P2 列为待确认 | 实测确认＝无间隔 |
-| 6 | **分块文件名** | `chunk{N}.json` | `chunk{N}.json` | `名词解释表.md` #20 与 `API契约表.md` §十 写 `{cx}_{cy}.json` | 两处文档需订正，见 §二.3 |
+**怎么验证它做对了**：[tests/asset/runtime-assets.test.ts](../../tests/asset/runtime-assets.test.ts) 核对运行期资源布局与扩展名；5 个 `scripts/browser-*.mjs` 冒烟脚本断言实际请求的路径。
 
 ---
 
-## 四、六项契约
+### 契约 2：复用——同样一块数据要不要再跑一趟
 
-### ① 地址契约（URL 模板）
+> 第一性原理：同一个字节搬两次要花两份成本（带宽、内存、电）。但「省」的手段有三种，**生命周期完全不同，别混为一谈**。
 
-**定义**：一个逻辑资源名 → 一个可取的网址。
+**它怎么工作的**：
 
-| 参数     | 值 / 位置                                                                                                                  |
-| ------ | ----------------------------------------------------------------------------------------------------------------------- |
-| 根路径    | `game/`：`/maps`；`src/asset/urls.ts`：`MAP_BASE_URL = "/assets/maps"`                                                     |
-| 分块文件名  | `chunk{index}.json`，`index = y × 横向块数 + x`                                                                              |
-| 分块地址推导 | **相对 master.json 的地址解析**，不是拼绝对路径                                                                                        |
-| 清单型资源  | 瓦片集（tileset）不是写死列表，靠 `discoverOptimizedTilesets()` 从 `final_map_small.json` 的 `tilesets` 数组里按前缀（`"exterior-small"`）现场推导 |
-
-**⚠️ 三处不一致（待收口）**：
-
-| 出处 | 根路径 | 磁盘 | 内容 |
+| 层次 | 生命周期 | 管什么 | 我们有没有 |
 |---|---|---|---|
-| 原站 | `/assets/maps/` | —— | 30 个散列文件 + `chunks/`（26 JSON）= **全集** |
-| 我们跑的站（地图） | `/maps/` | `public/maps/` | 5 个散列文件 + `chunks/`（26 JSON）= sanitize 后的**派生运行集** |
-| 我们跑的站（页面图） | `/assets/maps/` | `public/assets/maps/` | 2 个文件（`mini-map.webp`、`big-map.webp`） |
-| `src/asset/urls.ts` | `/assets/maps/` | —— | 建模**原站**那一侧，未接入运行时 |
+| **在途去重** | 一个请求的飞行时间 | 同一坐标并发只发一次 | ✅ `#inFlight` |
+| **内存缓存** | 页面存活期 | 已拿到的分块不再要 | ✅ `#cache` |
+| **HTTP 缓存** | 跨页面 / 跨会话 | 关掉页面也不丢 | ❌ 无 `Cache-Control` / `ETag`，无持久存储 |
 
-**前提订正（2026-09-14）**：这**不是**「同一个地图资源在三处叫三个名」。原站 `/assets/maps/` 是 30 文件的**全集**，我们 `/maps/` 是 5 文件的 **sanitize 派生子集**——`final_map_small.json`、`exterior-small*.webp`（16 个）、`footsteps-layer.json`、`particle-trajectories.json`、`full-map.webp` 等 **23 项**原站有、我们没有。所以这是**两个资产世界**，不是三处笔误。
-
-**冲突到底在哪（订正版，2026-09-14）**：
-
-先澄清一个之前写错的理由。**分块**的地址解析方式**不是**问题所在：`resolveRelativeUrl(masterUrl, "chunkN.json")` 让分块地址**跟着 master.json 走**——master 在哪，25 个 chunk 就在哪，一整包同进同退。
-
-**瓦片集**才是关键，而且原站与我们的机制**不一样**：
-
-| | 瓦片图怎么找到 |
+| 职责 | 实现 |
 |---|---|
-| **原站** | 约定是 `image` 名字**相对于 JSON 所在目录**解析 → 所以原站把 30 个文件全堆在 `/assets/maps/` 一个根下，是同根**必需** |
-| **`src/asset/urls.ts`** | 把上面那条固化成 `${MAP_BASE_URL}/${image}` = `/assets/maps/{image}`，**假设图和 JSON 同根** |
-| **`game/`（我们运行期）** | 不依赖相对解析——`CampusScene.ts:582-585` 用**显式绝对路径**预加载贴图，再用 Phaser 的贴图 key 挂上 tilemap（`addTilesetImage("exterior", "exterior", …)` 第二个参数是**已加载的 key，不是网址**） |
+| 在途去重 | `#inFlight` Map —— 同一坐标的并发请求合并成同一个 Promise，后续复用 |
+| 成功缓存 | `#cache` Map —— 命中直接返回，不再过网络 |
+| 失败记忆 | `#failures` Map —— 记录坐标、错误类别、尝试次数；失败后不自动重发，除非显式调 `retryChunk()` |
 
-**所以真正的问题比"原理上不能共存"小，也具体**：地图数据（master + 25 chunk + 全部瓦片图）**只能待在一个根下**，而现在有两个说法在抢这个根——`/maps/`（地图数据**实际**在 `public/maps/`）和 `/assets/maps/`（`src/asset/urls.ts` **声明**的，也是原站的）。今天不炸，只因为 `src/asset/` 还没被接进运行期；一旦接上，`chunkMasterUrl()` 就会请求 `/assets/maps/chunks/master.json`——**404**，那儿只有两张 UI 图。
+**代码在哪**：
 
-**收口方案（需 Human 选一个）**：
+| 做什么 | 文件路径 + 行号 | 关键函数/类型 |
+|---|---|---|
+| 在途去重 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 322-325 行 | `#inFlight` Map |
+| 成功缓存 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 173 行 | `#cache` Map |
+| 失败记录 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 175 行 | `#failures` Map |
 
-- **A｜统一到 `/assets/maps/`（贴原站，也是 `src/asset/urls.ts` 现值）**：把派生运行集也生成到 `public/assets/maps/`。要改 `scripts/prepare-runtime-assets.mjs`、`scripts/check-runtime-assets.mjs`、`scripts/sanitize-runtime-maps.mjs`、`game/CampusScene.ts`（5 处）、6 个 `scripts/browser-*.mjs` 路径断言、`tests/asset/runtime-assets.test.ts`。**不碰 `src/`**。代价：派生子集与原站全集共用一个路径空间，需靠文档讲清「同名不同集」。
-- **B｜保留 `/maps/` 为运行根，把根路径做成皮（配置点）**：`MAP_BASE_URL` 改为可注入、由后台下发。**必须改 `src/`**——按 `AGENTS.md` §7 需先有已授权的正式工作项。
+**设计动作**：
 
-**两者的关系**：A 收口今天，B 是换皮时的目标形态（每个校园的资产包来自后台下发，根路径本来就是皮）。建议 **A 现在做、B 记为本层的设计规则**。
+1. **前两层保留**。它们是页内优化，和后台无关，换校园也不用改。
+2. **第三层由后台下发**，且**必须按「名字是否带内容指纹」分档**——见 §五。这是本层对后台最硬的一条要求。
+3. **措辞以「持久 / 页内」区分**：`API契约表.md` §十 说的「无缓存」指**没有持久缓存**；`ChunkDataStore` **确有页内内存缓存**，两者不矛盾。
 
-> **换皮提示**：无论选哪个，后台下发时必须区分——页面图（`mini-map`/`big-map`/`map-holder`）走原站口径 `/assets/`，地图运行集是可配置根。见 §六。
+**怎么验证它做对了**：[tests/chunk/data-store.test.ts](../../tests/chunk/data-store.test.ts) 覆盖缓存命中、在途去重、失败记录与销毁。
 
-### ② 复用契约（缓存与去重）
+---
 
-三个不同层次，**别混为一谈**：
+### 契约 3：配额——一次最多问几个
 
-| 层次 | 生命周期 | 我们有没有 | 原站 |
-|---|---|---|---|
-| **在途去重** | 一个请求的飞行时间 | ✅ `#inFlight` | 未确认（见下） |
-| **内存缓存** | 页面存活期 | ✅ `#cache` | 未确认 |
-| **HTTP 缓存** | 跨页面 / 跨会话 | ❌ 无 `Cache-Control`/`ETag`，无 Service Worker | **未确认**（证据无响应头） |
+> 第一性原理：浏览器对**同一个源**（origin）的并发连接有硬上限，HTTP/1.1 通常 6 个。25 个分块一次全发，多出来的请求在浏览器层面排队——**而浏览器不认识游戏逻辑，不会把「玩家正前方的块」排到前面**。结果是玩家脚下那块可能要等最后一块。
 
-> **名词**：**Service Worker（后台缓存脚本）** 和 **IndexedDB / localStorage（浏览器本地数据库 / 小仓库）** 是三种「关掉页面也不丢」的持久存储手段。
+**它怎么工作的**：**完全未实现**。`ChunkCoordinator.updateTargets()` 对所有目标块一起发请求，没有任何上限。
 
-- **在途去重 ≠ 原站事实**：这次采集 227 条网址 **0 重复**，但这只说明「这次没重复」，**不能证明原站有去重机制**。`WI-PARALLEL-MAP-RECON-001-窗口C` 的结论一致：「原站没有独立的 in-flight 请求表；请求成功前的重复调用可能产生重复 HTTP 请求」——保持未确认。
-- **接口层 §十 说「无缓存」是歧义**：它指的是「没有 Service Worker / IndexedDB / localStorage 持久缓存」，而代码里 `ChunkDataStore` **确实有内存成功缓存**。两句话都对，但连起来读会矛盾。建议 §十 改成「无持久缓存（HTTP / Service Worker / IndexedDB），有页内内存缓存」。
-- **能不能长缓存的前提**：原站前端产物是**内容哈希文件名**（如 `main-RV3Z53H4.js`——名字里带一段内容算出来的指纹，内容一变指纹就变），这种名字天然可以标 `immutable`（「永不变，放心长存」）长缓存。但**地图数据是固定名**（`chunk0.json`、`final_map.json`），换校园内容就变，**不能长缓存**——这是后台下发缓存策略时必须分开对待的两类资源。
+**这是本层唯一一个「只有游戏自己才知道」的信息**：优先级次序来自玩法（玩家 3×3 邻域 > 相机可见 > 其余），浏览器无从知晓。
 
-> **名词**：**内容哈希文件名** = 文件名里带一段由文件内容算出来的指纹。好处：内容变 → 名字变 → 浏览器自然当成新文件，不会拿到旧的。
+**代码在哪**：无。要加的话落在 [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 的 `updateTargets()`（第 113-163 行）。
 
-### ③ 配额契约（并发上限与排队）
+**设计动作**：
 
-**定义**：同一时刻最多几个在途请求；超了怎么排队、谁优先。
+1. 加 `maxInFlight` 上限 + 一个**优先级队列**。
+2. **上限值下发（皮），优先级次序不下发（骨架）**——前者是部署环境的事（HTTP/1.1 还是 HTTP/2、有没有 CDN），后者是玩法的事。
+3. 队列必须**可取消**——见契约 6。
 
-| | 状态 |
+**怎么验证它做对了**：待补。可用 `coordinator.state.requesting` 观察在途数量上界。
+
+---
+
+### 契约 4：时限——多久没回话算失败
+
+> 第一性原理：延迟无上界，对方可能永远不回。所以**每个请求都必须有一个截止时刻**，且这个截止时刻要覆盖**全程**——只管到响应头是不够的，正文卡住时仍然会永久挂起。
+
+**它怎么工作的**：
+
+| 行为 | 实现 |
 |---|---|
-| 我们 | **完全未实现**。`updateTargets()` 对所有目标块一起发请求，没有上限 |
-| 原站 | 未确认（时间戳不可用，见 §二.4） |
-| 文档 | `API契约表.md` §十 提到「HTTP/1.1 通常 6 个」，「并发上限未定稿」 |
+| 超时 | `JSON_REQUEST_TIMEOUT_MS = 15_000`（15 秒），`game/fetchJson.ts:1` |
+| 超时覆盖范围 | **一个截止时刻同时管响应头和 JSON 正文的读取**（注释明确写了这一点） |
+| 超时 vs 取消的区分 | 超时 → `TimeoutError`；生命周期取消 → `AbortError`。**两者名字不同，可分别处理** |
+| 图片 / 瓦片集 | **无超时**，走 Phaser 的 `load.image()` / `load.json()`，不受 `fetchJson` 管，依赖浏览器默认 |
 
-**为什么迟早要做**：25 个分块一次全发，同源连接数只有个位数，多出来的请求在浏览器层面排队——**而且浏览器不认识游戏逻辑，不会把「玩家正前方的块」排到前面**。结果是玩家脚下那块可能要等最后一块。优先级（玩家 3×3 邻域 > 相机可见 > 其余）是**只有游戏自己才知道的信息**，必须由前端显式排队。
+**代码在哪**：
 
-### ④ 时限契约（超时）
+| 做什么 | 文件路径 + 行号 | 关键函数/类型 |
+|---|---|---|
+| 统一 JSON 取数器 | [game/fetchJson.ts](../../game/fetchJson.ts) 第 1 行 | `JSON_REQUEST_TIMEOUT_MS` |
+| 截止时刻与取消桥接 | [game/fetchJson.ts](../../game/fetchJson.ts) | `fetchJson()` |
 
-| 参数 | 当前值 | 位置 | 文档建议 |
-|---|---|---|---|
-| JSON 取数超时 | **15 000 ms** | `game/fetchJson.ts:1` | `统一失败处理策略.md`：分块 10s |
-| 覆盖范围 | 响应头 + 正文读取（一个截止时刻） | `game/fetchJson.ts:3` 注释 | — |
-| 瓦片集 / 图片超时 | **无**（依赖浏览器默认） | — | 30s（`统一失败处理策略.md` §四 P0） |
+**设计动作**：把 15 000 这个数字从常量挪进 `TransportConfig.timeouts.json`；补上 `timeouts.image`（图片 / 瓦片集超时）。
 
-**一个截止时刻管全程是对的**：如果只管到响应头，正文卡住时仍然会永久挂起。这个实现比大多数项目严谨，应当保留。
+**怎么验证它做对了**：现有回归覆盖 JSON 超时分支；图片超时待补测试。
 
-### ⑤ 失败定性契约（分类 + 重试）
+---
 
-**四类失败，账不一样**：
+### 契约 5：失败定性——失败了算谁的账
+
+> 第一性原理：失败不是一种。不同来源的失败**账不一样、处置也不一样**。分类错了会出现两种坏结果：把可恢复的当成致命（白放弃），或把致命的当成可恢复（白重试）。
+
+**它怎么工作的**——四类失败，账不一样：
 
 | 失败 | 产生方 | 名字 | 是否可重试 | 我们怎么处理 |
 |---|---|---|---|---|
 | 超时 | `fetchJson` 的定时器 | `TimeoutError` | ✅ 可重试 | `ChunkDataStore` 计入尝试次数 |
-| 生命周期取消 | 调用方 / `destroy()` | `AbortError` | ❌ 不是失败 | 转 `ChunkRequestAbortedError`，**不记失败、不报错** |
+| 生命周期取消 | 调用方 / `destroy()` | `AbortError` | ❌ **不是失败** | 转 `ChunkRequestAbortedError`，不记失败、不报错 |
 | 非 2xx | `fetchJson` 的 `!response.ok` | `Error` | ✅ 可重试 | 计入尝试次数 |
-| 内容不合法 | `parseChunk` | `ChunkDataError` | ⚠️ 重试无意义但代码仍重试 | 计入尝试次数，最终记入 `#failures` |
+| 内容不合法 | `parseChunk` | `ChunkDataError` | ❌ **重试无意义** | 当前仍重试 |
 
-**重试**：`maxAttempts = 3`，**无退避**（循环里 `await` 完立即重发）。
+**⚠️ 本项目有两套重试，不是一个**——这是本层最容易看错的地方：
 
-> **名词**：**退避（backoff）** = 失败后不立刻重试，而是等一会儿（如 1s → 2s → 4s）再试。好处是给服务器喘息时间；坏处是玩家多等。
+| | 单次取数的重试循环 | 失败目标的重试调度 |
+|---|---|---|
+| 位置 | `src/chunk/data-store.ts` `#loadChunk()` | `src/chunk/coordinator.ts` `#retryBackoff` + `retryFailedTargets()` |
+| 管什么 | 同一块**连发几次** | 失败过的目标**什么时候才准再试** |
+| 次数 | **3**（`data-store.ts:186`，唯一定义处） | 无固定次数 |
+| 退避 | **无**——`await` 完立即重发 | **有，指数退避**：2 500 ms 起、每次翻倍、封顶 30 000 ms |
+| 谁驱动 | 循环自己 | `game/CampusScene.ts:2189`——**每次目标集合更新时检查一遍**（不是定时器） |
 
-**这里有一个设计上值得讨论的点**：第 4 类（内容不合法）**重试是浪费的**——JSON 格式错、图层数不对，重试 3 次拿到的还是同一个坏文件。`统一失败处理策略.md` 的三级分类里这类应属「致命」或「可降级」，不该走「可恢复」的重试路径。当前实现把四类一律重试 3 次，可以接受（简单、无害），但如果要做性能基准，这 3 次会额外制造 2 个无用请求。
+> **驱动方式的含义**：重试由「目标集合更新」触发，所以**玩家站着不动时不会重试**。这本身合理（没人动就没必要重试），但要清楚它不是后台定时轮询。
 
-### ⑥ 撤回契约（取消）
+**代码在哪**：
+
+| 做什么 | 文件路径 + 行号 | 关键函数/类型 |
+|---|---|---|
+| 重试循环 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 348-428 行 | `#loadChunk()` |
+| 尝试次数默认值 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 186 行 | `maxAttempts ?? 3` |
+| 调用点传值 | [game/CampusScene.ts](../../game/CampusScene.ts) 第 1346 行 | `{ maxAttempts: 3 }` |
+| 失败退避记录 | [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 第 184-185 行 | `#retryBackoff` 的 `nextAt` 放行 |
+| 退避曲线 | [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 第 233 行 | 初始 2 500 ms、翻倍、封顶 30 000 ms |
+| 退避驱动 | [game/CampusScene.ts](../../game/CampusScene.ts) 第 2189 行 | 每次目标集合更新调 `retryFailedTargets()` |
+
+**设计动作**：
+
+1. **把第 4 类从重试路径里拿出来**。JSON 格式错、图层数不对——重试拿到的还是同一个坏文件，纯浪费请求。按[统一失败处理策略](../03-执行层/统一失败处理策略.md)的三级分类，这类应走「致命 / 可降级」，不该走「可恢复」的重试。**这是本层唯一建议改现有行为的地方**。
+2. **单次循环内补退避**。目标级调度**已经有退避**，但同一块内的连发仍是零间隔——两层要对齐，否则第一轮连发就把服务器砸了。
+3. **配置默认值取现状，不是重设**：`maxAttempts = 3`、`backoffInitialMs = 2500`、`backoffFactor = 2`、`backoffMaxMs = 30000`。
+4. **`maxAttempts` 只留一个定义处**（`data-store.ts:186`），调用点不单独调低。
+
+**怎么验证它做对了**：[tests/chunk/data-store.test.ts](../../tests/chunk/data-store.test.ts) 覆盖失败与重试分支；[tests/chunk/coordinator.test.ts](../../tests/chunk/coordinator.test.ts) 覆盖退避放行与过期守卫。
+
+---
+
+### 契约 6：撤回——不要了怎么把请求截回来
+
+> 第一性原理：用户会中途不要了（关页面、点 Retry、走出加载范围）。不管的话，旧请求回来时会**污染新状态**——这是状态机的正确性问题，不是性能问题。
+
+**它怎么工作的**：
 
 | 场景 | 谁触发 | 我们怎么做 |
 |---|---|---|
 | 玩家走出目标范围 | `ChunkCoordinator` | 从 `#targets` 移除 → 丢弃过期响应（`#applyIfCurrent` 里查 `#targets.has(key)`） |
 | 用户点 Retry / 关页面 | `AppRuntime.cleanup` | `dataStore.destroy()` → `abortController.abort()` → 全部在途请求中断 |
-| 页面关闭（`pagehide`） | `game/main.ts:315` | `appRuntime.shutdown()` → 清理全链路 |
+| 页面关闭（`pagehide`） | `game/main.ts` | `appRuntime.shutdown()` → 清理全链路 |
 
-**关键约定（已实现且必须保持）**：取消是**正常行为**，不是失败——不触发错误状态、不打印错误日志、不计入 `#failures`。这条写在 `统一失败处理策略.md` §二.4，代码里由 `isChunkRequestAbortedError` 落实。
+**关键约定（已实现且必须保持）**：取消是**正常行为**，不是失败——不触发错误状态、不打印错误日志、不计入 `#failures`。这条写在[统一失败处理策略](../03-执行层/统一失败处理策略.md) §二.4，代码里由 `isChunkRequestAbortedError` 落实。
 
----
+**⚠️ 加并发队列会新开一个取消口子**：现在「取消」只需管**已发出**的请求（一个 `AbortController` 全断）。一旦按契约 3 加了排队，就出现第三种状态：**已排队但还没发出**。这类请求不能靠 `abort()` 取消（还没进 `fetch`），必须从队列里**移除**，否则取消后还会照样发出去——**取消就失效了**。所以契约 3 和契约 6 必须一起设计：**队列的每个条目都要能单独丢弃**。
 
-## 五、骨架与皮
+**代码在哪**：
 
-沿用全项目的「骨架 / 皮」分类（读法见 `02-接口层/API契约表.md` 的皮标注读法）：
-**骨架** = 换什么校园都不变的做事方式；**皮** = 跟 Peter 这个具体项目绑定的内容。
-
-| 契约项 | 骨架（换校园不变） | 皮（换校园要改） |
+| 做什么 | 文件路径 + 行号 | 关键函数/类型 |
 |---|---|---|
-| ① 地址 | 「资源根路径 + 相对推导」这个机制；分块文件名公式 | 根路径值、CDN 域名、各校园的资源清单 |
-| ② 复用 | 「在途去重 + 成功缓存 + 失败记忆」三层的存在 | 缓存时长、哪些资源可长缓存（取决于是否内容哈希命名） |
-| ③ 配额 | 「有上限 + 有优先级排队」这个机制 | 上限数值、优先级半径（3×3 还是别的） |
-| ④ 时限 | 「每个请求都有截止时刻」的规矩 | 毫秒数（按资源类型分档） |
-| ⑤ 失败定性 | 「四类失败分开记 + 可重试的才重试」的分类法 | 重试次数、退避曲线 |
-| ⑥ 撤回 | 「取消不算失败」的语义 | 具体的取消触发点集合 |
+| abort 控制器 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 17 / 177 行 | `#abortController` / `#throwIfDestroyed()` |
+| 取消识别 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 31-39 行 | `isChunkRequestAbortedError()` |
+| apply 前过期检查 | [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 第 242-248 行 | `#applyIfCurrent()` 守卫 |
+| remove 前过期检查 | [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 第 272-274 行 | `#removeIfCurrent()` 守卫 |
+| 协调器销毁 | [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 第 178-198 行 | `destroyAsync()` |
+| 页面关闭 | [game/main.ts](../../game/main.ts) | `pagehide` → `appRuntime.shutdown()` |
 
-**一句话记**：这六项的**形状**是骨架，**数字**是皮。换校园时骨架一个字不动，只换数字——这正好是后台管理系统要下发的东西。
+**设计动作**：加队列时，队列条目自带取消标记；`destroy()` / 目标移除时一并从队列剔除。**待授权**（同契约 3）。
+
+**怎么验证它做对了**：[tests/chunk/coordinator.test.ts](../../tests/chunk/coordinator.test.ts) 测试过期结果被拒绝；浏览器 `browser:lifecycle-smoke` 验证销毁后无异常 / 无失败请求。
 
 ---
 
-## 六、后台管理系统需要提供什么
+## 二、皮落地
 
-这一节是**这一层对 Phase 2 的直接交付物**——你正在搭的后台，要负责的东西里属于网络协议层的部分。
+**皮 = 跟具体校园绑定、换校园要改的数字**。全部数字的唯一实测出处是本节。
 
-### 6.1 后台要下发的前端参数
+| 皮 | 精确值 | 在哪 |
+|---|---|---|
+| 地图资源根 | `/assets/maps` | [src/asset/urls.ts](../../src/asset/urls.ts) 第 9 行 `MAP_BASE_URL` |
+| JSON 取数超时 | 15 000 ms | [game/fetchJson.ts](../../game/fetchJson.ts) 第 1 行 |
+| 图片 / 瓦片集超时 | 无（依赖浏览器默认） | —— |
+| 单次循环最大尝试 | 3 | [src/chunk/data-store.ts](../../src/chunk/data-store.ts) 第 186 行 |
+| 目标级退避初值 | 2 500 ms | [src/chunk/coordinator.ts](../../src/chunk/coordinator.ts) 第 233 行 |
+| 目标级退避倍数 | 2（每次翻倍） | 同上 |
+| 目标级退避上限 | 30 000 ms | 同上 |
+| 并发上限 | 无上限（未实现） | —— |
+| 分块文件名格式 | `chunk{index}.json` | [src/chunk/coordinates.ts](../../src/chunk/coordinates.ts) 第 74-79 行 |
+| 分块索引公式 | `index = y × 横向块数 + x` | [src/chunk/coordinates.ts](../../src/chunk/coordinates.ts) 第 55-61 行 |
+| 地图资源扩展名 | `.webp`（`collisions-objects` / `tileset-particles`） | `public/assets/maps/`（同名 `.png` 是 Tiled 作图源，运行期不用） |
 
-| 参数 | 现在硬编码在哪 | 现状值 | 后台应下发 |
+**地址契约的特殊之处**：其余契约的皮是一串数字，**地址契约的皮只有一个值**（`mapBaseUrl`）。这是契约 1 那条推导规则带来的红利——本来可能是一张清单，现在是一个字符串。
+
+---
+
+## 三、配置点：TransportConfig
+
+**为什么必须收成一个配置**：六项契约的参数**互相制约**（提高并发会撞上源上限、加长缓存会和换校园打架、多重试会砸服务器）。它们若分散在各处各自读取，就会出现「同一次会话里一半请求用旧超时、一半用新超时」——这是**不一致状态**，比参数取值本身不对更难查。
+
+> 对照现状：`MAP_BASE_URL`、`JSON_REQUEST_TIMEOUT_MS`、`maxAttempts` 现在是三个互不相干的模块常量 / 构造参数，没有任何一处能整体调参。**待建**。
+
+**配置的形状**：
+
+```
+TransportConfig
+├── mapBaseUrl: string            地图运行资源根。唯一必下发值。默认 "/assets/maps"
+├── timeouts
+│   ├── json: number              JSON 取数截止时长（毫秒）。现状 15000
+│   └── image: number             图片 / 瓦片集截止时长。现状：无（缺口）
+├── retry
+│   ├── maxAttempts: number       单次循环内最多连发几次。现状 3
+│   ├── backoffInitialMs: number  目标级重试的首次等待。现状 2500
+│   ├── backoffFactor: number     每次失败后等待翻几倍。现状 2
+│   └── backoffMaxMs: number      等待上限。现状 30000
+└── concurrency
+    └── maxInFlight: number       同一时刻最多几个在途。现状：无限（缺口）
+```
+
+每个字段都能追溯到「现值」（§二）或「缺口」，没有凭空发明的参数。
+
+**配置从哪来：三个来源，优先级递增**：
+
+| 优先级 | 来源 | 用途 | 现状 |
 |---|---|---|---|
-| 资源根路径 / CDN 前缀 | `game/CampusScene.ts:174,582-585`、`src/asset/urls.ts:9` | `/maps` 与 `/assets/maps` 两套 | 每校园一个前缀 |
-| 资源清单地址 | 分散在各 Runtime 的 `preload()` | 无统一清单 | 一个清单网址（对应 SYS-ASSET 配置点「资源清单地址」） |
-| 分块 JSON 超时 | `game/fetchJson.ts:1` | 15 000 ms | 按资源类型分档下发 |
-| 图片 / 瓦片集超时 | 无 | 浏览器默认 | 30s 起 |
-| 重试次数 | `ChunkDataStore` `maxAttempts` | 3 | 可配 |
-| 重试退避曲线 | 无 | 无退避 | 1s / 2s / 4s 起 |
-| 并发上限 | 无 | 无限 | 建议 6 起，配优先级 |
-| 缓存策略 | 无 | 无 HTTP 缓存 | 按资源类别分档（见 6.3） |
+| 低 | 代码内置默认值 `DEFAULT_TRANSPORT_CONFIG` | 本地开发**零配置就能跑** | 待建 |
+| 中 | 构建期注入（Vite 环境变量） | 单校园固定部署 | 待建 |
+| 高 | 后台运行时下发（启动时拉一次） | 换校园 / 多租户 | 待建（Phase 2） |
 
-> **名词**：**CDN（内容分发网络）** = 把资源复制到各地服务器上，玩家就近取，快。用了 CDN 之后资源域名通常和网页域名不同，就会触发跨域问题（见 6.2 第 3 条）。
+**三条设计约束**：
 
-### 6.2 后台作为服务器必须做对的四件事
+1. **默认值必须能独立工作**。缺了后台，`npm run dev` 也要能跑起来——这是「后端还没做，前端先能开发」的前提。
+2. **只有一处读取点**。启动时读一次、冻结，之后只读不写。
+3. **下发失败要降级到默认值，不能白屏**。后台挂了不等于游戏不能玩——和[统一失败处理策略](../03-执行层/统一失败处理策略.md)的「可降级」是同一条原则。
 
-1. **内容类型标记（MIME type）正确**。原站实测分块 JSON 的类型是 `application/json`。如果后台把 JSON 当 `text/html` 返回，前端的 JSON 解析会失败，而失败会走 §四⑤ 的重试路径——**3 次全废**。
-2. **404 必须真的是 404**，不能返「200 + 一个 HTML 错误页」。原站镜像里已知有 **3 个真实 404**（`assets/maps/exterior.png`、`assets/images/cards/card5_foil.webp`、`assets/images/ui/cables3.png`）。前端靠「状态码不是 2xx」判断失败，错误页返 200 会让前端误以为拿到了数据，然后在解析环节以更难查的方式炸掉。
-3. **跨域（CORS）**。原站除 Google Fonts 外全部同源，所以没有跨域需求。一旦把资源挪到 CDN 域名，就必须配 CORS（跨域资源共享——服务器声明「允许别的域名来取我的资源」），否则所有资源请求直接失败。
-4. **带内容指纹的资源才配长缓存**。前端产物（`main-*.js`）名字里带内容指纹，可以标长缓存；**地图数据是固定名**（`chunk0.json`），换校园就变，**必须短缓存或协商缓存**。这两类千万不能一刀切。
+---
 
-> **名词**：**协商缓存** = 浏览器不直接信任本地的旧副本，而是先问服务器「我这份指纹是 abc，你那边变了没」，没变就用本地副本（省流量），变了就重下。
+## 四、测试覆盖
 
-### 6.3 换校园时的缓存分档建议
+| 测试文件 | 测什么 |
+|---|---|
+| [tests/chunk/data-store.test.ts](../../tests/chunk/data-store.test.ts) | master / chunk 加载、缓存命中、在途去重、失败记录、重试、取消、销毁 |
+| [tests/chunk/coordinator.test.ts](../../tests/chunk/coordinator.test.ts) | 目标更新、apply/remove 调度、三态一致性、过期守卫、退避放行、`destroyAsync` |
+| [tests/asset/runtime-assets.test.ts](../../tests/asset/runtime-assets.test.ts) | 运行期资源布局、扩展名（`.webp`）、尺寸 |
+| [tests/world/world.test.ts](../../tests/world/world.test.ts) | World apply/remove 集成 |
+| `scripts/browser-chunk-smoke.mjs` | 浏览器分块 Smoke：动态装卸、请求路径断言 |
+| `scripts/browser-lifecycle-smoke.mjs` | 生命周期 Smoke：销毁后无残留请求 |
+| **缺口** | **图片 / 瓦片集超时**（契约 4）、**并发上限与队列**（契约 3）**无测试** |
+
+---
+
+## 五、后台要做什么（Phase 2 交付）
+
+### 五.1 后台要下发的参数
+
+| 参数 | 现值（出处见 §二） | 后台应下发 |
+|---|---|---|
+| **地图资源根** | `/assets/maps`（`src/asset/urls.ts:9`，运行期唯一入口） | 每校园一个根 |
+| `timeouts.json` | 15 000 ms（`game/fetchJson.ts:1`） | 按资源类型分档 |
+| `timeouts.image` | 无 | 30s 起 |
+| `retry.maxAttempts` | 3（`src/chunk/data-store.ts:186`） | 做成可配 |
+| `retry.backoff*` | 2 500 ms 起、翻倍、封顶 30 000 ms | 保持现状即可，做成可配 |
+| `concurrency.maxInFlight` | 无限 | 建议 6 起 |
+| 缓存策略 | 无 HTTP 缓存 | 按资源类别分档（§五.3） |
+
+**两条不下发的**：① **优先级次序**（玩家 3×3 > 相机可见 > 其余）——这是玩法，属骨架（契约 3）；② **页面地图缩略图的路径**（`/assets/maps/mini-map.webp` 等）——这是网页 chrome，跟着 `index.html` 走，不属于游戏资源根。
+
+### 五.2 后台作为服务器必须做对的四件事
+
+1. **内容类型标记（MIME type）正确**。分块 JSON 必须以 `application/json` 返回。若后台把 JSON 当 `text/html` 返回，前端 JSON 解析会失败，而失败会走契约 5 的重试路径——**3 次全废**。
+2. **404 必须真的是 404**，不能返「200 + 一个 HTML 错误页」。前端靠「状态码不是 2xx」判断失败；错误页返 200 会让前端误以为拿到了数据，然后在解析环节以更难查的方式炸掉。
+3. **跨域（CORS）**。现在资源全部同源，没有跨域需求。一旦把资源挪到 CDN 域名（`mapBaseUrl` 换成绝对网址），就必须配 CORS，否则所有资源请求直接失败。**这是把根路径改成可下发之后新引入的风险**。
+4. **带内容指纹的资源才配长缓存**。前端产物（`main-*.js`）名字里带指纹，可以标长缓存；**地图数据是固定名**（`chunk0.json`），换校园就变，**必须短缓存或协商缓存**。这两类千万不能一刀切。
+
+### 五.3 换校园时的缓存分档建议
+
+**这一档是建议，不是实测事实**——原站缓存头未确认（§六），我们自己也还没实现。
 
 | 资源类别 | 命名方式 | 建议 |
 |---|---|---|
@@ -446,146 +395,101 @@ updated: 2026-09-14
 | 瓦片集 / 精灵图 | 固定名，换校园会变 | `max-age=3600` + `ETag`，靠协商缓存 |
 | 地图数据（`final_map.json`、`chunk*.json`） | 固定名，换校园必变 | `no-cache` + `ETag`，每次协商 |
 
-> 这一档表是**建议，不是原站事实**——原站缓存头未确认（§二.4）。上线前应该用一次**带响应头**的采集补上证据，再定稿。
+> **分档依据**（第一性原理）：**名字里有没有内容指纹**。有指纹 → 内容变名字就变 → 可放心永久缓存。没指纹 → 内容变了名字没变 → 必须每次问，否则玩家拿到上一个校园的地图。
 
 ---
 
-## 七、当前缺口与未确认
+## 六、缺口与边界
 
-### 7.1 缺口（我们这边）
+### 六.1 缺口（我们这边）
 
 | 优先级 | 缺口 | 说明 |
 |---|---|---|
-| P0 | **并发上限 + 优先级排队** | 完全没有。25 块一起发，玩家脚下的块可能最后到 |
-| P0 | **SYS-ASSET 无超时无取消** | `统一失败处理策略.md` §四 已列为 P0，两轮未修 |
-| P1 | **路径根三处不一致** | `/assets/maps` vs `/maps`，收口前不宜做 CDN 化 |
-| P1 | **重试无退避** | 立即重发 3 次，服务器抖动时等于放大冲击 |
-| P2 | **超时值文档与代码不符** | 文档 10s，代码 15s |
-| P2 | **无 HTTP 缓存策略** | 换校园后整包重下 |
+| P0 | **并发上限 + 优先级排队**（契约 3） | 完全没有。25 块一起发，玩家脚下的块可能最后到。加队列时别忘契约 6 的取消口子 |
+| P0 | **图片 / 瓦片集加载无超时、无取消**（契约 4） | 走 Phaser 的 `load.image()` / `load.json()`，不受 `fetchJson` 管。[统一失败处理策略](../03-执行层/统一失败处理策略.md) §四把它记在 **SYS-ASSET** 名下列为 P0 |
+| P0 | **没有 `TransportConfig`**（§三） | 参数散落成模块常量，无法整体调参，也无法下发 |
+| P1 | **第 4 类失败（内容不合法）仍走重试**（契约 5） | 重试拿到的还是同一个坏文件，纯浪费请求 |
+| P1 | **根值仍是模块常量**（契约 1） | 未从 `TransportConfig` 取，换校园仍需改代码 |
+| P2 | **单次循环内无退避**（契约 5） | 同一块连发 `maxAttempts` 次之间零间隔；目标级虽有退避，第一轮连发仍会同时砸出去 |
+| P2 | **无 HTTP 缓存策略**（契约 2） | 换校园后整包重下 |
 
-### 7.2 未确认（原站那边）
+### 六.2 边界：本层不含原站分析
 
-| 项 | 为什么未确认 |
-|---|---|
-| 分块的 `Cache-Control` / `ETag` / `Expires` | 抓取记录**没有响应头字段** |
-| 原站实际并发度与请求顺序 | 时间戳跨度仅 14.6ms，**分辨率不足** |
-| 是否存在请求级在途去重 | 单次 0 重复不能证明机制存在 |
-| 原站 `responseCount: 404` 与实际 396 条的差额 | 8 条未记录，原因不明 |
+本层**不承载原站侧分析**。这一层几乎无法从原站逆向——查过原站网络证据（`sample/analysis/runtime-network.json`），六项契约里五项拿不到：
 
-### 7.3 后续可做的事
+| 契约 | 原站能查到吗 | 为什么 |
+|---|---|---|
+| ① 地址 | ✅ 拿到了 | 每条记录都有完整 URL |
+| ② 复用（HTTP 缓存） | ❌ | 记录里**没有响应头字段**，`Cache-Control` / `ETag` / `Expires` 无从得知 |
+| ③ 配额（并发） | ❌ | 时间戳是采集器登记的，**396 条挤在 14.6 毫秒里**，物理上不可能，分辨率不足 |
+| ④ 时限（超时） | ❌ **原理上就查不到** | 超时是**客户端逻辑**，网络日志只记「实际发出去了什么」 |
+| ⑤ 失败定性 | ❌ | 那次采集**全程 0 失败**（396 条全 200、0 重复），失败路径一次没被触发 |
+| ⑥ 撤回（取消） | ❌ **原理上就查不到** | 同④，被取消的请求不会出现在请求列表里 |
+
+④⑤⑥ **再采一次也拿不到**——那是前端代码里的决定，不是网络行为。原始文件仍在 `sample/analysis/runtime-network.json`，只读边界见 `AGENTS.md` §10。
+
+### 六.3 后续可做的事
 
 | # | 事 | 状态 |
 |---|---|---|
-| 1 | 做一次**带响应头**的原站采集（不抓正文，只读响应头），把 §二.4 的两条未确认关掉 | **待授权** —— 受 `AGENTS.md` §10「sample 只读不抓」约束，需 Human 明确授权采集范围后执行 |
-| 2 | 把「网络协议层」登记进 `doc/名词解释表.md` | ✅ 2026-09-14 完成 —— 新增 §二十四，条目 #227–#257（全表共 257 条 / 24 大类） |
-| 3 | 订正分块文件名描述（`名词解释表.md` #20、`API契约表.md` §十） | ✅ 2026-09-14 完成 —— 统一为 `chunk{index}.json`，并在两处注明订正 |
-| 4 | `API契约表.md` §十 加指针 + 修正「无缓存」措辞 | ✅ 2026-09-14 完成 —— 标题改为「网络协议层（已独立成层）」，加跳转入口与「措辞订正」说明 |
-| 5 | `换皮配置总表.md` 补入传输参数 | ✅ 2026-09-14 完成 —— 新增「六、网络协议层（补充板块）」，含皮 / 配置点两张表 |
-| 6 | **收口地图资源根**（§四① 方案 A / B 二选一） | **待 Human 裁决** —— 方案 A 要动 `game/`、3 份资源脚本、6 个 browser smoke 脚本和 1 份测试；方案 B 要动 `src/`（受 §7 门禁）。两者都超出「只改文档」范围，未获授权前不动 |
+| 1 | 把 `TransportConfig` 落成 `src/` 代码 | **待授权**——改 `src/` 按 `AGENTS.md` §7 需要已授权的正式工作项 |
+| 2 | `MAP_BASE_URL` 改为从 `TransportConfig.mapBaseUrl` 取值 | **待授权**（同上，契约 1） |
+| 3 | `/sprites/**` 与 `/vendor/phaser.min.js` 跟原站对齐 | **待裁决**——原站分别是 `/assets/sprites/**` 和 `/assets/js/phaser.min.js` |
 
 ---
 
-## 八、权威位置与关联
+## 七、所有代码位置一页速查
 
-| 信息 | 位置 |
-|---|---|
-| **本层权威** | 本文件 |
-| 接口调用契约 | `doc/02-接口层/API契约表.md`（§十 声明本层为独立层） |
-| 失败三级分类与异步四条要求 | `doc/03-执行层/统一失败处理策略.md` |
-| 分块请求去重与取消的讨论 | `doc/03-执行层/01-地图线/04-地图分块.md` §四 |
-| 换皮配置汇总（含各系统配置点） | `doc/换皮配置总表.md` |
-| 全项目名词权威 | `doc/名词解释表.md`（本层词条见 §二十四 #227–#257） |
-| 换皮 / 后端下发的一站式清单 | `doc/换皮配置总表.md`（本层参数见 §六） |
-| 原站网络证据 | `sample/analysis/runtime-network.json` |
-| 资源加载时序调查报告 | `doc/task-todos/WI-PARALLEL-MAP-RECON-001-窗口C-SYS-ASSET资源加载时序调查报告.md` |
-| 统一 JSON 取数器实现 | `game/fetchJson.ts` |
-| 分块取数器实现 | `src/chunk/data-store.ts` |
-| 分块编排实现 | `src/chunk/coordinator.ts` |
-| URL 模板实现 | `src/asset/urls.ts` |
+```
+src/asset/
+  urls.ts             — MAP_BASE_URL 常量、chunkMasterUrl() / tilesetImageUrl() / independentLayerUrl()
+                        （运行期地图资源地址的唯一入口）
 
----
+src/chunk/
+  coordinates.ts      — ChunkCoordinate / ChunkGeometry 类型
+                      — chunkCoordinateToIndex() / chunkFileName()
+  data-store.ts       — ChunkDataStore 类（master/chunk 加载、#inFlight 去重、#cache、#failures）
+                      — #abortController / isChunkRequestAbortedError()（撤回契约）
+                      — #loadChunk() 重试循环 + maxAttempts（失败定性契约）
+                      — resolveRelativeUrl()（地址契约）
+  coordinator.ts      — ChunkCoordinator 类（updateTargets / applyIfCurrent / removeIfCurrent）
+                      — #retryBackoff / retryFailedTargets()（目标级指数退避）
 
-## 九、本层名词速查
+game/
+  fetchJson.ts        — JSON_REQUEST_TIMEOUT_MS = 15_000、fetchJson()（超时与取消桥接）
+  CampusScene.ts      — 地图资源加载调用点（181、589-592）；重试调度驱动（2189）；maxAttempts 传值（1346）
+  main.ts             — pagehide → appRuntime.shutdown()
 
-> **已于 2026-09-14 并入 `doc/名词解释表.md` §二十四「网络协议层」（条目 #227–#257，全表共 257 条 / 24 大类）。** 本节保留为速查副本，与该表 §二十四 内容一致；**以名词解释表为唯一权威**，本节内容变化时须回写该表。
->
-> 已在该表**其他节**有条目的名词不重复收录：chunk（地图分块）、tile（瓦片）、GID（全局瓦片 ID）、tileset（瓦片集）、master.json（地图总索引文件）、AbortController（#134）、ChunkDataStore（#133）、可恢复 / 可降级 / 致命（#139–#141）。
+scripts/
+  prepare-runtime-assets.mjs — 从 sample/ 镜像生成 public/（创建 public/ 的唯一受支持方式）
 
-### 9.1 传输与协议
-
-| 英文 | 中文 | 一句话 |
-|---|---|---|
-| **URL** | 网址 / 资源地址 | 一个资源在网络上的门牌号，如 `/assets/maps/chunks/chunk0.json` |
-| **origin** | 源 | 协议 + 域名 + 端口三样合起来，浏览器按它限制并发和判定同源 |
-| **HTTP** | 超文本传输协议 | 浏览器和服务器之间取数据的规矩（本项目全程用它取 JSON 和图片） |
-| **response headers** | 响应头 | 服务器随数据一起回的一小段说明，如缓存时长、文件指纹 |
-| **Cache-Control** | 缓存控制（响应头） | 服务器说「这文件你能存多久」 |
-| **ETag** | 实体标签（响应头） | 服务器给文件的一个指纹，供协商缓存比对 |
-| **Expires** | 过期时间（响应头） | 服务器说「这文件到某日过期」（老式写法，已被 `Cache-Control` 取代） |
-| **status code** | 状态码 | 服务器回的三位数，200=正常、404=没这东西、5xx=服务器出错 |
-| **MIME type** | 内容类型标记 | 服务器说「我回的是 JSON 还是图片还是网页」 |
-| **CORS** | 跨域资源共享 | 服务器声明「允许别的域名来取我的资源」 |
-| **CDN** | 内容分发网络 | 把资源复制到各地服务器，玩家就近取 |
-| **content hash** | 内容哈希 / 内容指纹 | 文件名里带一段由内容算出的指纹，内容变则名字变 |
-| **immutable** | 永不变（缓存指令） | 标上它浏览器就再也不重问这个文件 |
-| **negotiated caching** | 协商缓存 | 先问服务器「你那边变了没」，没变就用本地副本 |
-| **backoff** | 退避 | 失败后不立刻重试，等一会儿再试（如 1s → 2s → 4s） |
-| **deadline** | 截止时刻 | 一个请求最多允许花的时间 |
-| **in-flight** | 在途 | 请求已发出、结果还没回来 |
-| **Service Worker** | 后台缓存脚本 | 浏览器里可离线缓存资源的后台程序（本项目未使用） |
-| **IndexedDB / localStorage** | 浏览器本地数据库 / 小仓库 | 关掉页面也不丢的本地存储（本项目未使用） |
-| **base64** | base64 编码 | 把二进制转成纯文本的编码方式 |
-| **`data:` / `blob:`** | 内联数据 / 内存对象 | 两种不走网络的资源形式；原站抓取里 162 条是 `blob:` |
-
-### 9.2 实现机制
-
-| 英文 | 中文 | 一句话 |
-|---|---|---|
-| **fetch** | 浏览器取数函数 | 浏览器内置的「按网址取数据」函数 |
-| **AbortController** | 取消遥控器 | 浏览器提供的取消在途请求的机制 |
-| **signal** | 取消信号 | `AbortController` 发出的信号，传给取数函数即可被取消 |
-| **Promise** | 异步占位对象 | 表示「将来会有结果」的对象 |
-| **Map** | 键值对容器 | 按 key 快速查表的容器 |
-| **TimeoutError / AbortError** | 超时错误 / 中止错误 | 两种名字不同的失败：前者可重试，后者是正常取消 |
-| **JSON** | JSON 数据格式 | 一种纯文本的数据格式，本项目所有地图数据都用它 |
-
-### 9.3 本层待并入名词表的项目内术语
-
-| 名称 | 一句话 | 状态 |
-|---|---|---|
-| **网络协议层** | 与接口层平级的独立设计层，管字节怎么过网络 | 待登记 |
-| **传输契约** | 本层的六项约定统称：地址 / 复用 / 配额 / 时限 / 失败定性 / 撤回 | 待登记 |
-| **网络行为对照表** | 本层把原站、本地站、文档三方数值并列核对的做法（§三.3） | 待登记 |
-| **缓存分档** | 按资源命名方式（内容哈希 / 固定名）决定缓存时长的做法（§六.3） | 待登记 |
+tests/
+  chunk/data-store.test.ts    — 缓存 / 去重 / 失败 / 重试 / 取消 / 销毁
+  chunk/coordinator.test.ts   — 目标调度 / 过期守卫 / 退避放行
+  asset/runtime-assets.test.ts — 运行期资源布局与扩展名
+```
 
 ---
 
-## 十、状态声明
+## 八、状态声明
 
-按项目规则，本文件严格区分四类内容：
+本文件严格区分三类内容：
 
-- **原站事实**（§二 全部条目、§2.2 路径、§2.3 几何）：来自 `sample/analysis/runtime-network.json` 与镜像 `master.json`。
-- **本机实测**（§三 全部条目）：来自当前 `game/`、`src/` 代码与 `public/` 磁盘布局。
-- **重构建议**（§四 收口建议、§六.3 缓存分档、§七.3 后续项）：**是建议，未经 Human 签字，不是已定稿决定**。
-- **未确认**（§二.4、§七.2）：明确标出，不补猜。
+- **实测**（契约 1-6 的「它怎么工作的」「代码在哪」、§二 皮落地）：来自当前 `game/`、`src/` 代码与 `public/` 磁盘布局，可逐条核对行号。
+- **设计**（各契约的「设计动作」、§三、§五.3、§六.3）：**是设计，不是已落码的实现**。
+- **已排除**（§六.2）：原站侧为何不可逆向后不再承载，不补猜。
 
-**本文件当前状态：`draft`，待 Human 审查。** 未经签字前，本文件不构成对 `src/` 的写入授权，也不改变 `doc/02-接口层/API契约表.md` 的现有契约。
+**地址契约已定的两条**：① 地图资源根改为**后台可下发**的配置（**未落码**）；② 根值**取 `/assets/maps`**、运行期统一走 `src/asset/urls.ts`（**已落码**）。其余设计动作尚未定稿。
 
-### 本次修订记录（2026-09-14）
+**本文件状态：`draft`，待 Human 审查。** 未经签字前，本文件不构成对 `src/` 的写入授权，也不改变 [API契约表](../02-接口层/API契约表.md) 的现有契约。
 
-| 动作 | 对象 | 说明 |
-|---|---|---|
-| 新建 | `doc/06-网络协议层/README.md` | 本文件，与 `01-理解层/` 平级的独立层 |
-| 新增词条 | `doc/名词解释表.md` §二十四 | #227–#257 共 31 条；全表 226 → **257 条**，23 → **24 大类** |
-| 订正 | `doc/名词解释表.md` #20 | 分块文件名 `{cx}_{cy}.json` → `chunk{index}.json` |
-| 订正 | `doc/02-接口层/API契约表.md` §十 | 标题改「已独立成层」+ 加跳转入口；订正分块文件名；订正「无缓存」→「无持久缓存」 |
-| 订正 | `doc/02-接口层/API契约表.md` §十一 | 名词计数 226 → 257 条，23 → 24 大类 |
-| 新增板块 | `doc/换皮配置总表.md` §六 | 「网络协议层（补充板块）」，含皮 / 配置点两张表 |
-| **前提订正** | 本文件 §四①、§三.3 第 1 项 | 原写「同一个地图资源三处异名」**不成立**：原站 `/assets/maps/` 是 30 文件全集，我们 `/maps/` 是 5 文件 sanitize 子集，另有 2 张给 `index.html` 的图在 `public/assets/maps/`。改述为「两个资产世界」+ 给出 A/B 收口方案 |
-| 补充事实 | 本文件 §三.1 | 补 `public/assets/maps/` 两图出处的表格行；补「`public/` 整目录不进版本库，由 `prepare:runtime` 生成」 |
-| 登记 | `doc/决策记录.md`、`doc/task_plan.md` | 本层独立成层的 Human 授权与完成结果 |
+---
 
-**未做的**（需 Human 授权）：
+## 关联文档
 
-1. §7.3 第 1 项的原站响应头采集 —— 受 `AGENTS.md` §10「sample 只读不抓」约束，未授权不执行。
-2. §7.3 第 6 项的地图资源根收口 —— 方案 A 动 `game/`/`scripts/`/`tests/`，方案 B 动 `src/`；两者都超出「只改文档」，未获授权前不动。
+- [API 契约表（L1+L2）](../02-接口层/API契约表.md) — §十 声明网络协议细节由本层承接
+- [统一失败处理策略](../03-执行层/统一失败处理策略.md) — 三级分类 + 异步操作四条要求
+- [地图分块（SYS-CHUNK）](../03-执行层/01-地图线/04-地图分块.md) — 分块请求的去重与取消
+- [资源加载（SYS-ASSET）](../03-执行层/01-地图线/01-资源加载.md) — 地图资源根的落点
+- [换皮配置总表](../换皮配置总表.md) — §六 网络协议层板块
+- [名词解释表](../名词解释表.md) — §二十四 本层词条 #227–#258

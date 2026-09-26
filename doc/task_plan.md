@@ -9,7 +9,7 @@ gate-status: idle
 authorization-ref: not-applicable
 preauthorized-next-work-item: none
 next-phase: implementation
-updated: 2026-09-14
+updated: 2026-09-17
 retrospective-ref: doc/复盘-2026-09-07.md
 collaboration-mode: single-person
 ---
@@ -19,12 +19,51 @@ collaboration-mode: single-person
 ## ⏱ 当前状态（一眼看懂）
 
 - **正在做**：无（`current-work-item: none`）。执行层 16 张系统卡**全部**已完成详细设计（SYS-ENTITY 于 2026-09-14 补齐，16/16 `designed`）；8 个确定性 CORE 已实现并验证。
-- **最近完成**：两波并行设计（M1 地图 + P1 玩家 + SYS-CAMERA 范围已定稿）、碰撞集成、运行时安全修复、SYS-ZONE 设计、SYS-LAYER 运行时收束、地图生命周期收口、SYS-ENTITY 实体生命周期设计（已关闭工作项索引末条）、两轮有界运行时修复、网络协议层独立成层、SYS-ENTITY 卡按当前代码重对。
+- **最近完成**：两波并行设计（M1 地图 + P1 玩家 + SYS-CAMERA 范围已定稿）、碰撞集成、运行时安全修复、SYS-ZONE 设计、SYS-LAYER 运行时收束、地图生命周期收口、SYS-ENTITY 实体生命周期设计（已关闭工作项索引末条）、两轮有界运行时修复、网络协议层独立成层、SYS-ENTITY 卡按当前代码重对、**地图资源根收口（根值取原站 `/assets/maps`，`src/asset/` 接入运行期成为唯一入口）**。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/轨迹/脚印/内容线，不自动合并或推送。
 - **阻塞项**：**无技术阻塞**。原记载的两项经 2026-09-14 复核均已不成立：仓库无任何 rebase/merge 残留状态（`git ls-files -u` 为 0），全仓只有一个 worktree，`impl/gameplay-serial` 分支从未创建。真正阻止正式代码写入的是**没有已授权的工作项**，不是环境。
 - **下一步**：Human 自主选择下一工作项（候选见「近期候选」列表）；选择后从 `doc/03-执行层/` 对应系统卡读取范围，取得 Human 签字后才能写 `src/` 正式代码。
 
 ## 项目目标（9-7 复盘后定调）
+
+### 2026-09-17 文档订正、结构重设与全树链接修复
+
+- 范围：纯文档 + 记忆/技能；当前工作项保持 `none`，门禁状态不变。
+- 订正（`06-网络协议层/README.md` 按代码逐条复核，三处写错的事实）：① 原写「本项目无退避」——**实为目标级有指数退避**（`src/chunk/coordinator.ts:233`，2 500 ms 起、翻倍、封顶 30 000 ms；`game/CampusScene.ts:2189` 驱动），原建议「加 1s/2s/4s 退避」作废；② 原 P0「`src/asset/` 无超时无取消」归错位置——该模块只拼 URL 不发请求，缺口在 Phaser 加载器（SYS-ASSET）；③ `maxAttempts` 原表只写 3，未记调用点实传 2。
+- 订正（超时与措辞）：`03-执行层/统一失败处理策略.md` §二 chunk 超时「建议 10s」→ **实际 15s**（`game/fetchJson.ts:1`）；§三 SYS-CHUNK 行改为 3 次尝试；§四 P2「重试退避」结项。连带 `名词解释表.md` #250 / #253、`换皮配置总表.md` §六、`02-接口层/API契约表.md` §十 第 4 项、`03-执行层/跨系统数据流场景.md`（「3 次重试」→「每块最多 3 次尝试」）。
+- 订正（`maxAttempts` 收口，`DEC-MAP-RETRY-001`）：`game/CampusScene.ts:1346` 由 `{ maxAttempts: 2 }` 改为 **3**，与 `src/chunk/data-store.ts:186` 默认值一致；行数不变，故该文件其余行号引用不受影响。此后只留一个定义处。
+- 修复（`doc/` 全树相对链接）：原登记的「15 条失效」不准确，实际 **559 条**（全树 1017 条中）。三类成因——**334 条**写在 `03-执行层/<子目录>/` 里却只写 `../../`（到仓库根少一层）、**209 条**是裸路径（如 `src/npc/staticNpc.ts`）、**16 条**带 `virtual-campus-reconstruction/` 前缀的迁移残留；另 **2 条**链接地址与链接文字不符，按文字改正。改法与安全网：14 份受影响文件先备份到 `bak/doc-links-2026-09-17/`；脚本只动**当前解析不到**的目标，且只取「第一个真实存在」的候选路径；改完逐行比对备份，确认 540 处改动**只发生在链接地址部分**、行数与正文均未变。
+- 结构（`06-网络协议层/README.md` 按执行卡体例重设）：删去本层自带的「名词速查」节（名词唯一权威是 `doc/名词解释表.md` §二十四）、逐轮修订记录与历史叙述。体例照 `doc/03-执行层/01-地图线/04-地图分块.md` 那份执行卡：`> 对照…`（本层无原站对照）→ `## 👀 先看这里`（当前状态 / 还没做的 / 你审的就认这几条）→ `## 总览图：六项契约 → 代码 对照` → `## 一、契约落地`（契约 1-6，每个统一「第一性原理 → 它怎么工作的 → 代码在哪 → 设计动作 → 怎么验证它做对了」）→ `## 二、皮落地`（全部数字的唯一实测出处）→ `## 三、配置点：TransportConfig` → `## 四、测试覆盖` → `## 五、后台要做什么` → `## 六、缺口与边界` → `## 七、所有代码位置一页速查` → `## 八、状态声明` → `## 关联文档`。骨架/皮不再单独成节——由「一、契约落地」（骨架）与「二、皮落地」（数字）两节本身承载。
+- 连带（节号重编）：旧锚 `§一 / §二.1-2.3 / §四①-⑥ / §六.1-6.3 / §七.0` 全部失效，已同步改完全部 **38 处**外部引用（`名词解释表.md` §二十四 31 处、`02-接口层/API契约表.md` 5 处、`03-执行层/统一失败处理策略.md` 1 处、`换皮配置总表.md` 1 处）→ 新锚 `§一 契约 1-6 / §三 / §5.1-5.3 / §6.2`。改前备份 `bak/doc-netproto-cardframe-2026-09-17/`。
+- 规则：发现与代码不符的事实错误**直接改，不再逐条请示**（记忆 `doc-edit-scope-rule`）；无数值证据的跨层分歧、`src/` 写入门槛（`AGENTS.md` §7）、`sample/` 只读边界均不变。
+- 同步（`换皮配置总表.md` §17 对齐 `06-网络协议层/README.md`）：该节原有 21 个 `transport.*` 字段已覆盖 §二 皮落地 11 项与 §三 `TransportConfig` 的全部形状，本轮补齐 4 项漏登——`transport.retry.intraLoopBackoffMs`（同一块连试的两次之间歇多久，现值 0，缺口）、`transport.concurrency.priorityOrder`（玩家 3×3 邻域 > 相机可见 > 其余，§五.1「两条不下发的」之一）、`transport.cache.enginePolicy`（引擎长缓存 + `ETag`，§五.3 四档里唯一漏登的一档）、`transport.config.fallbackToDefault`（下发失败降级到内置默认值，不白屏，§三 设计约束 3）。§17 字段 **21 → 25**，总表字段合计 **462 → 466**。
+- 连带（口径订正，`换皮配置总表.md`）：「表行数」一列在本版改写后未重算。按该节自己写的定义（除字段定义表以外所有表格的数据行合计）逐节重算——17 节里 15 节相符、2 节不符（§1 `11 → 38`、§17 `25 → 21`）；六个板块小计与合计 `286 → 275`。末节「按系统排行」的表行一列整列是改写前的旧数（17 行全部重算：§1 `13→38`、§14 `46→39`、§16 `21→16`、§3 `31→28`、§7 `24→21`、§5 `22→19`、§13 `21→19`、§10 `18→16`、§11/§12 `0` 不变、§2 `0`、§4 `26→25`、§6 `11→9`、§8 `7→6`、§9 `12→11`、§15 `9→7`、§17 `25→21`）。字段数一列未动（65 / 80 / 28 / 101 / 167 与逐节实测相符）。另订正本文件上一轮把新锚记成 `§5.1-5.3 / §6.2`，实为 `§五.1-五.3 / §六.2`（`06-网络协议层` 正文与 38 处外部引用均用后者）。
+- 验证（本轮）：`check-state-consistency.py` PASS；`doc-charset-scan` / `doc-tradchar-scan` 干净，`doc-splitword-scan` 1 处待确认为既有（`换皮配置总表.md:732`，与本轮改动无关）；`doc/` 全树相对链接检查 **0 失效**；总表「配置点总览」的字段数 / 表行数 / 排序脚本复核自洽。
+- 备份：`bak/netproto-configpoints-2026-09-17/`（本轮改动前的 `换皮配置总表.md`）。
+- 验证：`npx tsc --noEmit` 退出 0；`npx vitest run --maxWorkers=2` **74 文件 / 426 用例全过**；`npm run build` 成功；三份文档扫描器干净；`check-state-consistency.py` PASS；名词表 258 条 / 24 大类无缺号无重复；`doc/` 全树 123 份文件 **1040 条相对链接 0 失效**（含 `migration-history/`、`task-todos/`；链接目标含括号的文件名已按嵌套括号解析）。
+- 备份：`bak/maxattempts-2026-09-17/`、`bak/doc-links-2026-09-17/`、`bak/doc-netproto-structure-2026-09-17/`。
+- 交付状态：仅文档 + 记忆/技能，**尚未提交**；推送保持独立授权。
+- 未授权：不改 `game/`、`src/`、`public/`、`scripts/`、`tests/`；不实现 `TransportConfig` 落码；不扩大 `sample/` 采集。
+
+### 2026-09-14 地图资源根收口（根值取原站 + `src/asset/` 接入运行期）
+
+- Human 授权原文：`a,执行层是对的，理解层陈旧进行修改，`；`把 public/maps/* 挪到 public/assets/maps/（含 chunks/），保持原站的 .webp 扩展名，CampusScene.ts 改成调 src/asset/urls.ts。一次消掉三个问题：和原站一致、文档与代码不再两张皮、src/asset/ 从死代码变成唯一入口我说的是这个`（`DEC-MAP-ROOT-ORIGIN-001`）。
+- **要消的三个问题**：① 和原站一致；② 文档与代码不再「两张皮」；③ `src/asset/` 从死代码变成唯一入口。
+- **根值定为取原站**：`/assets/maps`。证据是原站 bundle `chunk-WMFY56ZM.js` 里 load 的就是 `/assets/maps/exterior-final.webp`、`/assets/maps/collisions-objects.webp` 等。此前重建版用的是 `/maps`。
+- **磁盘**：`public/maps/*`（5 个散列文件 + `chunks/` 26 个 JSON）→ `public/assets/maps/`；旧 `public/maps/` 已不存在。
+- **扩展名**：改取原站运行期**实际 load 的那一个** —— `collisions-objects.webp`、`tileset-particles.webp`。同名的 `.png` 是 Tiled 作图源（`tileset-particles.tsx` 指向它），原站运行期不用，不再进 `public/`。
+  - ⚠️ 两者尺寸不等：`.png` 是 112×16（7 格，Tiled 声明 `tilecount=7`），`.webp` 是 **96×16（6 格）**。**原站自己就不一致**。Phaser 从纹理宽度现算列数，故运行期实际 6 列；sanitizer 保下来的 GID 只有 69355–69359（第 0–4 格），不越界。JSON 元数据里的 `112/7` 作为 Tiled 作图真值保留，运行期纹理事实写在注释里。
+- **代码**：`game/CampusScene.ts` 加 7 行导入 + `CHUNK_MASTER_URL` 常量（现 `181` 行），5 处地图资源加载（现 `589-592` 行）从字面量路径改调 `src/asset/urls.ts` 的 `chunkMasterUrl()` / `tilesetImageUrl()` / `independentLayerUrl()`；纹理**键**不变。至此 `src/asset/` 由死代码变为运行期唯一入口，换校园只改一个常量。
+- **脚本**：`prepare-runtime-assets.mjs`（FILES 地图条目 → `assets/maps/*.webp`）、`sanitize-runtime-maps.mjs`（`RUNTIME_MAPS`）、`sanitize-map.mjs`（OUT + 注释）、`check-runtime-assets.mjs`（FILES / `CHUNK_FILES` + `runtimeMapPath()` + 双格式尺寸读取 `webpDimensions`，期望 96×16）、5 个 `browser-*.mjs` 冒烟脚本的路径断言。
+- **测试**：`tests/asset/runtime-assets.test.ts` —— `RUNTIME_MAPS` 改 `public/assets/maps`；`pngDimensions` 换 `webpDimensions`；粒子断言改 `.webp` + 96×16。JSON 元数据断言（`tileset-particles.png` / `112` / `tilecount 7` / `columns 7`）**有意保留**（那是 Tiled 作图真值）。
+- **文档六份同步**：`06-网络协议层/README.md`（§2.1 地址表、§2.3 由「最要紧的一条」改述为「已收口」并记两次裁决、§3.3/§四①/§六.1 默认值、§7.1 P1 划掉、§7.2 第 2 项结项、§十 签字范围与后续修订记录）；`03-执行层/01-地图线/01-资源加载.md`（行号全面回写 + 皮表 `.png`→`.webp` + 配置点表新增「地图资源根（CDN 前缀）」行 + 运行期唯一入口说明）；`名词解释表.md` #254/#255；`02-接口层/API契约表.md` §十 两处；`换皮配置总表.md` 皮表/配置点表 4 处。
+- **另订正**：`01-理解层/01-地图线/04-地图分块.md:209` 重试次数「未定」→ `3`（与执行层同值，消掉跨层不一致）。
+- **另订正（顺带，笔误类）**：`03-执行层/01-地图线/01-资源加载.md` 里指向仓库根的链接少了一层（`../../src/...` → 应为 `../../../src/...`），27 处全部改对；这是本卡从 `doc/` 迁到 `doc/03-执行层/01-地图线/` 时留下的路径笔误，且本轮新增的配置点表行沿用了同一错法，故一并修掉。备份 `bak/doc-link-fix-2026-09-14/`。
+- 验证：`node scripts/prepare-runtime-assets.mjs` + `check-runtime-assets.mjs` **PASS**（`public/assets/maps/` 含 `chunks/` 26 JSON，旧 `public/maps/` 已不存在）；`npx tsc --noEmit` 退出 0；`npx vitest run --maxWorkers=2` **74 文件 / 426 用例全过**；`npm run build` 成功且 `dist/assets/maps/` 布局正确；`doc-charset-scan` / `doc-splitword-scan` / `doc-tradchar-scan` 干净（`doc-misspell-scan` 35 项候选**均为既有**，本轮未新增）；`check-state-consistency.py` **PASS**。
+- 备份：`bak/map-root-2026-09-14/`（`game/CampusScene.ts`、9 个 `scripts/*.mjs`、`tests/asset/runtime-assets.test.ts.bak`；按 `docs/api-skin-readability-20260911` 既有约定不进仓库）。
+- ⚠️ 未处理（**只报不改**）：`game/CampusScene.ts` 的 `ChunkDataStore` 调用点传 `maxAttempts: 2`，而文档与 `src/chunk/data-store.ts` 的默认值写的是 `3`。属跨层数值冲突，按既有规则只报不改。→ **2026-09-17 已处理**，调用点改为 3，见上方同日条目。
+- 交付状态：**尚未提交**；推送保持独立授权。
+- 未授权：不实现方案 B 的 `TransportConfig` 落码；`/sprites/**` 与 `/vendor/phaser.min.js` 不跟原站对齐；不扩大 `sample/` 采集。
 
 ### 2026-09-14 第二轮有界修复
 
@@ -50,9 +89,27 @@ collaboration-mode: single-person
 - 前提订正：本层 §四① 原写「同一个地图资源三处异名」**不成立** —— 原站 `/assets/maps/` 是 30 文件**全集**，我们 `/maps/` 是 5 文件 **sanitize 子集**，另有 2 张页面图在 `public/assets/maps/`。改述为「两个资产世界」，并给出 A / B 收口方案。
 - 验证：本轮涉及的 6 份文档 267 条相对链接 0 失效；`doc-charset-scan` / `doc-splitword-scan` / `doc-tradchar-scan` 干净；`check-state-consistency.py` PASS；名词表 257 条 / 24 大类无缺号无重复。
 - 顺带订正：`决策记录.md`、`task_plan.md` 里 3 条 HEAD 就已存在的相对链接层级笔误（`README.md` → `../README.md` 等）。
-- ⚠️ 未处理（**只报不改**）：`doc/` 全树另有 15 条失效相对链接，集中在 `01-理解层/写作规范.md`、`03-执行层/00-总账.md`、`03-执行层/README.md`（多数写成 `virtual-campus-reconstruction/01-理解层/…` 前缀，疑为 9-7 目录迁移残留）和 `05-素材/README.md → ../README.md`。不属本轮范围，未动。
+- ⚠️ 未处理（**只报不改**）：`doc/` 全树另有 15 条失效相对链接，集中在 `01-理解层/写作规范.md`、`03-执行层/00-总账.md`、`03-执行层/README.md`（多数写成 `virtual-campus-reconstruction/01-理解层/…` 前缀，疑为 9-7 目录迁移残留）和 `05-素材/README.md → ../README.md`。不属本轮范围，未动。→ **2026-09-17 复核：「15 条」这个数字是错的，实际 559 条；同日已全部修完**，见上方同日条目。
 - 交付状态：仅文档，已提交 Git（`8a57396`）；推送保持独立授权。
 - 未授权：不改 `game/`、`src/`、`public/`、`scripts/`、`tests/`；不扩大 `sample/` 采集；**地图资源根收口**（本层 §四①、§7.3 第 6 项）待单独裁决。
+
+### 2026-09-14 网络协议层定位改定与地址契约选 B（重写记录）
+
+- Human 授权原文：`第一个我没听懂…我再想这个板块应该和地址很有关系吧，还有原网站关于这个板块的东西你们查不出来吧`；`B（保留 /maps，把根路径做成后台可下发的配置）`；`这个板块既然和地址本地息息相关那么就别考虑原网站了，把原网站的分析部分给删了，然后你自己从第一性原理出发，也是从我们目前已经跑出的项目实际出发，对相关内容进行设计`（`DEC-DOC-LAYER-NETPROTO-002`）。本轮**纯文档**，当前工作项保持 `none`，门禁状态不变。
+- **定位改定**：`doc/06-网络协议层/` 从「原站逆向层」改为「**我们自己的传输设计层**」。原站网络证据六项契约里**五项查不到**——① 地址能查到，② 缓存（记录无响应头字段）、③ 并发（396 条挤在 14.6 ms 内，时间戳分辨率不足）查不到，④ 时限 / ⑤ 失败定性 / ⑥ 撤回**原理上就查不到**（是客户端逻辑，不是网络行为；被取消的请求根本不出现在日志里）。加上路径根已不沿用原站，原站分析对本层不再有设计输入价值。
+- **删除**：原 §二「原站实测（证据）」整节（含 2.1 请求总量 / 2.2 地址约定 / 2.3 分块几何 / 2.4 从证据推不出来的东西），以及 §三.3 的原站列、§四 各契约表的原站列、§六 里的原站事实（3 个真实 404、原站 mimeType）。**保留** §七.0 一段追溯说明（约 10 行），写明「不是漏查了」并指向原始证据 `sample/analysis/runtime-network.json`。
+- **Human 裁决（地址契约，选 B）**：**保留 `/maps` 为运行期地图根，把根路径做成后台可下发的配置值**。不改运行期现状，改的是「这个值从哪来」。原 §四① 的 A / B 二选一收口方案随之收口。
+- **重设结构**：`一、第一性原理` → `二、我们的现状（已跑出来的站实测）` → **`三、设计总纲：一个传输配置（TransportConfig）`（新增）** → `四、六项契约的设计`（每项统一写「第一性原理 → 我们现状 → 设计动作」）→ `五、骨架与皮` → `六、后台管理系统需要提供什么` → `七、缺口与边界` → `八、权威位置` → `九、名词速查` → `十、状态声明`。原来的「原站 / 本机 / 文档」三方对照结构全部取消，改为单向设计稿。
+- **核心设计结论**：地址契约压缩成「**一个必下发值 + 三条推导**」——根值 `mapBaseUrl`（默认 `/maps`）是唯一必下发项；分块地址**相对 `master.json` 地址解析**（根一换，索引和 25 个分块一起换）、瓦片图地址 = `{根}/{tileset.image}`、索引文件名固定为 `chunks/master.json`。**推导优于清单**的理由：清单要人为维护早晚与实际文件对不上，而推导不可能不一致（`master.json` 本身就是唯一真相源）。
+- **新增设计内容**：① `TransportConfig` 配置形状（`mapBaseUrl` + `timeouts.json/image` + `retry.maxAttempts/backoffMs` + `concurrency.maxInFlight`），每个字段都能追溯到「现值」或「缺口」，无凭空发明；② 配置三来源与降级规则（代码默认值 < 构建期注入 < 后台运行时下发，**默认值必须能独立工作**，后台挂掉降级不白屏）；③ **新发现的取消口子**——加并发队列会新增「已排队未发出」这一状态，`abort()` 管不到，必须能单独丢弃，否则取消失效（写在 §四⑥）。
+- **唯一建议改现有行为的一处**：把第 4 类失败（内容不合法，`ChunkDataError`）从重试路径里拿出来——现在仍重试 3 次，但重试拿到的还是同一个坏文件，纯浪费 2 个请求；按 `统一失败处理策略.md` 三级分类应走「致命 / 可降级」。
+- **连带订正**：`名词解释表.md` #256「路径根不一致」**作废**（B 下根值不再需「收口」而是改为可下发）→ 替换为「传输配置（TransportConfig）」；新增 #258「优先级队列」；清理 #238/#245/#248/#254/#255 里的原站事实；#252/#253 锚点随新结构改为 §二.2。全表 257 → **258 条**，24 大类不变。
+- **连带订正（其他文档）**：`API契约表.md` §十 定位说明改为「不承载原站分析」、删 `runtime-network.json` 证据指针、第 1/2 项去掉原站未转化讨论并写入 B 的裁决；§十一 名词计数 257 → 258。`换皮配置总表.md` §六 根路径「当前值」去原站并标注 B，新增「两条不下发（并发优先级次序 / 页面缩略图路径）」与分档依据说明。
+- **数值订正**：`API契约表.md` §十末段原写「超时 10s、最多 6 个并发」**与代码不符**——实际 JSON 超时 15 000 ms（`game/fetchJson.ts:1`），并发**完全无上限**（未实现）。该行改为不写具体数字，并加订正说明。
+- 验证：7 份文档相对链接 0 失效；`doc-charset-scan` / `doc-splitword-scan` / `doc-tradchar-scan` 干净；`check-state-consistency.py` PASS；名词表 258 条 / 24 大类无缺号无重复。
+- 交付状态：仅文档，**尚未提交**；推送保持独立授权。
+- 未授权：**不授权实现方案 B** —— `TransportConfig` 落码需改 `src/`、根值收口需改 `game/` + `scripts/` + `tests/`，按 `AGENTS.md` §7 均需已授权的正式工作项（`src/asset/` CORE 已 closed，重开需重新授权）；不改 `public/`；不扩大 `sample/` 采集。
+- **效力说明（2026-09-14 同日稍后）**：本块的**「保留 `/maps`」已被取代**——Human 当天随后下 `DEC-MAP-ROOT-ORIGIN-001`（见上方「地图资源根收口」块），根值改定为**取原站 `/assets/maps`**，`public/maps/` 挪到 `public/assets/maps/`，`game/CampusScene.ts` 改调 `src/asset/urls.ts`。**本块第 82 行「保留 `/maps` 为运行期地图根」、第 84 行「默认 `/maps`」、第 88 行「去原站并标注 B」、第 92 行「不授权……根值收口」按此作废**；**「方案 B（根路径改为后台可下发）」本身仍然有效**——改的是「值从哪来」的机制，不是「值是多少」。本块其余内容（删除原站分析、重设结构、`TransportConfig` 设计、`名词解释表.md` 的连带订正）不受影响。本块保留为历史，不回改。
 
 ### 2026-09-14 已提交三堆并回填提交号
 

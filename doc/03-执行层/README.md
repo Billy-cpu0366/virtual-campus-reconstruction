@@ -74,7 +74,7 @@ updated: 2026-08-18
 
 | 抽屉 | 卡 |
 |---|---|
-| 01-地图线 | [01-资源加载](virtual-campus-reconstruction/03-执行层/01-地图线/01-资源加载.md)（SYS-ASSET）、[02-世界与地图](virtual-campus-reconstruction/03-执行层/01-地图线/02-世界与地图.md)（SYS-WORLD）、[03-图层与遮挡](virtual-campus-reconstruction/03-执行层/01-地图线/03-图层与遮挡.md)（SYS-LAYER）、[04-地图分块](virtual-campus-reconstruction/03-执行层/01-地图线/04-地图分块.md)（SYS-CHUNK） |
+| 01-地图线 | [01-资源加载](01-地图线/01-资源加载.md)（SYS-ASSET）、[02-世界与地图](01-地图线/02-世界与地图.md)（SYS-WORLD）、[03-图层与遮挡](01-地图线/03-图层与遮挡.md)（SYS-LAYER）、[04-地图分块](01-地图线/04-地图分块.md)（SYS-CHUNK） |
 | 02-玩法线 | [01-输入](02-玩法线/01-输入.md)（SYS-INPUT）、[02-移动与碰撞](02-玩法线/02-移动与碰撞.md)（SYS-MOVE）、[03-玩家](02-玩法线/03-玩家.md)（SYS-PLAYER）、[04-相机](02-玩法线/04-相机.md)（SYS-CAMERA） |
 | 03-内容线 | [01-区域触发](03-内容线/01-区域触发.md)（SYS-ZONE）、[02-世界交互(弹窗)](03-内容线/02-世界交互(弹窗).md)（SYS-INTERACT） |
 | 04-独立件 | [01-应用启动与页面](04-独立件/01-应用启动与页面.md)（SYS-APP）、[02-游戏UI](04-独立件/02-游戏UI.md)（SYS-GAME-UI）、[03-实体生命周期](04-独立件/03-实体生命周期.md)（SYS-ENTITY） |
@@ -111,4 +111,4 @@ updated: 2026-08-18
 
 ## 历史位置
 
-旧精确文档按原结构归档到 [migration-history/doc-v0.1/](../migration-history/doc-v0.1/)（历史可查，不在当前工作链）；当前只维护本执行层一套文档。
+旧精确文档按原结构归档到 [migration-history/doc-v0.1/](../migration-history/doc-v0.1)（历史可查，不在当前工作链）；当前只维护本执行层一套文档。
