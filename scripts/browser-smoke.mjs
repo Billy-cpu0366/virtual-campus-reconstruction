@@ -82,7 +82,7 @@ ws.addEventListener("message", (event) => {
   if (message.method === "Network.responseReceived") {
     const response = message.params.response;
     const assetRequest =
-      response.url.includes("/maps/") ||
+      response.url.includes("/assets/maps/") ||
       response.url.includes("/sprites/") ||
       response.url.includes("/vendor/");
     if (response.status >= 400) {

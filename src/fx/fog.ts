@@ -8,7 +8,7 @@ export const FOG_PLAYER_CLEAR_WIDTH = 85;
 export const FOG_PLAYER_CLEAR_HEIGHT = 35;
 export const FOG_CAR_CLEAR_RADIUS = 40;
 export const FOG_ORANGE_SMOKE_RESPAWN_MS = 500;
-/** Rebuild decision: keep the public quantity, render fewer fog particles. */
+/** 呈现层实际并发数（性能取舍）。数据层的 quantity 仍是 4（下方 config），别把 2 抄回去。 */
 export const FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY = 2;
 
 export interface FogPoint {
@@ -58,6 +58,7 @@ export const FOG_ORANGE_SMOKE_CONFIG = Object.freeze({
   scale: 8,
   alpha: 0.3,
   speed: 5,
+  // 数据层要发的粒子数。呈现层实际用 FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY = 2（性能取舍），别被它带偏。
   quantity: 4,
   frequency: 20,
   lifespan: Object.freeze({ min: 350, max: 2_000 }),

@@ -10,11 +10,11 @@
 // 并把所有 GID >= 69355 的 tile 归零（空 tile），既消除崩溃、又不丢渲染需要的数据。
 //
 // 源：sample/original-public-build/mirror/assets/maps/final_map.json
-// 目标：public/maps/final_map.json（gitignored，派生文件）
+// 目标：public/assets/maps/final_map.json（gitignored，派生文件）
 import { readFileSync, writeFileSync } from "node:fs";
 
 const SRC = "sample/original-public-build/mirror/assets/maps/final_map.json";
-const OUT = "public/maps/final_map.json";
+const OUT = "public/assets/maps/final_map.json";
 const EXTERNAL_FIRSTGID = 69355;
 
 const j = JSON.parse(readFileSync(SRC, "utf8"));

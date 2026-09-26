@@ -1,24 +1,25 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  BUG_CROWD_CONFIG,
-  BUG_CROWD_CONFIGS,
   BUG_CROWD_TILE_SIZE,
   BugCrowdRuntime,
   type BugCrowdPoint,
   type BugCrowdRuntimeOptions,
 } from "../../src/npc/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
 import {
-  BUG_CROWD_DISPLAY_SCALE,
-  BUG_CROWD_FRAME_COUNT,
-  BUG_CROWD_FRAME_HEIGHT,
-  BUG_CROWD_FRAME_WIDTH,
-  BUG_CROWD_ORIGIN,
   bugCrowdFrameForFacing,
   PhaserBugCrowdRuntime,
   preloadBugCrowdRuntimeAssets,
   type PhaserBugCrowdSceneLike,
 } from "../../game/PhaserBugCrowdRuntime.js";
+
+/** 配置不再从 src/ 里来，是读磁盘上那份 JSON——和游戏里读的是同一份。 */
+const CONFIGS = await loadNpcConfigs(createDiskConfigSource());
+const CONFIG = CONFIGS.bugCrowd;
+/** 虫子长什么样：帧规格、缩放、锚点、四方向起始帧。原先写死在 game/ 里。 */
+const PRESENTATION = CONFIGS.presentation.bugCrowd;
 
 const center = (x: number, y: number): BugCrowdPoint => ({
   x: x * BUG_CROWD_TILE_SIZE + 8,
@@ -38,6 +39,7 @@ function runtime(
   overrides: Partial<BugCrowdRuntimeOptions> = {},
 ): BugCrowdRuntime {
   return new BugCrowdRuntime({
+    config: CONFIG,
     random: () => 0.5,
     pathProvider: pathProvider(),
     ...overrides,
@@ -87,21 +89,38 @@ describe("BugCrowdRuntime", () => {
       spritesheet: (key, url, config) => {
         loaded = { key, url, config: { ...config } };
       },
-    });
+    }, PRESENTATION);
 
     expect(loaded).toEqual({
       key: "npc-bug",
       url: "/sprites/npc-bug.webp",
       config: {
-        frameWidth: BUG_CROWD_FRAME_WIDTH,
-        frameHeight: BUG_CROWD_FRAME_HEIGHT,
+        frameWidth: 38,
+        frameHeight: 38,
         startFrame: 0,
-        endFrame: BUG_CROWD_FRAME_COUNT - 1,
+        endFrame: 23,
       },
     });
-    expect(loaded?.config.frameWidth).toBe(38);
-    expect(loaded?.config.frameHeight).toBe(38);
-    expect(loaded?.config.endFrame).toBe(23);
+    expect(PRESENTATION).toMatchObject({
+      frameWidth: 38,
+      frameHeight: 38,
+      frameCount: 24,
+      frameRate: 10,
+      displayScale: 0.63,
+      origin: { x: 0.5, y: 0.85 },
+      facingFrameStart: { south: 0, north: 6, west: 12, east: 18 },
+    });
+    expect(Object.isFrozen(PRESENTATION)).toBe(true);
+  });
+
+  it("贴图规格是按传进来的那份配置登记的，不是写死的", () => {
+    const loads: Array<{ key: string; config: { frameWidth: number; endFrame: number | undefined } }> = [];
+    preloadBugCrowdRuntimeAssets({
+      spritesheet: (key, _url, config) => {
+        loads.push({ key, config: { frameWidth: config.frameWidth, endFrame: config.endFrame } });
+      },
+    }, { ...PRESENTATION, frameWidth: 64, frameCount: 8 });
+    expect(loads).toEqual([{ key: "npc-bug", config: { frameWidth: 64, endFrame: 7 } }]);
   });
 
   it("renders direction frames with the public scale and origin", () => {
@@ -117,37 +136,51 @@ describe("BugCrowdRuntime", () => {
       },
     };
     const runtime = new PhaserBugCrowdRuntime(scene, {
+      config: CONFIG,
       pathProvider: pathProvider(),
+      presentation: PRESENTATION,
       viewport: () => ({ left: 0, top: 0, width: 2_240, height: 2_240 }),
     });
 
     expect(runtime.start(0)).toBe(true);
     expect(sprites).toHaveLength(10);
-    expect(sprites.every((sprite) => sprite.scale === BUG_CROWD_DISPLAY_SCALE)).toBe(true);
+    expect(sprites.every((sprite) => sprite.scale === PRESENTATION.displayScale)).toBe(true);
     expect(sprites.every((sprite) =>
-      sprite.origin.x === BUG_CROWD_ORIGIN.x && sprite.origin.y === BUG_CROWD_ORIGIN.y,
+      sprite.origin.x === PRESENTATION.origin.x && sprite.origin.y === PRESENTATION.origin.y,
     )).toBe(true);
-    expect(sprites.every((sprite) => sprite.frame >= 0 && sprite.frame < BUG_CROWD_FRAME_COUNT)).toBe(true);
+    expect(sprites.every((sprite) =>
+      sprite.frame >= 0 && sprite.frame < PRESENTATION.frameCount)).toBe(true);
+    expect(PRESENTATION.displayScale).toBe(0.63);
+    expect(PRESENTATION.origin).toEqual({ x: 0.5, y: 0.85 });
 
     runtime.update(100);
     expect(sprites.every((sprite) => sprite.frame >= 0 && sprite.frame < 24)).toBe(true);
-    expect(bugCrowdFrameForFacing("south", 0)).toBe(0);
-    expect(bugCrowdFrameForFacing("south", 500)).toBe(5);
-    expect(bugCrowdFrameForFacing("north", 0)).toBe(6);
-    expect(bugCrowdFrameForFacing("west", 0)).toBe(12);
-    expect(bugCrowdFrameForFacing("east", 0)).toBe(18);
-    expect(bugCrowdFrameForFacing("east", 600)).toBe(18);
-    expect(bugCrowdFrameForFacing("east", 600, false)).toBe(18);
-    expect(BUG_CROWD_FRAME_WIDTH).not.toBe(48);
-    expect(BUG_CROWD_FRAME_HEIGHT).not.toBe(48);
+    expect(bugCrowdFrameForFacing("south", 0, PRESENTATION)).toBe(0);
+    expect(bugCrowdFrameForFacing("south", 500, PRESENTATION)).toBe(5);
+    expect(bugCrowdFrameForFacing("north", 0, PRESENTATION)).toBe(6);
+    expect(bugCrowdFrameForFacing("west", 0, PRESENTATION)).toBe(12);
+    expect(bugCrowdFrameForFacing("east", 0, PRESENTATION)).toBe(18);
+    expect(bugCrowdFrameForFacing("east", 600, PRESENTATION)).toBe(18);
+    expect(bugCrowdFrameForFacing("east", 600, PRESENTATION, false)).toBe(18);
+    // 四个方向的起始帧认配置里那份：改配置能改行为，说明代码没把 6/12/18 写死。
+    const shifted = {
+      ...PRESENTATION,
+      facingFrameStart: { ...PRESENTATION.facingFrameStart, north: 2 },
+    };
+    expect(bugCrowdFrameForFacing("north", 0, shifted)).toBe(2);
+    // 每方向几帧是从 frameCount ÷ 方向数（24 ÷ 4 = 6）算出来的，原先写死 6。
+    // 7000 毫秒 × 每秒 10 帧 = 第 70 帧：除 6 余 4，除 8 余 6。
+    expect(PRESENTATION.frameRate).toBe(10);
+    expect(bugCrowdFrameForFacing("south", 7_000, PRESENTATION)).toBe(4);
+    const wide = { ...PRESENTATION, frameCount: 32 };
+    expect(bugCrowdFrameForFacing("south", 7_000, wide)).toBe(6);
 
     runtime.shutdown();
     expect(sprites.every((sprite) => sprite.destroyed)).toBe(true);
   });
 
-  it("publishes the immutable public bug-area configuration", () => {
-    expect(BUG_CROWD_CONFIGS).toEqual([BUG_CROWD_CONFIG]);
-    expect(BUG_CROWD_CONFIG).toMatchObject({
+  it("读出来还是 bug-area 这一片、这些值", () => {
+    expect(CONFIG).toMatchObject({
       id: "bug-area",
       startTiles: [
         { x: 5, y: 128 }, { x: 9, y: 129 }, { x: 13, y: 130 },
@@ -162,18 +195,17 @@ describe("BugCrowdRuntime", () => {
       npcCount: 10,
       movementSpeed: 15,
       speedVariation: 0.3,
-      mode: "wander",
       randomPositions: true,
       wanderDistance: 24,
       wanderInterval: { minMs: 2_000, maxMs: 4_000 },
       sprite: "npc-bug",
       maxActiveInViewport: 40,
     });
-    expect(Object.isFrozen(BUG_CROWD_CONFIG)).toBe(true);
-    expect(Object.isFrozen(BUG_CROWD_CONFIG.startTiles)).toBe(true);
-    expect(Object.isFrozen(BUG_CROWD_CONFIG.startTiles[0])).toBe(true);
-    expect(Object.isFrozen(BUG_CROWD_CONFIG.wanderInterval)).toBe(true);
-    expect(Object.isFrozen(BUG_CROWD_CONFIGS)).toBe(true);
+    expect(CONFIG).not.toHaveProperty("mode");
+    expect(Object.isFrozen(CONFIG)).toBe(true);
+    expect(Object.isFrozen(CONFIG.startTiles)).toBe(true);
+    expect(Object.isFrozen(CONFIG.startTiles[0])).toBe(true);
+    expect(Object.isFrozen(CONFIG.wanderInterval)).toBe(true);
   });
 
   it("selects a new target only when its timestamp interval elapses", () => {
@@ -181,16 +213,17 @@ describe("BugCrowdRuntime", () => {
     const crowd = runtime({ pathProvider: pathProvider({ calls }) });
 
     crowd.start(0);
-    expect(calls).toHaveLength(BUG_CROWD_CONFIG.npcCount);
+    expect(calls).toHaveLength(CONFIG.npcCount);
     crowd.tick(2_999);
-    expect(calls).toHaveLength(BUG_CROWD_CONFIG.npcCount);
+    expect(calls).toHaveLength(CONFIG.npcCount);
     crowd.tick(3_000);
-    expect(calls).toHaveLength(BUG_CROWD_CONFIG.npcCount * 2);
+    expect(calls).toHaveLength(CONFIG.npcCount * 2);
     expect(calls.at(-1)?.start).toBeDefined();
   });
 
   it("moves through the path provider at the configured speed", () => {
     const crowd = new BugCrowdRuntime({
+      config: CONFIG,
       random: () => 0.5,
       pathProvider: (request) => [
         request.start,
@@ -215,6 +248,7 @@ describe("BugCrowdRuntime", () => {
     ];
     let randomCalls = 0;
     const crowd = new BugCrowdRuntime({
+      config: CONFIG,
       random: () => {
         const value = randomCalls % 6 === 0
           ? Math.min(0.99, Math.floor(randomCalls / 6) / 9)

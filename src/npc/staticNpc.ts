@@ -36,49 +36,18 @@ export interface StaticNpcSnapshot {
   readonly instances: readonly StaticNpcInstanceSnapshot[];
 }
 
+/**
+ * 站位的人需要的外部输入。两个字段都**必须**由调用方给：原先它们各自有一个
+ * 默认值（`STATIC_NPC_CONFIGS` / `STATIC_NPC_VIEWPORT_MARGIN`），那份默认值
+ * 就是被搬走的配置。留着默认值等于「没给配置也能跑」，那种情况下场景会静悄悄地
+ * 少几个人，比直接报错难查。
+ */
 export interface StaticNpcRuntimeOptions {
-  readonly configs?: readonly StaticNpcConfig[];
-  readonly viewportMargin?: number;
+  readonly configs: readonly StaticNpcConfig[];
+  readonly viewportMargin: number;
 }
 
 export const STATIC_NPC_TILE_SIZE = 16;
-export const STATIC_NPC_VIEWPORT_MARGIN = 300;
-
-// these are the only accepted static NPCs; no other public NPC
-// configuration is inferred into this runtime.
-export const STATIC_NPC_CONFIGS = Object.freeze([
-  Object.freeze({
-    id: "special-reading",
-    spriteKey: "npc-special-reading",
-    tileX: 72,
-    tileY: 53,
-    scale: 0.9,
-    frameRate: 3,
-    frameDurations: Object.freeze([
-      Object.freeze({ frame: 1, duration: 2_000 }),
-      Object.freeze({ frame: 9, duration: 3_000 }),
-    ]),
-  }),
-  Object.freeze({
-    id: "special-eating",
-    spriteKey: "npc-special-eating",
-    tileX: 54,
-    tileY: 63,
-    scale: 0.73,
-    frameRate: 4,
-  }),
-  Object.freeze({
-    id: "cat-licking",
-    spriteKey: "npc-cat-licking",
-    tileX: 12,
-    tileY: 106,
-    scale: 1,
-    frameRate: 6,
-    frameDurations: Object.freeze([
-      Object.freeze({ frame: 0, duration: 3_000 }),
-    ]),
-  }),
-] as const);
 
 function pointFor(config: StaticNpcConfig): StaticNpcPoint {
   return {
@@ -108,9 +77,9 @@ export class StaticNpcRuntime {
   private dead = false;
   private current: StaticNpcSnapshot = { instances: Object.freeze([]) };
 
-  constructor(options: StaticNpcRuntimeOptions = {}) {
-    this.configs = options.configs ?? STATIC_NPC_CONFIGS;
-    this.viewportMargin = options.viewportMargin ?? STATIC_NPC_VIEWPORT_MARGIN;
+  constructor(options: StaticNpcRuntimeOptions) {
+    this.configs = options.configs;
+    this.viewportMargin = options.viewportMargin;
   }
 
   get snapshot(): StaticNpcSnapshot {

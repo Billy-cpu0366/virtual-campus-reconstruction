@@ -11,9 +11,15 @@ const SOURCE_MAPS = resolve(
   ROOT,
   "sample/original-public-build/mirror/assets/maps",
 );
-const RUNTIME_MAPS = resolve(ROOT, "public/maps");
+const RUNTIME_MAPS = resolve(ROOT, "public/assets/maps");
 const EXTERNAL_FIRSTGID = 69355;
 const PARTICLE_TILESET_SOURCE = "tileset-particles.tsx";
+// 这几个数字抄自 Tiled 作图源 `tileset-particles.tsx`（tilecount=7 columns=7
+// image=tileset-particles.png width=112），描述的是**作图工程**，不是运行期纹理。
+// 运行期纹理是 `tileset-particles.webp`，96×16 —— 只有 6 格。原站自己就这样：
+// .tsx 指向 7 格的 png，bundle 却 load 6 格的 webp。Phaser 的 addTilesetImage
+// 用纹理宽度除以 tileWidth 现算列数，所以运行期实际拿到 6 列；本 sanitizer 保
+// 留下来的 GID 只有 69355–69359（第 0–4 格），落在 6 列内，不缺格。
 const PARTICLE_TILESET = {
   columns: 7,
   firstgid: EXTERNAL_FIRSTGID,

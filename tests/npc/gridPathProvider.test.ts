@@ -1,6 +1,12 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { GridRouteCrowdPathProvider } from "../../src/npc/gridPathProvider.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+
+/** 寻路那四项现在读磁盘上那份配置，不再从 src/ 里拿常量。 */
+const { tuning } = await loadNpcConfigs(createDiskConfigSource());
+const PATH_TUNING = tuning.path;
 
 describe("GridRouteCrowdPathProvider", () => {
   it("finds an eight-way walkable route and rejects blocked endpoints", () => {
@@ -8,7 +14,7 @@ describe("GridRouteCrowdPathProvider", () => {
       [0, 0, 0],
       [1, 1, 0],
       [0, 0, 0],
-    ]);
+    ], PATH_TUNING);
     expect(provider.findPath({ start: { x: 8, y: 8 }, end: { x: 40, y: 40 } }))
       .toEqual([
         { x: 8, y: 8 },
@@ -26,7 +32,7 @@ describe("GridRouteCrowdPathProvider", () => {
       [0, 0, 0],
       [1, 1, 0],
       [0, 0, 0],
-    ]);
+    ], PATH_TUNING);
     const path = provider.findPath({
       start: { x: 8, y: 24 },
       end: { x: 40, y: 40 },
@@ -41,7 +47,7 @@ describe("GridRouteCrowdPathProvider", () => {
       "../../sample/original-public-build/mirror/assets/maps/walls-layer.json",
       import.meta.url,
     ), "utf8")) as { grid: number[][] };
-    const provider = new GridRouteCrowdPathProvider(wallData.grid);
+    const provider = new GridRouteCrowdPathProvider(wallData.grid, PATH_TUNING);
     for (const x of [31, 32, 33]) {
       const request = {
         start: { x: x * 16, y: 81 * 16 },
@@ -65,7 +71,7 @@ describe("GridRouteCrowdPathProvider", () => {
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
       ],
-      (point) => point.x === 24 && point.y === 8,
+      { ...PATH_TUNING, isBlocked: (point) => point.x === 24 && point.y === 8 },
     );
     const path = provider.findPath({
       start: { x: 8, y: 8 },
@@ -83,7 +89,10 @@ describe("GridRouteCrowdPathProvider", () => {
         [0, 0, 0],
         [0, 0, 0],
       ],
-      (point) => point.x === blocked.x && point.y === blocked.y,
+      {
+        ...PATH_TUNING,
+        isBlocked: (point) => point.x === blocked.x && point.y === blocked.y,
+      },
     );
     const path = provider.findPath({
       start: blocked,
@@ -103,7 +112,7 @@ describe("GridRouteCrowdPathProvider", () => {
       [0, 0, 1, 0, 0],
       [0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0],
-    ]);
+    ], PATH_TUNING);
     const request = { start: { x: 8, y: 40 }, end: { x: 72, y: 40 }, randomFactor: .8 };
     const first = provider.findPath({ ...request, randomSeed: 1 });
     expect(provider.findPath({ ...request, randomSeed: 1 })).toEqual(first);
@@ -114,7 +123,7 @@ describe("GridRouteCrowdPathProvider", () => {
     const provider = new GridRouteCrowdPathProvider([
       [0, 1],
       [1, 0],
-    ]);
+    ], PATH_TUNING);
     expect(provider.findPath({ start: { x: 8, y: 8 }, end: { x: 24, y: 24 } }))
       .toBeNull();
   });
@@ -124,7 +133,7 @@ describe("GridRouteCrowdPathProvider", () => {
       [0, 1, 0],
       [1, 1, 1],
       [0, 1, 0],
-    ]);
+    ], PATH_TUNING);
     expect(provider.findPath({ start: { x: 8, y: 8 }, end: { x: 40, y: 40 } }))
       .toBeNull();
   });

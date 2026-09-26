@@ -6,20 +6,35 @@ import type {
   RouteCrowdTile,
 } from "./routeCrowd.js";
 
-const TILE_SIZE = 16;
-// Keep route startup below a frame budget; unfinished jobs resume next frame.
-const ITERATIONS_PER_STEP = 64;
 const key = (point: RouteCrowdTile) => `${point.x},${point.y}`;
-const DIRECTIONS = Object.freeze([
-  { dx: 0, dy: -1, cost: 1 },
-  { dx: 1, dy: 0, cost: 1 },
-  { dx: 0, dy: 1, cost: 1 },
-  { dx: -1, dy: 0, cost: 1 },
-  { dx: 1, dy: -1, cost: 1.41 },
-  { dx: 1, dy: 1, cost: 1.41 },
-  { dx: -1, dy: 1, cost: 1.41 },
-  { dx: -1, dy: -1, cost: 1.41 },
-]);
+
+/** 一条走法：往哪偏几格、代价多少。 */
+export interface GridRouteCrowdDirection {
+  readonly dx: number;
+  readonly dy: number;
+  readonly cost: number;
+}
+
+/**
+ * 寻路的四项可改值，全部来自 `path-tuning.json`。
+ *
+ * 四项都**必须**由调用方递进来：少给一项就编译不过。这样改配置的人不会被
+ * 「代码里还留着一份旧值」骗到。
+ */
+export interface GridRouteCrowdPathProviderOptions {
+  /** 一格多少像素。它同时是格坐标和像素坐标之间的换算基准，通常不该动。 */
+  readonly tileSize: number;
+  /**
+   * 一次 findPath 最多算多少步，算不完就留到下一帧接着算。
+   * 写太小开场要多等几帧；写太大开场会卡一下。
+   */
+  readonly iterationsPerStep: number;
+  /** 单条路径最多算多少步，超了就放弃这条路径。 */
+  readonly maxIterations: number;
+  /** 八个走法方向和各自的代价。改它等于改寻路形状，不是调参。 */
+  readonly directions: readonly GridRouteCrowdDirection[];
+  readonly isBlocked?: (point: RouteCrowdTile) => boolean;
+}
 
 type OpenNode = { point: RouteCrowdTile; priority: number; order: number };
 class MinHeap {
@@ -85,12 +100,13 @@ const heuristic = (a: RouteCrowdTile, b: RouteCrowdTile): number => {
 const nearestWalkable = (
   grid: readonly (readonly number[])[],
   point: RouteCrowdTile,
+  tileSize: number,
   isBlocked?: (point: RouteCrowdTile) => boolean,
   maxRadius = 4,
 ): RouteCrowdTile | undefined => {
   const worldCenter = (tile: RouteCrowdTile): RouteCrowdTile => ({
-    x: tile.x * TILE_SIZE + TILE_SIZE / 2,
-    y: tile.y * TILE_SIZE + TILE_SIZE / 2,
+    x: tile.x * tileSize + tileSize / 2,
+    y: tile.y * tileSize + tileSize / 2,
   });
   if (isWalkable(grid, point.x, point.y) &&
     !isBlocked?.(worldCenter(point))) return point;
@@ -120,8 +136,16 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
 
   constructor(
     private readonly grid: readonly (readonly number[])[],
-    private readonly isBlocked?: (point: RouteCrowdTile) => boolean,
+    private readonly options: GridRouteCrowdPathProviderOptions,
   ) {}
+
+  private get tileSize(): number {
+    return this.options.tileSize;
+  }
+
+  private get isBlocked(): ((point: RouteCrowdTile) => boolean) | undefined {
+    return this.options.isBlocked;
+  }
 
   findPath(request: RouteCrowdPathRequest): RouteCrowdPathResult {
     const id = [
@@ -137,9 +161,13 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
       this.jobs.set(id, job);
     }
 
-    for (let step = 0; step < ITERATIONS_PER_STEP && job.open.size > 0; step += 1) {
+    for (
+      let step = 0;
+      step < this.options.iterationsPerStep && job.open.size > 0;
+      step += 1
+    ) {
       job.iterations += 1;
-      if (job.iterations > 50_000) break;
+      if (job.iterations > this.options.maxIterations) break;
       const current = job.open.pop()!.point;
       const currentKey = key(current);
       if (job.closed.has(currentKey)) continue;
@@ -149,13 +177,13 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
         return path;
       }
       job.closed.add(currentKey);
-      for (const direction of DIRECTIONS) {
+      for (const direction of this.options.directions) {
         const next = { x: current.x + direction.dx, y: current.y + direction.dy };
         const nextKey = key(next);
         const isGoal = nextKey === key(job.goal);
         const nextWorld = {
-          x: next.x * TILE_SIZE + TILE_SIZE / 2,
-          y: next.y * TILE_SIZE + TILE_SIZE / 2,
+          x: next.x * this.tileSize + this.tileSize / 2,
+          y: next.y * this.tileSize + this.tileSize / 2,
         };
         const walkable = job.ignoreWalls || isWalkable(this.grid, next.x, next.y) ||
           (isGoal && job.allowConfiguredEndpoints);
@@ -166,12 +194,12 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
           (!isWalkable(this.grid, current.x + direction.dx, current.y) ||
             !isWalkable(this.grid, current.x, current.y + direction.dy) ||
             job.isBlocked?.({
-              x: (current.x + direction.dx) * TILE_SIZE + TILE_SIZE / 2,
-              y: current.y * TILE_SIZE + TILE_SIZE / 2,
+              x: (current.x + direction.dx) * this.tileSize + this.tileSize / 2,
+              y: current.y * this.tileSize + this.tileSize / 2,
             }) === true ||
             job.isBlocked?.({
-              x: current.x * TILE_SIZE + TILE_SIZE / 2,
-              y: (current.y + direction.dy) * TILE_SIZE + TILE_SIZE / 2,
+              x: current.x * this.tileSize + this.tileSize / 2,
+              y: (current.y + direction.dy) * this.tileSize + this.tileSize / 2,
             }) === true)
         ) continue;
         job.seed = (job.seed * 1_664_525 + 1_013_904_223) >>> 0;
@@ -187,43 +215,45 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
         });
       }
     }
-    if (job.open.size > 0 && job.iterations <= 50_000) return undefined;
+    if (job.open.size > 0 && job.iterations <= this.options.maxIterations) {
+      return undefined;
+    }
     this.jobs.delete(id);
     return null;
   }
 
   private createJob(id: string, request: RouteCrowdPathRequest): PathJob | undefined {
     const requestedStart = {
-      x: Math.floor(request.start.x / TILE_SIZE),
-      y: Math.floor(request.start.y / TILE_SIZE),
+      x: Math.floor(request.start.x / this.tileSize),
+      y: Math.floor(request.start.y / this.tileSize),
     };
     const requestedGoal = {
-      x: Math.floor(request.end.x / TILE_SIZE),
-      y: Math.floor(request.end.y / TILE_SIZE),
+      x: Math.floor(request.end.x / this.tileSize),
+      y: Math.floor(request.end.y / this.tileSize),
     };
     const ignoreWalls = request.ignoreWalls === true;
     const allowConfiguredEndpoints = request.allowBlockedEndpoints === true;
     const start = ignoreWalls || (
       isWalkable(this.grid, requestedStart.x, requestedStart.y) &&
       this.isBlocked?.({
-        x: requestedStart.x * TILE_SIZE + TILE_SIZE / 2,
-        y: requestedStart.y * TILE_SIZE + TILE_SIZE / 2,
+        x: requestedStart.x * this.tileSize + this.tileSize / 2,
+        y: requestedStart.y * this.tileSize + this.tileSize / 2,
       }) !== true
     )
       ? requestedStart
       : allowConfiguredEndpoints
-        ? nearestWalkable(this.grid, requestedStart, this.isBlocked)
+        ? nearestWalkable(this.grid, requestedStart, this.tileSize, this.isBlocked)
         : undefined;
     const goal = ignoreWalls || (
       isWalkable(this.grid, requestedGoal.x, requestedGoal.y) &&
       this.isBlocked?.({
-        x: requestedGoal.x * TILE_SIZE + TILE_SIZE / 2,
-        y: requestedGoal.y * TILE_SIZE + TILE_SIZE / 2,
+        x: requestedGoal.x * this.tileSize + this.tileSize / 2,
+        y: requestedGoal.y * this.tileSize + this.tileSize / 2,
       }) !== true
     )
       ? requestedGoal
       : allowConfiguredEndpoints
-        ? nearestWalkable(this.grid, requestedGoal, this.isBlocked)
+        ? nearestWalkable(this.grid, requestedGoal, this.tileSize, this.isBlocked)
         : undefined;
     if (start === undefined || goal === undefined) return undefined;
     const open = new MinHeap();
@@ -248,7 +278,10 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
     let cursor: string | undefined = key(job.goal);
     while (cursor !== undefined) {
       const [x, y] = cursor.split(",").map(Number);
-      path.unshift({ x: x! * TILE_SIZE + 8, y: y! * TILE_SIZE + 8 });
+      path.unshift({
+        x: x! * this.tileSize + this.tileSize / 2,
+        y: y! * this.tileSize + this.tileSize / 2,
+      });
       cursor = job.cameFrom.get(cursor);
     }
     return path;

@@ -20,14 +20,26 @@ export {
 } from "./idle.js";
 export { DEFAULT_FACING, facingDirection } from "./facing.js";
 export {
+  BEACH_IDLE_FRAME,
+  BEACH_TEXTURE,
+  beachWalkAnimation,
   CHANGE_CLOTHES_COOLDOWN_MS,
   CLOTHES_OFF_DISPLAY_SIZE,
+  CLOTHES_OFF_FIRST_FRAME,
+  CLOTHES_OFF_FRAME_HEIGHT,
+  CLOTHES_OFF_FRAME_WIDTH,
+  CLOTHES_OFF_LAST_FRAME,
+  CLOTHES_OFF_TEXTURE,
+  CLOTHING_FRAME_RATE,
+  DRESS_ANIMATION,
   HOLDING_DISPLAY_SIZE,
   HOLDING_TEXTURE,
+  UNDRESS_ANIMATION,
 } from "./clothing.js";
 export {
   PLAYER_IDLE_ACTIONS,
   PlayerRuntimeStateMachine,
+  type ClothingChange,
   type PlayerControlEffects,
   type PlayerControlSnapshot,
   type PlayerPositionSnapshot,

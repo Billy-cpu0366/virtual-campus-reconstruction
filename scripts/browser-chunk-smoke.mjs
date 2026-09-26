@@ -108,7 +108,7 @@ await clickPlay(command, evaluate, initialWaitMs + 10000);
 
 const chunkResources = () => `performance.getEntriesByType("resource")
   .map((entry) => entry.name)
-  .filter((name) => name.includes("/maps/chunks/chunk"))`;
+  .filter((name) => name.includes("/assets/maps/chunks/chunk"))`;
 async function waitForSettledDebug(timeoutMs) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
@@ -147,10 +147,10 @@ const uniqueAfter = [...new Set(after)];
 const newRequests = uniqueAfter.filter((name) => !uniqueBefore.includes(name));
 const allChunksPreloaded = uniqueBefore.length === 25;
 const chunk20Requested = uniqueAfter.some((name) =>
-  name.endsWith("/maps/chunks/chunk20.json"),
+  name.endsWith("/assets/maps/chunks/chunk20.json"),
 );
 
-const masterResponse = await fetch(new URL("/maps/chunks/master.json", url));
+const masterResponse = await fetch(new URL("/assets/maps/chunks/master.json", url));
 if (!masterResponse.ok) {
   throw new Error(`could not load chunk master: ${masterResponse.status}`);
 }

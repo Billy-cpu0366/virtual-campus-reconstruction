@@ -6,6 +6,7 @@ import {
   IDLE_TIME_FOR_SITTING,
 } from "./idle.js";
 import { DEFAULT_FACING } from "./facing.js";
+import { CHANGE_CLOTHES_COOLDOWN_MS } from "./clothing.js";
 
 export type PlayerStatus =
   | "disabled"
@@ -15,7 +16,11 @@ export type PlayerStatus =
   | "sitting-down"
   | "sitting"
   | "standing-up"
+  | "changing-clothes"
   | "shutdown";
+
+/** 换装方向：脱（进沙滩）或穿（离开沙滩）。 */
+export type ClothingChange = "undressing" | "dressing";
 
 export interface PlayerPositionSnapshot {
   readonly x: number;
@@ -36,6 +41,10 @@ export interface PlayerUpdateResult {
   readonly facing: Direction;
   readonly idleAnimation: IdleAnimation | null;
   readonly pendingDirection: Direction | null;
+  /** 身上是不是沙滩装。换装中沿用换装前那一套。 */
+  readonly onBeach: boolean;
+  /** 正在播的换装方向；没在换装时为 null。 */
+  readonly clothingChange: ClothingChange | null;
 }
 
 export interface PlayerControlEffects {
@@ -74,6 +83,7 @@ function isVisualLocked(status: PlayerStatus): boolean {
     status === "sitting-down" ||
     status === "sitting" ||
     status === "standing-up" ||
+    status === "changing-clothes" ||
     status === "shutdown"
   );
 }
@@ -92,6 +102,9 @@ export class PlayerRuntimeStateMachine {
   private pendingDirectionState: Direction | undefined;
   private lastMovementAt: number;
   private lastIdleAnimationAt: number;
+  private onBeachState = false;
+  private clothingChangeState: ClothingChange | undefined;
+  private clothesChangeCooldownUntil = 0;
 
   constructor(options: PlayerRuntimeOptions = {}) {
     this.now = options.now ?? (() => Date.now());
@@ -137,6 +150,65 @@ export class PlayerRuntimeStateMachine {
 
   get pendingDirection(): Direction | null {
     return this.pendingDirectionState ?? null;
+  }
+
+  get onBeach(): boolean {
+    return this.onBeachState;
+  }
+
+  get clothingChange(): ClothingChange | null {
+    return this.clothingChangeState ?? null;
+  }
+
+  /**
+   * 请求换装。冷却未过、已在换装中、或控制被关掉时都不生效。
+   * 生效时锁住操作并把速度清零——对应原站的 `player.setVelocity(0, 0)`。
+   */
+  beginClothingChange(
+    change: ClothingChange,
+    nowMs: number = this.now(),
+  ): boolean {
+    if (this.shutdownState || !this.controlEnabled) return false;
+    if (this.statusState === "changing-clothes") return false;
+    if (nowMs < this.clothesChangeCooldownUntil) return false;
+    this.clothingChangeState = change;
+    this.statusState = "changing-clothes";
+    this.activeIdleState = undefined;
+    this.pendingDirectionState = undefined;
+    this.lastMovementAt = nowMs;
+    this.lastIdleAnimationAt = nowMs;
+    this.effects.stopMovement();
+    return true;
+  }
+
+  /**
+   * 换装动画播完了。脱衣完成就换上沙滩装，穿衣完成就换回常服，并开始计时冷却。
+   */
+  completeClothingChange(nowMs: number = this.now()): boolean {
+    if (this.shutdownState || this.statusState !== "changing-clothes") {
+      return false;
+    }
+    const change = this.clothingChangeState;
+    if (change === undefined) return false;
+    this.clothingChangeState = undefined;
+    this.onBeachState = change === "undressing";
+    this.resetState(nowMs, "normal-idle");
+    this.clothesChangeCooldownUntil = nowMs + CHANGE_CLOTHES_COOLDOWN_MS;
+    return true;
+  }
+
+  /** 换装动画缺失时的兜底：跳过动画直接落到目标着装，不把玩家卡在换装中。 */
+  skipClothingChange(
+    change: ClothingChange,
+    nowMs: number = this.now(),
+  ): boolean {
+    if (this.shutdownState) return false;
+    if (this.statusState !== "changing-clothes") {
+      this.clothingChangeState = change;
+      this.statusState = "changing-clothes";
+      this.effects.stopMovement();
+    }
+    return this.completeClothingChange(nowMs);
   }
 
   setPosition(x: number, y: number): void {
@@ -191,6 +263,11 @@ export class PlayerRuntimeStateMachine {
   ): PlayerUpdateResult {
     this.assertActive();
     if (!this.controlEnabled) {
+      return this.result(null);
+    }
+
+    // 换装中不接受任何输入，等动画播完由 completeClothingChange 收尾。
+    if (this.statusState === "changing-clothes") {
       return this.result(null);
     }
 
@@ -298,6 +375,7 @@ export class PlayerRuntimeStateMachine {
     this.statusState = status;
     this.activeIdleState = undefined;
     this.pendingDirectionState = undefined;
+    this.clothingChangeState = undefined;
     this.lastMovementAt = nowMs;
     this.lastIdleAnimationAt = nowMs;
   }
@@ -333,6 +411,8 @@ export class PlayerRuntimeStateMachine {
       facing: this.facingState,
       idleAnimation: this.activeIdleState ?? null,
       pendingDirection: this.pendingDirectionState ?? null,
+      onBeach: this.onBeachState,
+      clothingChange: this.clothingChangeState ?? null,
     });
   }
 }

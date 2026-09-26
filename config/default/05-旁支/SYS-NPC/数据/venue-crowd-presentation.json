@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserVenueCrowdRuntime.ts",
+    "sourceConstant": "DEFAULT_NPC_HALF_SIZE / PROTESTER_HALF_SIZE / PROTESTER_SLOGANS / PROTEST_SPEECH_MAX_VISIBLE / _INITIAL_DELAY_MS / _DURATION_MS / _INTERVAL_MS",
+    "units": {
+      "npcTexture": "text",
+      "slogans": "text",
+      "npcHalfSize": "pixel",
+      "protesterHalfSize": "pixel",
+      "speechMaxVisible": "count",
+      "speechInitialDelayMs": "ms",
+      "speechDurationMs": "ms",
+      "speechIntervalMs": "ms",
+      "maxCreatePerSync": "count",
+      "maxConcurrentActs": "count",
+      "actCapableEveryNth": "count"
+    },
+    "notes": [
+      "这份管场馆人群「长什么样、喊什么」，管「站在哪、几个人」的是 venue-crowd-regions.json。",
+      "slogans 是抗议者举牌喊的话，换校园时基本一定要换。数组里有几句就轮几句，加句子不用改代码。",
+      "speechMaxVisible 是「同时最多几个人头顶有气泡」——设太大屏幕会糊成一片。",
+      "speechInitialDelayMs / DurationMs / IntervalMs 三个一起决定喊话节奏：第一次等多久、一句显示多久、隔多久换下一句。",
+      "maxCreatePerSync 是每帧最多新出现几个人，防止一次涌出一大片卡帧。数字调小会更平滑，但人多的地方出现得慢。",
+      "maxConcurrentActs 是同时最多几个人在做动作（转身、举手）。actCapableEveryNth 是「每 N 个抗议者里挑 1 个会做动作」，3 表示三分之一。",
+      "气泡的字体、字号、颜色、换行宽度都在 speechBubble 里——原来是写死的，换校园改不了。",
+      "抗议者贴图是 64×64，普通场馆人群复用 npc-man（规格见 static-crowd-presentation.json），两者规格不同。",
+      "说话/转身的随机间隔（源码里的 stableHash 取模）没有抽出来：那是算法里的抖动，改了只影响随机感，不改变外观和行为，后台不该给人调。"
+    ],
+    "verified": "mixed"
+  },
+  "data": {
+    "npcTexture": "npc-man",
+    "protesterAsset": {
+      "key": "npc_protester_rising",
+      "url": "/sprites/npc_protester_rising.webp",
+      "frameWidth": 64,
+      "frameHeight": 64
+    },
+    "npcHalfSize": 24,
+    "protesterHalfSize": 32,
+    "slogans": [
+      "People, not machines!",
+      "Jobs for humans!",
+      "Human > machine"
+    ],
+    "speechMaxVisible": 2,
+    "speechInitialDelayMs": 500,
+    "speechDurationMs": 3000,
+    "speechIntervalMs": 6000,
+    "maxCreatePerSync": 16,
+    "maxConcurrentActs": 2,
+    "actCapableEveryNth": 3,
+    "speechBubble": {
+      "fontFamily": "monospace",
+      "fontStyle": "bold",
+      "color": "#111111",
+      "backgroundColor": "#ffffff",
+      "fontSizePx": 8,
+      "wordWrapWidthPx": 128,
+      "padding": { "left": 3, "right": 3, "top": 1, "bottom": 1 },
+      "align": "center",
+      "offsetYFromSpritePx": 8
+    }
+  }
+}

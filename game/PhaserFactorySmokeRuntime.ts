@@ -10,8 +10,8 @@ export const FACTORY_SMOKE_RUNTIME_ASSET = Object.freeze({
   url: new URL("../src/fx/assets/smoke-white.webp", import.meta.url).href,
 });
 
-// Presentation-only correction: the reconstruction's factory roof layers use
-// depths 3200/3300, while the public smoke config retains its 从原站确认 depth=500。
+// 仅呈现层修正：本重构的工厂屋顶层用 depth 3200/3300，而公开包的烟雾配置
+// 保留原站确认值 depth=500（见 src/fx/factory-smoke.ts）。两个数都对，别合并成一个。
 export const FACTORY_SMOKE_PRESENTATION_DEPTH = 3_400;
 
 type SmokeListener = (...args: unknown[]) => void;

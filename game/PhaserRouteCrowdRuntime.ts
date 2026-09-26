@@ -1,6 +1,6 @@
 import {
-  ROUTE_CROWD_CONFIGS,
   RouteCrowdRuntime,
+  type RouteCrowdConfig,
   type RouteCrowdFacing,
   type RouteCrowdPathProvider,
   type RouteCrowdTile,
@@ -12,31 +12,21 @@ import {
   WALK_FRAMES_PER_DIRECTION,
   walkFrameStart,
 } from "../src/player/index.js";
+import type {
+  RouteCrowdPresentation,
+  TrackBand,
+} from "../config/骨架/05-旁支/SYS-NPC/逻辑/types.js";
 
-export const ROUTE_CROWD_TEXTURES = Object.freeze([
-  "npc-man", "npc-man2", "npc-woman", "npc-woman2", "npc-woman3",
-  "npc-woman4", "npc-woman5", "npc-woman6", "npc-woman7", "npc-woman8",
-  "npc-man3", "npc-man4", "npc-man5", "npc-man6", "npc-man8",
-  "npc-man9", "npc-man10",
-] as const);
-
-const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
-
-export function keepOrdinaryCrowdOffTrack(groupId: string, x: number, y: number): { x: number; y: number } {
-  if (groupId === "crowd-train" || x < CROWD_TRACK_BAND.minX || x > CROWD_TRACK_BAND.maxX || y < CROWD_TRACK_BAND.minY || y > CROWD_TRACK_BAND.maxY) return { x, y };
-  return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
+/** 铁轨带：普通路人踩进去会被弹到带外，火车乘客例外。静态人群读的是同一份。 */
+export function keepOrdinaryCrowdOffTrack(
+  groupId: string,
+  x: number,
+  y: number,
+  trackBand: TrackBand,
+): { x: number; y: number } {
+  if (groupId === "crowd-train" || x < trackBand.minX || x > trackBand.maxX || y < trackBand.minY || y > trackBand.maxY) return { x, y };
+  return { x, y: y < (trackBand.minY + trackBand.maxY) / 2 ? trackBand.minY - 1 : trackBand.maxY + 1 };
 }
-
-export const ROUTE_CROWD_VISUAL_OFFSETS: Readonly<Record<string, number>> = Object.freeze({
-  "main-crowd": 16, "loop-crowd": 8, drinkers: 8, concert_crowd: 10,
-  beach_crowd_walk: 8, "vertical-crowd": 6, "vertical-crowd-reverse": 0,
-  "crowd-train": 8,
-});
-
-const ROUTE_CROWD_SPECIAL_TEXTURES = Object.freeze({
-  beach_crowd_walk: ["npc-man-beach", "npc-man-beach2", "npc-woman-beach", "npc-woman-beach2"],
-  "hazmat-crowd": ["npc-hazmat-suit"],
-} as const);
 
 export interface PhaserRouteCrowdLoaderLike {
   spritesheet(
@@ -48,11 +38,15 @@ export interface PhaserRouteCrowdLoaderLike {
 
 export function preloadRouteCrowdRuntimeAssets(
   loader: PhaserRouteCrowdLoaderLike,
+  presentation: RouteCrowdPresentation,
 ): void {
-  for (const texture of [...ROUTE_CROWD_TEXTURES, ...Object.values(ROUTE_CROWD_SPECIAL_TEXTURES).flat()]) {
+  for (const texture of [
+    ...presentation.textures,
+    ...Object.values(presentation.specialTextures).flat(),
+  ]) {
     loader.spritesheet(texture, `/sprites/${texture}.webp`, {
-      frameWidth: 48,
-      frameHeight: 48,
+      frameWidth: presentation.textureFrameWidth,
+      frameHeight: presentation.textureFrameHeight,
     });
   }
 }
@@ -74,6 +68,14 @@ export interface PhaserRouteCrowdSceneLike {
   };
 }
 export interface PhaserRouteCrowdRuntimeOptions {
+  /** 11 组路线的全部参数——来自 `route-crowd-configs.json`。 */
+  readonly configs: readonly RouteCrowdConfig[];
+  /** 三项调参：基准速度、开局每帧算几条路径、视野外多远的缓冲——来自 `route-crowd-tuning.json`。 */
+  readonly tuning: {
+    readonly baseSpeed: number;
+    readonly startBatchSize: number;
+    readonly safeMargin: number;
+  };
   readonly pathProvider: RouteCrowdPathProvider;
   readonly isBlocked?: (point: RouteCrowdTile) => boolean;
   readonly viewport: () => RouteCrowdViewport | undefined;
@@ -81,6 +83,8 @@ export interface PhaserRouteCrowdRuntimeOptions {
   /** Production supplies a callback for the next Phaser update/frame. */
   readonly scheduleNextUpdate?: (callback: () => void) => void;
   readonly visualSpacing?: RouteCrowdSpacingRule;
+  /** 「用哪些贴图、哪组用专用贴图、显示怎么错开、铁轨带在哪」——来自 `route-crowd-presentation.json`。 */
+  readonly presentation: RouteCrowdPresentation;
 }
 
 /** Presentation owner for route crowds with viewport-bounded sprites. */
@@ -99,10 +103,13 @@ export class PhaserRouteCrowdRuntime {
     private readonly scene: PhaserRouteCrowdSceneLike,
     private readonly options: PhaserRouteCrowdRuntimeOptions,
   ) {
-    const normalConfigs = ROUTE_CROWD_CONFIGS.filter(
+    const normalConfigs = options.configs.filter(
       (config) => config.id !== "crowd-train",
     );
     const runtimeOptions = {
+      baseSpeed: options.tuning.baseSpeed,
+      startBatchSize: options.tuning.startBatchSize,
+      safeMargin: options.tuning.safeMargin,
       pathProvider: options.pathProvider,
       ...(options.isBlocked === undefined ? {} : { isBlocked: options.isBlocked }),
       ...(options.random === undefined ? {} : { random: options.random }),
@@ -113,7 +120,7 @@ export class PhaserRouteCrowdRuntime {
       ...(options.visualSpacing === undefined ? {} : { visualSpacing: options.visualSpacing }),
     });
     this.trainCore = new RouteCrowdRuntime({
-      configs: ROUTE_CROWD_CONFIGS.filter((config) => config.id === "crowd-train"),
+      configs: options.configs.filter((config) => config.id === "crowd-train"),
       ...runtimeOptions,
     });
   }
@@ -128,7 +135,7 @@ export class PhaserRouteCrowdRuntime {
   }
 
   get configIds(): readonly string[] {
-    return ROUTE_CROWD_CONFIGS.map((config) => config.id);
+    return this.options.configs.map((config) => config.id);
   }
 
   get spriteCount(): number { return this.sprites.size; }
@@ -254,6 +261,7 @@ export class PhaserRouteCrowdRuntime {
 
   private sync(): void {
     const allInstances = this.snapshot.instances;
+    const presentation = this.options.presentation;
     const activeIds = new Set<string>();
     for (const [index, item] of allInstances.entries()) {
       activeIds.add(item.id);
@@ -265,14 +273,14 @@ export class PhaserRouteCrowdRuntime {
       }
       if (!item.materialized) continue;
       const groupId = item.id.split(":", 1)[0]!;
-      const textures = ROUTE_CROWD_SPECIAL_TEXTURES[groupId as keyof typeof ROUTE_CROWD_SPECIAL_TEXTURES] ?? ROUTE_CROWD_TEXTURES;
+      const textures = presentation.specialTextures[groupId] ?? presentation.textures;
       const texture = textures[index % textures.length]!;
       const sprite = prior ?? this.scene.add.sprite(
         item.position.x,
         item.position.y,
         texture,
       );
-      const offsetRange = ROUTE_CROWD_VISUAL_OFFSETS[groupId] ?? 0;
+      const offsetRange = presentation.visualOffsets[groupId] ?? 0;
       const seed = [...item.id].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 0);
       const offsetX = offsetRange === 0 ? 0 : (seed % (offsetRange * 2 + 1)) - offsetRange;
       const offsetY = offsetRange === 0 ? 0 : ((seed >>> 8) % (offsetRange * 2 + 1)) - offsetRange;
@@ -280,6 +288,7 @@ export class PhaserRouteCrowdRuntime {
         groupId,
         item.position.x + offsetX,
         item.position.y + offsetY,
+        presentation.trackBand,
       );
       sprite.x = display.x;
       sprite.y = display.y;

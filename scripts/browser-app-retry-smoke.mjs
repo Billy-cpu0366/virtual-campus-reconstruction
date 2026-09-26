@@ -39,7 +39,7 @@ socket.addEventListener("message", (event) => {
   }
   if (message.method === "Fetch.requestPaused") {
     const requestUrl = message.params.request.url;
-    if (remainingChunkFailures > 0 && requestUrl.endsWith("/maps/chunks/chunk0.json")) {
+    if (remainingChunkFailures > 0 && requestUrl.endsWith("/assets/maps/chunks/chunk0.json")) {
       remainingChunkFailures -= 1;
       void command("Fetch.failRequest", {
         requestId: message.params.requestId,

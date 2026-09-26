@@ -31,6 +31,11 @@ import {
 } from "../src/move/index.js";
 import {
   ANIMATION_FRAME_RATE,
+  BEACH_TEXTURE,
+  beachWalkAnimation,
+  CLOTHES_OFF_FRAME_HEIGHT,
+  CLOTHES_OFF_FRAME_WIDTH,
+  CLOTHES_OFF_TEXTURE,
   DEFAULT_FACING,
   DISPLAY_SIZE,
   SPAWN_X,
@@ -97,6 +102,7 @@ import {
 } from "./PhaserTrainRuntime.js";
 import {
   PhaserSprayerRuntime,
+  preloadSprayerRuntimeAssets,
   type PhaserSprayerSceneLike,
 } from "./PhaserSprayerRuntime.js";
 import {
@@ -115,6 +121,7 @@ import { PhaserBugCrowdRuntime, preloadBugCrowdRuntimeAssets } from "./PhaserBug
 import { PhaserVenueCrowdRuntime, preloadVenueCrowdRuntimeAssets } from "./PhaserVenueCrowdRuntime.js";
 import { PhaserDancingCrowdRuntime, preloadDancingCrowdRuntimeAssets } from "./PhaserDancingCrowdRuntime.js";
 import { GridRouteCrowdPathProvider } from "../src/npc/index.js";
+import type { NpcConfigs } from "../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
 import {
   PhaserFactorySmokeRuntime,
   type PhaserFactorySmokeSceneLike,
@@ -150,12 +157,15 @@ import {
   type ProductEntrySnapshot,
 } from "./ProductEntryRuntime.js";
 import {
+  BEACH_TRIGGER_GID,
   BRIDGE_PLAYER_DEPTH,
   BRIDGES,
-  LAYER_STRATEGIES,
+  COLLISION_GID_FORCED,
+  isBeachTriggerTile,
   isBridge1EntryZone,
   isBridge1ExitZone,
   isBridge2Zone,
+  LAYER_STRATEGIES,
   playerDepth,
   type RoofGroupState,
 } from "../src/layer/index.js";
@@ -170,8 +180,15 @@ import {
   PhaserVirtualJoystick,
   type JoystickSceneLike,
 } from "./PhaserVirtualJoystick.js";
+// 地图资源地址一律走 src/asset 的拼装函数，这里不再出现字面量路径。
+// 根值 `/assets/maps` 与原站运行期一致（`MAP_BASE_URL`）。
+import {
+  chunkMasterUrl,
+  independentLayerUrl,
+  tilesetImageUrl,
+} from "../src/asset/index.js";
 
-const CHUNK_MASTER_URL = "/maps/chunks/master.json";
+const CHUNK_MASTER_URL = chunkMasterUrl();
 const PHASER_ASSET_PROGRESS_WEIGHT = 0.72;
 const MASTER_READY_PROGRESS = 0.8;
 const WORLD_OWNER_READY_PROGRESS = 0.88;
@@ -401,6 +418,8 @@ export class CampusScene extends Phaser.Scene {
   private playerWasInBridge1EntryZone = false;
   private playerWasInBridge1ExitZone = false;
   private playerWasInBridge2Zone = false;
+  /** 上一次巡检时玩家脚下的瓦片编号。换装的「离开沙滩」判定靠它做边沿检测。 */
+  private playerLastTileIndex: number | null = null;
   private sceneDestroyed = false;
   private readonly testHooksEnabled =
     import.meta.env.DEV || import.meta.env.MODE === "test-hooks";
@@ -462,7 +481,15 @@ export class CampusScene extends Phaser.Scene {
     }
   };
 
+  /**
+   * `npcConfigs` 是**场景造出来之前就读好的**。
+   *
+   * 为什么非得这么早：`preload()` 是同步的，而登记贴图必须在那时候说清楚
+   * 「这图每一帧多大、一共几帧」。这些数字全在配置里。所以顺序只能是
+   * 先读配置 → 再造 Phaser 游戏对象 → `preload()` 才有数可依。
+   */
   constructor(
+    private readonly npcConfigs: NpcConfigs,
     private readonly entryCallbacks: CampusSceneEntryCallbacks = {},
   ) {
     super("campus");
@@ -485,18 +512,6 @@ export class CampusScene extends Phaser.Scene {
       this.requiredLoadError = new Error(`required asset failed: ${key}`);
       this.entryCallbacks.onError?.(this.requiredLoadError);
     });
-    this.sprayerRuntime = new PhaserSprayerRuntime(
-      this as unknown as PhaserSprayerSceneLike,
-      {
-        playerPosition: () => this.playerRuntime?.position,
-        onTriggered: () => {
-          if (!this.sceneDestroyed) {
-            this.entryCallbacks.onAmbientGuide?.(FACTORY_SMOKE_GUIDE);
-          }
-        },
-        onError: (reason) => this.recordSideFailure(`sprayer:${reason}`),
-      },
-    );
     this.trainRuntime = new PhaserTrainRuntime(
       this as unknown as PhaserTrainSceneLike,
       {
@@ -568,24 +583,35 @@ export class CampusScene extends Phaser.Scene {
       this as unknown as PhaserVehicleSceneLike,
       { onError: (reason) => this.recordSideFailure(`vehicle:${reason}`) },
     );
-    this.sprayerRuntime.preload();
+    const presentation = this.npcConfigs.presentation;
+    preloadSprayerRuntimeAssets(this.load, presentation.sprayer);
     this.trainRuntime.preload();
     this.smokeRuntime.preload();
     this.vehicleRuntime.preload();
-    preloadRouteCrowdRuntimeAssets(this.load);
-    preloadStaticNpcRuntimeAssets(this.load);
-    preloadStaticCrowdRuntimeAssets(this.load);
-    preloadBugCrowdRuntimeAssets(this.load);
-    preloadVenueCrowdRuntimeAssets(this.load);
-    preloadDancingCrowdRuntimeAssets(this.load);
+    preloadRouteCrowdRuntimeAssets(this.load, presentation.routeCrowd);
+    preloadStaticNpcRuntimeAssets(this.load, presentation.staticNpc);
+    preloadStaticCrowdRuntimeAssets(this.load, presentation.staticCrowd);
+    preloadBugCrowdRuntimeAssets(this.load, presentation.bugCrowd);
+    preloadVenueCrowdRuntimeAssets(this.load, presentation.venueCrowd);
+    preloadDancingCrowdRuntimeAssets(this.load, presentation.dancingCrowd);
 
-    this.load.image("exterior", "/maps/exterior-final.webp");
-    this.load.image("collisions-objects", "/maps/collisions-objects.png");
-    this.load.json("walls-layer", "/maps/walls-layer.json");
-    this.load.image("tileset-particles", "/maps/tileset-particles.png");
+    this.load.image("exterior", tilesetImageUrl("exterior-final.webp"));
+    this.load.image("collisions-objects", tilesetImageUrl("collisions-objects.webp"));
+    this.load.json("walls-layer", independentLayerUrl("walls-layer.json"));
+    this.load.image("tileset-particles", tilesetImageUrl("tileset-particles.webp"));
     this.load.spritesheet("player", "/sprites/player.webp", {
       frameWidth: 48,
       frameHeight: 48,
+    });
+    // 沙滩换装用：泳装跟常服同规格（384×384 / 48×48 格 / 64 帧），
+    // 换装贴图是 512×512 / 128×128 格 / 16 帧（原站加载参数一致）。
+    this.load.spritesheet(BEACH_TEXTURE, "/sprites/player-beach.webp", {
+      frameWidth: 48,
+      frameHeight: 48,
+    });
+    this.load.spritesheet(CLOTHES_OFF_TEXTURE, "/sprites/player-clothes-off.webp", {
+      frameWidth: CLOTHES_OFF_FRAME_WIDTH,
+      frameHeight: CLOTHES_OFF_FRAME_HEIGHT,
     });
     preloadPhaserPlayerRuntimeAssets(this.load);
   }
@@ -727,7 +753,12 @@ export class CampusScene extends Phaser.Scene {
         this.player.anims.stop();
         this.player.setFrame(walkFrameStart(direction));
       } else {
-        this.player.anims.play(`walk-${direction}`, true);
+        this.player.anims.play(
+          playerUpdate?.onBeach === true
+            ? beachWalkAnimation(direction)
+            : `walk-${direction}`,
+          true,
+        );
       }
     } else {
       this.player.setVelocity(0, 0);
@@ -745,6 +776,7 @@ export class CampusScene extends Phaser.Scene {
     if (this.bridgeCheckFrames >= 3) {
       this.bridgeCheckFrames = 0;
       this.updateBridgeZones();
+      this.updateBeachClothing();
     }
 
     const delta = this.game?.loop?.delta ?? 16.67;
@@ -773,17 +805,24 @@ export class CampusScene extends Phaser.Scene {
 
     for (const dir of DIRECTIONS) {
       const start = walkFrameStart(dir);
+      const range = {
+        start,
+        end: start + WALK_FRAMES_PER_DIRECTION - 1,
+      };
       this.anims.create({
         key: `walk-${dir}`,
-        frames: this.anims.generateFrameNumbers("player", {
-          start,
-          end: start + WALK_FRAMES_PER_DIRECTION - 1,
-        }),
+        frames: this.anims.generateFrameNumbers("player", range),
+        frameRate: ANIMATION_FRAME_RATE,
+        repeat: -1,
+      });
+      // 泳装走路：帧布局与常服完全一致，只是换一张贴图。
+      this.anims.create({
+        key: beachWalkAnimation(dir),
+        frames: this.anims.generateFrameNumbers(BEACH_TEXTURE, range),
         frameRate: ANIMATION_FRAME_RATE,
         repeat: -1,
       });
     }
-
     this.cursors = this.input.keyboard!.createCursorKeys();
     const wasdKeys = this.input.keyboard!.addKeys("W,A,S,D") as {
       W: Phaser.Input.Keyboard.Key;
@@ -1333,10 +1372,17 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private async initializeDynamicWorld(): Promise<void> {
+    // NPC 配置在**造这个场景之前**就读好了（见构造函数说明），这里只是取用。
+    // 读不到、或者读回来不合规范（缺字段、值超范围），那一步会直接抛——
+    // 错误会走到弹错误页。**宁可进不去，也不要拿一份半对的配置把场景糊起来**：
+    // 糊起来的表现是「有一部分 NPC 站错地方」，比干脆报错难查得多。
+    const npcConfigs = this.npcConfigs;
+    if (this.sceneDestroyed) return;
+
     const store = new ChunkDataStore(
       CHUNK_MASTER_URL,
       fetchJson as JsonLoader,
-      { maxAttempts: 2 },
+      { maxAttempts: 3 }, // 与 data-store.ts 的默认值一致，此处不再单独调低
     );
     this.dataStore = store;
     const master = await store.loadMaster();
@@ -1458,11 +1504,25 @@ export class CampusScene extends Phaser.Scene {
           y: this.player.y,
           depth: (this.player as any).depth,
           visible: (this.player as any).visible,
+          texture: (this.player as any).texture?.key ?? null,
+          frame: (this.player as any).frame?.name ?? null,
+          animation: (this.player as any).anims?.currentAnim?.key ?? null,
+          animationPlaying: (this.player as any).anims?.isPlaying ?? null,
         },
         playerVisual: this.playerVisualInterpolator?.position ?? null,
         playerRuntime: {
           position: this.playerRuntime?.position ?? null,
           control: this.playerRuntime?.control ?? null,
+          onBeach: this.playerRuntime?.onBeach ?? null,
+          clothingChange: this.playerRuntime?.clothingChange ?? null,
+          clothesChange: {
+            tileIndex: renderer.tileIndexAtWorld(
+              "walls",
+              this.player.x,
+              this.player.y,
+            ),
+            lastTileIndex: this.playerLastTileIndex,
+          },
         },
         entry: {
           sceneReady: this.sceneReady,
@@ -1559,12 +1619,27 @@ export class CampusScene extends Phaser.Scene {
       );
     }
 
-    this.sprayerRuntime?.createAnimations();
-    const sprayerStarted = this.sprayerRuntime?.start(this.time.now);
-    if (sprayerStarted === undefined || !sprayerStarted.ok) {
-      throw new Error(
-        `sprayer runtime failed: ${sprayerStarted?.reason ?? "missing-owner"}`,
-      );
+    // 喷水器要在这一步才造得出来：它的位置和路线来自 sprayer-configs.json，
+    // 而配置是这一步开头才读到的（preload 阶段读不了）。
+    this.sprayerRuntime = new PhaserSprayerRuntime(
+      this as unknown as PhaserSprayerSceneLike,
+      {
+        configs: npcConfigs.sprayerConfigs,
+        tuning: npcConfigs.tuning.sprayer,
+        presentation: npcConfigs.presentation.sprayer,
+        playerPosition: () => this.playerRuntime?.position,
+        onTriggered: () => {
+          if (!this.sceneDestroyed) {
+            this.entryCallbacks.onAmbientGuide?.(FACTORY_SMOKE_GUIDE);
+          }
+        },
+        onError: (reason) => this.recordSideFailure(`sprayer:${reason}`),
+      },
+    );
+    this.sprayerRuntime.createAnimations();
+    const sprayerStarted = this.sprayerRuntime.start(this.time.now);
+    if (!sprayerStarted.ok) {
+      throw new Error(`sprayer runtime failed: ${sprayerStarted.reason}`);
     }
     const wallData = this.cache.json.get("walls-layer") as { grid?: readonly (readonly number[])[] } | undefined;
     if (wallData?.grid === undefined) throw new Error("route crowd walls grid unavailable");
@@ -1573,12 +1648,15 @@ export class CampusScene extends Phaser.Scene {
         Math.abs(point.x - police.x) <= POLICE_COLLISION_SIZE.width / 2 + 24 &&
         Math.abs(point.y - police.y) <= POLICE_COLLISION_SIZE.height / 2 + 24,
       );
-    const pathProvider = new GridRouteCrowdPathProvider(
-      wallData.grid,
-      isPoliceBlocked,
-    );
+    const pathProvider = new GridRouteCrowdPathProvider(wallData.grid, {
+      ...npcConfigs.tuning.path,
+      isBlocked: isPoliceBlocked,
+    });
     this.routeCrowdRuntime = new PhaserRouteCrowdRuntime(
       this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
+      configs: npcConfigs.routeCrowdConfigs,
+      tuning: npcConfigs.tuning.routeCrowd,
+      presentation: npcConfigs.presentation.routeCrowd,
       pathProvider,
       isBlocked: (point) => isPoliceBlocked(point) || this.trainBlockingCells.includes(
         `${Math.floor(point.x / 16)},${Math.floor(point.y / 16)}`,
@@ -1602,6 +1680,9 @@ export class CampusScene extends Phaser.Scene {
           width: this.cameras.main.worldView.width,
           height: this.cameras.main.worldView.height,
         }),
+        configs: npcConfigs.staticNpcConfigs,
+        viewportMargin: npcConfigs.tuning.staticNpc.viewportMargin,
+        presentation: npcConfigs.presentation.staticNpc,
         onError: (reason) => this.recordSideFailure(`static-npc:${reason}`),
       },
     );
@@ -1614,8 +1695,15 @@ export class CampusScene extends Phaser.Scene {
           width: this.cameras.main.worldView.width,
           height: this.cameras.main.worldView.height,
         }),
-        viewportMargin: 400,
-        disabledRegionIndexes: [38, 61],
+        crowd: {
+          regions: npcConfigs.staticCrowdRegions,
+          spritePools: npcConfigs.staticCrowdSpritePools,
+          disabledRegionIndexes: npcConfigs.staticCrowdDisabledRegionIndexes,
+          tuning: npcConfigs.tuning.staticCrowd,
+        },
+        presentation: npcConfigs.presentation.staticCrowd,
+        // 铁轨带读的是路线人群那份表——铁轨在哪是世界事实，两边共读一处。
+        trackBand: npcConfigs.presentation.routeCrowd.trackBand,
         onError: (reason) => this.recordSideFailure(`static-crowd:${reason}`),
       },
     );
@@ -1634,12 +1722,12 @@ export class CampusScene extends Phaser.Scene {
     }
     this.bugCrowdRuntime = new PhaserBugCrowdRuntime(
       this as unknown as import("./PhaserBugCrowdRuntime.js").PhaserBugCrowdSceneLike,
-      { pathProvider, viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
+      { config: npcConfigs.bugCrowd, pathProvider, presentation: npcConfigs.presentation.bugCrowd, viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
     );
     if (!this.bugCrowdRuntime.start(this.time.now)) this.recordSideFailure("bug-crowd:start-failed");
-    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
+    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), { regions: npcConfigs.venueCrowdRegions, tuning: npcConfigs.tuning.venueCrowd }, npcConfigs.presentation.venueCrowd, Date.now);
     if (!this.venueCrowdRuntime.start()) this.recordSideFailure("venue-crowd:start-failed");
-    this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }));
+    this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), npcConfigs.dancingCrowd, npcConfigs.presentation.dancingCrowd);
     if (!this.dancingCrowdRuntime.start()) this.recordSideFailure("dancing-crowd:start-failed");
     const smokeStarted = this.smokeRuntime?.start();
     if (smokeStarted === undefined || !smokeStarted.ok) {
@@ -1971,6 +2059,41 @@ export class CampusScene extends Phaser.Scene {
     this.playerWasInBridge1EntryZone = inBridge1Entry;
     this.playerWasInBridge1ExitZone = inBridge1ExitTrigger;
     this.playerWasInBridge2Zone = inBridge2;
+  }
+
+  /**
+   * 沙滩换装。原站每 3 帧查一次玩家脚下的瓦片编号（`wallLayer.getTileAtWorldXY`）：
+   * 踩到 GID 69353 就脱衣换泳装；离开后再踩回 69353 时穿回常服。
+   *
+   * 「该穿」的判断要求「上一次巡检时脚下是 69353」，这是离开沙滩的边沿条件——
+   * 否则玩家一脱下泳装就会被立刻判定为「不在沙滩」而反复换装。
+   */
+  private updateBeachClothing(): void {
+    const renderer = this.worldRenderer;
+    const runtime = this.playerRuntime;
+    if (renderer === undefined || runtime === undefined) return;
+
+    const tileIndex = renderer.tileIndexAtWorld(
+      "walls",
+      this.player.x,
+      this.player.y,
+    );
+    const onBeachTile = isBeachTriggerTile(tileIndex);
+    const changing = runtime.clothingChange !== null;
+
+    if (onBeachTile && !runtime.onBeach && !changing) {
+      runtime.beginClothingChange("undressing", this.time.now);
+    } else if (
+      !onBeachTile &&
+      tileIndex !== COLLISION_GID_FORCED &&
+      runtime.onBeach &&
+      !changing &&
+      this.playerLastTileIndex === BEACH_TRIGGER_GID
+    ) {
+      runtime.beginClothingChange("dressing", this.time.now);
+    }
+
+    this.playerLastTileIndex = tileIndex;
   }
 
   private stopPlayerMovement(): void {

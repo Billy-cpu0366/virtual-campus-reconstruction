@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { playerDepth } from "../../src/layer/index.js";
-import { SPRAYER_CONFIGS, SPRAYER_TILE_SIZE } from "../../src/npc/index.js";
+import { SPRAYER_TILE_SIZE } from "../../src/npc/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
 import { SPAWN_Y } from "../../src/player/index.js";
 import {
   TRAIN_COLLISION_BOTTOM,
@@ -23,6 +25,10 @@ import {
   type PhaserTrainSceneLike,
   type PhaserTrainSpriteLike,
 } from "../../game/PhaserTrainRuntime.js";
+
+/** 喷水器位置现在读磁盘上那份配置，不再从 src/ 里拿常量。 */
+const SPRAYER_CONFIGS = (await loadNpcConfigs(createDiskConfigSource()))
+  .sprayerConfigs;
 
 class FakeEvents implements PhaserTrainEventsLike {
   readonly listeners = new Map<string, Set<(...args: unknown[]) => void>>();

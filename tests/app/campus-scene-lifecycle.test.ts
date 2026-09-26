@@ -5,6 +5,14 @@ vi.mock("../../game/phaser.js", () => ({ default: { Scene: class {} } }));
 import { CampusScene } from "../../game/CampusScene.js";
 import { PLAYER_RUNTIME_ASSETS } from "../../game/PhaserPlayerRuntime.js";
 import { AppGameUiBridge } from "../../game/AppGameUiBridge.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+
+/**
+ * 场景现在**必须**带着配置才能造出来——`preload()` 要靠配置里的帧规格登记贴图。
+ * 这里读的是磁盘上那份真配置，和游戏里读的是同一份。
+ */
+const NPC_CONFIGS = await loadNpcConfigs(createDiskConfigSource());
 
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
@@ -17,7 +25,7 @@ it("地图内容关闭后回收虚拟驻留记录", () => {
   });
   vi.spyOn(AppGameUiBridge.prototype, "show").mockReturnValue({ status: "shown" });
   vi.spyOn(AppGameUiBridge.prototype, "hide").mockReturnValue({ status: "hidden" });
-  const scene = new CampusScene() as any;
+  const scene = new CampusScene(NPC_CONFIGS) as any;
   scene.time = { now: 0 };
   scene.playerRuntime = { control: { enabled: true }, disableControls: () => true, enableControls: () => true };
   scene.createContentFoundation();
@@ -34,7 +42,7 @@ it("地图内容关闭后回收虚拟驻留记录", () => {
 
 it("可选玩家素材失败保持降级路径，随后必需素材错误仍被上报", () => {
   const onError = vi.fn();
-  const scene = new CampusScene({ onError }) as any;
+  const scene = new CampusScene(NPC_CONFIGS, { onError }) as any;
   const loader = Object.assign(new EventEmitter(), {
     image: vi.fn(), json: vi.fn(), spritesheet: vi.fn(),
   });
@@ -52,7 +60,7 @@ it("可选玩家素材失败保持降级路径，随后必需素材错误仍被�
 it("单个 owner 清理异常仍清理其他 owner，失败任务可重新执行", async () => {
   vi.stubGlobal("window", { removeEventListener: vi.fn() });
   vi.stubGlobal("document", { removeEventListener: vi.fn(), getElementById: () => null });
-  const scene = new CampusScene() as any;
+  const scene = new CampusScene(NPC_CONFIGS) as any;
   scene.scene = { stop: vi.fn() };
   scene.time = { now: 0 };
   scene.sprayerRuntime = { shutdown: vi.fn().mockImplementationOnce(() => { throw new Error("owner failure"); }) };
