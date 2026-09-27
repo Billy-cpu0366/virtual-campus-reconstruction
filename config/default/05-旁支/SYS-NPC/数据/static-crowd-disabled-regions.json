@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/CampusScene.ts",
+    "sourceConstant": "StaticCrowdRuntimeOptions.disabledRegionIndexes（字段定义）",
+    "units": {
+      "disabledRegionIndexes": "count"
+    },
+    "notes": [
+      "这是「这个校园里，哪几块地方不站路人」。序号对应 static-crowd-regions.json 里的 regionIndex。",
+      "当前是 [38, 61] 两块被关掉。改这里等于让那一片地方空着——通常是因为那儿有别的演出或遮挡物，站了人会穿模。",
+      "填一个不存在的序号不会报错，只是没效果。想确认序号对不对，去 static-crowd-regions.json 里搜 regionIndex。",
+      "这个值原先没有任何配置文件记录（总表里写的是「默认空，可注入」），实际写死在调用处，所以标成 manual。",
+      "现在它由调用方通过 StaticCrowdRuntimeOptions.disabledRegionIndexes 递进来，调用处那份字面量已经删掉。"
+    ],
+    "verified": "manual"
+  },
+  "data": {
+    "disabledRegionIndexes": [38, 61]
+  }
+}

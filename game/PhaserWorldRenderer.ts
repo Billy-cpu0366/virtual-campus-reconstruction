@@ -28,6 +28,11 @@ interface TileLike {
 }
 
 export interface TilemapLayerLike {
+  getTileAt?(
+    tileX: number,
+    tileY: number,
+    nonNull?: boolean,
+  ): TileLike | null;
   forEachTile?(
     callback: (tile: TileLike) => void,
     context?: unknown,
@@ -252,6 +257,42 @@ export class PhaserWorldRenderer {
 
   private collisionEnabled(name: string): boolean {
     return this.#collisionEnabled.get(name) ?? false;
+  }
+
+  /**
+   * 查世界坐标下某一格的瓦片编号，等价于原站的
+   * `wallLayer.getTileAtWorldXY(x, y, true)`。
+   *
+   * 注意每个块是独立的小图层，层内坐标以块原点为基准，所以要先把世界格坐标
+   * 折算成「第几块 + 块内偏移」。
+   *
+   * 三种返回值：
+   * - **数字**：该格的瓦片编号。**地面上没东西的格子会返回 `-1`**，不是 `null`——
+   *   Phaser 的 `getTileAt(..., nonNull = true)` 是「没有就造一个空格子」的意思，
+   *   空格子的 `index` 就是 `-1`。原站也是这么拿到 `-1` 的，两边语义一致。
+   * - `null`：**那一块地图还没渲染出来**（分块是按需加载的）。这时候查不到东西，
+   *   不代表脚下是空的。
+   */
+  tileIndexAtWorld(
+    layerName: string,
+    worldX: number,
+    worldY: number,
+  ): number | null {
+    const tileX = Math.floor(worldX / this.spec.tileWidthPixels);
+    const tileY = Math.floor(worldY / this.spec.tileHeightPixels);
+    const chunkX = Math.floor(tileX / this.spec.chunkWidthTiles);
+    const chunkY = Math.floor(tileY / this.spec.chunkHeightTiles);
+    const layer = this.layers.get(
+      this.layerId(layerName, { x: chunkX, y: chunkY }),
+    );
+    if (layer?.getTileAt === undefined) return null;
+    const tile = layer.getTileAt(
+      tileX - chunkX * this.spec.chunkWidthTiles,
+      tileY - chunkY * this.spec.chunkHeightTiles,
+      true,
+    );
+    if (tile === null || tile === undefined) return null;
+    return typeof tile.index === "number" ? tile.index : null;
   }
 
   private layersFor(name: string): readonly TilemapLayerLike[] {

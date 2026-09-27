@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ROUTE_CROWD_CONFIGS,
   RouteCrowdRuntime,
   type RouteCrowdConfig,
   type RouteCrowdPathRequest,
@@ -26,6 +25,13 @@ const testConfig = (overrides: Partial<RouteCrowdConfig> = {}): RouteCrowdConfig
   completionExit: overrides.completionExit ?? false,
 });
 
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+
+/** 11 组路线和三项调参现在都读磁盘上那份配置——每一处构造都把调参展开进去。 */
+const CONFIGS = await loadNpcConfigs(createDiskConfigSource());
+const TUNING = CONFIGS.tuning.routeCrowd;
+
 const pathFor = (request: RouteCrowdPathRequest) => [
   request.start,
   { x: request.start.x + 48, y: request.start.y },
@@ -33,10 +39,10 @@ const pathFor = (request: RouteCrowdPathRequest) => [
 
 describe("RouteCrowdRuntime contract", () => {
   it("publishes the source-backed frozen groups with the required deterministic fields", () => {
-    expect(ROUTE_CROWD_CONFIGS).toHaveLength(11);
-    expect(ROUTE_CROWD_CONFIGS.every((config) => config.count > 0)).toBe(true);
+    expect(CONFIGS.routeCrowdConfigs).toHaveLength(11);
+    expect(CONFIGS.routeCrowdConfigs.every((config) => config.count > 0)).toBe(true);
     expect(
-      ROUTE_CROWD_CONFIGS.every(
+      CONFIGS.routeCrowdConfigs.every(
         (config) =>
           config.startTiles.length > 0 &&
           config.endTiles.length > 0 &&
@@ -50,9 +56,9 @@ describe("RouteCrowdRuntime contract", () => {
             config.maxActiveInViewport > 0),
       ),
     ).toBe(true);
-    expect(Object.isFrozen(ROUTE_CROWD_CONFIGS)).toBe(true);
-    expect(Object.isFrozen(ROUTE_CROWD_CONFIGS[0])).toBe(true);
-    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "main-crowd"))
+    expect(Object.isFrozen(CONFIGS.routeCrowdConfigs)).toBe(true);
+    expect(Object.isFrozen(CONFIGS.routeCrowdConfigs[0])).toBe(true);
+    expect(CONFIGS.routeCrowdConfigs.find((config) => config.id === "main-crowd"))
       .toMatchObject({
         startTiles: [{ x: 31, y: 81 }, { x: 32, y: 81 }, { x: 33, y: 81 }],
         endTiles: [{ x: 73, y: 133 }],
@@ -61,7 +67,7 @@ describe("RouteCrowdRuntime contract", () => {
         randomPositions: true,
         maxActiveInViewport: 25,
       });
-    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "crowd-train"))
+    expect(CONFIGS.routeCrowdConfigs.find((config) => config.id === "crowd-train"))
       .toMatchObject({
         count: 10,
         movementSpeed: 35,
@@ -70,7 +76,7 @@ describe("RouteCrowdRuntime contract", () => {
         randomPositions: false,
         maxActiveInViewport: 10,
       });
-    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "drinkers"))
+    expect(CONFIGS.routeCrowdConfigs.find((config) => config.id === "drinkers"))
       .toEqual({
         id: "drinkers",
         count: 5,
@@ -88,7 +94,7 @@ describe("RouteCrowdRuntime contract", () => {
         ignoreWalls: false,
         completionExit: true,
       });
-    expect(ROUTE_CROWD_CONFIGS.find((config) => config.id === "vertical-crowd-reverse"))
+    expect(CONFIGS.routeCrowdConfigs.find((config) => config.id === "vertical-crowd-reverse"))
       .toMatchObject({
         startTiles: [{ x: 87, y: 86 }, { x: 88, y: 86 }, { x: 89, y: 86 }],
         endTiles: [{ x: 87, y: 56 }, { x: 88, y: 56 }, { x: 89, y: 56 }],
@@ -98,18 +104,18 @@ describe("RouteCrowdRuntime contract", () => {
         completionExit: true,
       });
     expect(
-      ROUTE_CROWD_CONFIGS
+      CONFIGS.routeCrowdConfigs
         .filter((config) => config.id !== "crowd-train")
         .every((config) => config.randomPositions),
     ).toBe(true);
     expect(
-      ROUTE_CROWD_CONFIGS
+      CONFIGS.routeCrowdConfigs
         .filter((config) => config.maxActiveInViewport === undefined)
         .map((config) => config.id),
     ).toEqual(["walking-crowd", "hazmat-crowd", "outside_concert1"]);
     expect(
       Object.fromEntries(
-        ROUTE_CROWD_CONFIGS
+        CONFIGS.routeCrowdConfigs
           .filter((config) => config.maxActiveInViewport !== undefined)
           .map((config) => [config.id, config.maxActiveInViewport]),
       ),
@@ -127,7 +133,7 @@ describe("RouteCrowdRuntime contract", () => {
 
   it("replays the same creation and progression with an injected random source", () => {
     const makeRuntime = () =>
-      new RouteCrowdRuntime({
+      new RouteCrowdRuntime({ ...TUNING,
         random: () => 0.25,
         configs: [testConfig({ id: "replay", count: 2 })],
         pathProvider: pathFor,
@@ -143,7 +149,7 @@ describe("RouteCrowdRuntime contract", () => {
 
   it("does not create an instance when the provider cannot produce a path", () => {
     const calls: RouteCrowdPathRequest[] = [];
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({ count: 2 })],
       pathProvider: {
         findPath: (request) => {
@@ -165,7 +171,7 @@ describe("RouteCrowdRuntime contract", () => {
 
   it("processes batched startup one at a time and reports final failures", () => {
     const calls: RouteCrowdPathRequest[] = [];
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         count: 5,
         startTiles: Array.from({ length: 5 }, (_, index) => ({ x: 2, y: 3 + index })),
@@ -203,7 +209,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("covers delay, moving, returning and restart for a round trip", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig()],
       baseSpeed: 48,
       pathProvider: pathFor,
@@ -238,7 +244,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("reverses drinkers immediately and restarts only after an offscreen return", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         id: "drinkers",
         delay: { minMs: 0, maxMs: 0 },
@@ -295,7 +301,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("exits from the original path origin after a randomized start", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       random: () => 0,
       configs: [testConfig({
         id: "randomized-exit",
@@ -347,7 +353,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("limits only route owners that enter the bounded coffee spacing area", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         count: 3,
         startTiles: [{ x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }],
@@ -367,7 +373,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("allows only the configured route owner inside a scoped area", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [
         testConfig({ id: "allowed-crowd" }),
         testConfig({ id: "blocked-crowd" }),
@@ -388,7 +394,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("can fix a scoped route's offscreen start and delay", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       random: () => 0,
       configs: [testConfig({
         count: 2,
@@ -417,7 +423,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("phases scoped starts by normalized path progress", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         count: 2,
         startTiles: [{ x: 2, y: 3 }, { x: 3, y: 3 }],
@@ -450,7 +456,7 @@ describe("RouteCrowdRuntime contract", () => {
 
   it("waits before entering a bounded visual spacing exclusion", () => {
     let externalPoints = [{ x: 100, y: 48 }];
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         delay: { minMs: 0, maxMs: 0 },
         goBack: false,
@@ -490,7 +496,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("deletes one-way routes or respawns them according to the contract", () => {
-    const oneWayDelete = new RouteCrowdRuntime({
+    const oneWayDelete = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({ goBack: false, deleteAfterComplete: true })],
       baseSpeed: 48,
       pathProvider: pathFor,
@@ -500,7 +506,7 @@ describe("RouteCrowdRuntime contract", () => {
     oneWayDelete.tick(1_100);
     expect(oneWayDelete.snapshot.instances[0]?.state).toBe("gone");
 
-    const oneWayRespawn = new RouteCrowdRuntime({
+    const oneWayRespawn = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({ goBack: false, deleteAfterComplete: false })],
       baseSpeed: 48,
       pathProvider: pathFor,
@@ -518,7 +524,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("culls by full path bounds and restores the logical state when visible again", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({ delay: { minMs: 0, maxMs: 0 } })],
       pathProvider: pathFor,
     });
@@ -541,7 +547,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("advances a visible point and updates its facing", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({ delay: { minMs: 0, maxMs: 0 }, goBack: false })],
       pathProvider: (request) => [
         request.start,
@@ -572,7 +578,7 @@ describe("RouteCrowdRuntime contract", () => {
       randomPositions: true,
       startTiles: Array.from({ length: 4 }, (_, index) => ({ x: 2, y: 3 + index })),
     });
-    const makeRuntime = () => new RouteCrowdRuntime({
+    const makeRuntime = () => new RouteCrowdRuntime({ ...TUNING,
       random: () => 0.25,
       configs: [config],
       pathProvider: (request) => [
@@ -594,7 +600,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("keeps a random start before the terminal waypoint when a route can move", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       random: () => 0,
       configs: [testConfig({
         delay: { minMs: 0, maxMs: 0 },
@@ -610,7 +616,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("caps materialized instances per group without changing logical instances", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         count: 6,
         maxActiveInViewport: 3,
@@ -627,7 +633,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("walks every waypoint and applies injected delay and speed variation", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       random: () => 0.5,
       configs: [testConfig({
         delay: { minMs: 100, maxMs: 300 },
@@ -655,7 +661,7 @@ describe("RouteCrowdRuntime contract", () => {
 
   it("waits before a dynamically blocked next waypoint and resumes with its facing", () => {
     let blocked = true;
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({ delay: { minMs: 0, maxMs: 0 }, goBack: false, deleteAfterComplete: false })],
       pathProvider: (request) => [
         request.start,
@@ -684,7 +690,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("materializes opaque before viewport entry and keeps logical state offscreen", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         startTiles: [{ x: -10, y: 3 }],
         endTiles: [{ x: 10, y: 3 }],
@@ -717,7 +723,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("retains a materialized item through the safe margin and then reports culling", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         startTiles: [{ x: -10, y: 3 }],
         delay: { minMs: 0, maxMs: 0 },
@@ -749,7 +755,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("defers one-way completion until terminal and restart positions are safe to leave", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         startTiles: [{ x: 2, y: 3 }],
         endTiles: [{ x: 2, y: 3 }],
@@ -776,7 +782,7 @@ describe("RouteCrowdRuntime contract", () => {
       destroyed: false,
     });
 
-    const restartStillSafe = new RouteCrowdRuntime({
+    const restartStillSafe = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         startTiles: [{ x: 2, y: 3 }],
         endTiles: [{ x: 2, y: 3 }],
@@ -813,7 +819,7 @@ describe("RouteCrowdRuntime contract", () => {
       destroyed: true,
     });
 
-    const deleteRuntime = new RouteCrowdRuntime({
+    const deleteRuntime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         startTiles: [{ x: 2, y: 3 }],
         endTiles: [{ x: 2, y: 3 }],
@@ -843,7 +849,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("does not pop a cap-suppressed item into the viewport", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         count: 2,
         maxActiveInViewport: 1,
@@ -882,7 +888,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("does not let the active cap dematerialize retained items", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig({
         count: 2,
         maxActiveInViewport: 1,
@@ -912,7 +918,7 @@ describe("RouteCrowdRuntime contract", () => {
   });
 
   it("cancel clears active instances, while shutdown prevents restart", () => {
-    const runtime = new RouteCrowdRuntime({
+    const runtime = new RouteCrowdRuntime({ ...TUNING,
       configs: [testConfig()],
       pathProvider: pathFor,
     });

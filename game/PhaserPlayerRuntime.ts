@@ -1,7 +1,17 @@
 import type { Direction } from "../src/input/index.js";
 import {
+  BEACH_IDLE_FRAME,
+  BEACH_TEXTURE,
+  CLOTHES_OFF_DISPLAY_SIZE,
+  CLOTHES_OFF_FIRST_FRAME,
+  CLOTHES_OFF_LAST_FRAME,
+  CLOTHES_OFF_TEXTURE,
+  CLOTHING_FRAME_RATE,
   DISPLAY_SIZE,
+  DRESS_ANIMATION,
   PlayerRuntimeStateMachine,
+  UNDRESS_ANIMATION,
+  type ClothingChange,
   type IdleAnimation,
   type PlayerControlEffects,
   type PlayerControlSnapshot,
@@ -52,6 +62,17 @@ export interface PhaserPlayerAnimationControllerLike {
 }
 
 export interface PhaserPlayerVisualLike {
+  readonly scaleX?: number;
+  readonly scaleY?: number;
+  readonly displayOriginX?: number;
+  readonly displayOriginY?: number;
+  readonly body?: {
+    readonly width: number;
+    readonly height: number;
+    readonly offset: { readonly x: number; readonly y: number };
+    setSize(width: number, height: number, center?: boolean): unknown;
+    setOffset(x: number, y: number): unknown;
+  };
   readonly x: number;
   readonly y: number;
   readonly anims: PhaserPlayerAnimationControllerLike;
@@ -160,11 +181,13 @@ function animationKeyFromEvent(value: unknown): string | undefined {
 }
 
 export class PhaserPlayerRuntime {
+  private readonly bodyShape: { width: number; height: number; left: number; top: number } | undefined;
   private readonly state: PlayerRuntimeStateMachine;
   private readonly createdAnimations = new Set<string>();
   private animationListenerInstalled = false;
   private renderedStatus: PlayerStatus | undefined;
   private renderedIdleAnimation: IdleAnimation | undefined;
+  private renderedClothingChange: ClothingChange | undefined;
   private pendingMovementDirection: Direction | undefined;
   private shutdownState = false;
 
@@ -182,6 +205,14 @@ export class PhaserPlayerRuntime {
       if (pending !== null) {
         this.pendingMovementDirection = pending;
         this.renderedStatus = undefined;
+        this.restoreNormalPlayer();
+      }
+      return;
+    }
+    if (key === UNDRESS_ANIMATION || key === DRESS_ANIMATION) {
+      if (this.state.completeClothingChange()) {
+        this.renderedStatus = undefined;
+        this.renderedIdleAnimation = undefined;
         this.restoreNormalPlayer();
       }
       return;
@@ -208,6 +239,13 @@ export class PhaserPlayerRuntime {
     const runtimeOptions: PlayerRuntimeOptions =
       effects === undefined ? stateOptions : { ...stateOptions, effects };
     this.state = new PlayerRuntimeStateMachine(runtimeOptions);
+    const body = sprite.body;
+    this.bodyShape = body === undefined ? undefined : {
+      width: body.width,
+      height: body.height,
+      left: (sprite.scaleX ?? 1) * (body.offset.x - (sprite.displayOriginX ?? 0)),
+      top: (sprite.scaleY ?? 1) * (body.offset.y - (sprite.displayOriginY ?? 0)),
+    };
   }
 
   preload(): void {
@@ -240,6 +278,21 @@ export class PhaserPlayerRuntime {
       15,
       0,
       16,
+    );
+    // 沙滩换装：同一张 16 帧贴图，脱衣正向播、穿衣倒放。
+    this.createAnimationIfAvailable(
+      CLOTHES_OFF_TEXTURE,
+      UNDRESS_ANIMATION,
+      CLOTHES_OFF_FIRST_FRAME,
+      CLOTHES_OFF_LAST_FRAME,
+      CLOTHING_FRAME_RATE,
+    );
+    this.createAnimationIfAvailable(
+      CLOTHES_OFF_TEXTURE,
+      DRESS_ANIMATION,
+      CLOTHES_OFF_LAST_FRAME,
+      CLOTHES_OFF_FIRST_FRAME,
+      CLOTHING_FRAME_RATE,
     );
   }
 
@@ -353,6 +406,17 @@ export class PhaserPlayerRuntime {
       this.restoreNormalPlayer();
       return this.snapshotResult(null);
     }
+    if (result.status === "changing-clothes") {
+      if (this.renderClothingChange(result.clothingChange)) return result;
+      // 贴图或动画缺失：跳过动画直接落到目标着装，别把玩家卡在换装中（照原站兜底）。
+      const change = result.clothingChange ?? "undressing";
+      if (nowMs === undefined) this.state.skipClothingChange(change);
+      else this.state.skipClothingChange(change, nowMs);
+      this.renderedStatus = undefined;
+      this.renderedIdleAnimation = undefined;
+      this.restoreNormalPlayer();
+      return this.snapshotResult(null);
+    }
     return result;
   }
 
@@ -366,6 +430,24 @@ export class PhaserPlayerRuntime {
 
   get status(): PlayerStatus {
     return this.state.status;
+  }
+
+  /** 身上是不是沙滩装。 */
+  get onBeach(): boolean {
+    return this.state.onBeach;
+  }
+
+  /** 正在播的换装方向；没在换装时为 null。 */
+  get clothingChange(): ClothingChange | null {
+    return this.state.clothingChange;
+  }
+
+  /** 请求换装。冷却未过、已在换装中、或控制被关掉时返回 false。 */
+  beginClothingChange(change: ClothingChange, nowMs?: number): boolean {
+    if (this.shutdownState) return false;
+    return nowMs === undefined
+      ? this.state.beginClothingChange(change)
+      : this.state.beginClothingChange(change, nowMs);
   }
 
   private availableAnimations(): PlayerRuntimeAvailability {
@@ -434,6 +516,7 @@ export class PhaserPlayerRuntime {
         .setFrame(0)
         .setDisplaySize(SPECIAL_DISPLAY_SIZE, SPECIAL_DISPLAY_SIZE);
       if (!this.playAnimation(key)) return false;
+      this.preserveBodyShape();
       this.renderedStatus = "idle-action";
       this.renderedIdleAnimation = animation;
       return true;
@@ -457,6 +540,7 @@ export class PhaserPlayerRuntime {
         .setFrame(reverse ? 15 : 0)
         .setDisplaySize(SPECIAL_DISPLAY_SIZE, SPECIAL_DISPLAY_SIZE);
       if (!this.playAnimation(key)) return false;
+      this.preserveBodyShape();
       this.renderedStatus = status;
       this.renderedIdleAnimation = undefined;
       return true;
@@ -482,12 +566,55 @@ export class PhaserPlayerRuntime {
     return this.snapshotResult(null);
   }
 
+  /** 换装动画。贴图或动画缺失时返回 false，交给调用方走兜底。 */
+  private renderClothingChange(change: ClothingChange | null): boolean {
+    if (change === null) return false;
+    if (!this.hasTexture(CLOTHES_OFF_TEXTURE)) return false;
+    const key = change === "undressing" ? UNDRESS_ANIMATION : DRESS_ANIMATION;
+    if (!this.animationExists(key)) return false;
+    // 每帧都会被调到，已经在播同一个方向就别重播——否则动画会被按回第 0 帧，永远播不完。
+    if (
+      this.renderedStatus === "changing-clothes" &&
+      this.renderedClothingChange === change
+    ) {
+      return true;
+    }
+    try {
+      this.sprite
+        .setTexture(CLOTHES_OFF_TEXTURE)
+        .setDisplaySize(CLOTHES_OFF_DISPLAY_SIZE, CLOTHES_OFF_DISPLAY_SIZE);
+      this.preserveBodyShape();
+      this.renderedStatus = "changing-clothes";
+      this.renderedIdleAnimation = undefined;
+      this.renderedClothingChange = change;
+      return this.playAnimation(key);
+    } catch {
+      return false;
+    }
+  }
+
   private restoreNormalPlayer(): void {
     this.sprite.anims.stop?.();
+    const onBeach = this.state.onBeach;
     this.sprite
-      .setTexture(NORMAL_TEXTURE)
+      .setTexture(onBeach ? BEACH_TEXTURE : NORMAL_TEXTURE)
       .setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE)
-      .setFrame(walkFrameStart(this.state.facing));
+      .setFrame(onBeach ? BEACH_IDLE_FRAME : walkFrameStart(this.state.facing));
+    this.preserveBodyShape();
+  }
+
+  private preserveBodyShape(): void {
+    const shape = this.bodyShape;
+    const body = this.sprite.body;
+    if (shape === undefined || body === undefined) return;
+    const sx = this.sprite.scaleX ?? 1;
+    const sy = this.sprite.scaleY ?? 1;
+    if (sx === 0 || sy === 0) return;
+    body.setSize(shape.width / Math.abs(sx), shape.height / Math.abs(sy), false);
+    body.setOffset(
+      (this.sprite.displayOriginX ?? 0) + shape.left / sx,
+      (this.sprite.displayOriginY ?? 0) + shape.top / sy,
+    );
   }
 
   private snapshotResult(
@@ -501,6 +628,8 @@ export class PhaserPlayerRuntime {
       facing: this.state.facing,
       idleAnimation: this.state.activeIdleAnimation,
       pendingDirection: this.state.pendingDirection,
+      onBeach: this.state.onBeach,
+      clothingChange: this.state.clothingChange,
     });
   }
 

@@ -32,7 +32,7 @@ export class GameplayControlLeaseRuntime
   private readonly disableControls: Effect;
   private readonly enableControls: Effect;
   private readonly activeTokens = new Set<GameplayControlLeaseToken>();
-  private readonly issuedTokens = new Set<GameplayControlLeaseToken>();
+  private readonly issuedTokens = new WeakSet<GameplayControlLeaseToken>();
   private shutdownResult: GameplayControlLeaseShutdownResult | undefined;
   private controlsDisabled = false;
 

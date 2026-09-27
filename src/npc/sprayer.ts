@@ -1,7 +1,4 @@
 export const SPRAYER_TILE_SIZE = 16;
-export const SPRAYER_FLEE_SPEED = 140;
-export const SPRAYER_GROUP_DELAY = 300;
-export const SPRAYER_SPRAY_DELAY_MAX = 3_000;
 
 export interface SprayerPoint {
   readonly x: number;
@@ -17,123 +14,6 @@ export interface SprayerConfig {
   readonly frameRate: number;
   readonly escapeRoute: readonly SprayerPoint[];
 }
-
-const route = (...points: readonly [number, number][]): readonly SprayerPoint[] =>
-  Object.freeze(
-    points.map(([x, y]) => Object.freeze({ x, y })),
-  );
-
-/** The four coordinates and routes observed in the public Bundle. */
-export const SPRAYER_CONFIGS: readonly SprayerConfig[] = Object.freeze([
-  {
-    id: "sprayer-60-25",
-    tileX: 60,
-    tileY: 25,
-    depth: 500,
-    scale: 0.9,
-    frameRate: 6,
-    escapeRoute: route(
-      [60, 25],
-      [60, 26],
-      [0, 26],
-    ),
-  },
-  {
-    id: "sprayer-67-25",
-    tileX: 67,
-    tileY: 25,
-    depth: 500,
-    scale: 0.9,
-    frameRate: 6,
-    escapeRoute: route(
-      [67, 25],
-      [67, 26],
-      [56, 26],
-      [55, 27],
-      [55, 35],
-      [45, 35],
-      [41, 39],
-      [41, 87],
-      [45, 91],
-      [47, 91],
-      [47, 98],
-      [46, 99],
-      [46, 102],
-      [40, 108],
-      [39, 108],
-      [36, 111],
-      [35, 111],
-      [34, 112],
-      [24, 112],
-      [23, 111],
-      [22, 111],
-      [21, 110],
-      [15, 110],
-      [14, 111],
-      [8, 111],
-    ),
-  },
-  {
-    id: "sprayer-71-25",
-    tileX: 71,
-    tileY: 25,
-    depth: 500,
-    scale: 0.9,
-    frameRate: 6,
-    escapeRoute: route(
-      [71, 25],
-      [71, 26],
-      [79, 26],
-      [80, 27],
-      [80, 35],
-      [90, 35],
-      [91, 36],
-      [91, 38],
-      [92, 39],
-      [92, 40],
-      [102, 40],
-      [103, 39],
-      [111, 39],
-    ),
-  },
-  {
-    id: "sprayer-78-25",
-    tileX: 78,
-    tileY: 25,
-    depth: 500,
-    scale: 0.9,
-    frameRate: 6,
-    escapeRoute: route(
-      [78, 25],
-      [78, 26],
-      [79, 26],
-      [79, 35],
-      [66, 35],
-      [66, 42],
-      [53, 55],
-      [53, 56],
-      [52, 56],
-      [50, 58],
-      [50, 77],
-      [45, 82],
-      [45, 91],
-      [47, 91],
-      [48, 92],
-      [48, 98],
-      [49, 99],
-      [53, 99],
-      [54, 100],
-      [54, 103],
-      [71, 103],
-      [73, 105],
-      [90, 105],
-      [92, 103],
-      [102, 103],
-      [109, 110],
-      [122, 110],
-    ),
-  },
-].map((config) => Object.freeze(config)));
 
 export type SprayerState = "idle" | "fleeing" | "gone" | "cancelled" | "shutdown";
 
@@ -174,9 +54,27 @@ export interface SprayerGroupSnapshot {
   readonly instances: readonly SprayerSnapshot[];
 }
 
+/**
+ * 喷水器需要的外部输入。
+ *
+ * 四个喷水器、和四项调参**都必填**：它们原先各自有一个模块级默认值
+ * （`SPRAYER_CONFIGS` / `SPRAYER_FLEE_SPEED` / `SPRAYER_GROUP_DELAY` /
+ * `SPRAYER_SPRAY_DELAY_MAX`），那几份默认值就是被搬走的配置。留着默认值等于
+ * 「没给配置也能跑」——那样四个喷水器会一个都不出现，比直接报错难查。
+ *
+ * `triggerVerticalMaxTiles` / `triggerHorizontalTiles` 是原来写死在
+ * `isInsideTrigger` 里的两个 2：玩家站在喷水器正下方几格、横向偏几格之内会被触发。
+ */
 export interface SprayerRuntimeOptions {
+  readonly configs: readonly SprayerConfig[];
+  readonly tuning: {
+    readonly fleeSpeed: number;
+    readonly groupDelay: number;
+    readonly sprayDelayMax: number;
+    readonly triggerVerticalMaxTiles: number;
+    readonly triggerHorizontalTiles: number;
+  };
   readonly random?: () => number;
-  readonly speed?: number;
   readonly tileSize?: number;
 }
 
@@ -245,14 +143,16 @@ function isInsideTrigger(
   instance: SprayerInstance,
   player: SprayerPlayerPosition,
   tileSize: number,
+  verticalMaxTiles: number,
+  horizontalTiles: number,
 ): boolean {
   if (instance.state !== "idle") return false;
   const playerTileY = Math.round(player.y / tileSize);
   const verticalDelta = playerTileY - instance.config.tileY;
   return (
     verticalDelta >= 0 &&
-    verticalDelta <= 2 &&
-    Math.abs(player.x - instance.position.x) / tileSize <= 2
+    verticalDelta <= verticalMaxTiles &&
+    Math.abs(player.x - instance.position.x) / tileSize <= horizontalTiles
   );
 }
 
@@ -263,7 +163,8 @@ function isInsideTrigger(
  */
 export class SprayerGroupRuntime {
   private readonly random: () => number;
-  private readonly speed: number;
+  private readonly tuning: SprayerRuntimeOptions["tuning"];
+  private readonly configs: readonly SprayerConfig[];
   private readonly tileSize: number;
   private instances: SprayerInstance[] = [];
   private startedState = false;
@@ -271,9 +172,10 @@ export class SprayerGroupRuntime {
   private triggeredAtState: number | undefined;
   private lastNow = 0;
 
-  constructor(options: SprayerRuntimeOptions = {}) {
+  constructor(options: SprayerRuntimeOptions) {
     this.random = options.random ?? Math.random;
-    this.speed = options.speed ?? SPRAYER_FLEE_SPEED;
+    this.tuning = options.tuning;
+    this.configs = options.configs;
     this.tileSize = options.tileSize ?? SPRAYER_TILE_SIZE;
   }
 
@@ -309,7 +211,7 @@ export class SprayerGroupRuntime {
     if (!resources.runningTexture) return { ok: false, reason: "missing-running-texture" };
 
     this.lastNow = nowMs;
-    this.instances = SPRAYER_CONFIGS.map((config) => {
+    this.instances = this.configs.map((config) => {
       const routePixels = Object.freeze(
         config.escapeRoute.map((point) =>
           Object.freeze({
@@ -322,7 +224,7 @@ export class SprayerGroupRuntime {
         config,
         routePixels,
         routeLength: routeLength(routePixels),
-        readyAt: nowMs + clampRandom(this.random()) * SPRAYER_SPRAY_DELAY_MAX,
+        readyAt: nowMs + clampRandom(this.random()) * this.tuning.sprayDelayMax,
         position: routePixels[0] ?? { x: config.tileX * this.tileSize, y: config.tileY * this.tileSize },
         state: "idle",
         fleeAt: undefined,
@@ -349,7 +251,7 @@ export class SprayerGroupRuntime {
 
       instance.routeDistance = Math.min(
         instance.routeLength,
-        Math.max(0, this.lastNow - instance.fleeStartedAt) * this.speed / 1_000,
+        Math.max(0, this.lastNow - instance.fleeStartedAt) * this.tuning.fleeSpeed / 1_000,
       );
       instance.position = pointAtDistance(instance.routePixels, instance.routeDistance);
       if (instance.routeDistance >= instance.routeLength) {
@@ -381,7 +283,13 @@ export class SprayerGroupRuntime {
   private triggerGroupIfNeeded(nowMs: number, player: SprayerPlayerPosition): void {
     if (this.triggeredAtState !== undefined) return;
     const trigger = this.instances.some((instance) =>
-      isInsideTrigger(instance, player, this.tileSize),
+      isInsideTrigger(
+        instance,
+        player,
+        this.tileSize,
+        this.tuning.triggerVerticalMaxTiles,
+        this.tuning.triggerHorizontalTiles,
+      ),
     );
     if (!trigger) return;
 
@@ -392,7 +300,7 @@ export class SprayerGroupRuntime {
       );
     this.triggeredAtState = nowMs;
     active.forEach((instance, index) => {
-      instance.fleeAt = nowMs + index * SPRAYER_GROUP_DELAY;
+      instance.fleeAt = nowMs + index * this.tuning.groupDelay;
     });
   }
 

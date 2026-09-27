@@ -2,8 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   PhaserVenueCrowdRuntime,
   preloadVenueCrowdRuntimeAssets,
-  PROTESTER_SLOGANS,
 } from "../../game/PhaserVenueCrowdRuntime.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+
+/** 区域和两个 margin 现在都读磁盘上那份配置——和游戏里读的是同一份。 */
+const CONFIGS = await loadNpcConfigs(createDiskConfigSource());
+const VENUE_OPTIONS = {
+  regions: CONFIGS.venueCrowdRegions,
+  tuning: CONFIGS.tuning.venueCrowd,
+};
+/** 「用哪张抗议者贴图、气泡长什么样、喊哪几句话」——原先写死在 game/ 里。 */
+const PRESENTATION = CONFIGS.presentation.venueCrowd;
+const SLOGANS = PRESENTATION.slogans;
 
 class Text {
   visible = false;
@@ -49,8 +60,11 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     let frameConfig: { frameWidth: number; frameHeight: number } | undefined;
     preloadVenueCrowdRuntimeAssets({
       spritesheet: (_key, _url, config) => { frameConfig = config; },
-    });
+    }, PRESENTATION);
     expect(frameConfig).toEqual({ frameWidth: 64, frameHeight: 64 });
+    expect(PRESENTATION.protesterAsset.key).toBe("npc_protester_rising");
+    expect(PRESENTATION.npcHalfSize).toBe(24);
+    expect(PRESENTATION.protesterHalfSize).toBe(32);
 
     let viewport = { left: 0, top: 0, width: 2240, height: 2240 };
     const sprites: Sprite[] = [];
@@ -63,7 +77,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
         },
       },
       textures: { exists: () => true },
-    }, () => viewport);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION);
 
     expect(runtime.start()).toBe(true);
     const protester = runtime.snapshot.instances.find((instance) =>
@@ -95,7 +109,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
         return sprite;
       } },
       textures: { exists: () => true },
-    }, () => viewport);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION);
 
     expect(runtime.start()).toBe(true);
     expect(sprites.some((sprite) => sprite.texture === "npc_protester_rising")).toBe(true);
@@ -111,7 +125,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
         return sprite;
       } },
       textures: { exists: () => true },
-    }, () => viewport);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION);
 
     expect(runtime.start()).toBe(true);
     viewport = { left: 1_560, top: 1_065, width: 480, height: 270 };
@@ -138,7 +152,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
         },
       },
       textures: { exists: () => true },
-    }, () => viewport, () => now);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION, () => now);
 
     expect(runtime.start()).toBe(true);
     expect(bubbles.length).toBeGreaterThan(0);
@@ -153,14 +167,14 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     for (now = 0; now <= 4_000; now += 100) {
       runtime.update();
       sawVisible ||= runtime.protestSpeechSnapshot.some((state) => state.phase === "visible");
-      sawBubble ||= bubbles.some((bubble) => bubble.visible && PROTESTER_SLOGANS.includes(
-        bubble.value as typeof PROTESTER_SLOGANS[number],
+      sawBubble ||= bubbles.some((bubble) => bubble.visible && SLOGANS.includes(
+        bubble.value as (typeof SLOGANS)[number],
       ));
     }
     expect(sawVisible).toBe(true);
     expect(sawBubble).toBe(true);
     expect(runtime.protestSpeechSnapshot.every((state) =>
-      PROTESTER_SLOGANS.includes(state.text as typeof PROTESTER_SLOGANS[number]),
+      SLOGANS.includes(state.text as (typeof SLOGANS)[number]),
     )).toBe(true);
 
     viewport = { left: 10_000, top: 10_000, width: 10, height: 10 };
@@ -183,7 +197,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
         create: (config) => { animations.push({ key: config.key, repeat: config.repeat }); return config; },
         generateFrameNumbers: (_key, range) => [range.start, range.end],
       },
-    }, () => viewport, () => now);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION, () => now);
 
     expect(runtime.start()).toBe(true);
     for (let frame = 0; frame < 40; frame += 1) runtime.update();
@@ -248,7 +262,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
         },
         generateFrameNumbers: (_key, range) => [range.start, range.end],
       },
-    }, () => viewport, () => now);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION, () => now);
 
     expect(runtime.start()).toBe(true);
     expect(sprites.length).toBeGreaterThan(0);
@@ -271,7 +285,7 @@ describe("PhaserVenueCrowdRuntime protest actions", () => {
     const runtime = new PhaserVenueCrowdRuntime({
       add: { sprite: (x, y) => { const sprite = new Sprite(x, y); sprites.push(sprite); return sprite; } },
       textures: { exists: () => true },
-    }, () => viewport);
+    }, () => viewport, VENUE_OPTIONS, PRESENTATION);
 
     expect(runtime.start()).toBe(true);
     const materializedCount = runtime.snapshot.instances

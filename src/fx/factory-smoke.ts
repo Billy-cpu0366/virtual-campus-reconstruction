@@ -16,6 +16,9 @@ export const FACTORY_SMOKE_CONFIG = Object.freeze({
   alphaEnd: 0,
   scaleEnd: 4,
   lifespan: 2_000,
+  // 原站确认值。呈现层另有 FACTORY_SMOKE_PRESENTATION_DEPTH = 3400（见
+  // game/PhaserFactorySmokeRuntime.ts）：为了让烟雾盖在屋顶层 3200/3300 之上。
+  // 两个数都对，别合并成一个。
   depth: 500,
   reactCars: false,
   reactPlayer: false,

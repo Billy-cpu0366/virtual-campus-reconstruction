@@ -37,6 +37,7 @@ export {
   isBridge1ExitZone,
   isBridge2Zone,
 } from "./bridge-zones.js";
+export { BEACH_TRIGGER_GID, isBeachTriggerTile } from "./beach-zone.js";
 export {
   BRIDGE_PLAYER_DEPTH,
   COLLISION_GID_FORCED,

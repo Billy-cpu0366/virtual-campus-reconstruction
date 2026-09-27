@@ -46,7 +46,7 @@ def main():
     errors = []
 
     # ---- 1/2. task_plan 一致性（原有） ----
-    tp = read("task_plan.md")
+    tp = read("doc/task_plan.md")
     m = re.search(r"^current-work-item:\s*(\S+)", tp, re.M)
     wi_fm = m.group(1).strip() if m else "<缺失>"
     m2 = re.search(r"# 原站逆向重构计划\s*\n(.*?)\n## 目标", tp, re.S)
@@ -61,14 +61,14 @@ def main():
         elif wi_fm not in wi_block:
             errors.append(f"task_plan: frontmatter = {wi_fm} 与顶部状态块 {wi_block} 不一致")
 
-    for rel in ["01-理解层/00-当前进度.md", "01-理解层/00-进度总览.md"]:
+    for rel in ["doc/01-理解层/00-当前进度.md", "doc/01-理解层/00-进度总览.md"]:
         wis = work_item_ids(read(rel))
         if wis:
             errors.append(f"{rel} 复制了工作项 ID {wis}，应改为指路 task_plan.md")
 
     # ---- 3-6. 逐系统漂移（执行卡 ↔ 理解卡 / 总账 / 进度总览） ----
     # 解析总账「16 系统总账」表：SYS-ID → (中文名, 工程状态)
-    ledger = read("03-执行层/00-总账.md")
+    ledger = read("doc/03-执行层/00-总账.md")
     ledger_systems = {}
     for line in ledger.splitlines():
         if line.startswith("| SYS-"):
@@ -76,10 +76,10 @@ def main():
             if len(parts) >= 7:
                 ledger_systems[parts[1]] = (parts[2], parts[6])  # 中文名, 工程状态
 
-    overview = read("01-理解层/00-进度总览.md")
+    overview = read("doc/01-理解层/00-进度总览.md")
 
     cards = sorted(
-        glob.glob(os.path.join(ROOT, "03-执行层", "**", "*.md"), recursive=True)
+        glob.glob(os.path.join(ROOT, "doc", "03-执行层", "**", "*.md"), recursive=True)
     )
     cards = [c for c in cards if os.path.basename(c) not in ("README.md", "00-总账.md")]
 
@@ -87,10 +87,16 @@ def main():
         crel = relpath(card)
         text = read(crel)
 
-        m = re.search(r"^system:\s*(\S+)", text, re.M)
-        sysid = m.group(1).strip() if m else "<缺失>"
-        m = re.search(r"^status:\s*(\S+)", text, re.M)
-        status = m.group(1).strip() if m else "<缺失>"
+        m_sys = re.search(r"^system:\s*(\S+)", text, re.M)
+        m_status = re.search(r"^status:\s*(\S+)", text, re.M)
+
+        # 非系统卡（统一失败处理策略、跨系统数据流场景等 type: design 辅助文档）
+        # 既无 system 也无 status，不是本检查的对象，直接跳过。
+        if not m_sys and not m_status:
+            continue
+
+        sysid = m_sys.group(1).strip() if m_sys else "<缺失>"
+        status = m_status.group(1).strip() if m_status else "<缺失>"
 
         if status not in DESIGNED_STATES and status not in UNDESIGNED_STATES:
             errors.append(f"{crel}: 未知 status = {status}")
@@ -103,7 +109,7 @@ def main():
             errors.append(f"{sysid}: 执行卡 status={status} 但缺人话块「## 👀 先看这里」")
 
         # 4. 理解卡进度图标
-        ud_rel = "01-理解层/" + crel[len("03-执行层/"):]
+        ud_rel = "doc/01-理解层/" + crel[len("doc/03-执行层/"):]
         try:
             ud_text = read(ud_rel)
         except IOError:

@@ -44,10 +44,12 @@ const VEHICLE_ASSETS = [
 ];
 
 const FILES = [
-  ["maps/exterior-final.webp", "maps/exterior-final.webp"],
-  ["maps/collisions-objects.png", "maps/collisions-objects.png"],
-  ["maps/tileset-particles.png", "maps/tileset-particles.png"],
+  ["maps/exterior-final.webp", "assets/maps/exterior-final.webp"],
+  ["maps/collisions-objects.webp", "assets/maps/collisions-objects.webp"],
+  ["maps/tileset-particles.webp", "assets/maps/tileset-particles.webp"],
   ["sprites/player.webp", "sprites/player.webp"],
+  ["sprites/player-beach.webp", "sprites/player-beach.webp"],
+  ["sprites/player-clothes-off.webp", "sprites/player-clothes-off.webp"],
   ...ROUTE_CROWD_TEXTURES.map((name) => [
     `sprites/${name}.webp`,
     `sprites/${name}.webp`,
@@ -73,10 +75,13 @@ const FILES = [
   ["js/phaser.min.js", "vendor/phaser.min.js"],
 ];
 
+// 镜像内相对路径。public 侧要多一层 assets/ 前缀（原站根是 /assets/maps），
+// 所以这里只存源侧，目标侧用 runtimeMapPath() 现推，别把两者当同一个值用。
 const CHUNK_FILES = [
   "maps/chunks/master.json",
   ...Array.from({ length: 25 }, (_, index) => `maps/chunks/chunk${index}.json`),
 ];
+const runtimeMapPath = (sourceRelative) => `assets/${sourceRelative}`;
 const RAW_PARTICLE_GIDS = new Set([69355, 69356, 69357, 69358, 69359]);
 const MARKER_GIDS = new Map([
   ["cars", new Set([69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352])],
@@ -94,6 +99,17 @@ const PARTICLE_TILESET = {
   tileheight: 16,
   tilewidth: 16,
 };
+// 运行期真正 load 的那张纹理。原站 bundle 是
+// `this.load.image("particles-tileset", "/assets/maps/tileset-particles.webp")`，
+// 96×16（6 格）。别和上面 PARTICLE_TILESET 的 112×16 / tilecount 7 搞混：那是
+// Tiled 作图源 `tileset-particles.tsx` 的声明，描述作图工程。原站两者本来就不
+// 一致；Phaser 按纹理宽度现算列数，所以运行期实际是 6 列，而 sanitizer 保下来
+// 的 GID 只有 69355–69359（第 0–4 格），不缺格。
+const PARTICLE_TEXTURE = {
+  file: "maps/tileset-particles.webp",
+  width: 96,
+  height: 16,
+};
 
 function pngDimensions(buffer) {
   if (
@@ -105,6 +121,43 @@ function pngDimensions(buffer) {
     throw new Error("not a PNG");
   }
   return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+}
+
+function webpDimensions(buffer) {
+  if (
+    buffer.length < 30 ||
+    buffer.toString("ascii", 0, 4) !== "RIFF" ||
+    buffer.toString("ascii", 8, 12) !== "WEBP"
+  ) {
+    throw new Error("not a WebP");
+  }
+  const format = buffer.toString("ascii", 12, 16);
+  if (format === "VP8L") {
+    if (buffer[20] !== 0x2f) throw new Error("bad VP8L signature");
+    const bits = buffer.readUInt32LE(21);
+    return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+  }
+  if (format === "VP8 ") {
+    return {
+      width: buffer.readUInt16LE(26) & 0x3fff,
+      height: buffer.readUInt16LE(28) & 0x3fff,
+    };
+  }
+  if (format === "VP8X") {
+    return {
+      width: buffer.readUIntLE(24, 3) + 1,
+      height: buffer.readUIntLE(27, 3) + 1,
+    };
+  }
+  throw new Error(`unsupported WebP chunk ${format}`);
+}
+
+function imageDimensions(buffer) {
+  return buffer
+    .subarray(0, 8)
+    .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    ? pngDimensions(buffer)
+    : webpDimensions(buffer);
 }
 
 function checkParticleTileset(tilesets, label) {
@@ -248,30 +301,32 @@ for (const [sourceRelative, targetRelative] of FILES) {
   if (sha256(source) !== sha256(target)) {
     errors.push(`hash mismatch: ${sourceRelative} -> ${targetRelative}`);
   }
-  if (sourceRelative === "maps/tileset-particles.png") {
+  if (sourceRelative === PARTICLE_TEXTURE.file) {
     try {
-      const sourceDimensions = pngDimensions(readFileSync(source));
-      const targetDimensions = pngDimensions(readFileSync(target));
-      for (const [label, dimensions] of [
-        ["source", sourceDimensions],
-        ["runtime", targetDimensions],
+      for (const [label, path] of [
+        ["source", source],
+        ["runtime", target],
       ]) {
-        if (dimensions.width !== 112 || dimensions.height !== 16) {
+        const dimensions = imageDimensions(readFileSync(path));
+        if (
+          dimensions.width !== PARTICLE_TEXTURE.width ||
+          dimensions.height !== PARTICLE_TEXTURE.height
+        ) {
           errors.push(
-            `${label} particle image is ${dimensions.width}x${dimensions.height}, ` +
-              "expected 112x16",
+            `${label} particle texture is ${dimensions.width}x${dimensions.height}, ` +
+              `expected ${PARTICLE_TEXTURE.width}x${PARTICLE_TEXTURE.height}`,
           );
         }
       }
     } catch (error) {
-      errors.push(`invalid particle image: ${error.message}`);
+      errors.push(`invalid particle texture: ${error.message}`);
     }
   }
 }
 
-const mapPath = resolve(RUNTIME_ROOT, "maps/final_map.json");
+const mapPath = resolve(RUNTIME_ROOT, "assets/maps/final_map.json");
 if (!existsSync(mapPath)) {
-  errors.push("missing runtime file: public/maps/final_map.json");
+  errors.push("missing runtime file: public/assets/maps/final_map.json");
 } else {
   try {
     const map = JSON.parse(readFileSync(mapPath, "utf8"));
@@ -291,16 +346,16 @@ if (!existsSync(mapPath)) {
 
 for (const relative of CHUNK_FILES) {
   const source = resolve(SOURCE_ROOT, relative);
-  const target = resolve(RUNTIME_ROOT, relative);
+  const target = resolve(RUNTIME_ROOT, runtimeMapPath(relative));
   if (!existsSync(source)) {
     errors.push(`missing versioned source: sample/.../assets/${relative}`);
   }
   if (!existsSync(target)) {
-    errors.push(`missing runtime file: public/${relative}`);
+    errors.push(`missing runtime file: public/${runtimeMapPath(relative)}`);
   }
 }
 
-const masterPath = resolve(RUNTIME_ROOT, "maps/chunks/master.json");
+const masterPath = resolve(RUNTIME_ROOT, "assets/maps/chunks/master.json");
 if (existsSync(masterPath)) {
   try {
     const master = JSON.parse(readFileSync(masterPath, "utf8"));
@@ -322,7 +377,7 @@ if (existsSync(masterPath)) {
 }
 
 for (const relative of CHUNK_FILES.slice(1)) {
-  const chunkPath = resolve(RUNTIME_ROOT, relative);
+  const chunkPath = resolve(RUNTIME_ROOT, runtimeMapPath(relative));
   if (!existsSync(chunkPath)) continue;
   try {
     const chunk = JSON.parse(readFileSync(chunkPath, "utf8"));

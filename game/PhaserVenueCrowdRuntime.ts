@@ -1,23 +1,15 @@
-import { VenueCrowdRuntime } from "../src/npc/index.js";
+import {
+  VenueCrowdRuntime,
+  type VenueCrowdRuntimeOptions,
+} from "../src/npc/index.js";
 import {
   ANIMATION_FRAME_RATE,
   WALK_FRAMES_PER_DIRECTION,
   walkFrameStart,
 } from "../src/player/index.js";
+import type { VenueCrowdPresentation } from "../config/骨架/05-旁支/SYS-NPC/逻辑/types.js";
 
 type View = { left: number; top: number; width: number; height: number };
-const DEFAULT_NPC_HALF_SIZE = 24;
-const PROTESTER_HALF_SIZE = 32;
-
-export const PROTESTER_SLOGANS = Object.freeze([
-  "People, not machines!",
-  "Jobs for humans!",
-  "Human > machine",
-]);
-const PROTEST_SPEECH_MAX_VISIBLE = 2;
-const PROTEST_SPEECH_INITIAL_DELAY_MS = 500;
-const PROTEST_SPEECH_DURATION_MS = 3_000;
-const PROTEST_SPEECH_INTERVAL_MS = 6_000;
 
 function isInViewport(
   x: number,
@@ -37,10 +29,11 @@ function isInViewportForRegion(
   y: number,
   regionId: string | undefined,
   viewport: View | undefined,
+  presentation: VenueCrowdPresentation,
 ): boolean {
   const halfSize = regionId?.startsWith("protesters_rising")
-    ? PROTESTER_HALF_SIZE
-    : DEFAULT_NPC_HALF_SIZE;
+    ? presentation.protesterHalfSize
+    : presentation.npcHalfSize;
   return isInViewport(x, y, viewport, halfSize);
 }
 
@@ -95,18 +88,21 @@ const stableHash = (value: string): number =>
   [...value].reduce((hash, character) =>
     (hash * 31 + character.charCodeAt(0)) >>> 0, 0);
 
-export function preloadVenueCrowdRuntimeAssets(loader: {
-  spritesheet(
-    key: string,
-    url: string,
-    config: { frameWidth: number; frameHeight: number },
-  ): unknown;
-}): void {
-  loader.spritesheet(
-    "npc_protester_rising",
-    "/sprites/npc_protester_rising.webp",
-    { frameWidth: 64, frameHeight: 64 },
-  );
+export function preloadVenueCrowdRuntimeAssets(
+  loader: {
+    spritesheet(
+      key: string,
+      url: string,
+      config: { frameWidth: number; frameHeight: number },
+    ): unknown;
+  },
+  presentation: VenueCrowdPresentation,
+): void {
+  const asset = presentation.protesterAsset;
+  loader.spritesheet(asset.key, asset.url, {
+    frameWidth: asset.frameWidth,
+    frameHeight: asset.frameHeight,
+  });
 }
 
 export interface PhaserVenueCrowdSceneLike {
@@ -137,7 +133,7 @@ export interface PhaserVenueCrowdSceneLike {
 
 /** Venue presentation with region culling and independent protest action state. */
 export class PhaserVenueCrowdRuntime {
-  private readonly core = new VenueCrowdRuntime();
+  private readonly core: VenueCrowdRuntime;
   private readonly sprites = new Map<string, Sprite>();
   private readonly protestStates = new Map<string, ProtestActionState>();
   private readonly speechBubbles = new Map<string, SpeechBubble>();
@@ -149,11 +145,16 @@ export class PhaserVenueCrowdRuntime {
   constructor(
     private readonly scene: PhaserVenueCrowdSceneLike,
     private readonly viewport: () => View | undefined,
+    options: VenueCrowdRuntimeOptions,
+    private readonly presentation: VenueCrowdPresentation,
     private readonly now: () => number = Date.now,
-  ) {}
+  ) {
+    this.core = new VenueCrowdRuntime(options);
+  }
 
   start(): boolean {
-    if (this.dead || !this.scene.textures.exists("npc_protester_rising")) return false;
+    if (this.dead ||
+      !this.scene.textures.exists(this.presentation.protesterAsset.key)) return false;
     this.startedAt = this.now();
     const viewport = this.viewport();
     this.core.start(viewport);
@@ -194,11 +195,12 @@ export class PhaserVenueCrowdRuntime {
   private sync(now: number, viewport: View | undefined): void {
     const instances = this.core.snapshot.instances;
     const byId = new Map(instances.map((instance) => [instance.id, instance]));
+    const presentation = this.presentation;
     const readyRegionIds = new Set<string>();
     if (viewport !== undefined) {
       for (const instance of instances) {
         if (isInViewportForRegion(
-          instance.position.x, instance.position.y, instance.regionId, viewport)) {
+          instance.position.x, instance.position.y, instance.regionId, viewport, presentation)) {
           // A visible region must win the bounded creation budget over
           // prewarmed regions that are still outside the current view.
           readyRegionIds.add(instance.regionId);
@@ -207,7 +209,7 @@ export class PhaserVenueCrowdRuntime {
       for (const [id, sprite] of this.sprites) {
         const instance = byId.get(id);
         if (instance !== undefined && isInViewportForRegion(
-          sprite.x, sprite.y, instance.regionId, viewport)) {
+          sprite.x, sprite.y, instance.regionId, viewport, presentation)) {
           readyRegionIds.add(instance.regionId);
         }
       }
@@ -217,10 +219,10 @@ export class PhaserVenueCrowdRuntime {
     const activeSpeechIds = new Set<string>();
     const orderedInstances = [...instances].sort((left, right) => {
       const leftVisible = isInViewportForRegion(
-        left.position.x, left.position.y, left.regionId, viewport,
+        left.position.x, left.position.y, left.regionId, viewport, presentation,
       );
       const rightVisible = isInViewportForRegion(
-        right.position.x, right.position.y, right.regionId, viewport,
+        right.position.x, right.position.y, right.regionId, viewport, presentation,
       );
       return Number(rightVisible) - Number(leftVisible);
     });
@@ -229,18 +231,18 @@ export class PhaserVenueCrowdRuntime {
       let sprite = this.sprites.get(instance.id);
       const isNew = sprite === undefined;
       const existingVisible = sprite !== undefined && isInViewportForRegion(
-        sprite.x, sprite.y, instance.regionId, viewport);
+        sprite.x, sprite.y, instance.regionId, viewport, presentation);
       const currentlyVisible = isInViewportForRegion(
-        instance.position.x, instance.position.y, instance.regionId, viewport,
+        instance.position.x, instance.position.y, instance.regionId, viewport, presentation,
       );
       if (!instance.materialized && !existingVisible && !currentlyVisible) continue;
       if (!isNew && viewport !== undefined && !existingVisible) continue;
       activeIds.add(instance.id);
       const protest = instance.regionId.startsWith("protesters_rising");
       if (isNew) {
-        if (created >= 16 && !currentlyVisible &&
+        if (created >= presentation.maxCreatePerSync && !currentlyVisible &&
           !readyRegionIds.has(instance.regionId)) continue;
-        const texture = protest ? "npc_protester_rising" : "npc-man";
+        const texture = protest ? presentation.protesterAsset.key : presentation.npcTexture;
         sprite = this.scene.add.sprite(instance.position.x, instance.position.y, texture);
         created += 1;
         if (protest) this.initializeProtester(instance.id, sprite);
@@ -253,7 +255,8 @@ export class PhaserVenueCrowdRuntime {
       readySprite.setDepth(500 + readySprite.y * .1);
       if (protest) {
         this.updateProtester(instance.id, readySprite, now);
-        if (isInViewportForRegion(readySprite.x, readySprite.y, instance.regionId, viewport)) {
+        if (isInViewportForRegion(
+          readySprite.x, readySprite.y, instance.regionId, viewport, presentation)) {
           this.updateProtesterSpeech(instance.id, readySprite, now, activeSpeechIds);
         }
       }
@@ -261,7 +264,7 @@ export class PhaserVenueCrowdRuntime {
     }
     for (const [id, sprite] of this.sprites) {
       if (activeIds.has(id) || isInViewportForRegion(
-        sprite.x, sprite.y, byId.get(id)?.regionId, viewport)) continue;
+        sprite.x, sprite.y, byId.get(id)?.regionId, viewport, presentation)) continue;
       sprite.destroy();
       this.sprites.delete(id);
       const state = this.protestStates.get(id);
@@ -280,7 +283,7 @@ export class PhaserVenueCrowdRuntime {
     const index = Number(id.split(":").at(-1)) || 0;
     const state = this.protestStates.get(id) ?? {
       id,
-      capable: index % 3 === 0,
+      capable: index % this.presentation.actCapableEveryNth === 0,
       phase: "idle" as const,
       directionIndex: index % DIRECTIONS.length,
       actionCount: 0,
@@ -298,12 +301,14 @@ export class PhaserVenueCrowdRuntime {
     activeSpeechIds: Set<string>,
   ): void {
     if (this.scene.add.text === undefined) return;
+    const slogans = this.presentation.slogans;
+    const box = this.presentation.speechBubble;
     const state = this.speechStates.get(id) ?? {
       id,
       phase: "hidden" as const,
-      textIndex: stableHash(`${id}:slogan`) % PROTESTER_SLOGANS.length,
-      text: PROTESTER_SLOGANS[stableHash(`${id}:slogan`) % PROTESTER_SLOGANS.length]!,
-      nextChangeAt: this.startedAt + PROTEST_SPEECH_INITIAL_DELAY_MS +
+      textIndex: stableHash(`${id}:slogan`) % slogans.length,
+      text: slogans[stableHash(`${id}:slogan`) % slogans.length]!,
+      nextChangeAt: this.startedAt + this.presentation.speechInitialDelayMs +
         stableHash(`${id}:speech-start`) % 1_501,
     };
     this.speechStates.set(id, state);
@@ -311,16 +316,16 @@ export class PhaserVenueCrowdRuntime {
     if (now >= state.nextChangeAt) {
       if (state.phase === "visible") {
         state.phase = "hidden";
-        state.textIndex = (state.textIndex + 1) % PROTESTER_SLOGANS.length;
-        state.text = PROTESTER_SLOGANS[state.textIndex]!;
-        state.nextChangeAt = now + PROTEST_SPEECH_INTERVAL_MS +
+        state.textIndex = (state.textIndex + 1) % slogans.length;
+        state.text = slogans[state.textIndex]!;
+        state.nextChangeAt = now + this.presentation.speechIntervalMs +
           stableHash(`${id}:speech-next:${state.textIndex}`) % 8_001;
       } else {
         const visibleCount = [...this.speechStates.values()]
           .filter((candidate) => candidate.phase === "visible").length;
-        if (visibleCount < PROTEST_SPEECH_MAX_VISIBLE) {
+        if (visibleCount < this.presentation.speechMaxVisible) {
           state.phase = "visible";
-          state.nextChangeAt = now + PROTEST_SPEECH_DURATION_MS;
+          state.nextChangeAt = now + this.presentation.speechDurationMs;
         } else {
           state.nextChangeAt = now + 500 +
             stableHash(`${id}:speech-defer:${state.textIndex}`) % 501;
@@ -329,21 +334,28 @@ export class PhaserVenueCrowdRuntime {
     }
     let bubble = this.speechBubbles.get(id);
     if (bubble === undefined) {
-      bubble = this.scene.add.text(sprite.x, sprite.y - PROTESTER_HALF_SIZE - 8, state.text, {
-        fontFamily: "monospace",
-        fontStyle: "bold",
-        color: "#111111",
-        backgroundColor: "#ffffff",
-        padding: { left: 3, right: 3, top: 1, bottom: 1 },
-        fontSize: "8px",
-        wordWrap: { width: 128, useAdvancedWrap: true },
-        align: "center",
-      });
+      bubble = this.scene.add.text(
+        sprite.x,
+        sprite.y - this.presentation.protesterHalfSize - box.offsetYFromSpritePx,
+        state.text,
+        {
+          fontFamily: box.fontFamily,
+          fontStyle: box.fontStyle,
+          color: box.color,
+          backgroundColor: box.backgroundColor,
+          padding: { ...box.padding },
+          fontSize: `${box.fontSizePx}px`,
+          wordWrap: { width: box.wordWrapWidthPx, useAdvancedWrap: true },
+          align: box.align,
+        },
+      );
       bubble.setOrigin?.(0.5, 1);
       this.speechBubbles.set(id, bubble);
     }
     bubble.x = Math.round(sprite.x);
-    bubble.y = Math.round(sprite.y - PROTESTER_HALF_SIZE - 8);
+    bubble.y = Math.round(
+      sprite.y - this.presentation.protesterHalfSize - box.offsetYFromSpritePx,
+    );
     bubble.setText?.(state.text);
     bubble.setDepth(700 + sprite.y * .1);
     bubble.setVisible?.(state.phase === "visible");
@@ -367,7 +379,7 @@ export class PhaserVenueCrowdRuntime {
     }
     const actingCount = [...this.protestStates.values()].filter((candidate) =>
       candidate.phase === "acting").length;
-    if (actingCount >= 2) {
+    if (actingCount >= this.presentation.maxConcurrentActs) {
       state.nextChangeAt = now + 500 + stableHash(`${id}:defer:${state.actionCount}`) % 501;
       return;
     }
@@ -393,7 +405,7 @@ export class PhaserVenueCrowdRuntime {
     this.scene.anims?.create({
       key,
       frames: this.scene.anims.generateFrameNumbers(
-        "npc_protester_rising",
+        this.presentation.protesterAsset.key,
         { start, end: start + WALK_FRAMES_PER_DIRECTION - 1 },
       ),
       frameRate: ANIMATION_FRAME_RATE,

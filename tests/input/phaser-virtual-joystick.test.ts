@@ -105,6 +105,24 @@ function center(scene: ReturnType<typeof makeScene>) {
 }
 
 describe("Phaser 原生摇杆适配器", () => {
+  it("ENVELOP 竖屏裁切后整个摇杆保持在可见区域", () => {
+    const scene = makeScene();
+    scene.scale.width = 480;
+    scene.scale.height = 270;
+    const zoom = 844 / 270;
+    let viewport = { x: (480 - 390 / zoom) / 2, y: 0, width: 390 / zoom, height: 270 };
+    Object.assign(scene.scale, { getViewPort: () => viewport });
+    const joystick = new PhaserVirtualJoystick(scene, "mobile");
+    const point = joystick.debugState();
+    expect((point.x - 30 - viewport.x) * zoom).toBeGreaterThanOrEqual(0);
+    expect((point.x + 30 - viewport.x) * zoom).toBeLessThanOrEqual(390);
+    scene.input.emit("pointerdown", { id: 1, x: point.x, y: point.y });
+    scene.input.emit("pointermove", { id: 1, x: point.x - 20, y: point.y });
+    expect(joystick.direction).toBe("west");
+    viewport = { x: 0, y: 10, width: 480, height: 250 };
+    scene.scale.emit("resize");
+    expect(joystick.debugState()).toMatchObject({ x: 430, y: 210, active: false });
+  });
   it("只允许第一个 pointer 持有摇杆，并在释放或离开时恢复", () => {
     const scene = makeScene();
     const joystick = new PhaserVirtualJoystick(scene, "mobile");

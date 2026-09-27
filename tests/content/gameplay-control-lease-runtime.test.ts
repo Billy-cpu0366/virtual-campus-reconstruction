@@ -11,6 +11,13 @@ function tokenFrom(
 }
 
 describe("GameplayControlLeaseRuntime", () => {
+  it("历史 token 使用弱引用并保留 stale-token 判定", () => {
+    const runtime = new GameplayControlLeaseRuntime({});
+    const token = tokenFrom(runtime.acquire());
+    runtime.release(token);
+    expect((runtime as any).issuedTokens).toBeInstanceOf(WeakSet);
+    expect(runtime.release(token)).toEqual({ ok: false, reason: "stale-token" });
+  });
   it("首个 token disable，后续 acquire 不重复 disable", () => {
     const calls: string[] = [];
     const runtime = new GameplayControlLeaseRuntime({

@@ -333,6 +333,7 @@ export class InteractRuntime {
   private handleLeave(event: ZoneResidenceEvent): void {
     const identity = identityKey(event);
     this.suppressedResidences.delete(identity);
+    this.committedResidences.delete(identity);
     const active = this.activeState;
     if (active === undefined || !sameIdentity(active, event)) return;
     let hideResult;

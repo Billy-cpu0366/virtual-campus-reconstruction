@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  SPRAYER_CONFIGS,
-  SprayerGroupRuntime,
-} from "../../src/npc/index.js";
+import { SprayerGroupRuntime } from "../../src/npc/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
 import {
   PhaserSprayerRuntime,
   sprayerPresentationDepth,
@@ -12,6 +11,17 @@ import {
   type PhaserSprayerSceneLike,
   type PhaserSprayerSpriteLike,
 } from "../../game/PhaserSprayerRuntime.js";
+
+/** 四个喷水器和五项调参现在都读磁盘上那份配置。 */
+const CONFIGS = await loadNpcConfigs(createDiskConfigSource());
+const SPRAYER_CONFIGS = CONFIGS.sprayerConfigs;
+/** 两张贴图的帧规格与帧速——原先写死在 game/PhaserSprayerRuntime.ts 里，帧速是函数体里的字面量 6。 */
+const PRESENTATION = CONFIGS.presentation.sprayer;
+const SPRAYER_INPUT = {
+  configs: SPRAYER_CONFIGS,
+  tuning: CONFIGS.tuning.sprayer,
+  presentation: PRESENTATION,
+};
 
 class FakeClock {
   nowMs = 0;
@@ -152,7 +162,7 @@ function makeScene(textureExists: (key: string) => boolean = () => true) {
 describe("SprayerGroupRuntime", () => {
   it("保留四个公开锚点和完整路线，按300ms排序逃跑并完成销毁状态", () => {
     const clock = new FakeClock();
-    const runtime = new SprayerGroupRuntime({ random: () => 0 });
+    const runtime = new SprayerGroupRuntime({ ...SPRAYER_INPUT, random: () => 0 });
     expect(runtime.start(clock.nowMs)).toEqual({ ok: true });
     expect(runtime.snapshot.instances.map((instance) => instance.id)).toEqual(
       SPRAYER_CONFIGS.map((config) => config.id),
@@ -185,12 +195,12 @@ describe("SprayerGroupRuntime", () => {
   });
 
   it("严格使用横向2 tile、纵向0..2 tile触发窗口", () => {
-    const runtime = new SprayerGroupRuntime({ random: () => 0 });
+    const runtime = new SprayerGroupRuntime({ ...SPRAYER_INPUT, random: () => 0 });
     runtime.start(0);
     runtime.tick(0, { x: 60 * 16 + 2 * 16, y: 27 * 16 });
     expect(runtime.snapshot.triggeredAt).toBe(0);
 
-    const outside = new SprayerGroupRuntime({ random: () => 0 });
+    const outside = new SprayerGroupRuntime({ ...SPRAYER_INPUT, random: () => 0 });
     outside.start(0);
     outside.tick(0, { x: 60 * 16 + 2 * 16 + 0.01, y: 27 * 16 });
     expect(outside.snapshot.triggeredAt).toBeNull();
@@ -199,7 +209,7 @@ describe("SprayerGroupRuntime", () => {
   });
 
   it("资源失败、重复start、cancel和shutdown都是有界结果", () => {
-    const missing = new SprayerGroupRuntime();
+    const missing = new SprayerGroupRuntime(SPRAYER_INPUT);
     expect(missing.start(0, { idleTexture: false, runningTexture: true })).toEqual({
       ok: false,
       reason: "missing-idle-texture",
@@ -209,7 +219,7 @@ describe("SprayerGroupRuntime", () => {
       reason: "missing-running-texture",
     });
 
-    const runtime = new SprayerGroupRuntime({ random: () => 0 });
+    const runtime = new SprayerGroupRuntime({ ...SPRAYER_INPUT, random: () => 0 });
     expect(runtime.start(0)).toEqual({ ok: true });
     expect(runtime.start(1)).toEqual({ ok: false, reason: "already-running" });
     runtime.cancel();
@@ -231,7 +241,7 @@ describe("PhaserSprayerRuntime", () => {
     let player: { x: number; y: number } | undefined;
     const fake = makeScene();
     let triggered = 0;
-    const runtime = new PhaserSprayerRuntime(fake.scene, {
+    const runtime = new PhaserSprayerRuntime(fake.scene, { ...SPRAYER_INPUT,
       random: () => 0,
       playerPosition: () => player,
       onTriggered: () => {
@@ -279,10 +289,26 @@ describe("PhaserSprayerRuntime", () => {
     expect(fake.events.count("shutdown")).toBe(0);
   });
 
+  it("动画帧速是按递进来的那份配置算的，不是写死的", () => {
+    // 真配置里两张图都是每秒 6 帧——比人物走路那套（10）慢，这是原版就有的差别。
+    expect(PRESENTATION.map((asset) => asset.frameRate)).toEqual([6, 6]);
+
+    const fake = makeScene();
+    const shifted = PRESENTATION.map((asset) => ({ ...asset, frameRate: 3 }));
+    const runtime = new PhaserSprayerRuntime(fake.scene, {
+      ...SPRAYER_INPUT,
+      presentation: shifted,
+    });
+    runtime.createAnimations();
+    // 喷雾 1 条 + 跑动 8 个方向 = 9 条，帧速全部跟着配置走。
+    expect(fake.animations.created).toHaveLength(9);
+    expect(fake.animations.created.every((animation) => animation.frameRate === 3)).toBe(true);
+  });
+
   it("资源缺失不创建Sprite，cancel可重启且shutdown不可重启", () => {
     const errors: string[] = [];
     const missing = makeScene((key) => key !== "npc-sprayer-running");
-    const failed = new PhaserSprayerRuntime(missing.scene, {
+    const failed = new PhaserSprayerRuntime(missing.scene, { ...SPRAYER_INPUT,
       onError: (reason) => errors.push(reason),
     });
     expect(failed.start(0)).toEqual({
@@ -293,7 +319,7 @@ describe("PhaserSprayerRuntime", () => {
     expect(errors).toContain("missing-running-texture");
 
     const fake = makeScene();
-    const runtime = new PhaserSprayerRuntime(fake.scene);
+    const runtime = new PhaserSprayerRuntime(fake.scene, SPRAYER_INPUT);
     expect(runtime.start(0)).toEqual({ ok: true });
     expect(runtime.start(1)).toEqual({ ok: false, reason: "already-running" });
     runtime.cancel();

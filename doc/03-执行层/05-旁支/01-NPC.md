@@ -74,21 +74,21 @@ shutdown()
 
 **代码在哪**：
 
-| 做什么 | 文件路径 | 关键类/方法 |
-|---|---|---|
-| 静态 NPC 生命周期 | [src/npc/staticNpc.ts](src/npc/staticNpc.ts) | `StaticNpcRuntime` → `start(tick) → tick() → cancel() → shutdown()` |
-| 静态人群生命周期 | [src/npc/staticCrowd.ts](src/npc/staticCrowd.ts) | `StaticCrowdRuntime` → `start(tick) → tick() → cancel() → shutdown()` |
-| 路线人群生命周期 | [src/npc/routeCrowd.ts](src/npc/routeCrowd.ts) | `RouteCrowdRuntime` → `start() → tick() → cancel() → shutdown()` |
-| 跳舞人群生命周期 | [src/npc/dancingCrowd.ts](src/npc/dancingCrowd.ts) | `DancingCrowdRuntime` → `start() → tick() → shutdown()` |
-| 虫子群生命周期 | [src/npc/bugCrowd.ts](src/npc/bugCrowd.ts) | `BugCrowdRuntime` → `start() → tick() → cancel() → shutdown()` |
-| 场馆人群生命周期 | [src/npc/venueCrowdRuntime.ts](src/npc/venueCrowdRuntime.ts) | `VenueCrowdRuntime` → `start() → tick() → shutdown()` |
-| 喷水器生命周期 | [src/npc/sprayer.ts](src/npc/sprayer.ts) | `SprayerGroupRuntime` → `start() → tick() → cancel() → shutdown()` |
-| Phaser 适配层 | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts) | 六个 Phaser Runtime，每个包裹一个 src Runtime |
-| Phaser 适配层 | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) | 同步 snapshot → 创建/销毁 sprite |
-| Phaser 适配层 | [game/PhaserRouteCrowdRuntime.ts](game/PhaserRouteCrowdRuntime.ts) | 同上，额外处理 17 种纹理 |
-| Phaser 适配层 | [game/PhaserDancingCrowdRuntime.ts](game/PhaserDancingCrowdRuntime.ts) | 8 方向跳舞动画 |
-| Phaser 适配层 | [game/PhaserBugCrowdRuntime.ts](game/PhaserBugCrowdRuntime.ts) | 虫子 4 方向爬行动画 |
-| Phaser 适配层 | [game/PhaserVenueCrowdRuntime.ts](game/PhaserVenueCrowdRuntime.ts) | 抗议者 + 对话框 |
+| 做什么         | 文件路径                                                                   | 关键类/方法                                                                |
+| ----------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 静态 NPC 生命周期 | [src/npc/staticNpc.ts](../../../src/npc/staticNpc.ts)                           | `StaticNpcRuntime` → `start(tick) → tick() → cancel() → shutdown()`   |
+| 静态人群生命周期    | [src/npc/staticCrowd.ts](../../../src/npc/staticCrowd.ts)                       | `StaticCrowdRuntime` → `start(tick) → tick() → cancel() → shutdown()` |
+| 路线人群生命周期    | [src/npc/routeCrowd.ts](../../../src/npc/routeCrowd.ts)                         | `RouteCrowdRuntime` → `start() → tick() → cancel() → shutdown()`      |
+| 跳舞人群生命周期    | [src/npc/dancingCrowd.ts](../../../src/npc/dancingCrowd.ts)                     | `DancingCrowdRuntime` → `start() → tick() → shutdown()`               |
+| 虫子群生命周期     | [src/npc/bugCrowd.ts](../../../src/npc/bugCrowd.ts)                             | `BugCrowdRuntime` → `start() → tick() → cancel() → shutdown()`        |
+| 场馆人群生命周期    | [src/npc/venueCrowdRuntime.ts](../../../src/npc/venueCrowdRuntime.ts)           | `VenueCrowdRuntime` → `start() → tick() → shutdown()`                 |
+| 喷水器生命周期     | [src/npc/sprayer.ts](../../../src/npc/sprayer.ts)                               | `SprayerGroupRuntime` → `start() → tick() → cancel() → shutdown()`    |
+| Phaser 适配层  | [game/PhaserStaticNpcRuntime.ts](../../../game/PhaserStaticNpcRuntime.ts)       | 六个 Phaser Runtime，每个包裹一个 src Runtime                                  |
+| Phaser 适配层  | [game/PhaserStaticCrowdRuntime.ts](../../../game/PhaserStaticCrowdRuntime.ts)   | 同步 snapshot → 创建/销毁 sprite                                            |
+| Phaser 适配层  | [game/PhaserRouteCrowdRuntime.ts](../../../game/PhaserRouteCrowdRuntime.ts)     | 同上，额外处理 17 种纹理                                                        |
+| Phaser 适配层  | [game/PhaserDancingCrowdRuntime.ts](../../../game/PhaserDancingCrowdRuntime.ts) | 8 方向跳舞动画                                                              |
+| Phaser 适配层  | [game/PhaserBugCrowdRuntime.ts](../../../game/PhaserBugCrowdRuntime.ts)         | 虫子 4 方向爬行动画                                                           |
+| Phaser 适配层  | [game/PhaserVenueCrowdRuntime.ts](../../../game/PhaserVenueCrowdRuntime.ts)     | 抗议者 + 对话框                                                             |
 
 ---
 
@@ -124,15 +124,15 @@ NPC 位置: { x, y }
 
 | 做什么 | 文件路径 + 行号 | 关键常量 |
 |---|---|---|
-| 静态 NPC 裁剪 | [src/npc/staticNpc.ts:90-101](src/npc/staticNpc.ts#L90-L101) — `isNearViewport()` | `STATIC_NPC_VIEWPORT_MARGIN = 300` |
-| 静态人群裁剪 | [src/npc/staticCrowd.ts:4042-4055](src/npc/staticCrowd.ts#L4042-L4055) — `tick()` 中 region AABB 相交判断 | `STATIC_CROWD_VIEWPORT_MARGIN = 300` |
-| 路线人群裁剪 | [src/npc/routeCrowd.ts:245-284](src/npc/routeCrowd.ts#L245-L284) — `pointInSafeRange()` + `pathIntersectsSafeRange()` | `ROUTE_CROWD_SAFE_MARGIN = 100` |
-| 跳舞者裁剪 | [src/npc/dancingCrowd.ts:4-5](src/npc/dancingCrowd.ts) — `tick()` 中直接 AABB 判断 | 无 margin（精确裁剪） |
-| 虫子裁剪 | [src/npc/bugCrowd.ts:17](src/npc/bugCrowd.ts) — `view()` 中直接 AABB 判断 | 无 margin（精确裁剪） |
-| 场馆裁剪 | [src/npc/venueCrowdRuntime.ts:96-103](src/npc/venueCrowdRuntime.ts#L96-L103) — 预热/回收双 margin | `VENUE_PREWARM_MARGIN = 400`, `VENUE_RECYCLE_MARGIN = 500` |
+| 静态 NPC 裁剪 | [src/npc/staticNpc.ts:90-101](../../../src/npc/staticNpc.ts#L90-L101) — `isNearViewport()` | `STATIC_NPC_VIEWPORT_MARGIN = 300` |
+| 静态人群裁剪 | [src/npc/staticCrowd.ts:4042-4055](../../../src/npc/staticCrowd.ts#L4042-L4055) — `tick()` 中 region AABB 相交判断 | `STATIC_CROWD_VIEWPORT_MARGIN = 300` |
+| 路线人群裁剪 | [src/npc/routeCrowd.ts:245-284](../../../src/npc/routeCrowd.ts#L245-L284) — `pointInSafeRange()` + `pathIntersectsSafeRange()` | `ROUTE_CROWD_SAFE_MARGIN = 100` |
+| 跳舞者裁剪 | [src/npc/dancingCrowd.ts:4-5](../../../src/npc/dancingCrowd.ts) — `tick()` 中直接 AABB 判断 | 无 margin（精确裁剪） |
+| 虫子裁剪 | [src/npc/bugCrowd.ts:17](../../../src/npc/bugCrowd.ts) — `view()` 中直接 AABB 判断 | 无 margin（精确裁剪） |
+| 场馆裁剪 | [src/npc/venueCrowdRuntime.ts:96-103](../../../src/npc/venueCrowdRuntime.ts#L96-L103) — 预热/回收双 margin | `VENUE_PREWARM_MARGIN = 400`, `VENUE_RECYCLE_MARGIN = 500` |
 | 喷水器 | 无裁剪（只有 4 个，始终可见） | — |
-| Phaser 适配-静态 NPC 同步 | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts) `sync()` | 根据 materialized 创建/销毁 sprite |
-| Phaser 适配-静态人群同步 | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) `sync()` | 同上，额外处理 track band 避开 |
+| Phaser 适配-静态 NPC 同步 | [game/PhaserStaticNpcRuntime.ts](../../../game/PhaserStaticNpcRuntime.ts) `sync()` | 根据 materialized 创建/销毁 sprite |
+| Phaser 适配-静态人群同步 | [game/PhaserStaticCrowdRuntime.ts](../../../game/PhaserStaticCrowdRuntime.ts) `sync()` | 同上，额外处理 track band 避开 |
 
 ---
 
@@ -164,14 +164,14 @@ game/PhaserStaticNpcRuntime.ts → PhaserStaticNpcRuntime （表现：精灵创�
 
 | 层 | 文件 | Runtime 名 | 对应适配层 |
 |---|---|---|---|
-| 核心 | [src/npc/staticNpc.ts](src/npc/staticNpc.ts) | `StaticNpcRuntime` | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts) |
-| 核心 | [src/npc/staticCrowd.ts](src/npc/staticCrowd.ts) | `StaticCrowdRuntime` | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) |
-| 核心 | [src/npc/routeCrowd.ts](src/npc/routeCrowd.ts) | `RouteCrowdRuntime` | [game/PhaserRouteCrowdRuntime.ts](game/PhaserRouteCrowdRuntime.ts) |
-| 核心 | [src/npc/dancingCrowd.ts](src/npc/dancingCrowd.ts) | `DancingCrowdRuntime` | [game/PhaserDancingCrowdRuntime.ts](game/PhaserDancingCrowdRuntime.ts) |
-| 核心 | [src/npc/bugCrowd.ts](src/npc/bugCrowd.ts) | `BugCrowdRuntime` | [game/PhaserBugCrowdRuntime.ts](game/PhaserBugCrowdRuntime.ts) |
-| 核心 | [src/npc/venueCrowdRuntime.ts](src/npc/venueCrowdRuntime.ts) | `VenueCrowdRuntime` | [game/PhaserVenueCrowdRuntime.ts](game/PhaserVenueCrowdRuntime.ts) |
-| 核心 | [src/npc/sprayer.ts](src/npc/sprayer.ts) | `SprayerGroupRuntime` | （内嵌在 `gamescene` 中直接使用 snapshot） |
-| 核心 | [src/npc/gridPathProvider.ts](src/npc/gridPathProvider.ts) | `GridRouteCrowdPathProvider` | 被 `RouteCrowdRuntime` 使用 |
+| 核心 | [src/npc/staticNpc.ts](../../../src/npc/staticNpc.ts) | `StaticNpcRuntime` | [game/PhaserStaticNpcRuntime.ts](../../../game/PhaserStaticNpcRuntime.ts) |
+| 核心 | [src/npc/staticCrowd.ts](../../../src/npc/staticCrowd.ts) | `StaticCrowdRuntime` | [game/PhaserStaticCrowdRuntime.ts](../../../game/PhaserStaticCrowdRuntime.ts) |
+| 核心 | [src/npc/routeCrowd.ts](../../../src/npc/routeCrowd.ts) | `RouteCrowdRuntime` | [game/PhaserRouteCrowdRuntime.ts](../../../game/PhaserRouteCrowdRuntime.ts) |
+| 核心 | [src/npc/dancingCrowd.ts](../../../src/npc/dancingCrowd.ts) | `DancingCrowdRuntime` | [game/PhaserDancingCrowdRuntime.ts](../../../game/PhaserDancingCrowdRuntime.ts) |
+| 核心 | [src/npc/bugCrowd.ts](../../../src/npc/bugCrowd.ts) | `BugCrowdRuntime` | [game/PhaserBugCrowdRuntime.ts](../../../game/PhaserBugCrowdRuntime.ts) |
+| 核心 | [src/npc/venueCrowdRuntime.ts](../../../src/npc/venueCrowdRuntime.ts) | `VenueCrowdRuntime` | [game/PhaserVenueCrowdRuntime.ts](../../../game/PhaserVenueCrowdRuntime.ts) |
+| 核心 | [src/npc/sprayer.ts](../../../src/npc/sprayer.ts) | `SprayerGroupRuntime` | （内嵌在 `gamescene` 中直接使用 snapshot） |
+| 核心 | [src/npc/gridPathProvider.ts](../../../src/npc/gridPathProvider.ts) | `GridRouteCrowdPathProvider` | 被 `RouteCrowdRuntime` 使用 |
 
 **接口抽象示例**（路线人群寻路器）：
 
@@ -190,7 +190,7 @@ interface RouteCrowdPathProvider {
 > 理解层说的是"不写死坐标，而是写区域 + 公式"。
 > 在代码里，这分三条路：**静态人群 = 多边形撒点**，**路线人群 = 格子起点终点 + A***，**场馆人群 = 区域内随机撒 + 间距约束**。
 
-**① 静态人群：多边形 + 密度公式**（[src/npc/staticCrowd.ts](src/npc/staticCrowd.ts)）
+**① 静态人群：多边形 + 密度公式**（[src/npc/staticCrowd.ts](../../../src/npc/staticCrowd.ts)）
 
 ```
 46 个源区域（SOURCE_REGIONS）→ 每个区域有 outline 多边形 + tileCount + type
@@ -213,7 +213,7 @@ interface RouteCrowdPathProvider {
 方向分配：crowd_up 区域只朝上（north-east/north/north-west），火车站只朝前
 ```
 
-**② 路线人群：格子起点终点 + A***（[src/npc/routeCrowd.ts](src/npc/routeCrowd.ts) + [src/npc/gridPathProvider.ts](src/npc/gridPathProvider.ts)）
+**② 路线人群：格子起点终点 + A***（[src/npc/routeCrowd.ts](../../../src/npc/routeCrowd.ts) + [src/npc/gridPathProvider.ts](../../../src/npc/gridPathProvider.ts)）
 
 ```
 11 条路线配置（ROUTE_CROWD_CONFIGS）：
@@ -231,7 +231,7 @@ interface RouteCrowdPathProvider {
   moving 中若下一格被 block → waiting → (不 blocked 后) → moving
 ```
 
-**③ 场馆人群：区域内随机撒 + 间距约束**（[src/npc/venueCrowdRuntime.ts](src/npc/venueCrowdRuntime.ts)）
+**③ 场馆人群：区域内随机撒 + 间距约束**（[src/npc/venueCrowdRuntime.ts](../../../src/npc/venueCrowdRuntime.ts)）
 
 ```
 4 个区域（VENUE_CROWD_REGIONS）：3 个音乐会 + 1 个抗议区
@@ -242,17 +242,17 @@ interface RouteCrowdPathProvider {
 
 | 做什么 | 文件路径 | 关键函数/数据 |
 |---|---|---|
-| 静态人群区域定义 | [src/npc/staticCrowd.ts:90-3793](src/npc/staticCrowd.ts) | `SOURCE_REGIONS`（46 个多边形区域） |
-| 静态人群人数计算 | [src/npc/staticCrowd.ts:3833-3845](src/npc/staticCrowd.ts) | `staticCrowdRequestedCount()` |
-| 静态人群撒点 | [src/npc/staticCrowd.ts:3926-3990](src/npc/staticCrowd.ts) | `makePlacements()` |
-| 路线人群配置 | [src/npc/routeCrowd.ts:165-177](src/npc/routeCrowd.ts) | `ROUTE_CROWD_CONFIGS`（11 条路线） |
-| 路线人群启动 | [src/npc/routeCrowd.ts:372-562](src/npc/routeCrowd.ts) | `beginBatchedStart()` + `processBatchedStart()` |
-| A* 寻路器 | [src/npc/gridPathProvider.ts](src/npc/gridPathProvider.ts) | `GridRouteCrowdPathProvider.findPath()` |
-| 场馆区域定义 | [src/npc/venueCrowd.ts](src/npc/venueCrowd.ts) | `VENUE_CROWD_REGIONS`（4 个区域） |
-| 场馆撒点 | [src/npc/venueCrowdRuntime.ts:60-89](src/npc/venueCrowdRuntime.ts) | `VenueCrowdRuntime.start()` |
-| 跳舞者配置 | [src/npc/dancingCrowd.ts:1](src/npc/dancingCrowd.ts) | `DANCING_CROWD_CONFIG` |
-| 虫子配置 | [src/npc/bugCrowd.ts:12](src/npc/bugCrowd.ts) | `BUG_CROWD_CONFIG` |
-| 喷水器配置 | [src/npc/sprayer.ts:27-136](src/npc/sprayer.ts) | `SPRAYER_CONFIGS`（4 个喷水器 + 逃跑路线） |
+| 静态人群区域定义 | [src/npc/staticCrowd.ts:90-3793](../../../src/npc/staticCrowd.ts) | `SOURCE_REGIONS`（46 个多边形区域） |
+| 静态人群人数计算 | [src/npc/staticCrowd.ts:3833-3845](../../../src/npc/staticCrowd.ts) | `staticCrowdRequestedCount()` |
+| 静态人群撒点 | [src/npc/staticCrowd.ts:3926-3990](../../../src/npc/staticCrowd.ts) | `makePlacements()` |
+| 路线人群配置 | [src/npc/routeCrowd.ts:165-177](../../../src/npc/routeCrowd.ts) | `ROUTE_CROWD_CONFIGS`（11 条路线） |
+| 路线人群启动 | [src/npc/routeCrowd.ts:372-562](../../../src/npc/routeCrowd.ts) | `beginBatchedStart()` + `processBatchedStart()` |
+| A* 寻路器 | [src/npc/gridPathProvider.ts](../../../src/npc/gridPathProvider.ts) | `GridRouteCrowdPathProvider.findPath()` |
+| 场馆区域定义 | [src/npc/venueCrowd.ts](../../../src/npc/venueCrowd.ts) | `VENUE_CROWD_REGIONS`（4 个区域） |
+| 场馆撒点 | [src/npc/venueCrowdRuntime.ts:60-89](../../../src/npc/venueCrowdRuntime.ts) | `VenueCrowdRuntime.start()` |
+| 跳舞者配置 | [src/npc/dancingCrowd.ts:1](../../../src/npc/dancingCrowd.ts) | `DANCING_CROWD_CONFIG` |
+| 虫子配置 | [src/npc/bugCrowd.ts:12](../../../src/npc/bugCrowd.ts) | `BUG_CROWD_CONFIG` |
+| 喷水器配置 | [src/npc/sprayer.ts:27-136](../../../src/npc/sprayer.ts) | `SPRAYER_CONFIGS`（4 个喷水器 + 逃跑路线） |
 
 ---
 
@@ -281,10 +281,10 @@ Runtime 独立生命周期：
 
 | 做什么 | 文件路径 + 行号 | 关键方法 |
 |---|---|---|
-| 路线人群分组暂停 | [src/npc/routeCrowd.ts:677-684](src/npc/routeCrowd.ts) | `pauseGroup()` / `resumeGroup()` |
+| 路线人群分组暂停 | [src/npc/routeCrowd.ts:677-684](../../../src/npc/routeCrowd.ts) | `pauseGroup()` / `resumeGroup()` |
 | 通用取消 | 各 Runtime 文件 | `cancel()` / `shutdown()` |
-| 静态 NPC 取消 | [src/npc/staticNpc.ts:150-159](src/npc/staticNpc.ts) | `cancel()` / `shutdown()` |
-| 静态人群取消 | [src/npc/staticCrowd.ts:4075-4086](src/npc/staticCrowd.ts) | `cancel()` / `shutdown()` |
+| 静态 NPC 取消 | [src/npc/staticNpc.ts:150-159](../../../src/npc/staticNpc.ts) | `cancel()` / `shutdown()` |
+| 静态人群取消 | [src/npc/staticCrowd.ts:4075-4086](../../../src/npc/staticCrowd.ts) | `cancel()` / `shutdown()` |
 
 ---
 
@@ -292,38 +292,41 @@ Runtime 独立生命周期：
 
 | 皮 | 精确值 | 在哪 |
 |---|---|---|
-| NPC 大类 | 7 类：staticNpc/staticCrowd/routeCrowd/dancingCrowd/bugCrowd/venueCrowd/sprayer | [src/npc/index.ts](src/npc/index.ts)（所有导出） |
-| 静态 NPC（3 个） | special-reading(tileX=72,tileY=53,scale=0.9,frameRate=3)、special-eating(54,63,0.73,4)、cat-licking(12,106,1.0,6) | [src/npc/staticNpc.ts:49-81](src/npc/staticNpc.ts) `STATIC_NPC_CONFIGS` |
-| 静态人群区域数 | 46 个（regionIndex 29~74），含海滩(beach_crowd)、足球队(football_team_blue/red)、抗议区(protest_zone)、火车站(station_static_crowd) | [src/npc/staticCrowd.ts:88-3793](src/npc/staticCrowd.ts) `SOURCE_REGIONS` |
-| 静态人群精灵池 | ordinary: npc-man ~ npc-woman8 (17种)、beach: npc-man-beach ~ npc-woman-beach2 (4种)、football: npc_footballer_blue/red (2种) | [src/npc/staticCrowd.ts:75-86](src/npc/staticCrowd.ts) `DEFAULT_SPRITE_POOLS` |
-| 路线人群（11 条） | main-crowd(10人)/loop-crowd(10人)/drinkers(5人)/concert_crowd(40人)/beach_crowd_walk(4人)/vertical-crowd(10人)/vertical-crowd-reverse(10人)/walking-crowd(8人)/hazmat-crowd(8人)/outside_concert1(10人)/crowd-train(10人) | [src/npc/routeCrowd.ts:165-177](src/npc/routeCrowd.ts) `ROUTE_CROWD_CONFIGS` |
-| 跳舞者 | 8 人，区域 tileX 114~131 / tileY 100~102，depth=500，scale=0.9，frameRate=6，4 方向 | [src/npc/dancingCrowd.ts:1](src/npc/dancingCrowd.ts) `DANCING_CROWD_CONFIG` |
-| 虫子 | 10 只，tileX 5~23 / tileY 128~133，speed=15，sprite="npc-bug"，maxActive=40 | [src/npc/bugCrowd.ts:12](src/npc/bugCrowd.ts) `BUG_CROWD_CONFIG` |
-| 场馆区域 | 3 个音乐会(concert-84/85/86，共 460 人，spacing=18) + 1 个抗议区(protesters_rising-87，30 人，spacing=20) | [src/npc/venueCrowd.ts:3-5](src/npc/venueCrowd.ts) `VENUE_CROWD_REGIONS` |
-| 喷水器（4 个） | sprayer-60-25/67-25/71-25/78-25，escapeRoute 长度 3~59 点，frameRate=6，scale=0.9，depth=500 | [src/npc/sprayer.ts:27-136](src/npc/sprayer.ts) `SPRAYER_CONFIGS` |
-| 寻路算法 | 自定义 A*，8 方向（对角 cost 1.41），每帧 64 迭代，max 50000 迭代，seeded random 打破对称 | [src/npc/gridPathProvider.ts](src/npc/gridPathProvider.ts) |
-| Phaser 适配-静态 NPC | 3 个精灵图 key: npc-special-reading/eating, npc-cat-licking，depth=500+y*0.1 | [game/PhaserStaticNpcRuntime.ts](game/PhaserStaticNpcRuntime.ts) |
-| Phaser 适配-静态人群 | walk 动画帧起点按方向映射(walkFrameStart)，trackBand 避开 | [game/PhaserStaticCrowdRuntime.ts](game/PhaserStaticCrowdRuntime.ts) |
-| Phaser 适配-路线人群 | 17 种 NPC 纹理分 normal/train 两组，各组有 spriteKey+offset+visualOffset | [game/PhaserRouteCrowdRuntime.ts](game/PhaserRouteCrowdRuntime.ts) |
-| Phaser 适配-跳舞者 | 8 方向 × 16 帧，frameRate=6，depth=500，scale=0.9 | [game/PhaserDancingCrowdRuntime.ts](game/PhaserDancingCrowdRuntime.ts) |
-| Phaser 适配-虫子 | 24 帧，10fps，38×38 帧尺寸，scale=0.63，origin(0.5,0.85)，4 方向面对 | [game/PhaserBugCrowdRuntime.ts](game/PhaserBugCrowdRuntime.ts) |
-| Phaser 适配-场馆 | 抗议者 idle/acting 阶段切换，方向随机变换，对话框系统（"People, not machines!"等），depth≥700 | [game/PhaserVenueCrowdRuntime.ts](game/PhaserVenueCrowdRuntime.ts) |
+| NPC 大类 | 7 类：staticNpc/staticCrowd/routeCrowd/dancingCrowd/bugCrowd/venueCrowd/sprayer | [src/npc/index.ts](../../../src/npc/index.ts)（所有导出） |
+| 静态 NPC（3 个） | special-reading(tileX=72,tileY=53,scale=0.9,frameRate=3)、special-eating(54,63,0.73,4)、cat-licking(12,106,1.0,6) | [src/npc/staticNpc.ts:49-81](../../../src/npc/staticNpc.ts) `STATIC_NPC_CONFIGS` |
+| 静态人群区域数 | 46 个（regionIndex 29~74），含海滩(beach_crowd)、足球队(football_team_blue/red)、抗议区(protest_zone)、火车站(station_static_crowd) | [src/npc/staticCrowd.ts:88-3793](../../../src/npc/staticCrowd.ts) `SOURCE_REGIONS` |
+| 静态人群精灵池 | ordinary: npc-man ~ npc-woman8 (17种)、beach: npc-man-beach ~ npc-woman-beach2 (4种)、football: npc_footballer_blue/red (2种) | [src/npc/staticCrowd.ts:75-86](../../../src/npc/staticCrowd.ts) `DEFAULT_SPRITE_POOLS` |
+| 路线人群（11 条） | main-crowd(10人)/loop-crowd(10人)/drinkers(5人)/concert_crowd(40人)/beach_crowd_walk(4人)/vertical-crowd(10人)/vertical-crowd-reverse(10人)/walking-crowd(8人)/hazmat-crowd(8人)/outside_concert1(10人)/crowd-train(10人) | [src/npc/routeCrowd.ts:165-177](../../../src/npc/routeCrowd.ts) `ROUTE_CROWD_CONFIGS` |
+| 跳舞者 | 8 人，区域 tileX 114~131 / tileY 100~102，depth=500，scale=0.9，frameRate=6，4 方向 | [src/npc/dancingCrowd.ts:1](../../../src/npc/dancingCrowd.ts) `DANCING_CROWD_CONFIG` |
+| 虫子 | 10 只，tileX 5~23 / tileY 128~133，speed=15，sprite="npc-bug"，maxActive=40 | [src/npc/bugCrowd.ts:12](../../../src/npc/bugCrowd.ts) `BUG_CROWD_CONFIG` |
+| 场馆区域 | 3 个音乐会(concert-84/85/86，共 460 人，spacing=18) + 1 个抗议区(protesters_rising-87，30 人，spacing=20) | [src/npc/venueCrowd.ts:3-5](../../../src/npc/venueCrowd.ts) `VENUE_CROWD_REGIONS` |
+| 喷水器（4 个） | sprayer-60-25/67-25/71-25/78-25，escapeRoute 长度 3~59 点，frameRate=6，scale=0.9，depth=500 | [src/npc/sprayer.ts:27-136](../../../src/npc/sprayer.ts) `SPRAYER_CONFIGS` |
+| 寻路算法 | 自定义 A*，8 方向（对角 cost 1.41），每帧 64 迭代，max 50000 迭代，seeded random 打破对称 | [src/npc/gridPathProvider.ts](../../../src/npc/gridPathProvider.ts) |
+| Phaser 适配-静态 NPC | 3 个精灵图 key: npc-special-reading/eating, npc-cat-licking，depth=500+y*0.1 | [game/PhaserStaticNpcRuntime.ts](../../../game/PhaserStaticNpcRuntime.ts) |
+| Phaser 适配-静态人群 | walk 动画帧起点按方向映射(walkFrameStart)，keepStaticCrowdOffTrack 避开 | [game/PhaserStaticCrowdRuntime.ts](../../../game/PhaserStaticCrowdRuntime.ts) |
+| Phaser 适配-路线人群 | 17 种 NPC 纹理分 normal/train 两组，各组有 spriteKey+offset+visualOffset | [game/PhaserRouteCrowdRuntime.ts](../../../game/PhaserRouteCrowdRuntime.ts) |
+| Phaser 适配-跳舞者 | 8 方向 × 16 帧，frameRate=6，depth=500，scale=0.9 | [game/PhaserDancingCrowdRuntime.ts](../../../game/PhaserDancingCrowdRuntime.ts) |
+| Phaser 适配-虫子 | 24 帧，10fps，38×38 帧尺寸，scale=0.63，origin(0.5,0.85)，4 方向面对 | [game/PhaserBugCrowdRuntime.ts](../../../game/PhaserBugCrowdRuntime.ts) |
+| Phaser 适配-场馆 | 抗议者 idle/acting 阶段切换，方向随机变换，对话框系统（"People, not machines!"等），depth≥700 | [game/PhaserVenueCrowdRuntime.ts](../../../game/PhaserVenueCrowdRuntime.ts) |
 
 ---
 
 ## 三、配置点 —— 现在硬编码，将来后端下发
 
+> **字段级明细见** [换皮配置总表 §14 SYS-NPC](../../换皮配置总表.md#14-sys-npc)。
+> 本表只回答「这一类能不能配」；逐字段的**配置键、类型、默认值、生效时机、作用域、交付形态**，以及**实例数据**（每个对象的具体值），都在总表那一节。
+
 | 能改什么       | 现在硬编码在哪                                                                                             | 现在的值                                                        | 将来           |
 | ---------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------ |
 | NPC 类型清单   | 各 Runtime config 文件                                                                                 | 7 大类，硬编码                                                    | 后端 JSON 统一下发 |
-| 静态人群区域坐标   | [src/npc/staticCrowd.ts](src/npc/staticCrowd.ts)                                                    | 46 个多边形（数千行坐标）                                              | 后端配置下发       |
-| 密度系数       | [src/npc/staticCrowd.ts:63-64](src/npc/staticCrowd.ts)                                              | `STATIC_CROWD_FACTOR=0.004`, `STATIC_CROWD_UP_FACTOR=0.016` | 后端配置         |
-| 裁剪安全边距     | [src/npc/staticNpc.ts:45](src/npc/staticNpc.ts)、[src/npc/staticCrowd.ts:65](src/npc/staticCrowd.ts) | 300px（静态），100~500px（路线/场馆）                                  | 后端配置         |
-| 各路线 NPC 数量 | [src/npc/routeCrowd.ts:165-177](src/npc/routeCrowd.ts)                                              | 4~40 人不等                                                    | 后端配置         |
-| NPC 移动速度   | [src/npc/routeCrowd.ts:122](src/npc/routeCrowd.ts)、[src/npc/bugCrowd.ts:12](src/npc/bugCrowd.ts)    | baseSpeed=48，虫子 15                                          | 后端配置         |
-| 随机等待时间     | [src/npc/routeCrowd.ts:167-177](src/npc/routeCrowd.ts)                                              | 0~35000ms 不等                                                | 后端配置         |
+| 静态人群区域坐标   | [src/npc/staticCrowd.ts](../../../src/npc/staticCrowd.ts)                                                    | 46 个多边形（数千行坐标）                                              | 后端配置下发       |
+| 密度系数       | [src/npc/staticCrowd.ts:63-64](../../../src/npc/staticCrowd.ts)                                              | `STATIC_CROWD_FACTOR=0.004`, `STATIC_CROWD_UP_FACTOR=0.016` | 后端配置         |
+| 裁剪安全边距     | [src/npc/staticNpc.ts:45](../../../src/npc/staticNpc.ts)、[src/npc/staticCrowd.ts:65](../../../src/npc/staticCrowd.ts) | 300px（静态），100~500px（路线/场馆）                                  | 后端配置         |
+| 各路线 NPC 数量 | [src/npc/routeCrowd.ts:165-177](../../../src/npc/routeCrowd.ts)                                              | 4~40 人不等                                                    | 后端配置         |
+| NPC 移动速度   | [src/npc/routeCrowd.ts:122](../../../src/npc/routeCrowd.ts)、[src/npc/bugCrowd.ts:12](../../../src/npc/bugCrowd.ts)    | baseSpeed=48，虫子 15                                          | 后端配置         |
+| 随机等待时间     | [src/npc/routeCrowd.ts:167-177](../../../src/npc/routeCrowd.ts)                                              | 0~35000ms 不等                                                | 后端配置         |
 | 各 NPC 深度值  | 各 game/Phaser*Runtime.ts                                                                            | 500~700+，部分动态 y×0.1                                         | 后端配置         |
-| 视口内创建上限    | [src/npc/routeCrowd.ts:165-177](src/npc/routeCrowd.ts)                                              | 各 config 不同（5~40）                                           | 后端配置         |
+| 视口内创建上限    | [src/npc/routeCrowd.ts:165-177](../../../src/npc/routeCrowd.ts)                                              | 各 config 不同（5~40）                                           | 后端配置         |
 
 ---
 

@@ -1,22 +1,27 @@
 import {
   StaticCrowdRuntime,
+  type StaticCrowdRegion,
+  type StaticCrowdRuntimeTuning,
+  type StaticCrowdSpritePools,
   type StaticCrowdViewport,
 } from "../src/npc/index.js";
 import { walkFrameStart } from "../src/player/index.js";
-
-const CROWD_TRACK_BAND = Object.freeze({ minX: 25 * 16, maxX: 91 * 16 + 15, minY: 19 * 16, maxY: 19 * 16 + 15 });
-const NPC_HALF_SIZE = 24;
+import type {
+  StaticCrowdPresentation,
+  TrackBand,
+} from "../config/骨架/05-旁支/SYS-NPC/逻辑/types.js";
 
 function isInViewport(
   x: number,
   y: number,
   viewport: StaticCrowdViewport | undefined,
+  npcHalfSize: number,
 ): boolean {
   if (viewport === undefined) return true;
-  return x + NPC_HALF_SIZE >= viewport.left &&
-    x - NPC_HALF_SIZE <= viewport.left + viewport.width &&
-    y + NPC_HALF_SIZE >= viewport.top &&
-    y - NPC_HALF_SIZE <= viewport.top + viewport.height;
+  return x + npcHalfSize >= viewport.left &&
+    x - npcHalfSize <= viewport.left + viewport.width &&
+    y + npcHalfSize >= viewport.top &&
+    y - npcHalfSize <= viewport.top + viewport.height;
 }
 
 function staticCrowdRegionId(instanceId: string): string {
@@ -24,15 +29,11 @@ function staticCrowdRegionId(instanceId: string): string {
   return separator === -1 ? instanceId : instanceId.slice(0, separator);
 }
 
-function keepStaticCrowdOffTrack(x: number, y: number): { x: number; y: number } {
-  if (x < CROWD_TRACK_BAND.minX || x > CROWD_TRACK_BAND.maxX || y < CROWD_TRACK_BAND.minY || y > CROWD_TRACK_BAND.maxY) return { x, y };
-  return { x, y: y < (CROWD_TRACK_BAND.minY + CROWD_TRACK_BAND.maxY) / 2 ? CROWD_TRACK_BAND.minY - 1 : CROWD_TRACK_BAND.maxY + 1 };
+/** 铁轨带：静态路人踩进去会被弹到带外。带子从外面递进来，见 `trackBand` 那个选项。 */
+export function keepStaticCrowdOffTrack(x: number, y: number, trackBand: TrackBand): { x: number; y: number } {
+  if (x < trackBand.minX || x > trackBand.maxX || y < trackBand.minY || y > trackBand.maxY) return { x, y };
+  return { x, y: y < (trackBand.minY + trackBand.maxY) / 2 ? trackBand.minY - 1 : trackBand.maxY + 1 };
 }
-
-export const STATIC_CROWD_EXTRA_TEXTURES = Object.freeze([
-  "npc-man-beach", "npc-man-beach2", "npc-woman-beach", "npc-woman-beach2",
-  "npc_footballer_blue", "npc_footballer_red",
-] as const);
 
 export interface PhaserStaticCrowdLoaderLike {
   spritesheet(key: string, url: string, config: { readonly frameWidth: number; readonly frameHeight: number }): unknown;
@@ -49,14 +50,35 @@ export interface PhaserStaticCrowdSceneLike {
 }
 export interface PhaserStaticCrowdRuntimeOptions {
   readonly viewport: () => StaticCrowdViewport | undefined;
-  readonly viewportMargin?: number;
-  readonly disabledRegionIndexes?: readonly number[];
+  /** 46 个区域、三组贴图 key、哪几块不站人、各项调参——都来自 `config/`。 */
+  readonly crowd: {
+    readonly regions: readonly StaticCrowdRegion[];
+    readonly spritePools: StaticCrowdSpritePools;
+    readonly disabledRegionIndexes: readonly number[];
+    readonly tuning: StaticCrowdRuntimeTuning;
+  };
+  /** 「用哪些贴图、每帧切多大、判定视野的半宽、多久转一次头」——来自 `static-crowd-presentation.json`。 */
+  readonly presentation: StaticCrowdPresentation;
+  /**
+   * 铁轨带——来自 `route-crowd-presentation.json`。
+   *
+   * 为什么不放在上面那份里：**铁轨在哪儿是个世界事实，不是静态人群的属性**。
+   * 原先两个适配器各写了一份一模一样（400/1471/304/319）的常量，换校园挪了铁轨
+   * 只会改到一半。现在两份共读一处，改哪儿两边一起变。
+   */
+  readonly trackBand: TrackBand;
   readonly onError?: (reason: string) => void;
 }
 
-export function preloadStaticCrowdRuntimeAssets(loader: PhaserStaticCrowdLoaderLike): void {
-  for (const texture of STATIC_CROWD_EXTRA_TEXTURES) {
-    loader.spritesheet(texture, `/sprites/${texture}.webp`, { frameWidth: 48, frameHeight: 48 });
+export function preloadStaticCrowdRuntimeAssets(
+  loader: PhaserStaticCrowdLoaderLike,
+  presentation: StaticCrowdPresentation,
+): void {
+  for (const texture of presentation.extraTextures) {
+    loader.spritesheet(texture, `/sprites/${texture}.webp`, {
+      frameWidth: presentation.textureFrameWidth,
+      frameHeight: presentation.textureFrameHeight,
+    });
   }
 }
 
@@ -71,10 +93,10 @@ export class PhaserStaticCrowdRuntime {
 
   constructor(private readonly scene: PhaserStaticCrowdSceneLike, private readonly options: PhaserStaticCrowdRuntimeOptions) {
     this.core = new StaticCrowdRuntime({
-      ...(options.viewportMargin === undefined ? {} : { viewportMargin: options.viewportMargin }),
-      ...(options.disabledRegionIndexes === undefined ? {} : {
-        disabledRegionIndexes: options.disabledRegionIndexes,
-      }),
+      regions: options.crowd.regions,
+      spritePools: options.crowd.spritePools,
+      disabledRegionIndexes: options.crowd.disabledRegionIndexes,
+      tuning: options.crowd.tuning,
     });
   }
 
@@ -83,7 +105,8 @@ export class PhaserStaticCrowdRuntime {
 
   start(): boolean {
     if (this.shutdownState) return false;
-    const missing = ["npc-man", ...STATIC_CROWD_EXTRA_TEXTURES].find((key) => !this.scene.textures.exists(key));
+    const missing = [this.options.presentation.defaultTexture, ...this.options.presentation.extraTextures]
+      .find((key) => !this.scene.textures.exists(key));
     if (missing !== undefined) { this.options.onError?.(`missing-texture:${missing}`); return false; }
     const viewport = this.options.viewport();
     this.core.start(viewport);
@@ -96,7 +119,7 @@ export class PhaserStaticCrowdRuntime {
     const lookAroundChanged = now >= this.nextLookAroundAt;
     if (lookAroundChanged) {
       this.lookAroundStep += 1;
-      this.nextLookAroundAt = now + 1_000;
+      this.nextLookAroundAt = now + this.options.presentation.lookAroundIntervalMs;
       const candidates = [...this.sprites.keys()].sort();
       const count = Math.min(2 + this.lookAroundStep % 3, candidates.length);
       const start = candidates.length === 0 ? 0 : (this.lookAroundStep * 3) % candidates.length;
@@ -120,18 +143,20 @@ export class PhaserStaticCrowdRuntime {
     viewport: StaticCrowdViewport | undefined = this.options.viewport(),
   ): void {
     const instances = this.core.snapshot.instances;
+    const npcHalfSize = this.options.presentation.npcHalfSize;
+    const trackBand = this.options.trackBand;
     const byId = new Map(instances.map((item) => [item.id, item]));
     const readyRegionIds = new Set<string>();
     if (viewport !== undefined) {
       for (const item of instances) {
-        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y);
-        if (item.materialized && isInViewport(display.x, display.y, viewport)) {
+        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y, trackBand);
+        if (item.materialized && isInViewport(display.x, display.y, viewport, npcHalfSize)) {
           readyRegionIds.add(staticCrowdRegionId(item.id));
         }
       }
       for (const [id, sprite] of this.sprites) {
         const item = byId.get(id);
-        if (item !== undefined && isInViewport(sprite.x, sprite.y, viewport)) {
+        if (item !== undefined && isInViewport(sprite.x, sprite.y, viewport, npcHalfSize)) {
           readyRegionIds.add(staticCrowdRegionId(item.id));
         }
       }
@@ -143,18 +168,18 @@ export class PhaserStaticCrowdRuntime {
       let sprite = this.sprites.get(item.id);
       const isNew = sprite === undefined;
       const existingVisible = sprite !== undefined && isInViewport(
-        sprite.x, sprite.y, viewport);
+        sprite.x, sprite.y, viewport, npcHalfSize);
       if (!item.materialized && !existingVisible) continue;
       if (!isNew && viewport !== undefined && !existingVisible) continue;
       active.add(item.id);
       if (isNew) {
-        if (created >= 16 && !readyRegionIds.has(staticCrowdRegionId(item.id))) continue;
+        if (created >= this.options.presentation.maxCreatePerSync && !readyRegionIds.has(staticCrowdRegionId(item.id))) continue;
         sprite = this.scene.add.sprite(item.position.x, item.position.y, item.spriteKey);
         created += 1;
       }
       const readySprite = sprite!;
       if (item.materialized) {
-        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y);
+        const display = keepStaticCrowdOffTrack(item.position.x, item.position.y, trackBand);
         readySprite.x = display.x;
         readySprite.y = display.y;
         readySprite.setDepth(500 + display.y * .1);
@@ -168,7 +193,7 @@ export class PhaserStaticCrowdRuntime {
       this.sprites.set(item.id, readySprite);
     }
     for (const [id, sprite] of this.sprites) {
-      if (active.has(id) || isInViewport(sprite.x, sprite.y, viewport)) continue;
+      if (active.has(id) || isInViewport(sprite.x, sprite.y, viewport, npcHalfSize)) continue;
       sprite.destroy();
       this.sprites.delete(id);
     }

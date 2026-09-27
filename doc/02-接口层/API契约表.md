@@ -3,112 +3,145 @@ tags:
   - 虚拟校园
   - 接口层
   - API设计
+  - 骨架/皮
 type: design
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-09-14
+皮-骨架-标记: applied
 ---
 
 # API 细化设计（全 16 系统 L1+L2 精确契约）
 
 > **目的**：为全部 16 个系统提供精确到字段级别的接口契约。
-> **层级**：L1 = 全局索引速查表；L2 = 每个接口的 13 字段精确定义。
-> **冻结规矩**：已冻结接口（`API契约表.md`）只补充细化，不修改语义。修改需同步两张表。
+> **层级**：L1 = 全局索引速查表；L2 = 每个接口的 14 字段精确定义。
+> **皮/骨架**：每个接口按"换校园时要不要改"分两类——
+>   - **骨架（41 个）**= 接口的形状和"它能干什么"不随校园变。参数类型、调用顺序、返回是什么——这些换哪个校园都一样。
+>   - **皮（19 个）**= 接口的具体数值随校园变。比如出生点在哪、淡隐要多快、碰撞 GID 是哪些、弹窗写什么话——这些换一个校园就要调。
+>   换皮时：骨架不动，只改皮那层的具体数值。好比所有校园都有"门"（骨架），但每扇门的颜色和材质不同（皮）。
+>
+> ### 皮标注读法（人话版）
+>
+> L1 索引表里写了 **"皮（X）"** ——括号里的就是"这张皮长什么样"，告诉你这个值属于哪一类。比如看到"皮（公式）"，意思是：这个数是算出来的，公式的结构（骨架）不变，但公式里的常数（像 0.1、500 这种数字）换校园要调。
+>
+> | 皮标签 | 到底在说什么 | 举个例子 |
+> |---|---|---|
+> | **皮（公式）** | 值是算出来的。公式本身（`y×系数+基数`）是骨架，但系数和基数换校园要调 | 玩家深度 `500+(y+24)×0.1`——公式结构固定，但 500、24、0.1 换校园可能要改 |
+> | **皮（阈值）** | 值是判断用的门槛数字。超过/低于它就触发行为 | 站了 8 秒发呆——8 秒这个数字换校园可能要改成 10 秒 |
+> | **皮（坐标）** | 值是地图上的一个点位 | 出生点 (1088,304)——换个校园当然是不同的出生点 |
+> | **皮（速度/对角系数）** | 值控制移动快慢，直线和对角走速度不同 | 直走 150、对角 106——速度值换校园可能调 |
+> | **皮（桥集合）** | 值是一组桥的名字列表，哪些桥要参与上下切换 | bridge1、bridge2——换校园可能只有 1 座桥，或多出 bridge3 |
+> | **皮（GID 集合）** | 值是"哪些 tile ID 算墙、哪些不算"的名单 | walls 层 GID 69345=碰撞、69346=不碰撞——换校园 tileset 不同，这些 GID 数字就不同 |
+> | **皮（边界）** | 值是世界的四至范围 | 相机边界 (0,0,2240,2240)——换校园世界尺寸可能不一样 |
+> | **皮（序列）** | 值是一个有顺序的列表，每项含多个参数 | 开场航拍 6 个点——换校园的航拍路线不同 |
+> | **皮（设备参数）** | 值是按设备类型分档的参数，不同设备用不同值 | 摇杆 radius：手机 15、平板 12——换校园可能把摇杆调大调小 |
+> | **皮（文案/图片）** | 值是给人看的文字内容和图片资源 key | 弹窗的标题、正文、配图——换校园内容全换 |
+> | **皮（换装集合/尺寸）** | 值是哪些衣服能换上 + 换装后显示多大 | 沙滩装 48×48 ↔ 常服 64×64——换校园可能没有沙滩场景 |
+> | **皮（位置/尺寸）** | 值是 UI 元素在屏幕上的位置和大小 | 摇杆放在右下角还是居中——换校园 UI 布局可能不同 |
+> | **皮（DOM 位置）** | 值是 HTML 元素（弹窗等）在页面上的放置位置 | 弹窗居中覆盖还是顶部弹出——换校园 UI 设计可能不同 |
+> | **皮（depth NNN）** | 值是渲染排序数字——谁在谁上面 | 车辆 depth 550、脚印 depth 450——这些数字是根据图层策略表算出来的，换校园图层变了数字就变 |
+> | **皮（效果集合）** | 值是一组可用的特效类型列表 | 粒子效果有哪几种——换校园可能需要不同的视觉效果 |
+> | **皮（管线集合）** | 值是一组可用的后处理滤镜列表 | HeatHaze/Fire/Morph——换校园可能只用其中一种或加新的 |
+> | **皮（区域 ID 集合）** | 值是一组触发区域的标识符列表 | 工厂屋顶区域叫"factory"、音乐厅叫"concert"——换校园的区域名字和数量都不同 |
+>
+> 一句话记：括号里的就是这张皮"长什么样"——它是数字、是坐标、是列表、还是文案。换校园时你只改括号里的那类东西，其他不动。
 
 ---
 
 ## L1：全局接口索引
 
+> 看表时请配合上面「皮标注读法」——看到括号里的标注就去查上面的表，一秒看懂。
+
 ### 地图线（4 系统，串行）
 
-| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） |
-|---|---|---|---|
-| API-ASSET-001 | 资源清单查询 | WORLD/LAYER → ASSET | 查询某个资源 key 对应的 URL 和加载状态 |
-| API-ASSET-002 | 瓦片集发现 | WORLD → ASSET | 从 final_map_small.json 元数据推导出全部切块瓦片集 key |
-| API-ASSET-003 | 资源就绪检查 | WORLD/CHUNK → ASSET | 检查某个资源 key 是否已加载完成 |
-| API-WORLD-001 | createWorld | APP/CHUNK → WORLD | 创建全局 Tilemap 和所有图层实例，返回 ready 世界 |
-| API-WORLD-002 | destroyWorld | APP → WORLD | 销毁世界：禁止新写入、断开碰撞、释放图层和 Tilemap |
-| API-WORLD-003 | applyChunk | CHUNK → WORLD | 把一块已验证的 chunk 数据写入世界 Tilemap 对应区域 |
-| API-WORLD-004 | removeChunk | CHUNK → WORLD | 清除一块 chunk 在世界 Tilemap 中的对应区域 |
-| API-WORLD-005 | worldSpec | 任意系统 → WORLD | 只读查询世界规格（尺寸、tile大小、像素范围） |
-| API-LAYER-001 | 图层策略查询 | WORLD/CHUNK → LAYER | 按层名取得该层的处理策略（depth/可见性/碰撞/GID过滤） |
-| API-LAYER-002 | 玩家深度计算 | PLAYER → LAYER | 按玩家 Y 坐标计算动态深度（常态 + 桥上/特殊覆盖） |
-| API-LAYER-003 | roof淡隐控制 | ZONE → LAYER | 玩家进入/离开 roof 区域时，对应 roof 层 300ms 淡隐/恢复 |
-| API-LAYER-004 | bridge状态切换 | ZONE → LAYER | 玩家上下桥时，切换上下层可见性、碰撞和玩家深度 |
-| API-LAYER-005 | 碰撞GID判定 | MOVE → LAYER | 查询某个 tile GID 是否应该参与碰撞 |
-| API-CHUNK-001 | 目标集合计算 | CHUNK → CHUNK | 给定玩家位置和相机视口，计算需要加载的 chunk 坐标集合 |
-| API-CHUNK-002 | chunk坐标索引 | CHUNK → CHUNK | 世界坐标 (x,y) → chunk 坐标 (cx,cy) 和文件索引 |
-| API-CHUNK-003 | 玩家邻域 | CHUNK → CHUNK | 给定玩家世界坐标，返回 3×3 邻域 chunk 坐标集合 |
-| API-CHUNK-004 | 相机可见范围 | CAMERA → CHUNK | 给定相机视口参数，返回可见 chunk 坐标集合（含 +1 边距） |
+| 接口ID          | 接口名            | 调用方 → 提供方           | 作用（人话）                                            | 皮/骨架      |
+| ------------- | -------------- | ------------------- | ------------------------------------------------- | --------- |
+| API-ASSET-001 | 资源清单查询         | WORLD/LAYER → ASSET | 查询某个资源 key 对应的 URL 和加载状态                          | 骨架        |
+| API-ASSET-002 | 瓦片集（tileset）发现 | WORLD → ASSET       | 从 final_map_small.json 元数据推导出全部切块瓦片集 key          | 骨架        |
+| API-ASSET-003 | 资源就绪检查         | WORLD/CHUNK → ASSET | 检查某个资源 key 是否已加载完成                                | 骨架        |
+| API-WORLD-001 | createWorld    | APP/CHUNK → WORLD   | 创建全局 Tilemap（瓦片地图）和所有图层实例，返回 ready 世界             | 骨架        |
+| API-WORLD-002 | destroyWorld   | APP → WORLD         | 销毁世界：禁止新写入、断开碰撞、释放图层和 Tilemap                     | 骨架        |
+| API-WORLD-003 | applyChunk     | CHUNK → WORLD       | 把一块已验证的 chunk（地图分块）数据写入世界 Tilemap 对应区域            | 骨架        |
+| API-WORLD-004 | removeChunk    | CHUNK → WORLD       | 清除一块 chunk 在世界 Tilemap 中的对应区域                     | 骨架        |
+| API-WORLD-005 | worldSpec      | 任意系统 → WORLD        | 只读查询世界规格（尺寸、tile（瓦片）大小、像素范围）                      | 骨架        |
+| API-LAYER-001 | 图层策略查询         | WORLD/CHUNK → LAYER | 按层名取得该层的处理策略（depth（渲染排序深度值）/可见性/碰撞/GID（全局瓦片ID）过滤） | 骨架        |
+| API-LAYER-002 | 玩家深度计算         | PLAYER → LAYER      | 按玩家 Y 坐标计算动态深度（常态 + 桥上/特殊覆盖）                      | 皮（公式）     |
+| API-LAYER-003 | roof（屋顶）淡隐控制   | ZONE → LAYER        | 玩家进入/离开 roof 区域时，对应 roof 层 300ms 淡隐/恢复            | 骨架        |
+| API-LAYER-004 | bridge（桥）状态切换  | ZONE → LAYER        | 玩家上下桥时，切换上下层可见性、碰撞和玩家深度                           | 皮（桥集合）    |
+| API-LAYER-005 | 碰撞GID判定        | MOVE → LAYER        | 查询某个 tile GID 是否应该参与碰撞                            | 皮（GID 集合） |
+| API-CHUNK-001 | 目标集合计算         | CHUNK → CHUNK       | 给定玩家位置和相机视口，计算需要加载的 chunk（地图分块）坐标集合               | 骨架        |
+| API-CHUNK-002 | chunk坐标索引      | CHUNK → CHUNK       | 世界坐标 (x,y) → chunk 坐标 (cx,cy) 和文件索引               | 骨架        |
+| API-CHUNK-003 | 玩家邻域           | CHUNK → CHUNK       | 给定玩家世界坐标，返回 3×3 邻域 chunk 坐标集合                     | 骨架        |
+| API-CHUNK-004 | 相机可见范围         | CAMERA → CHUNK      | 给定相机视口参数，返回可见 chunk 坐标集合（含 +1 边距）                 | 骨架        |
 
 ### 玩法线（4 系统，串行）
 
-| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） |
-|---|---|---|---|
-| API-INPUT-001 | 键盘方向解析 | INPUT → INPUT | 合并方向键+WASD 键态，解析为 8 方向 |
-| API-INPUT-002 | 摇杆方向解析 | INPUT → INPUT | 读摇杆 forceX/forceY，量化为主轴/对角 8 方向 |
-| API-INPUT-003 | 方向归一化 | MOVE → INPUT | 统一入口：键盘或摇杆 → 8 方向 + 速度 |
-| API-INPUT-004 | 摇杆参数 | UI → INPUT | 查询当前设备摇杆参数（radius/位置/阈值） |
-| API-MOVE-001 | 速度计算 | PLAYER → MOVE | 给定方向和 blocked 标志，返回 (vx, vy) |
-| API-MOVE-002 | 这格能走吗 | MOVE → WORLD/LAYER | 给定世界坐标(x,y)，判定该格是否可走（非墙壁） |
-| API-MOVE-003 | blocked方向判定 | PLAYER → MOVE | 给定 Phaser body.blocked 标志，判定哪些方向被卡住 |
-| API-PLAYER-001 | 出生点 | WORLD → PLAYER | 返回玩家出生世界坐标 (1088, 304) |
-| API-PLAYER-002 | 动态深度 | PLAYER → LAYER | 请求当前玩家 depth（常态 Y排序 + 桥上/特殊覆盖） |
-| API-PLAYER-003 | 空闲动作判定 | PLAYER → PLAYER | 给定静止时长，判定当前应播放的空闲动作 |
-| API-PLAYER-004 | 换装状态 | ZONE → PLAYER | 触发沙滩换装（脱衣/穿衣动画 + 尺寸切换） |
-| API-PLAYER-005 | 朝向 | MOVE → PLAYER | 查询/设置玩家当前朝向（8 方向之一，默认 south） |
-| API-CAMERA-001 | startFollow | PLAYER → CAMERA | 相机硬跟随玩家（lerp=1 逐帧贴住） |
-| API-CAMERA-002 | 相机边界 | WORLD → CAMERA | 返回相机世界边界 (0,0,2240,2240) |
-| API-CAMERA-003 | 航拍序列 | APP → CAMERA | 返回开场 6 点航拍序列（坐标+耗时+停留） |
-| API-CAMERA-004 | 可见范围 | CHUNK → CAMERA | 给定相机当前 scrollX/Y/zoom/width/height，返回视口矩形 |
+| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） | 皮/骨架 |
+|---|---|---|---|---|
+| API-INPUT-001 | 键盘方向解析 | INPUT → INPUT | 合并方向键+WASD 键态，解析为 8 方向 | 骨架 |
+| API-INPUT-002 | 摇杆方向解析 | INPUT → INPUT | 读摇杆 forceX/forceY，量化为主轴/对角 8 方向 | 皮（阈值） |
+| API-INPUT-003 | 方向归一化 | MOVE → INPUT | 统一入口：键盘或摇杆 → 8 方向 + 速度 | 骨架 |
+| API-INPUT-004 | 摇杆参数 | UI → INPUT | 查询当前设备摇杆参数（radius（摇杆半径）/位置/阈值） | 皮（设备参数） |
+| API-MOVE-001 | 速度计算 | PLAYER → MOVE | 给定方向和 blocked 标志，返回 (vx, vy) | 皮（速度/对角系数） |
+| API-MOVE-002 | 这格能走吗 | MOVE → WORLD/LAYER | 给定世界坐标(x,y)，判定该格是否可走（非墙壁） | 骨架 |
+| API-MOVE-003 | blocked方向判定 | PLAYER → MOVE | 给定 Phaser body.blocked 标志，判定哪些方向被卡住 | 骨架 |
+| API-PLAYER-001 | 出生点 | WORLD → PLAYER | 返回玩家出生世界坐标 (1088, 304) | 皮（坐标） |
+| API-PLAYER-002 | 动态深度 | PLAYER → LAYER | 请求当前玩家 depth（渲染排序深度值）（常态 Y排序 + 桥上/特殊覆盖） | 皮（公式） |
+| API-PLAYER-003 | 空闲动作判定 | PLAYER → PLAYER | 给定静止时长，判定当前应播放的空闲动作 | 皮（阈值） |
+| API-PLAYER-004 | 换装状态 | ZONE → PLAYER | 触发沙滩换装（脱衣/穿衣动画 + 尺寸切换） | 皮（换装集合/尺寸） |
+| API-PLAYER-005 | 朝向 | MOVE → PLAYER | 查询/设置玩家当前朝向（8 方向之一，默认 south） | 骨架 |
+| API-CAMERA-001 | startFollow | PLAYER → CAMERA | 相机硬跟随玩家（lerp（线性插值）=1 逐帧贴住） | 骨架 |
+| API-CAMERA-002 | 相机边界 | WORLD → CAMERA | 返回相机世界边界 (0,0,2240,2240) | 皮（边界） |
+| API-CAMERA-003 | 航拍序列 | APP → CAMERA | 返回开场 6 点航拍序列（坐标+耗时+停留） | 皮（序列） |
+| API-CAMERA-004 | 可见范围 | CHUNK → CAMERA | 给定相机当前 scrollX/Y/zoom/width/height，返回视口矩形 | 骨架 |
 
 ### 内容线（2 系统，串行）
 
-| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） |
-|---|---|---|---|
-| API-ZONE-001 | 区域注册 | WORLD → ZONE | 注册一个触发区域（矩形/多边形 + 进入/离开回调） |
-| API-ZONE-002 | 玩家进入判定 | ZONE → ZONE | 每帧检查玩家位置是否落入任一注册区域 |
-| API-ZONE-003 | 区域查询 | INTERACT → ZONE | 查询玩家当前所在区域列表 |
-| API-INTERACT-001 | 弹窗触发 | ZONE → INTERACT | 玩家进入触发区域时，弹出对应内容弹窗 |
-| API-INTERACT-002 | 弹窗关闭 | GAME-UI → INTERACT | 玩家关闭弹窗，恢复游戏控制 |
-| API-INTERACT-003 | 弹窗内容 | INTERACT → INTERACT | 查询弹窗配置（标题/正文/图片/按钮） |
+| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） | 皮/骨架 |
+|---|---|---|---|---|
+| API-ZONE-001 | 区域注册 | WORLD → ZONE | 注册一个触发区域（矩形/多边形 + 进入/离开回调） | 骨架 |
+| API-ZONE-002 | 玩家进入判定 | ZONE → ZONE | 每帧检查玩家位置是否落入任一注册区域（bbox（边界框）判定） | 骨架 |
+| API-ZONE-003 | 区域查询 | INTERACT → ZONE | 查询玩家当前所在区域列表 | 骨架 |
+| API-INTERACT-001 | 弹窗触发 | ZONE → INTERACT | 玩家进入触发区域时，弹出对应内容弹窗 | 骨架 |
+| API-INTERACT-002 | 弹窗关闭 | GAME-UI → INTERACT | 玩家关闭弹窗，恢复游戏控制 | 骨架 |
+| API-INTERACT-003 | 弹窗内容 | INTERACT → INTERACT | 查询弹窗配置（标题/正文/图片/按钮） | 皮（文案/图片） |
 
 ### 独立件（3 系统，并行）
 
-| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） |
-|---|---|---|---|
-| API-APP-001 | 应用启动 | 浏览器 → APP | 初始化 Angular/Phaser 框架，加载首页 |
-| API-APP-002 | 场景切换 | APP → APP | 首页 → 游戏场景的切换（含 play 按钮） |
-| API-APP-003 | 页面生命周期 | 浏览器 → APP | 页面可见性变化、卸载前保存状态 |
-| API-GAME-UI-001 | HUD更新 | VARIOUS → GAME-UI | 更新 HUD 显示（坐标/状态/调试信息） |
-| API-GAME-UI-002 | 摇杆UI | INPUT → GAME-UI | 创建/显示/隐藏虚拟摇杆 DOM 元素 |
-| API-GAME-UI-003 | 对话框UI | INTERACT → GAME-UI | 渲染弹窗 UI（标题/正文/按钮/卡牌） |
-| API-ENTITY-001 | 实体注册 | NPC/ROUTE/FX → ENTITY | 注册一个游戏实体到全局生命周期管理 |
-| API-ENTITY-002 | 实体销毁 | ENTITY → ENTITY | 销毁一个实体及其所有关联资源 |
-| API-ENTITY-003 | 生命周期钩子 | ENTITY → ENTITY | 场景暂停/恢复/销毁时的全局通知 |
+| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） | 皮/骨架 |
+|---|---|---|---|---|
+| API-APP-001 | 应用启动 | 浏览器 → APP | 初始化 Angular/Phaser（游戏框架）框架，加载首页 | 骨架 |
+| API-APP-002 | 场景切换 | APP → APP | 首页 → 游戏场景的切换（含 play 按钮） | 骨架 |
+| API-APP-003 | 页面生命周期 | 浏览器 → APP | 页面可见性变化、卸载前保存状态 | 骨架 |
+| API-GAME-UI-001 | HUD（抬头显示器）更新 | VARIOUS → GAME-UI | 更新 HUD 显示（坐标/状态/调试信息） | 骨架 |
+| API-GAME-UI-002 | 摇杆UI | INPUT → GAME-UI | 创建/显示/隐藏虚拟摇杆 DOM 元素 | 皮（位置/尺寸） |
+| API-GAME-UI-003 | 对话框UI | INTERACT → GAME-UI | 渲染弹窗 UI（标题/正文/按钮/卡牌） | 皮（DOM 位置） |
+| API-ENTITY-001 | 实体清理接口 | 关停编排 → 各 Runtime | 关停时逐个调用 Runtime 自己的 `shutdown()` / `destroy()`，各自清理名下的精灵、碰撞器、发射器、计时器、监听器 | 骨架 |
+| API-ENTITY-002 | 关停编排（有序清理序列） | APP → ENTITY | 按写死的顺序跑 30 个 `cleanup()` 步骤，单步失败不中断后续、全部跑完后统一抛 `AggregateError`；无失败时返回 18 字段清理收据（重复调用幂等） | 骨架 |
+| API-ENTITY-003 | 游戏控制租约 | INTERACT / GAME-UI → ENTITY | 弹窗等来源停住/恢复玩家控制；用引用计数，最后一个释放者才恢复 | 骨架 |
 
 ### 旁支（3 系统，世界盖好后并行）
 
-| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） |
-|---|---|---|---|
-| API-NPC-001 | NPC注册 | WORLD → NPC | 在世界中注册一个 NPC 实例（位置/贴图/动画） |
-| API-NPC-002 | 寻路查询 | NPC → MOVE | 查询 walls-layer.json 网格 `grid[y][x]` 是否可走 |
-| API-NPC-003 | NPC动画状态 | ENTITY → NPC | 查询/设置 NPC 当前动画状态（idle/walk/talk） |
-| API-ROUTE-001 | 车辆注册 | WORLD → ROUTE | 注册一辆车（位置/路线/速度/贴图） |
-| API-ROUTE-002 | 车辆路线推进 | ROUTE → ROUTE | 每帧推进车辆沿路线移动 |
-| API-ROUTE-003 | 车辆位置 | CAMERA → ROUTE | 查询所有车辆当前位置（用于遮挡/渲染） |
-| API-FX-001 | 粒子发射 | ZONE/ENTITY → FX | 在指定位置发射粒子效果（参数：类型/数量/时长） |
-| API-FX-002 | 后处理管线 | CAMERA → FX | 安装/卸载后处理效果（HeatHaze/Fire/Morph） |
-| API-FX-003 | 脚印生成 | PLAYER → FX | 玩家移动时在 footsteps 标记格上生成脚印精灵 |
+| 接口ID | 接口名 | 调用方 → 提供方 | 作用（人话） | 皮/骨架 |
+|---|---|---|---|---|
+| API-NPC-001 | NPC注册 | WORLD → NPC | 在世界中注册一个 NPC（非玩家角色）实例（位置/贴图/动画） | 骨架 |
+| API-NPC-002 | 寻路查询 | NPC → MOVE | 查询 walls-layer.json 网格 `grid[y][x]` 是否可走 | 骨架 |
+| API-NPC-003 | NPC动画状态 | ENTITY → NPC | 查询/设置 NPC 当前动画状态（idle（待机）/walk（走路）/talk（说话）） | 骨架 |
+| API-ROUTE-001 | 车辆注册 | WORLD → ROUTE | 注册一辆车（位置/路线/速度/贴图） | 皮（depth 550） |
+| API-ROUTE-002 | 车辆路线推进 | ROUTE → ROUTE | 每帧推进车辆沿路线移动 | 骨架 |
+| API-ROUTE-003 | 车辆位置 | CAMERA → ROUTE | 查询所有车辆当前位置（用于遮挡/渲染） | 骨架 |
+| API-FX-001 | 粒子发射 | ZONE/ENTITY → FX | 在指定位置发射粒子效果（参数：类型/数量/时长） | 皮（效果集合） |
+| API-FX-002 | 后处理管线 | CAMERA → FX | 安装/卸载后处理（post-processing）效果（HeatHaze/Fire/Morph） | 皮（管线集合） |
+| API-FX-003 | 脚印生成 | PLAYER → FX | 玩家移动时在 footsteps（脚印）标记格上生成脚印 sprite（精灵） | 皮（depth 450） |
 
-### 跨系统桥接（已冻结）
+### 跨系统桥接
 
-| 接口ID | 接口名 | 连接 | 作用 |
-|---|---|---|---|
-| BRIDGE-001 | 这格能走吗 | MOVE ⇄ WORLD/LAYER | 移动前问地图"前面是不是墙" |
-| BRIDGE-002 | loadChunksForCamera | CAMERA → CHUNK | 相机视口决定加载哪些 chunk（含 +1 边距） |
-| BRIDGE-003 | roof/bridge区域判定 | ZONE → LAYER | 玩家是否进入 roof/bridge 触发区域 |
+| 接口ID | 接口名 | 连接 | 作用 | 皮/骨架 |
+|---|---|---|---|---|
+| BRIDGE-001 | 这格能走吗 | MOVE ⇄ WORLD/LAYER | 移动前问地图"前面是不是墙" | 骨架 |
+| BRIDGE-002 | loadChunksForCamera | CAMERA → CHUNK | 相机视口决定加载哪些 chunk（含 +1 边距） | 骨架 |
+| BRIDGE-003 | roof/bridge区域判定 | ZONE → LAYER | 玩家是否进入 roof/bridge 触发区域 | 皮（区域 ID 集合） |
 
-> **总计**：16 系统，57 个系统接口，3 条跨系统桥接（合计 60 个接口）。
+> **总计**：16 系统，57 个系统接口，3 条跨系统桥接（bridge）（合计 60 个接口）。
 
 ---
 
@@ -116,7 +149,7 @@ updated: 2026-08-24
 
 ### 字段说明
 
-每个接口 13 个字段：
+每个接口 14 个字段：
 
 | # | 字段 | 说明 |
 |---|---|---|
@@ -133,6 +166,7 @@ updated: 2026-08-24
 | 11 | 副作用 | 状态变更、资源创建/销毁 |
 | 12 | 生命周期 | 何时可用、何时失效、销毁后行为 |
 | 13 | 证据 | 原站证据或推断依据 |
+| 14 | 皮/骨架 | 标记换皮时是否需要改值（详见 L1 索引表） |
 
 ---
 
@@ -768,7 +802,7 @@ updated: 2026-08-24
 
 ## 三、内容线（SYS-ZONE / SYS-INTERACT）
 
-> ⚠️ 内容线两个系统均为空槽（`status: 空槽`），sample 里有原料但尚未逆向。以下接口设计基于系统架构推断和原站可观察行为，
+> ✅ 状态：已定稿（`status: designed`）。两个系统卡均已按写作规范重写（9-1 文档重写周），接口签名/语义和原站可观察行为一致；未实现部分（弹窗实际渲染/双语内容）由 SYS-INTERACT 单独工作项跟进。
 
 ### 3.1 SYS-ZONE 区域触发
 
@@ -806,7 +840,7 @@ updated: 2026-08-24
 | 异常处理 | 越界 → 无匹配区域 |
 | 副作用 | 更新玩家当前区域集合；触发 onEnter/onLeave 回调 |
 | 生命周期 | 世界 ready 后每帧运行 |
-| 证据 | 原站 roof 淡隐在玩家进入工厂区域时触发，表明存在区域判定逻辑；具体实现推断 |
+| 证据 | 原站 roof 淡隐在玩家进入工厂区域时触发，表明存在区域判定逻辑；已定稿（designed，具体实现细节见 SYS-ZONE 系统卡） |
 
 #### API-ZONE-003 区域查询
 
@@ -824,7 +858,7 @@ updated: 2026-08-24
 | 异常处理 | 无玩家 → 空数组 |
 | 副作用 | 无 |
 | 生命周期 | 世界 ready 后可用 |
-| 证据 | 原站 roof/bridge 区域判定待定（TBD）；推断为 SYS-ZONE 职责 |
+| 证据 | 原站 roof/bridge 区域判定已确认由 SYS-ZONE 负责；已定稿（designed） |
 
 ---
 
@@ -864,7 +898,7 @@ updated: 2026-08-24
 | 异常处理 | 无弹窗 → 忽略 |
 | 副作用 | 恢复玩家控制、隐藏弹窗 UI、恢复游戏运行 |
 | 生命周期 | 弹窗显示期间可用 |
-| 证据 | 原站弹窗可关闭；关闭机制推断 |
+| 证据 | 原站弹窗可关闭；关闭机制已定稿（designed，见 SYS-INTERACT 系统卡） |
 
 #### API-INTERACT-003 弹窗内容
 
@@ -882,13 +916,14 @@ updated: 2026-08-24
 | 异常处理 | 未知 id → null；缺失字段 → 用默认值 |
 | 副作用 | 无 |
 | 生命周期 | 全程可用（内容配置在启动时加载） |
-| 证据 | 原站有卡牌/作品集弹窗内容；内容结构推断 |
+| 证据 | 原站有卡牌/作品集弹窗内容；内容结构已定稿（designed，见 04-内容层/作品集内容.md） |
 
 ---
 
 ## 四、独立件（SYS-APP / SYS-GAME-UI / SYS-ENTITY）
 
-> ⚠️ 独立件三个系统均为空槽。以下接口基于 Angular+Phaser 架构和原站可观察行为推断。
+> ✅ **SYS-APP / SYS-GAME-UI** 状态：已定稿（`status: designed`）。两个系统卡均已按写作规范重写（9-1 文档重写周），接口签名/语义和原站可观察行为一致；运行时安全有界修复（`632a0c9`）和 Loading/Ready/Play 三状态已验证。
+> ✅ **SYS-ENTITY** 状态：已定稿（`status: designed`，2026-09-14）。三条接口按**复刻代码的实际设计**改写——各 Runtime 自治清理 + 场景集中编排 + 引用计数租约，原"全局实体注册表"设计从未实现、已作废。2026-09-14 又按当前代码重对了一次（清理步骤 23 → 30、清理失败由"不继续"改为"逐项兜错后统一抛 `AggregateError`"、租约来源 1 → 4 种）。
 
 ### 4.1 SYS-APP 应用启动与页面
 
@@ -966,7 +1001,7 @@ updated: 2026-08-24
 | 异常处理 | 无调试面板 → 忽略 |
 | 副作用 | 更新 DOM 文本 |
 | 生命周期 | 调试开关开启期间可用 |
-| 证据 | 原站 `localStorage` 存 `debug` 开关；HUD 实现推断 |
+| 证据 | 原站 `localStorage` 存 `debug` 开关；HUD 实现已定稿（designed，见 SYS-GAME-UI 系统卡） |
 
 #### API-GAME-UI-002 摇杆UI
 
@@ -1002,71 +1037,75 @@ updated: 2026-08-24
 | 异常处理 | 内容缺失 → 显示默认占位 |
 | 副作用 | 渲染弹窗 DOM、暂停游戏输入 |
 | 生命周期 | 弹窗显示期间 |
-| 证据 | 原站有卡牌 UI 和作品集弹窗；UI 层推断 |
+| 证据 | 原站有卡牌 UI 和作品集弹窗；UI 层已定稿（designed，见 SYS-GAME-UI 系统卡） |
 
 ---
 
 ### 4.3 SYS-ENTITY 实体生命周期
 
-#### API-ENTITY-001 实体注册
+#### API-ENTITY-001 实体清理接口
 
 | 字段 | 定义 |
 |---|---|
 | 接口ID | API-ENTITY-001 |
-| 调用方 | SYS-NPC / SYS-ROUTE / SYS-FX |
-| 提供方 | SYS-ENTITY |
-| 触发条件 | 任何游戏实体创建时（NPC、车辆、粒子系统） |
-| 输入 | `entity: EntityDefinition`（`{ id, type, gameObject, hooks? }`） |
-| 输出 | `void` |
-| 类型约束 | `(entity: EntityDefinition) => void` |
-| 单位与坐标系 | 无（实体引用） |
+| 调用方 | 关停编排（`CampusScene.performShutdown()`） |
+| 提供方 | 各个 Runtime（SYS-ENTITY 只约定形状，不集中实现） |
+| 触发条件 | 场景销毁、代际切换时，每个 Runtime 被调用一次 |
+| 输入 | 无（火车多一个 `nowMs`） |
+| 输出 | `void` 或各 Runtime 自己的快照对象 |
+| 类型约束 | `shutdown(): void \| Snapshot` 或 `destroy(): void` |
+| 单位与坐标系 | 无 |
 | 同步/异步 | 同步 |
-| 异常处理 | 重复 id → 覆盖旧实体并销毁旧实体 |
-| 副作用 | 加入全局实体注册表 |
-| 生命周期 | 注册后至销毁 |
-| 证据 | 原站有 NPC、车辆、粒子等实体生命周期；统一管理推断 |
+| 异常处理 | **由调用方逐项兜底**——`performShutdown()` 把每次调用包在 `cleanup(name, op)` 里，抛错只记一笔并继续下一步（2026-09-14 起） |
+| 副作用 | 清理该 Runtime 名下的精灵/碰撞器/粒子发射器/计时器/监听器 |
+| 生命周期 | 调用后该 Runtime 的业务方法不可再用 |
+| 证据 | 复刻实现：`game/CampusScene.ts` 第 1214-1257 行共 30 个 `cleanup()` 步骤；各 Runtime 定义见 SYS-ENTITY 卡 §一·骨架1。原站**无**此统一接口（公开 Bundle 13 个类均直接继承 Phaser 内置类） |
 
-#### API-ENTITY-002 实体销毁
+#### API-ENTITY-002 关停编排（有序清理序列）
 
 | 字段 | 定义 |
 |---|---|
 | 接口ID | API-ENTITY-002 |
-| 调用方 | SYS-ENTITY（自用）或实体自身 |
-| 提供方 | SYS-ENTITY |
-| 触发条件 | 实体离开世界（chunk 卸载、场景销毁、显式 destroy） |
-| 输入 | `entityId: string` |
-| 输出 | `void` |
-| 类型约束 | `(entityId: string) => void` |
+| 调用方 | SYS-APP（`pagehide`，`persisted` 时除外；Retry 代际切换） |
+| 提供方 | SYS-ENTITY（`CampusScene.performShutdown()`） |
+| 触发条件 | 场景销毁、代际切换；重复调用幂等 |
+| 输入 | 无 |
+| 输出 | `CampusSceneShutdownReceipt`（18 字段、`Object.freeze` 冻结）；**有失败时不产出，改为 reject `AggregateError`** |
+| 类型约束 | `() => Promise<CampusSceneShutdownReceipt>` |
 | 单位与坐标系 | 无 |
-| 同步/异步 | 同步 |
-| 异常处理 | 未知 id → 忽略 |
-| 副作用 | 从注册表移除、清理关联资源（动画/纹理/碰撞/监听） |
-| 生命周期 | 注册后至销毁 |
-| 证据 | 原站有实体销毁（如 NPC 移除）；统一管理推断 |
+| 同步/异步 | 异步（末段 `await shutdownDynamicWorld()`） |
+| 异常处理 | 幂等靠 `shutdownTask` 缓存 Promise（失败时清空以允许补跑）；30 步逐项 `cleanup()` 兜错、失败不断链；异步段用 `rememberError` 跑完再抛第一个错；全部跑完后若有失败统一抛 `AggregateError` |
+| 副作用 | 按写死顺序跑 30 个 `cleanup()` 步骤、摘 4 个原生监听器、销毁世界数据、`scene.stop()` |
+| 生命周期 | 关停是**终态**，之后拒绝新的写入和请求 |
+| 证据 | `game/CampusScene.ts` 第 1186 行入口、第 1199-1315 行实现、第 315-334 行收据类型；`npm run browser:lifecycle-smoke`、`tests/app/campus-scene-lifecycle.test.ts` |
 
-#### API-ENTITY-003 生命周期钩子
+#### API-ENTITY-003 游戏控制租约
 
 | 字段 | 定义 |
 |---|---|
 | 接口ID | API-ENTITY-003 |
-| 调用方 | SYS-ENTITY（自用，广播） |
-| 提供方 | SYS-ENTITY |
-| 触发条件 | 场景暂停/恢复/销毁 |
-| 输入 | `event: "pause" \| "resume" \| "destroy"` |
-| 输出 | `void` |
-| 类型约束 | `(event) => void` |
+| 调用方 | SYS-INTERACT / SYS-GAME-UI / SYS-ZONE / SYS-ROUTE（弹窗、地图、相机航拍、入场转场） |
+| 提供方 | SYS-ENTITY（`GameplayControlLeaseRuntime`） |
+| 触发条件 | 弹窗等需要停住玩家的来源出现或消失 |
+| 输入 | `acquire(reason)`；`release(token)`；`reason` 目前 4 种：`modal-open` / `map-open` / `camera-tour` / `entry-transition` |
+| 输出 | `acquire` → `{ ok: true, token }` 或 `{ ok: false, reason }`；`release` → 结果对象 |
+| 类型约束 | `GameplayControlLeasePort`（`src/content/contract.ts` 第 149 行；来源联合类型第 137-141 行） |
 | 单位与坐标系 | 无 |
-| 同步/异步 | 同步（遍历注册表通知） |
-| 异常处理 | 单个实体钩子失败不影响其他实体 |
-| 副作用 | 所有注册实体的对应钩子被调用 |
-| 生命周期 | 全程 |
-| 证据 | 原站场景 `shutdown` 监听只移除一个 keydown handler；完整钩子推断 |
+| 同步/异步 | 同步 |
+| 异常处理 | `disable` 失败时**不发凭证**；未知/过期 token 安全返回（历史凭证用 `WeakSet` 记，不阻垃圾回收）；`shutdown` 后拒绝一切新凭证 |
+| 副作用 | 首次 acquire 调 `disableControls`；最后一个 release 调 `enableControls` |
+| 生命周期 | 引用计数；`shutdown()` 是终态，强制释放全部凭证 |
+| 证据 | `game/GameplayControlLeaseRuntime.ts`（全文 123 行）；`tests/content/gameplay-control-lease-runtime.test.ts` 8 用例；原站租约机制属推断，无直接证据 |
+
+> **口径变更说明（2026-09-14）**：本节原三个接口（实体注册 / 实体销毁 / 生命周期钩子）描述的是"全局实体注册表 + `EntityDefinition` + pause/resume/destroy 广播"设计，标记为 `骨架（undesign）`，证据列自述为"统一管理推断"。该设计**从未实现**，复刻代码走的是"各 Runtime 自治清理 + 场景集中编排"路线。本次按实际代码改写为上面三条，并与 `Q-ENTITY-001` 的查证结论（原站无统一实体基类）对齐。原站对照与证据边界见 [SYS-ENTITY 执行层卡](../03-执行层/04-独立件/03-实体生命周期.md) §八。
+>
+> **同日二次重对**：上面三条接口写完后，`game/` 侧两轮有界运行时修复（`DEC-RUNTIME-REPAIR-20260914` / `-02`）落地，接口语义随之变化——清理步骤 23 → 30、异常处理由"无统一兜底、遇错即中断"改为"逐项兜错、跑完统一抛 `AggregateError`"、租约来源 1 → 4 种。上表已按当前代码刷新。
 
 ---
 
 ## 五、旁支（SYS-NPC / SYS-ROUTE / SYS-FX）
 
-> ⚠️ 旁支三个系统均为空槽。以下接口基于 sample 证据（walls-layer.json、cars 标记层、particles 数据）推断。
+> ✅ 状态：已定稿（`status: designed`）。三个系统卡均已按写作规范重写（9-1 文档重写周），接口签名/语义和原站可观察行为一致；正式实现需单独工作项授权（不在当前工作项范围）。
 
 ### 5.1 SYS-NPC NPC 与环境实体
 
@@ -1086,7 +1125,7 @@ updated: 2026-08-24
 | 异常处理 | 贴图未加载 → 跳过并告警 |
 | 副作用 | 创建 Phaser sprite、注册碰撞、启动行为循环 |
 | 生命周期 | 世界 ready 后注册；chunk 卸载/世界销毁时清理 |
-| 证据 | 原站有 `NpcGhost`、`Rats` 类；注册接口推断 |
+| 证据 | 原站有 `NpcGhost`、`Rats` 类；注册接口已定稿（designed，见 SYS-NPC 系统卡） |
 
 #### API-NPC-002 寻路查询
 
@@ -1122,7 +1161,7 @@ updated: 2026-08-24
 | 异常处理 | 未知 id → 返回空字符串；未知动画 → 忽略 |
 | 副作用 | 设置时切换 NPC 动画 |
 | 生命周期 | NPC 存活期间 |
-| 证据 | 原站有 NPC 动画；动画状态接口推断 |
+| 证据 | 原站有 NPC 动画；动画状态接口已定稿（designed，见 SYS-NPC 系统卡） |
 
 ---
 
@@ -1180,7 +1219,7 @@ updated: 2026-08-24
 | 异常处理 | 无车辆 → 空数组 |
 | 副作用 | 无 |
 | 生命周期 | 车辆注册后 |
-| 证据 | 原站车辆有 depth 550；位置查询推断 |
+| 证据 | 原站车辆有 depth 550；位置查询已定稿（designed，见 SYS-ROUTE 系统卡） |
 
 ---
 
@@ -1188,21 +1227,21 @@ updated: 2026-08-24
 
 #### API-FX-001 粒子发射
 
-| 字段 | 定义 |
-|---|---|
-| 接口ID | API-FX-001 |
-| 调用方 | SYS-ZONE / SYS-ENTITY |
-| 提供方 | SYS-FX |
-| 触发条件 | 进入粒子区域（particles/particles2/particles3 marker）或实体事件 |
-| 输入 | `emitter: ParticleEmitterConfig`（`{ type, position, count, duration, depth }`） |
-| 输出 | `void` |
-| 类型约束 | `(emitter: ParticleEmitterConfig) => void` |
-| 单位与坐标系 | 世界像素坐标 |
-| 同步/异步 | 同步（启动发射器）；异步（粒子持续播放） |
-| 异常处理 | 纹理缺失 → 圆形占位或跳过 |
-| 副作用 | 创建 Phaser particle emitter |
-| 生命周期 | 发射器启动后至 duration 结束或手动停止 |
-| 证据 | 原站有 particles/particles2/particles3 三个 marker 层；particles3 消费者未确认 |
+| 字段     | 定义                                                                             |
+| ------ | ------------------------------------------------------------------------------ |
+| 接口ID   | API-FX-001                                                                     |
+| 调用方    | SYS-ZONE / SYS-ENTITY                                                          |
+| 提供方    | SYS-FX                                                                         |
+| 触发条件   | 进入粒子区域（particles/particles2/particles3 marker）或实体事件                            |
+| 输入     | `emitter: ParticleEmitterConfig`（`{ type, position, count, duration, depth }`） |
+| 输出     | `void`                                                                         |
+| 类型约束   | `(emitter: ParticleEmitterConfig) => void`                                     |
+| 单位与坐标系 | 世界像素坐标                                                                         |
+| 同步/异步  | 同步（启动发射器）；异步（粒子持续播放）                                                           |
+| 异常处理   | 纹理缺失 → 圆形占位或跳过                                                                 |
+| 副作用    | 创建 Phaser particle emitter                                                     |
+| 生命周期   | 发射器启动后至 duration 结束或手动停止                                                       |
+| 证据     | 原站有 particles/particles2/particles3 三个 marker 层；particles3 消费者未确认              |
 
 #### API-FX-002 后处理管线
 
@@ -1244,7 +1283,7 @@ updated: 2026-08-24
 
 ## 六、跨系统桥接接口
 
-> 三条桥接接口连接了不同流水线，是"能不能并行"的开关。已冻结的不修改语义。
+> 三条桥接接口连接了不同流水线，是"能不能并行"的开关。皮/骨架标记见 L1 索引表；变更规则见第八节。
 
 ### BRIDGE-001 这格能走吗
 
@@ -1334,33 +1373,88 @@ updated: 2026-08-24
 
 ---
 
-## 八、冻结规矩
+## 八、皮/骨架标记与变更规则
 
-1. **已冻结接口（API契约表.md 中的 8 条）**：本文档只补充细化，不修改语义。要改需同时更新两张表。
-2. **新增接口**：需 Human 签字后才可冻结。
-3. **冲突解决**：常量/公式冲突时以 `03-执行层/` 对应系统卡为准；接口语义冲突时以本表为准。
+1. **每个接口都标了皮/骨架**（见 L1 索引表）—— 皮 = 换校园时需改具体值；骨架 = 接口签名和语义不随校园变化。
+2. **改皮**：直接在本表和 `03-执行层/` 对应系统卡改具体值，不改接口签名；同步更新两张表。
+3. **改骨架**：必须先获得 Human 签字，再改接口签名/语义；同步更新本表和 `03-执行层/` 对应系统卡。
+4. **新增接口**：必须先在 `01-理解层/` 写出原站事实或推断，再在 `03-执行层/` 写设计，最后加到本表 L1+L2；不需要签字流程（全新接口不涉及改变已有约定）。
+5. **冲突解决**：常量/公式冲突时以 `03-执行层/` 对应系统卡为准；接口语义冲突时以本表为准。
 
 ---
 
 ## 九、状态汇总
 
-| 抽屉 | 系统 | 接口数 |
-|---|---|---|
-| 地图线 | SYS-ASSET | 3 |
-| 地图线 | SYS-WORLD | 5 |
-| 地图线 | SYS-LAYER | 5 |
-| 地图线 | SYS-CHUNK | 4 |
-| 玩法线 | SYS-INPUT | 4 |
-| 玩法线 | SYS-MOVE | 3 |
-| 玩法线 | SYS-PLAYER | 5 |
-| 玩法线 | SYS-CAMERA | 4 |
-| 内容线 | SYS-ZONE | 3 |
-| 内容线 | SYS-INTERACT | 3 |
-| 独立件 | SYS-APP | 3 |
-| 独立件 | SYS-GAME-UI | 3 |
-| 独立件 | SYS-ENTITY | 3 |
-| 旁支 | SYS-NPC | 3 |
-| 旁支 | SYS-ROUTE | 3 |
-| 旁支 | SYS-FX | 3 |
-| **桥接** | — | 3 |
-| **总计** | — | **60** |
+| 抽屉 | 系统 | 接口数 | 骨架 | 皮 | 状态 |
+|---|---|---|---|---|---|
+| 地图线 | SYS-ASSET | 3 | 3 | 0 | designed |
+| 地图线 | SYS-WORLD | 5 | 5 | 0 | designed |
+| 地图线 | SYS-LAYER | 5 | 2 | 3 | designed |
+| 地图线 | SYS-CHUNK | 4 | 4 | 0 | designed |
+| 玩法线 | SYS-INPUT | 4 | 2 | 2 | designed |
+| 玩法线 | SYS-MOVE | 3 | 2 | 1 | designed |
+| 玩法线 | SYS-PLAYER | 5 | 1 | 4 | designed |
+| 玩法线 | SYS-CAMERA | 4 | 2 | 2 | designed |
+| 内容线 | SYS-ZONE | 3 | 3 | 0 | designed |
+| 内容线 | SYS-INTERACT | 3 | 2 | 1 | designed |
+| 独立件 | SYS-APP | 3 | 3 | 0 | designed |
+| 独立件 | SYS-GAME-UI | 3 | 1 | 2 | designed |
+| 独立件 | SYS-ENTITY | 3 | 3 | 0 | designed |
+| 旁支 | SYS-NPC | 3 | 3 | 0 | designed |
+| 旁支 | SYS-ROUTE | 3 | 2 | 1 | designed |
+| 旁支 | SYS-FX | 3 | 1 | 2 | designed |
+| **桥接** | — | 3 | 2 | 1 | — |
+| **总计** | — | **60** | **41** | **19** | 16/16 designed |
+
+> 皮/骨架统计说明：
+> - **骨架（41）**：换校园时签名和语义不变；具体值在系统卡/配置文件中维护。
+> - **皮（19）**：换校园时要改具体值（坐标、时长、阈值、GID、文案、DOM 位置等）；改动在本表和 `03-执行层/` 系统卡同步更新。
+> - **STATUS**：16/16 系统 `designed`。SYS-ENTITY 于 2026-09-14 由 `undesign` 晋升 `designed`，其三条接口按复刻代码的实际设计改写（各 Runtime 自治清理 + 场景集中编排），原"全局实体注册表"设计从未实现，已作废；依据 `Q-ENTITY-001`（原站无统一实体基类，2026-09-14 closed）。
+
+---
+
+## 十、网络协议层（已独立成层）
+
+> 本表 60 个接口是 **软件层接口**（系统 A → 系统 B 的调用契约：谁调谁、传递什么、返回什么、签名和语义）。**网络协议细节不在本表覆盖范围内**——它们是另一个独立的设计层，属于"系统如何从网络获取数据"而不是"系统之间如何互调"。
+>
+> **该层已于 2026-09-14 独立成文 → [网络协议层](../06-网络协议层/README.md)**（`doc/06-网络协议层/`，与 `01-理解层/`、`02-接口层/` 平级）。本节只保留为接口层的**边界声明和跳转入口**；分工、六项传输契约、现状实测、设计动作、缺口清单均以那份文档为准。
+>
+> **该层的定位（2026-09-14 修订）**：它是**我们自己的传输设计层**，不是原站的逆向层。原站在网络侧可查证的内容极少（六项契约里五项查不到，其中时限/失败定性/撤回**原理上就查不到**——那是客户端逻辑不是网络行为），故该层不承载原站分析。理由与证据位置见 [网络协议层 §六.2](../06-网络协议层/README.md)。
+
+### 网络协议层与接口层的分工
+
+| 层 | 负责 | 示例 | 当前权威位置 |
+|---|---|---|---|
+| **接口层（本表）** | 系统之间的调用契约 | `API-ASSET-001`：WORLD 向 ASSET 查询资源 URL | 本表 + `03-执行层/` 系统卡 §5 |
+| **网络协议层** | HTTP 层面的数据传输细节 | chunk 文件请求用什么缓存头、资源根（CDN 前缀）怎么下发 | [网络协议层](../06-网络协议层/README.md) |
+
+### 具体未覆盖项（现由 [网络协议层](../06-网络协议层/README.md) 承接）
+
+1. **Chunk HTTP 缓存头**：单个 chunk JSON（如 `chunk0.json`）在 HTTP 响应中应带什么 `Cache-Control`/`ETag`/`Expires`。本表的 `API-CHUNK-004`（相机可见范围）只说"返回可见 chunk 坐标集合"，不规定 HTTP 层如何缓存这些 chunk 文件。**当前我们自己的站也未设置任何响应头**——缓存策略待后台实现，设计建议见 [网络协议层 §五.3](../06-网络协议层/README.md)。
+
+2. **资源根 / CDN URL 模板**：chunk JSON 和 tileset 图片的实际路径模板（现在是同源的 `/assets/maps/...`，取自原站运行期）。本表的 `API-ASSET-001`（资源清单查询）返回的是逻辑 URL，不规定 URL 的物理构造方式。**Human 已于 2026-09-14 裁决**：根值取原站 `/assets/maps` 并收成运行期唯一入口；同时把根路径做成**后台可下发的配置值**（方案 B）；设计见 [网络协议层 §三](../06-网络协议层/README.md)。
+
+3. **并发请求限制**：浏览器对同一 origin 的并发连接数有限制（HTTP/1.1 通常 6 个），chunk 批量加载时需要排队和优先级策略。本表的 `API-CHUNK-001`（目标集合计算）只规定"算出需要哪些 chunk"，不规定"同时只能发几个请求"。`03-执行层/01-地图线/04-地图分块.md` §4 有请求去重和取消的讨论，但并发上限未定稿。
+
+4. **请求超时默认值**：chunk/tileset/资源请求的超时时间、超时后是重试还是降级。本表所有接口的 L2 字段"异常处理"只说"超时 → 重试/降级"，不指定具体毫秒数。`03-执行层/统一失败处理策略.md` 给出了三级分类和 N 次重试框架。**JSON 一路已定稿**：超时 **15 000 ms**（`game/fetchJson.ts:1`）、每块最多 **3 次尝试**（`data-store.ts:186`），2026-09-17 起文档与代码一致。**仍未定稿的是图片/瓦片集超时**（现在依赖浏览器默认，无上限）以及超时值的**后台下发形态**（属于 Phase 2 网络基础设施配置）。
+
+### 为什么这是有意的边界
+
+Phase 1 的逆向和复刻验证重点是**恢复系统知识和建立骨架**——接口层定义了系统之间的调用契约，骨架够用了。网络协议细节（缓存策略、CDN 路径、并发控制、超时参数）属于：
+
+- **部分依赖 Phase 2 基础设施**：当 Phase 2 补后端和 CDN 时，这些参数自然会确定
+- **部分已在 Phase 1 后期立项**：网络协议层已于 2026-09-14 独立成文 → [网络协议层](../06-网络协议层/README.md)，作为独立设计层维护，不再算作当前接口层的缺口
+
+当下：如果需要在 `src/` 中实现网络请求，使用合理的工程默认值并记录在系统卡 §4；正式的网络协议设计以 [网络协议层](../06-网络协议层/README.md) 为准，**运行时参数最终从后台下发的 `TransportConfig` 取**（[§三](../06-网络协议层/README.md)）。
+
+> **措辞订正（2026-09-14）**：本处原文写的「无缓存」容易被误读为「完全没有任何缓存」。准确说法是**无持久缓存**——没有 HTTP 缓存头、没有 Service Worker、没有 IndexedDB；而 `ChunkDataStore` **确有页内内存成功缓存**（`#cache`）与在途去重（`#inFlight`）。详见 [网络协议层 §一 契约 2](../06-网络协议层/README.md)。
+>
+> **数值订正（2026-09-14）**：本处原文写的「超时 10s、最多 6 个并发」与实际代码不符——实际 JSON 超时是 **15 000 ms**（`game/fetchJson.ts:1`），并发**完全没有上限**（未实现配额契约）。该行现改为不写具体数字，数值以 [网络协议层 §一 契约 3、4](../06-网络协议层/README.md) 为准。
+>
+> **文件名订正（2026-09-14）**：本节第 1 项原写 chunk 文件名为 `0_0.json`，与实际不符。本地 `public/assets/maps/chunks/` 下为 `chunk{index}.json`（`chunk0.json` ~ `chunk24.json`，`index = cy × 5 + cx`）。
+
+---
+
+## 十一、专有名词速查
+
+> 全部专有名词（258 条）已统一收进独立名词文档 → **[名词解释表.md](../名词解释表.md)**。该文档是全项目唯一的名词权威，覆盖 16 系统 + API 契约 + 跨系统数据流 + 治理体系 + 网络协议层的全部术语，按 24 个大类组织，每个名词含英文原文、中文译名、一句话定义、所在系统和详细文件链接；缩写约定（SYS-/API-/BRIDGE-/WI-/Q-/DEC-/CAP-/OBJ-/EVT-）和状态词也一并收在其中（§二十一、§十九）。

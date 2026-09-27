@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/staticCrowd.ts",
+    "sourceConstant": "StaticCrowdRuntimeTuning（十四个字段）",
+    "units": {
+      "factor": "ratio",
+      "upFactor": "ratio",
+      "viewportMargin": "pixel",
+      "minSpacing": "pixel",
+      "coffeeMinSpacing": "pixel",
+      "maxPlacementAttemptsPerInstance": "count",
+      "footballCount": "count",
+      "coffeeRegionIndexes": "count",
+      "activeRegionExtraMargin": "pixel",
+      "footballRegionIndexes": "count",
+      "beachRegionIndexes": "count",
+      "stationRegionIndexes": "count"
+    },
+    "notes": [
+      "源码里这前 11 项原先各自是独立的 export const，不是同一个对象（footballCount / coffeeRegionIndexes / activeRegionExtraMargin 三项更早，是直接写在函数体里的裸数字）。本文件把它们合成一个「调参集合」，因为后台就是按一个面板改它们。现在它们由调用方通过 StaticCrowdRuntimeOptions.tuning 递进来，src/ 里那份常量已经删掉。",
+      "viewportMargin 的值是 400，不是源码常量里的 300。原因：源码那个常量只是默认值，游戏实际跑的时候由调用处覆盖成 400，所以 300 从来没生效过。这里记的是真正生效的值。",
+      "stopAiBackgroundRegionIndex / stopAiBackgroundCount 是一对：前者指哪个区域，后者指那儿站几个人。⚠️ 这一对在原版里也找不到对应物：原版只有一个「Stop AI」——那是抗议者喊的口号文本，不是某片区域站几个人的设定。原版 88 片区域里只有 15 片有名字，没有和 Stop AI 沾边的那片。",
+      "factor / upFactor 是「每格撒几个人」的密度，不是「一共几个人」——改它等于整体调人口密度。",
+      "footballCount 只管「两队各站几个人」，不管「哪两片是足球队」——哪两片由 footballRegionIndexes 说了算。",
+      "footballRegionIndexes / beachRegionIndexes / stationRegionIndexes 是「哪几片是特殊区域」，按区域的序号认，不看名字。原版是按名字认的（football_team_blue / football_team_red / beach_crowd / station_static_crowd），改名就得改代码；现在改这里就行。序号就是 static-crowd-regions.json 里那个 regionIndex，也等于原版 particle-trajectories.json 的数组下标。",
+      "⚠️ maxPlacementAttemptsPerInstance 这个 20 在原版里是「整片区域一共试 20×人数 次」，不是「每个人试 20 次」——算法不一样，数字看着像。这是 src/ 的算法，不在配置能管的范围内，记在这里免得下次又被这个「20」骗过去。",
+      "⚑ 沙滩是两个区域（52 和 74），不是一处——原版两片都挂着同一个 id。编号只在「同一个数组」里有意义：换校园后如果区域增删了，序号会跟着变，要照 static-crowd-regions.json 重填。",
+      "coffeeRegionIndexes 是「哪几片算咖啡座」，写两个或两个以上都行；「两片咖啡座之间」用的是 coffeeMinSpacing 而不是 minSpacing。",
+      "⚠️ coffeeMinSpacing 和 coffeeRegionIndexes 在 src/ 里跑不到：这两项设定的 38、61 正好是 static-crowd-disabled-regions.json 里被关掉的那两片，关掉的区域压根不放人，所以「咖啡座之间隔 56 像素」这条规矩现在怎么调都不会生效。要么这两片本来就不该关，要么这套间距该删——还没定。",
+      "⚠️ 查过原版（sample/original-public-build/mirror 整棵镜像树，293 个文件）：「咖啡座」这个概念在原版里找不到——coffee / kaviar / káva / 咖啡 这几个词一次都没出现（同一轮搜 football_team_blue 是能搜到的，说明搜索确实覆盖了那些文件）。原版那块代码里只有一个间距值 20，没有第二档。所以这套咖啡设置是我们这版自己带的，不是从原版抄来的。",
+      "activeRegionExtraMargin 是「已经出现过的区域，往外多留一点才算离开」：不留这一截，区域会贴着屏幕边缘反复进进出出。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "factor": 0.004,
+    "upFactor": 0.016,
+    "viewportMargin": 400,
+    "minSpacing": 20,
+    "coffeeMinSpacing": 56,
+    "stopAiBackgroundRegionIndex": 64,
+    "stopAiBackgroundCount": 2,
+    "maxPlacementAttemptsPerInstance": 20,
+    "footballCount": 10,
+    "coffeeRegionIndexes": [38, 61],
+    "activeRegionExtraMargin": 100,
+    "footballRegionIndexes": [51, 53],
+    "beachRegionIndexes": [52, 74],
+    "stationRegionIndexes": [29]
+  }
+}

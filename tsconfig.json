@@ -8,6 +8,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
     "types": ["node", "vitest/globals"],
     "skipLibCheck": true
   },
@@ -16,6 +17,7 @@
     "src/**/*.ts",
     "tests/**/*.ts",
     "game/**/*.ts",
-    "game/**/*.d.ts"
+    "game/**/*.d.ts",
+    "config/**/*.ts"
   ]
 }

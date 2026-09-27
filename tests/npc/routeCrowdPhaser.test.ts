@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { ROUTE_CROWD_CONFIGS } from "../../src/npc/index.js";
-import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack, ROUTE_CROWD_VISUAL_OFFSETS } from "../../game/PhaserRouteCrowdRuntime.js";
+import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack } from "../../game/PhaserRouteCrowdRuntime.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+
+/** 11 组路线和三项调参现在都读磁盘上那份配置。 */
+const CONFIGS = await loadNpcConfigs(createDiskConfigSource());
+/** 用哪些贴图、哪组用专用贴图、显示怎么错开、铁轨带在哪——原先写死在 game/ 里。 */
+const PRESENTATION = CONFIGS.presentation.routeCrowd;
+const ROUTE_INPUT = {
+  configs: CONFIGS.routeCrowdConfigs,
+  tuning: CONFIGS.tuning.routeCrowd,
+  presentation: PRESENTATION,
+};
 
 class Sprite {
  x:number; y:number; depth=0; alpha=1; destroyed=false;
@@ -12,21 +23,52 @@ class Sprite {
 
 describe("PhaserRouteCrowdRuntime",()=>{
  it("uses only source-backed route display offsets",()=>{
-  expect(ROUTE_CROWD_VISUAL_OFFSETS).toMatchObject({"main-crowd":16,"loop-crowd":8,drinkers:8,concert_crowd:10,beach_crowd_walk:8,"vertical-crowd":6,"vertical-crowd-reverse":0,"crowd-train":8});
-  expect(ROUTE_CROWD_VISUAL_OFFSETS["walking-crowd"] ?? 0).toBe(0);
-  expect(ROUTE_CROWD_VISUAL_OFFSETS["hazmat-crowd"] ?? 0).toBe(0);
-  expect(ROUTE_CROWD_VISUAL_OFFSETS.outside_concert1 ?? 0).toBe(0);
+  expect(PRESENTATION.visualOffsets).toMatchObject({"main-crowd":16,"loop-crowd":8,drinkers:8,concert_crowd:10,beach_crowd_walk:8,"vertical-crowd":6,"vertical-crowd-reverse":0,"crowd-train":8});
+  expect(PRESENTATION.visualOffsets["walking-crowd"] ?? 0).toBe(0);
+  expect(PRESENTATION.visualOffsets["hazmat-crowd"] ?? 0).toBe(0);
+  expect(PRESENTATION.visualOffsets.outside_concert1 ?? 0).toBe(0);
+  expect(PRESENTATION.trackBand).toEqual({minX:400,maxX:1471,minY:304,maxY:319});
+  expect(PRESENTATION.specialTextures["beach_crowd_walk"]).toEqual([
+    "npc-man-beach","npc-man-beach2","npc-woman-beach","npc-woman-beach2",
+  ]);
+  expect(PRESENTATION.specialTextures["hazmat-crowd"]).toEqual(["npc-hazmat-suit"]);
+  expect(PRESENTATION.textures).toHaveLength(17);
+  expect(PRESENTATION.textures[0]).toBe("npc-man");
+  expect(Object.isFrozen(PRESENTATION)).toBe(true);
  });
 
  it("keeps ordinary crowd displays off the track while preserving train passengers",()=>{
-  expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 312).y).not.toBe(312);
-  expect(keepOrdinaryCrowdOffTrack("crowd-train", 600, 312)).toEqual({x:600,y:312});
-  expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 296)).toEqual({x:600,y:296});
+  const band = PRESENTATION.trackBand;
+  expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 312, band).y).not.toBe(312);
+  expect(keepOrdinaryCrowdOffTrack("crowd-train", 600, 312, band)).toEqual({x:600,y:312});
+  expect(keepOrdinaryCrowdOffTrack("main-crowd", 600, 296, band)).toEqual({x:600,y:296});
+ });
+
+ it("takes the track band and the per-group offset from the passed presentation",()=>{
+  const narrow={minX:0,maxX:100,minY:0,maxY:10};
+  // 带子中线上方推到 minY-1，下方推到 maxY+1，火车乘客照旧不推。
+  expect(keepOrdinaryCrowdOffTrack("main-crowd",50,4,narrow)).toEqual({x:50,y:-1});
+  expect(keepOrdinaryCrowdOffTrack("main-crowd",50,5,narrow)).toEqual({x:50,y:11});
+  expect(keepOrdinaryCrowdOffTrack("crowd-train",50,5,narrow)).toEqual({x:50,y:5});
+  expect(keepOrdinaryCrowdOffTrack("main-crowd",500,5,narrow)).toEqual({x:500,y:5});
+
+  const firstSprite=(visualOffsets:Readonly<Record<string,number>>)=>{
+   const sprites:Sprite[]=[];
+   const runtime=new PhaserRouteCrowdRuntime({add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}}},{ ...ROUTE_INPUT,
+    presentation:{...PRESENTATION,visualOffsets},
+    pathProvider:{findPath:r=>[r.start,{x:r.start.x+32,y:r.start.y}]},
+    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
+   });
+   runtime.start(0);
+   const first=sprites[0]!;
+   return {x:first.x,y:first.y};
+  };
+  expect(firstSprite({})).not.toEqual(firstSprite({"main-crowd":16}));
  });
 
  it("materializes visible route crowds and destroys them on shutdown",()=>{
   const sprites:Sprite[]=[];
-  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}}},{
+  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}}},{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>[r.start,{x:r.start.x+32,y:r.start.y}]},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
   });
@@ -38,7 +80,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   const sprites:Sprite[]=[];
   const callbacks:(()=>void)[]=[];
   let calls=0;
-  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}}},{
+  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}}},{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>{calls+=1;return [r.start,{x:r.start.x+32,y:r.start.y}]}},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
    scheduleNextUpdate:callback=>callbacks.push(callback),
@@ -49,7 +91,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   expect(sprites).toHaveLength(4);
 
   let frames=1;
-  const normalCount = ROUTE_CROWD_CONFIGS
+  const normalCount = CONFIGS.routeCrowdConfigs
    .filter((config) => config.id !== "crowd-train")
    .reduce((sum, config) => sum + Math.min(config.count * 3, config.startTiles.length * config.endTiles.length), 0);
   while (callbacks.length > 0) {
@@ -68,7 +110,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   const runtime=new PhaserRouteCrowdRuntime({
    add:{sprite:(x,y)=>{sprite.x=x;sprite.y=y;return sprite}},
    anims:{generateFrameNumbers:(_key,range)=>[range.start,range.end],create:config=>{created.push(config.key);return config},exists:()=>false},
-  },{
+  },{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>[r.start,{x:r.start.x+24,y:r.start.y},{x:r.start.x+48,y:r.start.y}]},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
   });
@@ -84,7 +126,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
  it("computes thirty train candidates and assigns ten unique paths",()=>{
   const callbacks:(()=>void)[]=[];
   let calls=0;
-  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:()=>new Sprite(0,0)}},{
+  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:()=>new Sprite(0,0)}},{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>{calls+=1;return [r.start,{x:r.start.x+32,y:r.start.y}]}},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),
    scheduleNextUpdate:callback=>callbacks.push(callback),
@@ -101,7 +143,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
  it("ignores stale startup callbacks after repeat or cancel",()=>{
   const callbacks:(()=>void)[]=[];
   let calls=0;
-  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:()=>new Sprite(0,0)}},{
+  const runtime=new PhaserRouteCrowdRuntime({add:{sprite:()=>new Sprite(0,0)}},{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>{calls+=1;return [r.start]}},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),
    scheduleNextUpdate:callback=>callbacks.push(callback),
@@ -134,7 +176,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   const sprites:Sprite[]=[];
   const runtime=new PhaserRouteCrowdRuntime({
    add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
-  },{
+  },{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>[r.start,{x:r.start.x+32,y:r.start.y}]},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
   });
@@ -152,7 +194,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   const viewport={left:0,top:0,width:2240,height:2240};
   const runtime=new PhaserRouteCrowdRuntime({
    add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
-  },{
+  },{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>{
     const drinker = (r.start.x===880 || r.start.x===800) &&
      (r.start.y===1376 || r.start.y===1360);
@@ -197,7 +239,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   const sprites:Sprite[]=[];
   const runtime=new PhaserRouteCrowdRuntime({
    add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
-  },{
+  },{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>[r.start,{x:r.start.x+96,y:r.start.y}]},
    viewport:()=>({left:0,top:0,width:2240,height:2240}),random:()=>0,
   });
@@ -219,7 +261,7 @@ describe("PhaserRouteCrowdRuntime",()=>{
   let viewport={left:0,top:0,width:2240,height:2240};
   const runtime=new PhaserRouteCrowdRuntime({
    add:{sprite:(x,y)=>{const s=new Sprite(x,y);sprites.push(s);return s}},
-  },{
+  },{ ...ROUTE_INPUT,
    pathProvider:{findPath:r=>[r.start,{x:r.start.x+32,y:r.start.y}]},
    viewport:()=>viewport,random:()=>0,
   });

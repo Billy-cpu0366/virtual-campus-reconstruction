@@ -2,7 +2,8 @@ import type { RoofState } from "./contract.js";
 import { layerStrategy } from "./strategy.js";
 
 // 玩家常态 depth（SYS-LAYER 为深度 SSOT）。
-// 注：契约表 / SYS-PLAYER 卡写的是 `500 + y*0.1`（差 +24），待对账；本 CORE 以本卡设计决定为准。
+// 注：原站与 SYS-PLAYER 卡记的是 `500 + y*0.1`，本 CORE 用的是 `500 + (y+24)*0.1`。
+// 两者是刻意不同的决策口径（本 CORE 以本卡设计决定为准），不是待修的不一致。
 export function playerDepth(worldY: number): number {
   return 500 + (worldY + 24) * 0.1;
 }

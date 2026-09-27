@@ -1,31 +1,10 @@
 import {
-  STATIC_NPC_CONFIGS,
   StaticNpcRuntime,
   type StaticNpcConfig,
   type StaticNpcFrameDuration,
   type StaticNpcViewport,
 } from "../src/npc/index.js";
-
-export const STATIC_NPC_RUNTIME_ASSETS = Object.freeze([
-  {
-    key: "npc-special-reading",
-    url: "/sprites/special/npc-special-reading.webp",
-    frameWidth: 64,
-    frameHeight: 64,
-  },
-  {
-    key: "npc-special-eating",
-    url: "/sprites/special/npc-special-eating.webp",
-    frameWidth: 64,
-    frameHeight: 64,
-  },
-  {
-    key: "npc-cat-licking",
-    url: "/sprites/special/npc-cat-licking.webp",
-    frameWidth: 48,
-    frameHeight: 48,
-  },
-] as const);
+import type { StaticNpcPresentationAsset } from "../config/骨架/05-旁支/SYS-NPC/逻辑/types.js";
 
 export interface PhaserStaticNpcLoaderLike {
   spritesheet(
@@ -67,7 +46,17 @@ export interface PhaserStaticNpcSceneLike {
 
 export interface PhaserStaticNpcRuntimeOptions {
   readonly viewport: () => StaticNpcViewport | undefined;
-  readonly viewportMargin?: number;
+  /** 站哪三个人、各站哪个格子——来自 `static-npc-configs.json`。 */
+  readonly configs: readonly StaticNpcConfig[];
+  /** 视口外多远就把人撤掉——来自 `static-npc-tuning.json`。 */
+  readonly viewportMargin: number;
+  /**
+   * 三张特殊贴图的帧规格——来自 `static-npc-presentation.json`。
+   *
+   * 运行时要用它拿每张图有几帧：动画帧表按这个数建。`[].key` 必须和上面
+   * `configs[].spriteKey` 对得上，缺了会在 `start()` 里报 `missing-presentation`。
+   */
+  readonly presentation: readonly StaticNpcPresentationAsset[];
   readonly onError?: (reason: string) => void;
 }
 
@@ -75,13 +64,14 @@ export type PhaserStaticNpcStartResult =
   | { readonly ok: true }
   | {
       readonly ok: false;
-      readonly reason: "shutdown" | "missing-texture";
+      readonly reason: "shutdown" | "missing-texture" | "missing-presentation";
     };
 
 export function preloadStaticNpcRuntimeAssets(
   loader: PhaserStaticNpcLoaderLike,
+  presentation: readonly StaticNpcPresentationAsset[],
 ): void {
-  for (const asset of STATIC_NPC_RUNTIME_ASSETS) {
+  for (const asset of presentation) {
     loader.spritesheet(asset.key, asset.url, {
       frameWidth: asset.frameWidth,
       frameHeight: asset.frameHeight,
@@ -99,8 +89,17 @@ function frameDuration(
   return custom?.duration ?? 1_000 / config.frameRate;
 }
 
-function animationFrames(config: StaticNpcConfig): readonly unknown[] {
-  return Array.from({ length: 16 }, (_, frame) => ({
+/**
+ * 建一条「原地循环播」的动画帧表。
+ *
+ * 帧数从配置里来——原先这里写死 `length: 16`，换一张帧数不同的图，人照样出现，
+ * 只是动画播不全，而且不报错。三张图现在都是 16 帧，见 `static-npc-presentation.json`。
+ */
+function animationFrames(
+  config: StaticNpcConfig,
+  frameCount: number,
+): readonly unknown[] {
+  return Array.from({ length: frameCount }, (_, frame) => ({
     key: config.spriteKey,
     frame,
     duration: frameDuration(config, frame),
@@ -119,9 +118,8 @@ export class PhaserStaticNpcRuntime {
     private readonly options: PhaserStaticNpcRuntimeOptions,
   ) {
     this.core = new StaticNpcRuntime({
-      ...(options.viewportMargin === undefined
-        ? {}
-        : { viewportMargin: options.viewportMargin }),
+      configs: options.configs,
+      viewportMargin: options.viewportMargin,
     });
   }
 
@@ -130,7 +128,7 @@ export class PhaserStaticNpcRuntime {
   }
 
   get configs(): readonly StaticNpcConfig[] {
-    return STATIC_NPC_CONFIGS;
+    return this.options.configs;
   }
 
   get spriteCount(): number {
@@ -139,12 +137,19 @@ export class PhaserStaticNpcRuntime {
 
   start(): PhaserStaticNpcStartResult {
     if (this.shutdownState) return { ok: false, reason: "shutdown" };
-    const missing = STATIC_NPC_CONFIGS.find(
+    const missing = this.options.configs.find(
       (config) => !this.scene.textures.exists(config.spriteKey),
     );
     if (missing !== undefined) {
       this.report(`missing-texture:${missing.spriteKey}`);
       return { ok: false, reason: "missing-texture" };
+    }
+    const missingPresentation = this.options.configs.find(
+      (config) => this.frameCountFor(config.spriteKey) === undefined,
+    );
+    if (missingPresentation !== undefined) {
+      this.report(`missing-presentation:${missingPresentation.spriteKey}`);
+      return { ok: false, reason: "missing-presentation" };
     }
     this.core.start(this.options.viewport());
     this.sync();
@@ -172,7 +177,7 @@ export class PhaserStaticNpcRuntime {
 
   private sync(): void {
     const configs = new Map<string, StaticNpcConfig>(
-      STATIC_NPC_CONFIGS.map((config) => [config.id, config]),
+      this.options.configs.map((config) => [config.id, config]),
     );
     const active = new Set<string>();
     for (const item of this.core.snapshot.instances) {
@@ -180,7 +185,9 @@ export class PhaserStaticNpcRuntime {
       active.add(item.id);
       const config = configs.get(item.id);
       if (config === undefined) continue;
-      const sprite = this.sprites.get(item.id) ?? this.createSprite(config, item.position.x, item.position.y);
+      const frameCount = this.frameCountFor(config.spriteKey);
+      if (frameCount === undefined) continue;
+      const sprite = this.sprites.get(item.id) ?? this.createSprite(config, frameCount, item.position.x, item.position.y);
       sprite.x = item.position.x;
       sprite.y = item.position.y;
       sprite.setDepth(500 + item.position.y * 0.1);
@@ -194,23 +201,34 @@ export class PhaserStaticNpcRuntime {
     }
   }
 
+  /** 这张图上一共几帧。配置里没登记这张图就返回 undefined——`start()` 会报出来。 */
+  private frameCountFor(spriteKey: string): number | undefined {
+    return this.options.presentation.find((asset) => asset.key === spriteKey)
+      ?.frameCount;
+  }
+
   private createSprite(
     config: StaticNpcConfig,
+    frameCount: number,
     x: number,
     y: number,
   ): PhaserStaticNpcSpriteLike {
     const animationKey = `static-npc-${config.id}`;
-    this.ensureAnimation(config, animationKey);
+    this.ensureAnimation(config, animationKey, frameCount);
     const sprite = this.scene.add.sprite(x, y, config.spriteKey);
     return sprite.setScale(config.scale);
   }
 
-  private ensureAnimation(config: StaticNpcConfig, key: string): void {
+  private ensureAnimation(
+    config: StaticNpcConfig,
+    key: string,
+    frameCount: number,
+  ): void {
     if (this.createdAnimations.has(key) || this.scene.anims.exists?.(key) === true) {
       this.createdAnimations.add(key);
       return;
     }
-    const frames = animationFrames(config);
+    const frames = animationFrames(config, frameCount);
     this.scene.anims.create({ key, frames, repeat: -1 });
     this.createdAnimations.add(key);
   }

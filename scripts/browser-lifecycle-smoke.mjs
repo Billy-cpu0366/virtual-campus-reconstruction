@@ -101,7 +101,7 @@ const before = await evaluate(`(() => {
   const chunks = [...new Set(
     performance.getEntriesByType("resource")
       .map((entry) => entry.name)
-      .filter((name) => name.includes("/maps/chunks/chunk")),
+      .filter((name) => name.includes("/assets/maps/chunks/chunk")),
   )];
   return {
     debug,

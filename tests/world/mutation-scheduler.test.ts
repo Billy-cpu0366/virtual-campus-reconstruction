@@ -11,6 +11,58 @@ function deferred(): { promise: Promise<void>; resolve(): void } {
 }
 
 describe("PhaserWorldMutationScheduler 生命周期", () => {
+  it("活动异步写入期间新增任务保持串行", async () => {
+    const frames: Array<() => void> = [];
+    vi.stubGlobal("requestAnimationFrame", (cb: () => void) => frames.push(cb));
+    const scheduler = new PhaserWorldMutationScheduler();
+    const gate = deferred();
+    const first = scheduler.schedule(() => gate.promise);
+    frames.shift()?.();
+    await Promise.resolve();
+    const next = vi.fn();
+    const second = scheduler.schedule(next);
+    let idle = false;
+    const waiting = scheduler.waitForIdle().then(() => { idle = true; });
+    expect(frames).toHaveLength(0);
+    expect(idle).toBe(false);
+    gate.resolve();
+    await first;
+    await vi.waitFor(() => expect(frames).toHaveLength(1));
+    expect(next).not.toHaveBeenCalled();
+    frames.shift()?.();
+    await second;
+    await waiting;
+    expect(next).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
+  });
+
+  it("同步异常释放已有 idle 等待者", async () => {
+    let frame: (() => void) | undefined;
+    vi.stubGlobal("requestAnimationFrame", (cb: () => void) => { frame = cb; return 1; });
+    const scheduler = new PhaserWorldMutationScheduler();
+    const failed = scheduler.schedule(() => { throw new Error("sync"); });
+    const rejected = expect(failed).rejects.toThrow("sync");
+    const idle = scheduler.waitForIdle();
+    frame?.();
+    await rejected;
+    await idle;
+    vi.unstubAllGlobals();
+  });
+
+  it("销毁取消待执行帧并立即释放等待者", async () => {
+    vi.stubGlobal("requestAnimationFrame", () => 42);
+    const cancel = vi.fn();
+    vi.stubGlobal("cancelAnimationFrame", cancel);
+    const scheduler = new PhaserWorldMutationScheduler();
+    const mutation = vi.fn();
+    const pending = scheduler.schedule(mutation);
+    const idle = scheduler.waitForIdle();
+    scheduler.destroy();
+    await Promise.all([pending, idle]);
+    expect(cancel).toHaveBeenCalledWith(42);
+    expect(mutation).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
   it("销毁时清空排队 mutation，并等待 active mutation", async () => {
     const frames: Array<() => void> = [];
     vi.stubGlobal(

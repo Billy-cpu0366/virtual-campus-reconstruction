@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/venueCrowdRuntime.ts",
+    "sourceConstant": "VenueCrowdRuntimeOptions.tuning（字段定义）",
+    "units": {
+      "prewarmMargin": "pixel",
+      "recycleMargin": "pixel",
+      "maxPlacementAttempts": "count"
+    },
+    "notes": [
+      "前两项原先是不导出的模块级常量 VENUE_PREWARM_MARGIN / VENUE_RECYCLE_MARGIN，运行时直接读它们。现在由调用方递进来（VenueCrowdRuntimeOptions.tuning），所以是 manual——那种「没有导出所以对不上」的缺口没有了。",
+      "maxPlacementAttempts 原先更早：是个写死在 start() 循环里的裸数字 20，连名字都没有。给一个人找位置试满这么多次还没找到，这个区域剩下的名额就放弃。"
+    ],
+    "verified": "manual"
+  },
+  "data": {
+    "prewarmMargin": 400,
+    "recycleMargin": 500,
+    "maxPlacementAttempts": 20
+  }
+}

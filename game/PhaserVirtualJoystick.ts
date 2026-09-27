@@ -31,7 +31,11 @@ interface GraphicsLike {
 export interface JoystickSceneLike {
   add: { graphics(): GraphicsLike };
   input: EventEmitterLike;
-  scale: EventEmitterLike & { width: number; height: number };
+  scale: EventEmitterLike & {
+    width: number;
+    height: number;
+    getViewPort?(): { x: number; y: number; width: number; height: number };
+  };
 }
 
 interface PointerLike {
@@ -255,11 +259,14 @@ export class PhaserVirtualJoystick {
   }
 
   private reposition(): void {
-    const width = this.scene.scale.width;
-    const height = this.scene.scale.height;
+    const viewport = this.scene.scale.getViewPort?.() ?? {
+      x: 0, y: 0, width: this.scene.scale.width, height: this.scene.scale.height,
+    };
     const baseRadius = this.params.baseDiameter / 2;
-    this.x = Math.max(baseRadius, width - POSITION_OFFSET);
-    this.y = Math.max(baseRadius, height - POSITION_OFFSET);
+    const insetX = Math.min(Math.max(baseRadius, POSITION_OFFSET), viewport.width / 2);
+    const insetY = Math.min(Math.max(baseRadius, POSITION_OFFSET), viewport.height / 2);
+    this.x = viewport.x + viewport.width - insetX;
+    this.y = viewport.y + viewport.height - insetY;
     this.base.setPosition(this.x, this.y).setVisible(this.visible);
     this.thumb.setPosition(this.x, this.y).setVisible(this.visible);
     if (this.activeState) {

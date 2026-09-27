@@ -1,0 +1,650 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/routeCrowd.ts",
+    "sourceConstant": "RouteCrowdConfig（元素类型）",
+    "units": {
+      "startTiles": "tile",
+      "endTiles": "tile",
+      "movementSpeed": "pxPerSec"
+    },
+    "notes": [
+      "源码用 group(...) 位置参数助手书写，本文件已摊成具名字段（规范第五节）。",
+      "group() 的后三个参数带默认值：pathRandomFactor .8 / ignoreWalls false / completionExit false。此处按规范第七条显式写全。",
+      "speedVariation 存的是派生后的值：源码写 variation=.25，派生为 {min:.75,max:1.25}。",
+      "maxActiveInViewport 为 null 表示「不限」（源码里是 undefined）。",
+      "crowd-train 的 startTiles 在源码里由 Array.from 生成 22 个点，此处已展开。"
+    ],
+    "verified": "exact"
+  },
+  "data": [
+    {
+      "id": "main-crowd",
+      "count": 10,
+      "startTiles": [
+        {
+          "x": 31,
+          "y": 81
+        },
+        {
+          "x": 32,
+          "y": 81
+        },
+        {
+          "x": 33,
+          "y": 81
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 73,
+          "y": 133
+        }
+      ],
+      "movementSpeed": 45,
+      "speedVariation": {
+        "min": 0.75,
+        "max": 1.25
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 0
+      },
+      "afterDelay": {
+        "minMs": 2000,
+        "maxMs": 2000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 25,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "loop-crowd",
+      "count": 10,
+      "startTiles": [
+        {
+          "x": 55,
+          "y": 18
+        },
+        {
+          "x": 62,
+          "y": 18
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 21,
+          "y": 86
+        },
+        {
+          "x": 55,
+          "y": 86
+        },
+        {
+          "x": 112,
+          "y": 48
+        },
+        {
+          "x": 116,
+          "y": 85
+        }
+      ],
+      "movementSpeed": 45,
+      "speedVariation": {
+        "min": 0.8,
+        "max": 1.2
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 0
+      },
+      "afterDelay": {
+        "minMs": 1000,
+        "maxMs": 1000
+      },
+      "goBack": true,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 10,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "drinkers",
+      "count": 5,
+      "startTiles": [
+        {
+          "x": 55,
+          "y": 86
+        },
+        {
+          "x": 50,
+          "y": 85
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 87,
+          "y": 55
+        },
+        {
+          "x": 85,
+          "y": 55
+        }
+      ],
+      "movementSpeed": 45,
+      "speedVariation": {
+        "min": 0.8,
+        "max": 1.2
+      },
+      "delay": {
+        "minMs": 4000,
+        "maxMs": 10000
+      },
+      "afterDelay": {
+        "minMs": 4000,
+        "maxMs": 10000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 5,
+      "pathRandomFactor": 1,
+      "ignoreWalls": false,
+      "completionExit": true
+    },
+    {
+      "id": "concert_crowd",
+      "count": 40,
+      "startTiles": [
+        {
+          "x": 105,
+          "y": 51
+        },
+        {
+          "x": 135,
+          "y": 50
+        },
+        {
+          "x": 136,
+          "y": 36
+        },
+        {
+          "x": 106,
+          "y": 37
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 108,
+          "y": 45
+        },
+        {
+          "x": 128,
+          "y": 47
+        },
+        {
+          "x": 129,
+          "y": 39
+        }
+      ],
+      "movementSpeed": 40,
+      "speedVariation": {
+        "min": 0.75,
+        "max": 1.25
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 3000
+      },
+      "afterDelay": {
+        "minMs": 1000,
+        "maxMs": 1000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 40,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "beach_crowd_walk",
+      "count": 4,
+      "startTiles": [
+        {
+          "x": 96,
+          "y": 119
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 68,
+          "y": 134
+        }
+      ],
+      "movementSpeed": 35,
+      "speedVariation": {
+        "min": 0.8,
+        "max": 1.2
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 0
+      },
+      "afterDelay": {
+        "minMs": 0,
+        "maxMs": 0
+      },
+      "goBack": true,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 4,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "vertical-crowd",
+      "count": 10,
+      "startTiles": [
+        {
+          "x": 85,
+          "y": 56
+        },
+        {
+          "x": 86,
+          "y": 56
+        },
+        {
+          "x": 87,
+          "y": 56
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 85,
+          "y": 86
+        },
+        {
+          "x": 86,
+          "y": 86
+        },
+        {
+          "x": 87,
+          "y": 86
+        }
+      ],
+      "movementSpeed": 40,
+      "speedVariation": {
+        "min": 0.8,
+        "max": 1.2
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 7000
+      },
+      "afterDelay": {
+        "minMs": 1000,
+        "maxMs": 1000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 20,
+      "pathRandomFactor": 0,
+      "ignoreWalls": true,
+      "completionExit": false
+    },
+    {
+      "id": "vertical-crowd-reverse",
+      "count": 10,
+      "startTiles": [
+        {
+          "x": 87,
+          "y": 86
+        },
+        {
+          "x": 88,
+          "y": 86
+        },
+        {
+          "x": 89,
+          "y": 86
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 87,
+          "y": 56
+        },
+        {
+          "x": 88,
+          "y": 56
+        },
+        {
+          "x": 89,
+          "y": 56
+        }
+      ],
+      "movementSpeed": 40,
+      "speedVariation": {
+        "min": 0.8,
+        "max": 1.2
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 7000
+      },
+      "afterDelay": {
+        "minMs": 2000,
+        "maxMs": 2000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": 20,
+      "pathRandomFactor": 0.2,
+      "ignoreWalls": false,
+      "completionExit": true
+    },
+    {
+      "id": "walking-crowd",
+      "count": 8,
+      "startTiles": [
+        {
+          "x": 35,
+          "y": 108
+        },
+        {
+          "x": 16,
+          "y": 115
+        },
+        {
+          "x": 36,
+          "y": 121
+        },
+        {
+          "x": 48,
+          "y": 120
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 108,
+          "y": 99
+        },
+        {
+          "x": 86,
+          "y": 104
+        }
+      ],
+      "movementSpeed": 45,
+      "speedVariation": {
+        "min": 0.85,
+        "max": 1.15
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 35000
+      },
+      "afterDelay": {
+        "minMs": 2000,
+        "maxMs": 2000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": null,
+      "pathRandomFactor": 1,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "hazmat-crowd",
+      "count": 8,
+      "startTiles": [
+        {
+          "x": 13,
+          "y": 126
+        },
+        {
+          "x": 19,
+          "y": 124
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 5,
+          "y": 133
+        },
+        {
+          "x": 11,
+          "y": 132
+        },
+        {
+          "x": 8,
+          "y": 131
+        }
+      ],
+      "movementSpeed": 45,
+      "speedVariation": {
+        "min": 0.85,
+        "max": 1.15
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 10000
+      },
+      "afterDelay": {
+        "minMs": 2000,
+        "maxMs": 2000
+      },
+      "goBack": true,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": null,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "outside_concert1",
+      "count": 10,
+      "startTiles": [
+        {
+          "x": 115,
+          "y": 109
+        },
+        {
+          "x": 123,
+          "y": 110
+        },
+        {
+          "x": 130,
+          "y": 108
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 120,
+          "y": 114
+        },
+        {
+          "x": 137,
+          "y": 106
+        },
+        {
+          "x": 138,
+          "y": 96
+        }
+      ],
+      "movementSpeed": 35,
+      "speedVariation": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "delay": {
+        "minMs": 0,
+        "maxMs": 3000
+      },
+      "afterDelay": {
+        "minMs": 1000,
+        "maxMs": 1000
+      },
+      "goBack": false,
+      "deleteAfterComplete": false,
+      "randomPositions": true,
+      "maxActiveInViewport": null,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    },
+    {
+      "id": "crowd-train",
+      "count": 10,
+      "startTiles": [
+        {
+          "x": 63,
+          "y": 19
+        },
+        {
+          "x": 64,
+          "y": 19
+        },
+        {
+          "x": 65,
+          "y": 19
+        },
+        {
+          "x": 66,
+          "y": 19
+        },
+        {
+          "x": 67,
+          "y": 19
+        },
+        {
+          "x": 68,
+          "y": 19
+        },
+        {
+          "x": 69,
+          "y": 19
+        },
+        {
+          "x": 70,
+          "y": 19
+        },
+        {
+          "x": 71,
+          "y": 19
+        },
+        {
+          "x": 72,
+          "y": 19
+        },
+        {
+          "x": 73,
+          "y": 19
+        },
+        {
+          "x": 74,
+          "y": 19
+        },
+        {
+          "x": 75,
+          "y": 19
+        },
+        {
+          "x": 76,
+          "y": 19
+        },
+        {
+          "x": 77,
+          "y": 19
+        },
+        {
+          "x": 78,
+          "y": 19
+        },
+        {
+          "x": 79,
+          "y": 19
+        },
+        {
+          "x": 80,
+          "y": 19
+        },
+        {
+          "x": 81,
+          "y": 19
+        },
+        {
+          "x": 82,
+          "y": 19
+        },
+        {
+          "x": 83,
+          "y": 19
+        },
+        {
+          "x": 84,
+          "y": 19
+        }
+      ],
+      "endTiles": [
+        {
+          "x": 68,
+          "y": 121
+        },
+        {
+          "x": 8,
+          "y": 100
+        },
+        {
+          "x": 36,
+          "y": 117
+        },
+        {
+          "x": 129,
+          "y": 108
+        },
+        {
+          "x": 106,
+          "y": 46
+        },
+        {
+          "x": 21,
+          "y": 86
+        }
+      ],
+      "movementSpeed": 35,
+      "speedVariation": {
+        "min": 0.8,
+        "max": 1.2
+      },
+      "delay": {
+        "minMs": 2400,
+        "maxMs": 2400
+      },
+      "afterDelay": {
+        "minMs": 0,
+        "maxMs": 0
+      },
+      "goBack": false,
+      "deleteAfterComplete": true,
+      "randomPositions": false,
+      "maxActiveInViewport": 10,
+      "pathRandomFactor": 0.8,
+      "ignoreWalls": false,
+      "completionExit": false
+    }
+  ]
+}

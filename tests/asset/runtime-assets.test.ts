@@ -12,7 +12,7 @@ const SOURCE_MAPS = resolve(
   ROOT,
   "sample/original-public-build/mirror/assets/maps",
 );
-const RUNTIME_MAPS = resolve(ROOT, "public/maps");
+const RUNTIME_MAPS = resolve(ROOT, "public/assets/maps");
 const RAW_PARTICLE_GIDS = new Set([69355, 69356, 69357, 69358, 69359]);
 const MARKER_GIDS = new Map([
   ["cars", new Set([69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352])],
@@ -22,12 +22,25 @@ const MARKER_GIDS = new Map([
 type JsonTileset = Record<string, unknown>;
 type JsonLayer = { name?: string; data?: number[] };
 
-function pngDimensions(path: string): { width: number; height: number } {
+// 运行期粒子纹理是原站 bundle 里 load 的那张 webp：96×16，6 格。
+// 别和下面 JSON 断言的 112×16 / tilecount 7 混起来 —— 那串数字抄自 Tiled 作图
+// 源 `tileset-particles.tsx`，描述作图工程。原站这两者本来就不一致：.tsx 指向
+// 7 格的 png，运行期却 load 6 格的 webp。Phaser 按纹理宽度现算列数，所以运行期
+// 实际是 6 列；sanitizer 保下来的 GID 只有 69355–69359（第 0–4 格），不缺格。
+function webpDimensions(path: string): { width: number; height: number } {
   const buffer = readFileSync(path);
-  return {
-    width: buffer.readUInt32BE(16),
-    height: buffer.readUInt32BE(20),
-  };
+  const format = buffer.toString("ascii", 12, 16);
+  if (format === "VP8L") {
+    const bits = buffer.readUInt32LE(21);
+    return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+  }
+  if (format === "VP8 ") {
+    return {
+      width: buffer.readUInt16LE(26) & 0x3fff,
+      height: buffer.readUInt16LE(28) & 0x3fff,
+    };
+  }
+  throw new Error(`unsupported WebP chunk ${format}`);
 }
 
 function sha256(path: string): string {
@@ -49,12 +62,12 @@ describe("M1 runtime particle asset contract", () => {
       stdio: "ignore",
     });
 
-    const sourceImage = resolve(SOURCE_MAPS, "tileset-particles.png");
-    const runtimeImage = resolve(RUNTIME_MAPS, "tileset-particles.png");
+    const sourceImage = resolve(SOURCE_MAPS, "tileset-particles.webp");
+    const runtimeImage = resolve(RUNTIME_MAPS, "tileset-particles.webp");
     expect(existsSync(runtimeImage)).toBe(true);
     expect(statSync(runtimeImage).size).toBe(statSync(sourceImage).size);
-    expect(pngDimensions(sourceImage)).toEqual({ width: 112, height: 16 });
-    expect(pngDimensions(runtimeImage)).toEqual({ width: 112, height: 16 });
+    expect(webpDimensions(sourceImage)).toEqual({ width: 96, height: 16 });
+    expect(webpDimensions(runtimeImage)).toEqual({ width: 96, height: 16 });
 
     const rawVisualCounts = new Map([
       ["particles", 0],

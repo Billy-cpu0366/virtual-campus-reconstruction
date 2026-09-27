@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/gridPathProvider.ts",
+    "sourceConstant": "GridRouteCrowdPathProviderOptions（四个字段）",
+    "units": {
+      "tileSize": "pixel",
+      "iterationsPerStep": "perFrame"
+    },
+    "notes": [
+      "maxIterations=50000 原先写死在函数体里（gridPathProvider.ts:142、190），不是模块常量。现在它改从 GridRouteCrowdPathProviderOptions 递进来，所以「改不了」这个缺口没有了。",
+      "directions 的 8 个方向与代价是从原站确认的（4 直向 1、4 斜向 1.41）。改它等于改寻路形状，不是调参。",
+      "tileSize 虽标 pixel，但它是「一格多少像素」这个换算基准本身——改它等于改所有格坐标的含义，通常不该动。"
+    ],
+    "verified": "manual"
+  },
+  "data": {
+    "tileSize": 16,
+    "iterationsPerStep": 64,
+    "maxIterations": 50000,
+    "directions": [
+      {
+        "dx": 0,
+        "dy": -1,
+        "cost": 1
+      },
+      {
+        "dx": 1,
+        "dy": 0,
+        "cost": 1
+      },
+      {
+        "dx": 0,
+        "dy": 1,
+        "cost": 1
+      },
+      {
+        "dx": -1,
+        "dy": 0,
+        "cost": 1
+      },
+      {
+        "dx": 1,
+        "dy": -1,
+        "cost": 1.41
+      },
+      {
+        "dx": 1,
+        "dy": 1,
+        "cost": 1.41
+      },
+      {
+        "dx": -1,
+        "dy": 1,
+        "cost": 1.41
+      },
+      {
+        "dx": -1,
+        "dy": -1,
+        "cost": 1.41
+      }
+    ]
+  }
+}
