@@ -73,9 +73,6 @@ export type DomAppView =
   | "error"
   | "shutdown";
 
-const FOCUS_RING = "3px solid #0b57d0";
-const MOBILE_WIDTH = 767;
-
 function hasTarget(value: DomAppTarget | undefined): value is DomAppTarget {
   return (
     value !== undefined &&
@@ -146,7 +143,15 @@ export class DomAppUi {
     this.notifyViewportChange();
   };
 
-  constructor(options: DomAppUiOptions) {
+  constructor(
+    options: DomAppUiOptions,
+    private readonly config: {
+      readonly mobileBreakpoint: number;
+      readonly focusRing: string;
+      readonly rootPadding: Readonly<{ desktop: string; mobile: string }>;
+      readonly showErrorDetail: boolean;
+    },
+  ) {
     this.elements = options.elements;
     this.viewport = options.viewport;
     this.focusPort = options.focus;
@@ -200,7 +205,11 @@ export class DomAppUi {
       case "MODAL_OPEN":
         return this.renderPlaying();
       case "ERROR":
-        return this.renderError(snapshot.error?.message ?? "Loading failed");
+        return this.renderError(
+          this.config.showErrorDetail
+            ? snapshot.error?.message ?? "Loading failed"
+            : "Loading failed",
+        );
       case "SHUTDOWN":
         this.destroy();
         return true;
@@ -338,7 +347,9 @@ export class DomAppUi {
     this.setStyle(
       root,
       "padding",
-      size.width <= MOBILE_WIDTH ? "16px" : "24px",
+      size.width <= this.config.mobileBreakpoint
+        ? this.config.rootPadding.mobile
+        : this.config.rootPadding.desktop,
     );
     this.setStyle(root, "maxWidth", "100vw");
   }
@@ -353,7 +364,7 @@ export class DomAppUi {
 
   private focusTarget(target: DomAppTarget | undefined): void {
     if (!hasTarget(target)) return;
-    this.setStyle(target, "outline", FOCUS_RING);
+    this.setStyle(target, "outline", this.config.focusRing);
     try {
       if (this.focusPort !== undefined) {
         this.focusPort.focus(target);
@@ -424,8 +435,16 @@ export class DomAppUi {
   }
 }
 
-export function createDomAppUi(options: DomAppUiOptions): DomAppUi {
-  return new DomAppUi(options);
+export function createDomAppUi(
+  options: DomAppUiOptions,
+  config: {
+    readonly mobileBreakpoint: number;
+    readonly focusRing: string;
+    readonly rootPadding: Readonly<{ desktop: string; mobile: string }>;
+    readonly showErrorDetail: boolean;
+  },
+): DomAppUi {
+  return new DomAppUi(options, config);
 }
 
 export type { AppStatus };

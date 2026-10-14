@@ -4,13 +4,21 @@ import { SprayerGroupRuntime } from "../../src/npc/index.js";
 import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
 import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
 import {
-  PhaserSprayerRuntime,
+  PhaserSprayerRuntime as PhaserSprayerRuntimeBase,
   sprayerPresentationDepth,
   type PhaserSprayerAnimationManagerLike,
   type PhaserSprayerEventsLike,
+  type PhaserSprayerRuntimeOptions,
   type PhaserSprayerSceneLike,
   type PhaserSprayerSpriteLike,
 } from "../../game/PhaserSprayerRuntime.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
+
+class PhaserSprayerRuntime extends PhaserSprayerRuntimeBase {
+  constructor(scene: PhaserSprayerSceneLike, options: PhaserSprayerRuntimeOptions) {
+    super(scene, options, PLAYER_CONFIGS);
+  }
+}
 
 /** 四个喷水器和五项调参现在都读磁盘上那份配置。 */
 const CONFIGS = await loadNpcConfigs(createDiskConfigSource());

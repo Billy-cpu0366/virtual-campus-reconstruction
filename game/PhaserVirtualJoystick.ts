@@ -4,9 +4,7 @@ import {
   type DeviceKind,
   type Direction,
 } from "../src/input/index.js";
-
-const POSITION_OFFSET = 50;
-const JOYSTICK_DEPTH = 10_000;
+import type { InputConfigs } from "../config/骨架/02-玩法线/SYS-INPUT/逻辑/index.js";
 
 type Listener = (...args: any[]) => void;
 
@@ -67,6 +65,7 @@ export interface VirtualJoystickState {
 }
 
 export function deviceKindForViewport(
+  tabletBreakpoint: number,
   environment: ViewportEnvironment = globalThis as ViewportEnvironment,
 ): DeviceKind {
   const width = environment.innerWidth ?? 0;
@@ -82,10 +81,10 @@ export function deviceKindForViewport(
   if (!hasTouch) {
     return "desktop";
   }
-  return width >= 768 ? "tablet" : "mobile";
+  return width >= tabletBreakpoint ? "tablet" : "mobile";
 }
 
-export function deviceKindForPhaserScene(scene: unknown): DeviceKind {
+export function deviceKindForPhaserScene(scene: unknown, tabletBreakpoint: number): DeviceKind {
   const os = (scene as { readonly sys?: any }).sys?.game?.device?.os;
   if (os?.desktop === true) {
     return "desktop";
@@ -93,7 +92,7 @@ export function deviceKindForPhaserScene(scene: unknown): DeviceKind {
   if (os?.tablet === true) {
     return "tablet";
   }
-  return deviceKindForViewport();
+  return deviceKindForViewport(tabletBreakpoint);
 }
 
 export class PhaserVirtualJoystick {
@@ -147,15 +146,16 @@ export class PhaserVirtualJoystick {
 
   constructor(
     private readonly scene: JoystickSceneLike,
-    device: DeviceKind = deviceKindForViewport(),
+    device: DeviceKind,
+    private readonly config: InputConfigs,
   ) {
     this.device = device;
-    this.params = joystickParams(device);
+    this.params = joystickParams(device, config.joystick.device, config.joystick.forceMin);
     this.base = scene.add.graphics();
     this.thumb = scene.add.graphics();
-    this.base.setScrollFactor(0, 0).setDepth(JOYSTICK_DEPTH);
-    this.thumb.setScrollFactor(0, 0).setDepth(JOYSTICK_DEPTH + 1);
-    this.visible = device !== "desktop";
+    this.base.setScrollFactor(0, 0).setDepth(config.joystick.depth);
+    this.thumb.setScrollFactor(0, 0).setDepth(config.joystick.depth + 1);
+    this.visible = device !== "desktop" || config.desktop.joystickVisible;
     this.drawBase();
     this.drawThumb();
     this.reposition();
@@ -247,7 +247,7 @@ export class PhaserVirtualJoystick {
     const distance = Math.hypot(forceX, forceY);
     this.directionState =
       distance >= this.params.forceMin
-        ? joystickDirection(forceX, forceY)
+        ? joystickDirection(forceX, forceY, this.config.joystick.mainAxisRatio, this.config.vectors)
         : null;
 
     const thumbDistance = Math.min(distance, this.params.radius);
@@ -263,8 +263,8 @@ export class PhaserVirtualJoystick {
       x: 0, y: 0, width: this.scene.scale.width, height: this.scene.scale.height,
     };
     const baseRadius = this.params.baseDiameter / 2;
-    const insetX = Math.min(Math.max(baseRadius, POSITION_OFFSET), viewport.width / 2);
-    const insetY = Math.min(Math.max(baseRadius, POSITION_OFFSET), viewport.height / 2);
+    const insetX = Math.min(Math.max(baseRadius, this.config.joystick.positionOffset), viewport.width / 2);
+    const insetY = Math.min(Math.max(baseRadius, this.config.joystick.positionOffset), viewport.height / 2);
     this.x = viewport.x + viewport.width - insetX;
     this.y = viewport.y + viewport.height - insetY;
     this.base.setPosition(this.x, this.y).setVisible(this.visible);
@@ -276,21 +276,23 @@ export class PhaserVirtualJoystick {
 
   private drawBase(): void {
     const radius = this.params.baseDiameter / 2;
+    const { baseFill, baseStroke } = this.config.joystick.style;
     this.base
       .clear()
-      .fillStyle(0x0f172a, 0.45)
+      .fillStyle(baseFill.color, baseFill.alpha)
       .fillCircle(0, 0, radius)
-      .lineStyle(2, 0x94a3b8, 0.75)
+      .lineStyle(baseStroke.width, baseStroke.color, baseStroke.alpha)
       .strokeCircle(0, 0, radius);
   }
 
   private drawThumb(): void {
     const radius = this.params.thumbDiameter / 2;
+    const { thumbFill, thumbStroke } = this.config.joystick.style;
     this.thumb
       .clear()
-      .fillStyle(0x38bdf8, 0.85)
+      .fillStyle(thumbFill.color, thumbFill.alpha)
       .fillCircle(0, 0, radius)
-      .lineStyle(2, 0xe0f2fe, 0.9)
+      .lineStyle(thumbStroke.width, thumbStroke.color, thumbStroke.alpha)
       .strokeCircle(0, 0, radius);
   }
 }

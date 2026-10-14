@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { FactorySmokeRuntime } from "../../src/fx/index.js";
 import {
-  FACTORY_SMOKE_CONFIG,
-  FactorySmokeRuntime,
-} from "../../src/fx/index.js";
-import {
-  FACTORY_SMOKE_PRESENTATION_DEPTH,
   PhaserFactorySmokeRuntime,
   type PhaserFactorySmokeEmitterLike,
   type PhaserFactorySmokeEventsLike,
@@ -13,6 +9,9 @@ import {
   type PhaserFactorySmokeParticleLike,
   type PhaserFactorySmokeSceneLike,
 } from "../../game/PhaserFactorySmokeRuntime.js";
+import { FX_CONFIGS } from "./fixture.js";
+
+const FACTORY_SMOKE_CONFIG = FX_CONFIGS.factorySmoke;
 
 const INSIDE_VIEWPORT = Object.freeze({
   left: 400,
@@ -142,7 +141,7 @@ function makeScene(textureAvailable = true) {
 
 describe("FactorySmokeRuntime", () => {
   it("使用公开锚点/参数，视口外停发、返回复用同一generation", () => {
-    const runtime = new FactorySmokeRuntime();
+    const runtime = new FactorySmokeRuntime(FACTORY_SMOKE_CONFIG);
     expect(FACTORY_SMOKE_CONFIG).toMatchObject({
       x: 808,
       y: 539.2,
@@ -175,11 +174,11 @@ describe("FactorySmokeRuntime", () => {
   });
 
   it("资源失败进入error，shutdown终止owner且不可重启", () => {
-    const missing = new FactorySmokeRuntime();
+    const missing = new FactorySmokeRuntime(FACTORY_SMOKE_CONFIG);
     expect(missing.start(false)).toEqual({ ok: false, reason: "missing-texture" });
     expect(missing.snapshot.state).toBe("error");
 
-    const runtime = new FactorySmokeRuntime();
+    const runtime = new FactorySmokeRuntime(FACTORY_SMOKE_CONFIG);
     runtime.start();
     expect(runtime.shutdown().teardownRequested).toBe(true);
     expect(runtime.shutdown()).toMatchObject({ state: "shutdown" });
@@ -196,7 +195,7 @@ describe("PhaserFactorySmokeRuntime", () => {
       readonly width: number;
       readonly height: number;
     } = INSIDE_VIEWPORT;
-    const runtime = new PhaserFactorySmokeRuntime(fake.scene, {
+    const runtime = new PhaserFactorySmokeRuntime(fake.scene, FACTORY_SMOKE_CONFIG, {
       viewport: () => viewport,
     });
     runtime.preload();
@@ -210,7 +209,7 @@ describe("PhaserFactorySmokeRuntime", () => {
       emitting: false,
     });
     expect(fake.emitters[0]?.visible).toBe(true);
-    expect(fake.emitters[0]?.depth).toBe(FACTORY_SMOKE_PRESENTATION_DEPTH);
+    expect(fake.emitters[0]?.depth).toBe(FACTORY_SMOKE_CONFIG.presentationDepth);
     expect(runtime.visualSnapshot).toMatchObject({
       anchor: { x: 808, y: 539.2 },
       aliveParticleCount: 1,
@@ -242,7 +241,7 @@ describe("PhaserFactorySmokeRuntime", () => {
   it("资源失败不创建emitter，且shutdown幂等", () => {
     const fake = makeScene(false);
     const errors: string[] = [];
-    const runtime = new PhaserFactorySmokeRuntime(fake.scene, {
+    const runtime = new PhaserFactorySmokeRuntime(fake.scene, FACTORY_SMOKE_CONFIG, {
       onError: (reason) => errors.push(reason),
     });
     expect(runtime.start()).toEqual({ ok: false, reason: "missing-texture" });

@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  DEFAULT_FACING,
   facingDirection,
 } from "../../src/player/index.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
 
 describe("朝向", () => {
   it("默认朝南", () => {
-    expect(DEFAULT_FACING).toBe("south");
-    expect(facingDirection(undefined)).toBe("south");
+    expect(PLAYER_CONFIGS.defaultFacing).toBe("south");
+    expect(facingDirection(undefined, PLAYER_CONFIGS.defaultFacing)).toBe("south");
   });
 
   it("有最后方向则用它", () => {
-    expect(facingDirection("east")).toBe("east");
-    expect(facingDirection("north-west")).toBe("north-west");
+    expect(facingDirection("east", PLAYER_CONFIGS.defaultFacing)).toBe("east");
+    expect(facingDirection("north-west", PLAYER_CONFIGS.defaultFacing)).toBe("north-west");
   });
 });

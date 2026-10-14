@@ -139,7 +139,7 @@ function makeUi(): {
     closeButton: new FakeTarget(),
   };
   const viewport = new FakeViewport();
-  return { ui: new DomModalGameUi(elements, viewport), elements, viewport };
+  return { ui: new DomModalGameUi(elements, viewport, 0.9, 0.7), elements, viewport };
 }
 
 function showRequest(
@@ -170,7 +170,7 @@ describe("DomModalGameUi", () => {
   it("rejects missing targets without changing the injected DOM", () => {
     const root = new FakeTarget();
     const viewport = new FakeViewport();
-    const ui = new DomModalGameUi({ root }, viewport);
+    const ui = new DomModalGameUi({ root }, viewport, 0.9, 0.7);
 
     expect(ui.show(showRequest())).toEqual({ status: "missing-target" });
     expect(root.hidden).toBe(true);
@@ -335,7 +335,7 @@ describe("DomModalGameUi", () => {
     const viewport = new FakeViewport();
     viewport.throwOnSubscribe = true;
 
-    expect(() => new DomModalGameUi(elements, viewport)).toThrow(
+    expect(() => new DomModalGameUi(elements, viewport, 0.9, 0.7)).toThrow(
       "subscribe failed",
     );
     expect(elements.closeButton.listeners.get("click")?.size ?? 0).toBe(0);
@@ -358,7 +358,7 @@ describe("DomModalGameUi", () => {
     elements.backdrop.throwOnAdd = true;
     const viewport = new FakeViewport();
 
-    expect(() => new DomModalGameUi(elements, viewport)).toThrow(
+    expect(() => new DomModalGameUi(elements, viewport, 0.9, 0.7)).toThrow(
       "add failed",
     );
     expect(elements.closeButton.listeners.get("click")?.size ?? 0).toBe(0);

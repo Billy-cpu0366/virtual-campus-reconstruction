@@ -8,10 +8,9 @@ import {
   type RouteCrowdSpacingRule,
 } from "../src/npc/index.js";
 import {
-  ANIMATION_FRAME_RATE,
-  WALK_FRAMES_PER_DIRECTION,
   walkFrameStart,
 } from "../src/player/index.js";
+import type { PlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
 import type {
   RouteCrowdPresentation,
   TrackBand,
@@ -102,6 +101,7 @@ export class PhaserRouteCrowdRuntime {
   constructor(
     private readonly scene: PhaserRouteCrowdSceneLike,
     private readonly options: PhaserRouteCrowdRuntimeOptions,
+    private readonly playerConfigs: PlayerConfigs,
   ) {
     const normalConfigs = options.configs.filter(
       (config) => config.id !== "crowd-train",
@@ -321,7 +321,7 @@ export class PhaserRouteCrowdRuntime {
       return;
     }
     sprite.anims?.stop?.();
-    sprite.setFrame?.(walkFrameStart(facing));
+    sprite.setFrame?.(walkFrameStart(facing, this.playerConfigs.animation.walkFrameStart));
   }
 
   private ensureAnimation(
@@ -333,14 +333,15 @@ export class PhaserRouteCrowdRuntime {
     if (animations === undefined) return false;
     if (this.createdAnimations.has(key) || animations.exists?.(key) === true) return true;
     try {
-      const start = walkFrameStart(facing);
+      const range = this.playerConfigs.animation;
+      const start = walkFrameStart(facing, range.walkFrameStart);
       const created = animations.create({
         key,
         frames: animations.generateFrameNumbers(texture, {
           start,
-          end: start + WALK_FRAMES_PER_DIRECTION - 1,
+          end: start + range.walkFramesPerDirection - 1,
         }),
-        frameRate: ANIMATION_FRAME_RATE,
+        frameRate: range.frameRate,
         repeat: -1,
       });
       if (created !== false) this.createdAnimations.add(key);

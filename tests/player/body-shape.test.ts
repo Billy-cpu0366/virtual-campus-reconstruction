@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { PhaserPlayerRuntime, type PhaserPlayerSceneLike } from "../../game/PhaserPlayerRuntime.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
 
 // Exercise the bundled engine's real body transform, including scale and origin.
 const engine = readFileSync(new URL("../../sample/original-public-build/mirror/assets/js/phaser.min.js", import.meta.url), "utf8");
@@ -42,7 +43,7 @@ it.each(["player-eating", "player-scratching", "player-tying-shoe", "player-sitt
     };
     sprite.body = body;
     const scene = { anims: { exists: () => true }, textures: { exists: (key: string) => key === "player" || key === texture } } as unknown as PhaserPlayerSceneLike;
-    const runtime = new PhaserPlayerRuntime(scene, sprite, { now: () => 0, random: () => 0 });
+    const runtime = new PhaserPlayerRuntime(scene, sprite, PLAYER_CONFIGS, { now: () => 0, random: () => 0 });
     const check = () => {
       body.updateFromGameObject();
       expect({ width: body.width, height: body.height, ...body.position }).toEqual({ width: 20, height: 8, x: 90, y: 112 });

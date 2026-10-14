@@ -1,10 +1,26 @@
 import { describe, expect, it } from "vitest";
 import {
-  PhaserVenueCrowdRuntime,
+  PhaserVenueCrowdRuntime as PhaserVenueCrowdRuntimeBase,
   preloadVenueCrowdRuntimeAssets,
+  type PhaserVenueCrowdSceneLike,
 } from "../../game/PhaserVenueCrowdRuntime.js";
 import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
 import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
+import type { VenueCrowdRuntimeOptions } from "../../src/npc/index.js";
+import type { VenueCrowdPresentation } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/types.js";
+
+class PhaserVenueCrowdRuntime extends PhaserVenueCrowdRuntimeBase {
+  constructor(
+    scene: PhaserVenueCrowdSceneLike,
+    viewport: () => { left: number; top: number; width: number; height: number } | undefined,
+    options: VenueCrowdRuntimeOptions,
+    presentation: VenueCrowdPresentation,
+    now: () => number = Date.now,
+  ) {
+    super(scene, viewport, options, presentation, PLAYER_CONFIGS, now);
+  }
+}
 
 /** 区域和两个 margin 现在都读磁盘上那份配置——和游戏里读的是同一份。 */
 const CONFIGS = await loadNpcConfigs(createDiskConfigSource());

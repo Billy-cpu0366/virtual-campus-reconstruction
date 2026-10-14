@@ -8,9 +8,6 @@ import type {
   ProductEntryTrainPort,
 } from "./ProductEntryRuntime.js";
 
-export const PRODUCT_ENTRY_CAMERA_DURATION_MS = 3000;
-export const PRODUCT_ENTRY_TRAIN_ARRIVAL_MS = 5000;
-
 interface ProductEntryCameraRuntimeLike {
   start(options: CameraRuntimeStartOptions): Promise<CameraRunResult>;
   shutdown(): void;
@@ -34,6 +31,7 @@ export class ProductEntryCameraAdapter implements ProductEntryCameraPort {
   constructor(
     private readonly runtime: ProductEntryCameraRuntimeLike,
     private readonly getCurrentCenter: () => CameraPosition,
+    private readonly defaultReturnDuration: number,
     private readonly options: ProductEntryCameraAdapterOptions = {},
   ) {}
 
@@ -59,7 +57,7 @@ export class ProductEntryCameraAdapter implements ProductEntryCameraPort {
               }),
         ],
         returnDuration:
-          preview?.returnDuration ?? PRODUCT_ENTRY_CAMERA_DURATION_MS,
+          preview?.returnDuration ?? this.defaultReturnDuration,
       })
       .then((result) => {
         if (result.status === "completed") return;
@@ -209,7 +207,10 @@ export class TimedTrainArrivalAdapter implements ProductEntryTrainPort {
   private rejectPromise: ((error: Error) => void) | undefined;
   private state: "idle" | "entering" | "arrived" | "shutdown" = "idle";
 
-  constructor(private readonly clock: ProductEntryClockLike) {}
+  constructor(
+    private readonly clock: ProductEntryClockLike,
+    private readonly arrivalDurationMs: number,
+  ) {}
 
   get status(): "idle" | "entering" | "arrived" | "shutdown" {
     return this.state;
@@ -223,7 +224,7 @@ export class TimedTrainArrivalAdapter implements ProductEntryTrainPort {
     this.state = "entering";
     this.promise = new Promise<void>((resolve, reject) => {
       this.rejectPromise = reject;
-      this.timer = this.clock.delayedCall(PRODUCT_ENTRY_TRAIN_ARRIVAL_MS, () => {
+      this.timer = this.clock.delayedCall(this.arrivalDurationMs, () => {
         if (this.state !== "entering") return;
         this.timer = undefined;
         this.rejectPromise = undefined;

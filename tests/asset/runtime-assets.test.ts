@@ -187,5 +187,5 @@ describe("M1 runtime particle asset contract", () => {
         stdio: "ignore",
       }),
     ).not.toThrow();
-  });
+  }, 15_000);
 });

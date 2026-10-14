@@ -6,9 +6,16 @@ import {
   type StaticCrowdPoint,
   type StaticCrowdRegion,
 } from "../../src/npc/index.js";
-import { PhaserStaticCrowdRuntime, keepStaticCrowdOffTrack } from "../../game/PhaserStaticCrowdRuntime.js";
+import { PhaserStaticCrowdRuntime as PhaserStaticCrowdRuntimeBase, keepStaticCrowdOffTrack, type PhaserStaticCrowdRuntimeOptions, type PhaserStaticCrowdSceneLike } from "../../game/PhaserStaticCrowdRuntime.js";
 import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
 import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
+
+class PhaserStaticCrowdRuntime extends PhaserStaticCrowdRuntimeBase {
+  constructor(scene: PhaserStaticCrowdSceneLike, options: PhaserStaticCrowdRuntimeOptions) {
+    super(scene, options, PLAYER_CONFIGS);
+  }
+}
 
 /** 区域、贴图池、关掉的区域、八项调参现在全部读磁盘上那份配置。 */
 const CONFIGS = await loadNpcConfigs(createDiskConfigSource());

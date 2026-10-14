@@ -1,12 +1,20 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { GridRouteCrowdPathProvider } from "../../src/npc/gridPathProvider.js";
+import { GridRouteCrowdPathProvider as BaseGridRouteCrowdPathProvider, type GridRouteCrowdPathProviderOptions } from "../../src/npc/gridPathProvider.js";
 import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
 import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+import { loadMoveConfigs } from "../../config/骨架/02-玩法线/SYS-MOVE/逻辑/index.js";
 
 /** 寻路那四项现在读磁盘上那份配置，不再从 src/ 里拿常量。 */
 const { tuning } = await loadNpcConfigs(createDiskConfigSource());
 const PATH_TUNING = tuning.path;
+const MOVE_CONFIGS = await loadMoveConfigs(createDiskConfigSource());
+class GridRouteCrowdPathProvider extends BaseGridRouteCrowdPathProvider {
+  constructor(grid: readonly (readonly number[])[], options: GridRouteCrowdPathProviderOptions) {
+    super(grid, options, MOVE_CONFIGS.walkableValue, MOVE_CONFIGS.blockedValue,
+      MOVE_CONFIGS.outOfBoundsIsWalkable);
+  }
+}
 
 describe("GridRouteCrowdPathProvider", () => {
   it("finds an eight-way walkable route and rejects blocked endpoints", () => {

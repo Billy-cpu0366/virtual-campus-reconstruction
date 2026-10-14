@@ -1,5 +1,9 @@
 // 配置实测冒烟：改一个配置值 → 刷新页面（**不重新构建**）→ 在真浏览器里量出来 + 截图 → 改回去。
 //
+// 覆盖已接线板块。每接一个板块，就往下面 TESTS 表里加用例，
+// 再在 MEASURE 里加上这个板块要量的数——这是「接线接上了没有」的最后一关。
+// 用例 01-10 是 NPC，11-14 是 SYS-ROUTE，15 起覆盖新增板块。
+//
 // 验的是「配置到底接上了没有」：改的数真的走进了画面，而不是只躺在 JSON 里没人读。
 // 顺带证明配置是「改完刷新就生效」，不用重新构建。
 //
@@ -28,7 +32,25 @@ const cdpUrl = process.env.CDP_URL ?? "http://127.0.0.1:9223";
 // 写 127.0.0.1 会连不上。localhost 两个都试。
 const inputUrl =
   process.argv[2] ?? process.env.SMOKE_URL ?? "http://localhost:4175/";
-const dataDir = "config/default/05-旁支/SYS-NPC/数据";
+// 每个板块的数据目录。用例不单独写 `dir` 时用 NPC 那份（下面大部分还是 NPC 的）。
+const DATA_DIRS = {
+  npc: "config/default/05-旁支/SYS-NPC/数据",
+  route: "config/default/05-旁支/SYS-ROUTE/数据",
+  chunk: "config/default/01-地图线/SYS-CHUNK/数据",
+  zone: "config/default/03-内容线/SYS-ZONE/数据",
+  move: "config/default/02-玩法线/SYS-MOVE/数据",
+  input: "config/default/02-玩法线/SYS-INPUT/数据",
+  world: "config/default/01-地图线/SYS-WORLD/数据",
+  camera: "config/default/02-玩法线/SYS-CAMERA/数据",
+  interact: "config/default/03-内容线/SYS-INTERACT/数据",
+  layer: "config/default/02-玩法线/SYS-LAYER/数据",
+  player: "config/default/02-玩法线/SYS-PLAYER/数据",
+  entity: "config/default/04-独立件/SYS-ENTITY/数据",
+  fx: "config/default/05-旁支/SYS-FX/数据",
+  app: "config/default/04-独立件/SYS-APP/数据",
+  gameUi: "config/default/04-独立件/SYS-GAME-UI/数据",
+  transport: "config/default/06-网络协议层/SYS-TRANSPORT/数据",
+};
 const outDir = process.env.CONFIG_LIVE_OUT ?? "/tmp/config-live-smoke";
 const shotDir = join(outDir, "screens");
 const totalTimeoutMs = Number(process.env.CONFIG_LIVE_TIMEOUT_MS ?? 1_800_000);
@@ -133,29 +155,266 @@ const TESTS = [
       json.data.factor = 0.016;
     },
   },
+  {
+    // ---- 从这一条起是 SYS-ROUTE。板块接线的第一件事就是让它们出现在这张表里。
+    id: "11-helicopter-scale",
+    dir: DATA_DIRS.route,
+    file: "vehicle-config.json",
+    camera: [504, 1288],
+    what: "直升机个头 scale 2 -> 5",
+    apply: (json) => {
+      json.data.helicopter.scale = 5;
+    },
+  },
+  {
+    id: "12-helicopter-move",
+    dir: DATA_DIRS.route,
+    file: "vehicle-config.json",
+    camera: [504, 1288],
+    what: "直升机从楼顶 (504,1288) 挪到 (620,1180)",
+    apply: (json) => {
+      json.data.helicopter.position = { x: 620, y: 1180 };
+    },
+  },
+  {
+    id: "13-police-scale",
+    dir: DATA_DIRS.route,
+    file: "vehicle-config.json",
+    camera: [1790, 1331],
+    what: "三辆警车个头 scale 1 -> 3",
+    apply: (json) => {
+      json.data.police.scale = 3;
+    },
+  },
+  {
+    id: "14-train-exit-distance",
+    dir: DATA_DIRS.route,
+    file: "train-config.json",
+    camera: [480, 310],
+    what: "火车开出去多远 exitDistance 4000 -> 1000（等它真停下再量：改前应停在 480-4000，改后 480-1000）",
+    apply: (json) => {
+      json.data.exitDistance = 1000;
+    },
+    // 开跑那一刻火车还在开出去，等的就是它到站。
+    settle: {
+      label: "火车离场结束",
+      expression: `(() => { for (const game of __games) {
+        const snapshot = game?.scene?.getScene?.("campus")?.trainRuntime?.snapshot;
+        if (snapshot) return snapshot.state;
+      } return null; })()`,
+      predicate: (state) =>
+        state === "complete" || state === "cancelled" || state === "shutdown",
+    },
+  },
+  {
+    id: "15-chunk-camera-padding",
+    dir: DATA_DIRS.chunk,
+    file: "chunk-config.json",
+    camera: [1000, 1000],
+    what: "相机预载边距 cameraPadding 1 -> 0，量稳定后的目标分块数",
+    apply: (json) => { json.data.cameraPadding = 0; },
+    expectedChange: "chunkTargetCount",
+    settle: {
+      label: "分块请求全部结束",
+      expression: `(() => { for (const game of __games) {
+        const state = game?.scene?.getScene?.("campus")?.coordinator?.state;
+        if (state) return { targets: state.targets?.length, requesting: state.requesting?.length };
+      } return null; })()`,
+      predicate: (state) => state?.targets > 0 && state?.requesting === 0,
+    },
+  },
+  {
+    id: "16-zone-memo6-position",
+    dir: DATA_DIRS.zone,
+    file: "zone-config.json",
+    camera: [496, 176],
+    what: "MEMO6 触发点和地图标记 x 从 496 移到 720",
+    apply: (json) => {
+      json.data.markers.find((marker) => marker.markerId === "memo6").x = 720;
+    },
+    expectedChange: "memo6Marker",
+  },
+  {
+    id: "17-move-drag",
+    dir: DATA_DIRS.move,
+    file: "move-config.json",
+    camera: [1000, 1000],
+    what: "玩家松手阻力 drag 从 300 调为 180，量碰撞体阻力",
+    apply: (json) => { json.data.drag = 180; },
+    expectedChange: "playerDrag",
+  },
+  {
+    id: "18-input-desktop-joystick",
+    dir: DATA_DIRS.input,
+    file: "input-config.json",
+    camera: [1000, 1000],
+    what: "桌面摇杆 visible 从 false 调为 true，量摇杆的运行时显示状态",
+    apply: (json) => { json.data.desktop.joystickVisible = true; },
+    expectedChange: "joystickVisible",
+  },
+  {
+    id: "19-world-clear-budget",
+    dir: DATA_DIRS.world,
+    file: "world-config.json",
+    camera: [1000, 1000],
+    what: "世界图层每帧清理预算 clearLayersPerFrame 从 4 调为 2",
+    apply: (json) => { json.data.clearLayersPerFrame = 2; },
+    expectedChange: "worldClearLayersPerFrame",
+  },
+  {
+    id: "20-camera-zoom",
+    dir: DATA_DIRS.camera,
+    file: "camera-config.json",
+    camera: [1000, 1000],
+    what: "相机缩放 zoom 从 1 调为 1.25，量 Phaser 相机当前 zoom",
+    apply: (json) => { json.data.settings.zoom = 1.25; },
+    expectedChange: "cameraZoom",
+  },
+  {
+    id: "21-interact-content",
+    dir: DATA_DIRS.interact,
+    file: "interact-config.json",
+    camera: [944, 768],
+    what: "About 弹窗标题从 About me 改为 CONFIG-LIVE-ABOUT",
+    apply: (json) => { json.data.content.about.title = "CONFIG-LIVE-ABOUT"; },
+    expectedChange: "contentTitle",
+    prepare: `(() => { for (const game of __games) {
+      const scene = game?.scene?.getScene?.("campus");
+      if (!scene) continue;
+      scene.openContentFromMap({ markerId: "about", menuId: "about", enabled: true });
+      return document.getElementById("content-title")?.textContent === "CONFIG-LIVE-ABOUT"
+        || document.getElementById("content-title")?.textContent === "About me";
+    } return false; })()`,
+  },
+  {
+    id: "22-layer-depth",
+    dir: DATA_DIRS.layer,
+    file: "layer-config.json",
+    camera: [1000, 1000],
+    what: "layer1 深度从 100 改为 777，量 Tilemap 实例 depth",
+    apply: (json) => {
+      const layer = json.data.strategies.find((entry) => entry.name === "layer1");
+      layer.depth = 777;
+    },
+    expectedChange: "layer1Depth",
+  },
+  {
+    id: "23-player-display-size",
+    dir: DATA_DIRS.player,
+    file: "player-config.json",
+    camera: [1088, 304],
+    what: "玩家显示尺寸从 48 改为 64，量玩家精灵 displayWidth",
+    apply: (json) => { json.data.displaySize = 64; },
+    expectedChange: "playerDisplayWidth",
+  },
+  {
+    id: "24-entity-cleanup-order",
+    dir: DATA_DIRS.entity,
+    file: "entity-config.json",
+    camera: [1088, 304],
+    what: "静态 NPC 与静态人群的清理顺序互换，量真实 shutdown 调用轨迹",
+    apply: (json) => {
+      const order = json.data.cleanupOrder;
+      const npc = order.indexOf("static-npc");
+      const crowd = order.indexOf("static-crowd");
+      [order[npc], order[crowd]] = [order[crowd], order[npc]];
+    },
+    expectedChange: "entityCleanupOrder",
+    prepare: `(() => {
+      for (const game of __games) {
+        const scene = game?.scene?.getScene?.("campus");
+        const npc = scene?.staticNpcRuntime;
+        const crowd = scene?.staticCrowdRuntime;
+        if (!scene || !npc || !crowd) continue;
+        const trace = globalThis.__entityCleanupTrace = [];
+        globalThis.__entityCleanupDone = false;
+        for (const [runtime, name] of [[npc, "static-npc"], [crowd, "static-crowd"]]) {
+          const shutdown = runtime.shutdown.bind(runtime);
+          runtime.shutdown = (...args) => { trace.push(name); return shutdown(...args); };
+        }
+        void scene.shutdownForGeneration().then(() => {
+          globalThis.__entityCleanupDone = true;
+        }, (error) => {
+          globalThis.__entityCleanupError = String(error);
+          globalThis.__entityCleanupDone = true;
+        });
+        return true;
+      }
+      return false;
+    })()`,
+    settle: {
+      label: "场景关停完成并记录两个 NPC 运行时",
+      expression: "globalThis.__entityCleanupDone === true ? globalThis.__entityCleanupTrace : null",
+      predicate: (trace) => Array.isArray(trace) && trace.length === 2,
+    },
+  },
+  {
+    id: "25-factory-smoke-anchor",
+    dir: DATA_DIRS.fx,
+    file: "fx-config.json",
+    camera: [1_000, 600],
+    what: "工厂烟囱 x 坐标从 808 改为 1000，量粒子运行时锚点",
+    apply: (json) => { json.data.factorySmoke.x = 1_000; },
+    expectedChange: "factorySmokeAnchorX",
+  },
+  {
+    id: "26-game-ui-root-padding",
+    dir: DATA_DIRS.gameUi,
+    file: "game-ui-config.json",
+    camera: [1_000, 600],
+    what: "桌面页面边距从 24px 改为 40px，量 app-shell 的内联 padding",
+    apply: (json) => { json.data.rootPadding.desktop = "40px"; },
+    expectedChange: "appShellPadding",
+  },
+  {
+    id: "27-app-logical-width",
+    dir: DATA_DIRS.app,
+    file: "app-config.json",
+    camera: [1_000, 600],
+    what: "Phaser 逻辑宽度从 480 改为 600，量实际 game.config.width",
+    apply: (json) => { json.data.logicalWidth = 600; },
+    expectedChange: "appLogicalWidth",
+  },
+  {
+    // ---- §17 网络协议层。超时不是画面值，量的是场景实际喂给 fetchJson 的那份。
+    id: "28-transport-json-timeout",
+    dir: DATA_DIRS.transport,
+    file: "transport-config.json",
+    camera: [1_000, 600],
+    what: "JSON 请求超时从 15000 改为 45000，量场景包装 JsonLoader 时传入的超时",
+    apply: (json) => { json.data.timeouts.json = 45000; },
+    expectedChange: "jsonTimeoutMs",
+  },
 ];
 
 // ------------------------------------------------------------------ 原值备份
+//
+// 键是「目录 + 文件名」：将来两个板块出现同名文件时也不会串。
 const originals = new Map();
-for (const name of new Set(TESTS.map((test) => test.file))) {
-  const text = readFileSync(join(dataDir, name), "utf8");
-  originals.set(name, {
-    path: join(dataDir, name),
+for (const test of TESTS) {
+  const dir = test.dir ?? DATA_DIRS.npc;
+  const key = `${dir}/${test.file}`;
+  if (originals.has(key)) continue;
+  const text = readFileSync(join(dir, test.file), "utf8");
+  originals.set(key, {
+    path: join(dir, test.file),
     text,
     // 配置是由 vite 开发中间件直接当静态文件端出来的，所以请求地址就是磁盘路径的 URL 编码
-    url: new URL(`config/default/05-旁支/SYS-NPC/数据/${name}`, inputUrl).toString(),
+    url: new URL(`${dir}/${test.file}`, inputUrl).toString(),
   });
 }
 // 先把上一次跑留下的「原值」读下来，再覆盖写——preflight 要靠它判断「这份配置在两次跑之间被动过没有」。
+// 备份文件名把目录里的斜杠换成 `--`，免得在 <out> 下再建一层目录。
+const backupName = (key) => `原值-${key.replace(/[\\/]/g, "--")}`;
 const previousOriginals = new Map();
-for (const name of originals.keys()) {
-  const previousPath = join(outDir, `原值-${name}`);
-  previousOriginals.set(name, existsSync(previousPath) ? readFileSync(previousPath, "utf8") : undefined);
+for (const key of originals.keys()) {
+  const previousPath = join(outDir, backupName(key));
+  previousOriginals.set(key, existsSync(previousPath) ? readFileSync(previousPath, "utf8") : undefined);
 }
 
 mkdirSync(shotDir, { recursive: true });
-for (const [name, original] of originals) {
-  writeFileSync(join(outDir, `原值-${name}`), original.text, "utf8");
+for (const [key, original] of originals) {
+  writeFileSync(join(outDir, backupName(key)), original.text, "utf8");
 }
 
 function restoreAll() {
@@ -213,11 +472,24 @@ async function waitFor(expression, predicate, label, timeoutMs = 45_000) {
   throw new Error(`timed out waiting for ${label} (last=${JSON.stringify(last)})`);
 }
 
-/** 一个镜头要量哪些数：人群总数 / 画面内数量 / 缩放、静态 NPC 坐标、喷水器、气泡。 */
+/**
+ * 一个镜头要量哪些数。
+ *
+ * NPC 那一组：人群总数 / 画面内数量 / 缩放、静态 NPC 坐标、喷水器、气泡。
+ * SYS-ROUTE 那一组：直升机、三辆警车、火车——**量的是运行时快照**，不是像素。
+ * 快照里的数就是画面上那个对象身上的数（`x`/`y`/`scale` 直接取自 sprite），
+ * 所以「快照变了」等价于「画面上那个东西变了」，截图也一并存着可以对着看。
+ *
+ * `scene.vehicleRuntime` / `scene.trainRuntime` 在 TS 里是 private，运行时就是普通属性，能直接取。
+ */
 const MEASURE = `(() => {
   if (typeof __games === "undefined") return null;
   for (const game of __games) {
     const scene = game?.scene?.getScene?.("campus");
+    const entityCleanupTrace = globalThis.__entityCleanupTrace;
+    if (scene && Array.isArray(entityCleanupTrace)) {
+      return { entityCleanupOrder: entityCleanupTrace.join(",") };
+    }
     const camera = scene?.cameras?.main;
     if (!scene || !camera) continue;
     const view = camera.worldView;
@@ -227,6 +499,12 @@ const MEASURE = `(() => {
       sprite.y + half >= view.y && sprite.y - half <= view.y + view.height).length;
     const dancing = entries(scene.dancingCrowdRuntime?.sprites);
     const bugs = entries(scene.bugCrowdRuntime?.sprites);
+    const vehicle = scene.vehicleRuntime?.snapshot;
+    const heli = vehicle?.helicopter;
+    const train = scene.trainRuntime?.snapshot;
+    const chunkState = scene.coordinator?.state;
+    const memo6 = scene.zoneRuntime?.markers?.find((marker) => marker.markerId === "memo6");
+    const memo6Dom = document.querySelector('[data-big-map-marker="memo6"]');
     return {
       view: {
         x: Math.round(view.x), y: Math.round(view.y),
@@ -253,6 +531,35 @@ const MEASURE = `(() => {
       bubbles: entries(scene.venueCrowdRuntime?.speechBubbles).map(([id, bubble]) => ({
         id: String(id), text: bubble.text ?? null, fontSize: bubble.style?.fontSize ?? null,
       })),
+      helicopter: heli ? {
+        x: Math.round(heli.x), y: Math.round(heli.y),
+        scale: Number(heli.scale.toFixed(2)),
+        depth: heli.depth,
+        frame: heli.frame,
+        bladeCount: heli.bladeCount,
+        mainRotorSize: heli.mainRotorSize,
+        mainRotorOffset: heli.mainRotorOffset,
+        componentKeys: heli.componentKeys,
+      } : null,
+      police: (vehicle?.police ?? []).map((car) => ({
+        id: car.id, x: Math.round(car.x), y: Math.round(car.y), frame: car.frame,
+        scale: Number(car.scale.toFixed(2)), depth: car.depth,
+      })),
+      train: train ? { state: train.state, x: Math.round(train.x) } : null,
+      chunkTargetCount: chunkState?.targets?.length ?? null,
+      memo6Marker: memo6 ? { x: memo6.x, y: memo6.y, left: memo6Dom?.style.left ?? null } : null,
+      playerDrag: scene.player?.body?.drag?.x ?? null,
+      joystickVisible: scene.joystick?.debugState?.().visible ?? null,
+      worldClearLayersPerFrame: scene.worldRenderer?.teardownSnapshot?.clearLayersPerFrame ?? null,
+      cameraZoom: camera.zoom,
+      contentTitle: document.getElementById("content-title")?.textContent ?? null,
+      layer1Depth: entries(scene.worldRenderer?.layers).find(([key]) => key.startsWith("layer1@"))?.[1]?.depth ?? null,
+      playerDisplayWidth: scene.player?.displayWidth ?? null,
+      entityCleanupOrder: globalThis.__entityCleanupTrace?.join(",") ?? null,
+      factorySmokeAnchorX: scene.smokeRuntime?.visualSnapshot?.anchor?.x ?? null,
+      appShellPadding: document.getElementById("app-shell")?.style.padding ?? null,
+      appLogicalWidth: game?.config?.width ?? null,
+      jsonTimeoutMs: scene.transportSnapshot?.jsonTimeoutMs ?? null,
       fps: Math.round(game.loop?.actualFps ?? 0),
     };
   }
@@ -311,8 +618,15 @@ async function awaitAppState(target, timeoutMs) {
   throw new Error(`timed out waiting for App status ${target}`);
 }
 
-/** 开一次游戏：导航 → 等到能玩 → 把镜头对准 → 量一遍 + 截图。 */
-async function loadAndPlay(tag, camera) {
+/**
+ * 开一次游戏：导航 → 等到能玩 → 把镜头对准 → （可选）等某个状态稳定 → 量一遍 + 截图。
+ *
+ * `settle` 是给「这条用例要量的数在开跑那一刻还没定下来」用的。火车那条就是：
+ * 进场流程结束时火车还在开出去，这时候量到的是「这一刻开到哪儿了」，两次跑差几百像素
+ * 可能只是加载快慢——看着变了，其实跟改的那个值没关系。等它真停下来再量，才是那条配置说了算。
+ * **量到没稳定下来的数，比没量到更坏**：报告是绿的，结论却是错的。
+ */
+async function loadAndPlay(tag, camera, settle, prepare) {
   noise.length = 0;
   const url = new URL(inputUrl);
   url.searchParams.set("config-live-smoke", tag);
@@ -350,6 +664,16 @@ async function loadAndPlay(tag, camera) {
   if (centered !== true) throw new Error("could not center camera");
   // 镜头里的人是逐帧补出来的（maxCreatePerSync），等它补齐再量
   await sleep(3200);
+  if (prepare !== undefined) {
+    const prepared = await evaluate(prepare);
+    if (prepared !== true) throw new Error("config-live smoke preparation failed");
+    await sleep(300);
+  }
+  if (settle !== undefined) {
+    await waitFor(settle.expression, settle.predicate, settle.label ?? "settle", 90_000);
+    // 状态到位之后再松一口气：上一帧刚变，画面上那个对象可能还差这一帧
+    await sleep(400);
+  }
   const measured = await evaluate(MEASURE);
   const shot = await command("Page.captureScreenshot", { format: "png" });
   return { measured, png: shot.data, noise: [...noise] };
@@ -357,17 +681,26 @@ async function loadAndPlay(tag, camera) {
 
 /** 只留改前改后不一样的那几项，并排成 [改前, 改后]。 */
 function diff(before, after) {
+  if (typeof before.entityCleanupOrder === "string" || typeof after.entityCleanupOrder === "string") {
+    return before.entityCleanupOrder === after.entityCleanupOrder
+      ? {}
+      : { entityCleanupOrder: [before.entityCleanupOrder, after.entityCleanupOrder] };
+  }
   const scalarKeys = [
     "dancingTotal", "dancingInView", "dancingScale",
     "bugTotal", "bugInView", "bugScale",
     "venueTotal", "venueInView",
     "staticCrowdTotal", "staticCrowdInView",
+    "chunkTargetCount", "playerDrag", "joystickVisible", "worldClearLayersPerFrame", "cameraZoom", "contentTitle", "layer1Depth", "playerDisplayWidth", "entityCleanupOrder", "factorySmokeAnchorX", "appShellPadding", "appLogicalWidth", "jsonTimeoutMs",
   ];
   const out = {};
   for (const key of scalarKeys) {
     if (before[key] !== after[key]) out[key] = [before[key], after[key]];
   }
-  for (const key of ["sprayers", "staticNpcAll"]) {
+  // 对象/数组类的按整体比。`train` 是对象也走这一支。
+  for (const key of [
+    "sprayers", "staticNpcAll", "helicopter", "police", "train", "memo6Marker",
+  ]) {
     if (JSON.stringify(before[key]) !== JSON.stringify(after[key])) {
       out[key] = [before[key], after[key]];
     }
@@ -388,28 +721,28 @@ const report = {
   originals: {},
   tests: [],
 };
-for (const [name, original] of originals) {
-  report.originals[name] = { sha256_16: sha(original.text), restored: null, servedMatchesDisk: null };
+for (const [key, original] of originals) {
+  report.originals[key] = { sha256_16: sha(original.text), restored: null, servedMatchesDisk: null };
 }
 
 function finalize(finishedBy) {
   restoreAll();
   report.finishedBy = finishedBy;
-  for (const [name, original] of originals) {
-    report.originals[name].restored =
+  for (const [key, original] of originals) {
+    report.originals[key].restored =
       readFileSync(original.path, "utf8") === original.text ? "byte-identical" : "MISMATCH";
   }
   report.noise = noise;
   writeFileSync(join(outDir, "RESULT.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
   console.log(`report -> ${join(outDir, "RESULT.json")}`);
   console.log(`restore: ${JSON.stringify(
-    Object.fromEntries(Object.entries(report.originals).map(([name, v]) => [name, v.restored])),
+    Object.fromEntries(Object.entries(report.originals).map(([key, v]) => [key, v.restored])),
   )}`);
 }
 
 const watchdog = setTimeout(() => {
   console.error("WATCHDOG: hard timeout");
-  console.error(`配置原文在 ${outDir}/原值-*.json，照着抄回 ${dataDir}/ 即可。`);
+  console.error(`配置原文在 ${outDir}/原值-*.json，照着自己那份路径抄回去即可。`);
   finalize("watchdog");
   process.exit(3);
 }, totalTimeoutMs);
@@ -478,9 +811,9 @@ try {
   // **不能让工具悄悄把脏值当成新的原值**：那样子跑完「逐字节还原」还原的是脏值，
   // 报告还是绿的，等于把错的东西盖了章（2026-09-23 真踩过一次）。
   const drifted = [];
-  for (const [name, original] of originals) {
-    const previous = previousOriginals.get(name);
-    if (previous !== undefined && previous !== original.text) drifted.push(name);
+  for (const [key, original] of originals) {
+    const previous = previousOriginals.get(key);
+    if (previous !== undefined && previous !== original.text) drifted.push(key);
   }
   if (drifted.length > 0 && process.env.CONFIG_LIVE_ADOPT !== "1") {
     throw new Error(
@@ -491,13 +824,13 @@ try {
   }
 
   // 前置检查二：开发服务器端出来的配置，和磁盘上那份是不是同一份（确认读的真是磁盘）
-  for (const [name, original] of originals) {
-    report.originals[name].servedMatchesDisk =
+  for (const [key, original] of originals) {
+    report.originals[key].servedMatchesDisk =
       (await (await fetch(original.url)).text()) === original.text;
   }
   const notServed = Object.entries(report.originals)
     .filter(([, v]) => v.servedMatchesDisk !== true)
-    .map(([name]) => name);
+    .map(([key]) => key);
   assert.deepEqual(
     notServed, [],
     `开发服务器端的配置和磁盘不一致，先确认 dev server 起对了：${notServed.join(", ")}`,
@@ -516,7 +849,12 @@ try {
   for (const [key, tag] of cameras) {
     const camera = key.split(",").map(Number);
     console.log(`[baseline ${tag}] camera ${key}`);
-    const run = await loadAndPlay(`base-${tag}`, camera);
+    // 基线镜头可能被同一镜头的多条用例共用，等的条件取该镜头下**最长的那个**：
+    // 基线只要等够，后面每条要量的数就都是稳定的。
+    const settles = active.filter((test) => test.camera.join(",") === key)
+      .map((test) => test.settle).filter(Boolean);
+    const prepare = active.find((test) => test.camera.join(",") === key && test.prepare)?.prepare;
+    const run = await loadAndPlay(`base-${tag}`, camera, settles.at(-1), prepare);
     writeFileSync(
       join(shotDir, `00-baseline-${tag}-${key.replace(",", "_")}.png`),
       run.png,
@@ -524,16 +862,23 @@ try {
     );
     baselines.set(key, run.measured);
     const m = run.measured;
-    console.log(`  dancing=${m.dancingTotal} bugs=${m.bugTotal} venueInView=${m.venueInView}`
-      + ` staticCrowd=${m.staticCrowdTotal} staticNpc=${m.staticNpcAll.length}`
-      + ` sprayers=${m.sprayers.length} bubbles=${m.bubbles.length} fps=${m.fps}`);
+    if (m.entityCleanupOrder !== undefined) {
+      console.log(`  entityCleanupOrder=${m.entityCleanupOrder}`);
+    } else {
+      console.log(`  dancing=${m.dancingTotal} bugs=${m.bugTotal} venueInView=${m.venueInView}`
+        + ` staticCrowd=${m.staticCrowdTotal} staticNpc=${m.staticNpcAll.length}`
+        + ` sprayers=${m.sprayers.length} bubbles=${m.bubbles.length} fps=${m.fps}`);
+      console.log(`  helicopter=${JSON.stringify(m.helicopter && {
+        x: m.helicopter.x, y: m.helicopter.y, scale: m.helicopter.scale,
+      })} police=${m.police.length} train=${JSON.stringify(m.train)}`);
+    }
   }
 
   const failures = [];
   let index = 0;
   for (const test of active) {
     index += 1;
-    const original = originals.get(test.file);
+    const original = originals.get(`${test.dir ?? DATA_DIRS.npc}/${test.file}`);
     const json = JSON.parse(original.text);
     test.apply(json);
     const mutated = `${JSON.stringify(json, null, 2)}\n`;
@@ -543,7 +888,7 @@ try {
 
     let changed = {};
     try {
-      const run = await loadAndPlay(`${test.id}-${index}`, test.camera);
+      const run = await loadAndPlay(`${test.id}-${index}`, test.camera, test.settle, test.prepare);
       writeFileSync(join(shotDir, `${test.id}-after.png`), run.png, "base64");
       changed = diff(baselines.get(test.camera.join(",")), run.measured);
       report.tests.push({
@@ -558,7 +903,8 @@ try {
     }
 
     const empty = Object.keys(changed).length === 0;
-    if (empty || servedNow !== true) failures.push(test.id);
+    const expectedMissing = test.expectedChange !== undefined && !(test.expectedChange in changed);
+    if (empty || expectedMissing || servedNow !== true) failures.push(test.id);
     console.log(`  ${empty ? "NO CHANGE" : "changed"} ${JSON.stringify(changed).slice(0, 500)}`);
   }
 

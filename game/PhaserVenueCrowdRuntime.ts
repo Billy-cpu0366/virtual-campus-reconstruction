@@ -3,10 +3,9 @@ import {
   type VenueCrowdRuntimeOptions,
 } from "../src/npc/index.js";
 import {
-  ANIMATION_FRAME_RATE,
-  WALK_FRAMES_PER_DIRECTION,
   walkFrameStart,
 } from "../src/player/index.js";
+import type { PlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
 import type { VenueCrowdPresentation } from "../config/骨架/05-旁支/SYS-NPC/逻辑/types.js";
 
 type View = { left: number; top: number; width: number; height: number };
@@ -82,8 +81,6 @@ const DIRECTIONS: readonly Direction[] = [
   "east", "north-east", "north-west", "north",
   "south-east", "south-west", "south", "west",
 ];
-const ACTION_DURATION_MS = WALK_FRAMES_PER_DIRECTION / ANIMATION_FRAME_RATE * 1_000;
-
 const stableHash = (value: string): number =>
   [...value].reduce((hash, character) =>
     (hash * 31 + character.charCodeAt(0)) >>> 0, 0);
@@ -147,6 +144,7 @@ export class PhaserVenueCrowdRuntime {
     private readonly viewport: () => View | undefined,
     options: VenueCrowdRuntimeOptions,
     private readonly presentation: VenueCrowdPresentation,
+    private readonly playerConfigs: PlayerConfigs,
     private readonly now: () => number = Date.now,
   ) {
     this.core = new VenueCrowdRuntime(options);
@@ -291,7 +289,7 @@ export class PhaserVenueCrowdRuntime {
     };
     this.protestStates.set(id, state);
     sprite.anims?.stop?.();
-    sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!));
+    sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!, this.playerConfigs.animation.walkFrameStart));
   }
 
   private updateProtesterSpeech(
@@ -373,7 +371,7 @@ export class PhaserVenueCrowdRuntime {
     if (state.phase === "acting") {
       state.phase = "idle";
       sprite.anims?.stop?.();
-      sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!));
+      sprite.setFrame?.(walkFrameStart(DIRECTIONS[state.directionIndex]!, this.playerConfigs.animation.walkFrameStart));
       state.nextChangeAt = now + this.idleDelay(id, state.actionCount);
       return;
     }
@@ -392,7 +390,9 @@ export class PhaserVenueCrowdRuntime {
     const animation = `npc-protester-rising-action-${direction}`;
     this.ensureAnimation(direction, animation);
     sprite.anims?.play(animation, false);
-    state.nextChangeAt = now + ACTION_DURATION_MS;
+    state.nextChangeAt = now +
+      this.playerConfigs.animation.walkFramesPerDirection /
+      this.playerConfigs.animation.frameRate * 1_000;
   }
 
   private idleDelay(id: string, actionCount: number): number {
@@ -401,14 +401,15 @@ export class PhaserVenueCrowdRuntime {
 
   private ensureAnimation(direction: Direction, key: string): void {
     if (this.createdAnimations.has(key) || this.scene.anims?.exists?.(key)) return;
-    const start = walkFrameStart(direction);
+    const animation = this.playerConfigs.animation;
+    const start = walkFrameStart(direction, animation.walkFrameStart);
     this.scene.anims?.create({
       key,
       frames: this.scene.anims.generateFrameNumbers(
         this.presentation.protesterAsset.key,
-        { start, end: start + WALK_FRAMES_PER_DIRECTION - 1 },
+        { start, end: start + animation.walkFramesPerDirection - 1 },
       ),
-      frameRate: ANIMATION_FRAME_RATE,
+      frameRate: animation.frameRate,
       repeat: 0,
     });
     this.createdAnimations.add(key);

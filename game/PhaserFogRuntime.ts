@@ -2,15 +2,14 @@ import Phaser from "./phaser.js";
 
 import {
   FOG_ORANGE_SMOKE_ASSET_KEY,
-  FOG_ORANGE_SMOKE_CONFIG,
   FOG_ORANGE_SMOKE_ID,
-  FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY,
   FogRuntime,
   type FogPlayerInput,
   type FogPoint,
   type FogSnapshot,
   type FogViewport,
 } from "../src/fx/index.js";
+import type { FogFxConfig } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
 
 type FogListener = (...args: unknown[]) => void;
 
@@ -122,9 +121,10 @@ export class PhaserFogRuntime {
 
   constructor(
     private readonly scene: PhaserFogSceneLike,
+    private readonly config: FogFxConfig,
     options: PhaserFogRuntimeOptions = {},
   ) {
-    this.runtime = new FogRuntime(options.cars !== undefined);
+    this.runtime = new FogRuntime(options.cars !== undefined, config);
     this.viewportProvider = options.viewport;
     this.playerProvider = options.player;
     this.carsProvider = options.cars;
@@ -197,26 +197,26 @@ export class PhaserFogRuntime {
         FOG_ORANGE_SMOKE_ASSET_KEY,
         {
           speed: {
-            min: FOG_ORANGE_SMOKE_CONFIG.speed * 0.3,
-            max: FOG_ORANGE_SMOKE_CONFIG.speed,
+            min: this.config.speed * 0.3,
+            max: this.config.speed,
           },
           angle: { min: 0, max: 360 },
-          scale: { start: 0, end: FOG_ORANGE_SMOKE_CONFIG.scale },
-          alpha: { start: FOG_ORANGE_SMOKE_CONFIG.alpha, end: 0 },
-          lifespan: FOG_ORANGE_SMOKE_CONFIG.lifespan,
-          quantity: FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY,
-          frequency: FOG_ORANGE_SMOKE_CONFIG.frequency,
-          blendMode: FOG_ORANGE_SMOKE_CONFIG.blendMode,
-          tint: FOG_ORANGE_SMOKE_CONFIG.tint,
+          scale: { start: 0, end: this.config.scale },
+          alpha: { start: this.config.alpha, end: 0 },
+          lifespan: this.config.lifespan,
+          quantity: this.config.presentationQuantity,
+          frequency: this.config.frequency,
+          blendMode: this.config.blendMode,
+          tint: this.config.tint,
           rotate: { min: 0, max: 360 },
           emitting: false,
           emitZone: {
             type: "random",
-            source: circleSource(FOG_ORANGE_SMOKE_CONFIG.cellSize * 1.5 / 2),
+            source: circleSource(this.config.cellSize * 1.5 / 2),
           },
         },
       );
-      emitter.setDepth(FOG_ORANGE_SMOKE_CONFIG.depth).setVisible?.(false);
+      emitter.setDepth(this.config.depth).setVisible?.(false);
       this.emitters.set(cell.id, emitter);
     }
   }

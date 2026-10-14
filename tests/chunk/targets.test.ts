@@ -7,6 +7,10 @@ import {
   type ChunkCoordinate,
   type ChunkGeometry,
 } from "../../src/chunk/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadChunkConfigs } from "../../config/骨架/01-地图线/SYS-CHUNK/逻辑/index.js";
+
+const chunkConfig = await loadChunkConfigs(createDiskConfigSource());
 
 const geometry: ChunkGeometry = {
   chunkWidthTiles: 28,
@@ -23,7 +27,7 @@ function keys(coordinates: readonly ChunkCoordinate[]): string[] {
 
 describe("playerNeighborhood", () => {
   it("returns a row-major 3x3 neighborhood for an interior player", () => {
-    expect(keys(playerNeighborhood(906, 906, geometry))).toEqual([
+    expect(keys(playerNeighborhood(906, 906, geometry, chunkConfig.playerNeighborhoodRadius))).toEqual([
       "1_1", "2_1", "3_1",
       "1_2", "2_2", "3_2",
       "1_3", "2_3", "3_3",
@@ -31,13 +35,13 @@ describe("playerNeighborhood", () => {
   });
 
   it("clips the neighborhood at world edges", () => {
-    expect(keys(playerNeighborhood(10, 10, geometry))).toEqual([
+    expect(keys(playerNeighborhood(10, 10, geometry, chunkConfig.playerNeighborhoodRadius))).toEqual([
       "0_0", "1_0", "0_1", "1_1",
     ]);
   });
 
   it("returns no player chunks for a position outside the world", () => {
-    expect(playerNeighborhood(-1, 0, geometry)).toEqual([]);
+    expect(playerNeighborhood(-1, 0, geometry, chunkConfig.playerNeighborhoodRadius)).toEqual([]);
   });
 
   it("rejects an invalid radius", () => {
@@ -53,6 +57,7 @@ describe("cameraVisibleChunks", () => {
     const result = cameraVisibleChunks(
       { scrollX: 448, scrollY: 448, width: 448, height: 448, zoom: 1 },
       geometry,
+      chunkConfig.cameraPadding,
     );
 
     expect(keys(result)).toEqual([
@@ -67,10 +72,12 @@ describe("cameraVisibleChunks", () => {
     const zoomOne = cameraVisibleChunks(
       { scrollX: 448, scrollY: 448, width: 896, height: 896, zoom: 1 },
       geometry,
+      chunkConfig.cameraPadding,
     );
     const zoomTwo = cameraVisibleChunks(
       { scrollX: 448, scrollY: 448, width: 896, height: 896, zoom: 2 },
       geometry,
+      chunkConfig.cameraPadding,
     );
 
     expect(keys(zoomOne)).toHaveLength(25);
@@ -81,6 +88,7 @@ describe("cameraVisibleChunks", () => {
     const result = cameraVisibleChunks(
       { scrollX: 1792, scrollY: 1792, width: 448, height: 448, zoom: 1 },
       geometry,
+      chunkConfig.cameraPadding,
     );
 
     expect(keys(result)).toEqual(["3_3", "4_3", "3_4", "4_4"]);
@@ -90,6 +98,7 @@ describe("cameraVisibleChunks", () => {
     const result = cameraVisibleChunks(
       { scrollX: -2000, scrollY: -2000, width: 100, height: 100, zoom: 1 },
       geometry,
+      chunkConfig.cameraPadding,
     );
 
     expect(result).toEqual([]);
@@ -99,10 +108,12 @@ describe("cameraVisibleChunks", () => {
     expect(() => cameraVisibleChunks(
       { scrollX: 0, scrollY: 0, width: 0, height: 100, zoom: 1 },
       geometry,
+      chunkConfig.cameraPadding,
     )).toThrow(RangeError);
     expect(() => cameraVisibleChunks(
       { scrollX: 0, scrollY: 0, width: 100, height: 100, zoom: 0 },
       geometry,
+      chunkConfig.cameraPadding,
     )).toThrow(RangeError);
     expect(() => cameraVisibleChunks(
       { scrollX: 0, scrollY: 0, width: 100, height: 100, zoom: 1 },
@@ -119,6 +130,8 @@ describe("target chunk union", () => {
       10,
       { scrollX: 0, scrollY: 0, width: 448, height: 448, zoom: 1 },
       geometry,
+      chunkConfig.playerNeighborhoodRadius,
+      chunkConfig.cameraPadding,
     );
 
     expect(keys(result)).toEqual([

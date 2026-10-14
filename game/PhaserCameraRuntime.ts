@@ -1,6 +1,5 @@
 import {
   blurStrength,
-  CAMERA_RUNTIME_SETTINGS,
   CameraRuntime,
   chunkRenderBlockSize,
   scaleFactor,
@@ -12,6 +11,7 @@ import {
   type CameraRuntimeTweenOptions,
   type CameraViewport,
 } from "../src/camera/index.js";
+import type { CameraConfigs } from "../config/骨架/02-玩法线/SYS-CAMERA/逻辑/index.js";
 
 export interface PhaserCameraLike {
   scrollX: number;
@@ -133,6 +133,7 @@ export class PhaserCameraRuntime {
   constructor(
     private readonly scene: PhaserCameraSceneLike,
     options: PhaserCameraRuntimeOptions,
+    private readonly cameraConfigs: CameraConfigs,
   ) {
     this.camera = scene.cameras.main;
     this.options = options;
@@ -148,6 +149,11 @@ export class PhaserCameraRuntime {
         getPlayerPosition: () => options.getPlayerPosition(),
         restoreCameraSettings: (settings) => this.restoreCameraSettings(settings),
       },
+      cameraConfigs.settings,
+      cameraConfigs.sequence,
+      cameraConfigs.returnDuration,
+      cameraConfigs.pointEase,
+      cameraConfigs.returnEase,
       options.driver ?? this.createPhaserDriver(),
     );
   }
@@ -184,7 +190,7 @@ export class PhaserCameraRuntime {
   }
 
   configure(): void {
-    this.restoreCameraSettings(CAMERA_RUNTIME_SETTINGS);
+    this.restoreCameraSettings(this.cameraConfigs.settings);
   }
 
   shutdown(): void {
@@ -204,12 +210,12 @@ export class PhaserCameraRuntime {
 
   private recoverBeforeStart(): void {
     try {
-      this.restoreCameraSettings(CAMERA_RUNTIME_SETTINGS);
+      this.restoreCameraSettings(this.cameraConfigs.settings);
     } catch {
       // Preserve the startup failure while still attempting follow recovery.
     }
     try {
-      this.options.startHardFollow(CAMERA_RUNTIME_SETTINGS);
+      this.options.startHardFollow(this.cameraConfigs.settings);
     } catch {
       // Preserve the startup failure.
     }

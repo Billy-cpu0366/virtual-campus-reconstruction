@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  STOP_AI_SMOKE_CONFIG,
-  STOP_AI_SMOKE_SITES,
+  STOP_AI_SMOKE_ASSET_KEY,
   StopAiSmokeRuntime,
 } from "../../src/fx/index.js";
 import {
@@ -13,6 +12,9 @@ import {
   type PhaserStopAiSmokeSceneLike,
   type PhaserStopAiSmokeTimerLike,
 } from "../../game/PhaserStopAiSmokeRuntime.js";
+import { FX_CONFIGS } from "./fixture.js";
+
+const STOP_AI_CONFIG = FX_CONFIGS.stopAiSmoke;
 
 const INSIDE = Object.freeze({ left: 1_400, top: 1_100, width: 500, height: 400 });
 const OUTSIDE = Object.freeze({ left: 0, top: 0, width: 500, height: 500 });
@@ -113,15 +115,15 @@ function makeScene() {
 
 describe("StopAiSmokeRuntime", () => {
   it("locks the three sites and nine layered emitters", () => {
-    const runtime = new StopAiSmokeRuntime();
-    expect(STOP_AI_SMOKE_SITES.map(({ x, y }) => [x, y])).toEqual([
+    const runtime = new StopAiSmokeRuntime(STOP_AI_CONFIG);
+    expect(STOP_AI_CONFIG.sites.map(({ x, y }) => [x, y])).toEqual([
       [1800, 1352], [1480, 1272], [1672, 1304],
     ]);
-    expect(STOP_AI_SMOKE_SITES.map(({ graphicAngle }) => graphicAngle)).toEqual([
+    expect(STOP_AI_CONFIG.sites.map(({ graphicAngle }) => graphicAngle)).toEqual([
       -25, -15, 15,
     ]);
-    expect(STOP_AI_SMOKE_CONFIG).toMatchObject({
-      assetKey: "particle_smoke_white",
+    expect(STOP_AI_SMOKE_ASSET_KEY).toBe("particle_smoke_white");
+    expect(STOP_AI_CONFIG).toMatchObject({
       speed: { min: 15, max: 35 },
       scale: { start: 0.1, end: 3 },
       lifespan: 1800,
@@ -139,7 +141,7 @@ describe("StopAiSmokeRuntime", () => {
     const fake = makeScene();
     let viewport: { left: number; top: number; width: number; height: number } = INSIDE;
     let player: { x: number; y: number; bodyBottom: number; depth: number } | undefined;
-    const runtime = new PhaserStopAiSmokeRuntime(fake.scene, {
+    const runtime = new PhaserStopAiSmokeRuntime(fake.scene, STOP_AI_CONFIG, {
       viewport: () => viewport,
       playerPosition: () => player,
     });

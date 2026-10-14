@@ -2,14 +2,6 @@ import Phaser from "./phaser.js";
 
 import {
   STOP_AI_SMOKE_ASSET_KEY,
-  STOP_AI_SMOKE_CONFIG,
-  STOP_AI_SMOKE_SITES,
-  STOP_AI_SMOKE_WIND_MAX_DELAY_MS,
-  STOP_AI_SMOKE_WIND_MAX_DURATION_MS,
-  STOP_AI_SMOKE_WIND_MIN_DELAY_MS,
-  STOP_AI_SMOKE_WIND_MIN_DURATION_MS,
-  STOP_AI_SMOKE_WIND_START_DELAY_MS,
-  STOP_AI_SMOKE_VISIBILITY_CHECK_MS,
   StopAiSmokeRuntime,
   stopAiSmokeEmitterConfig,
   stopAiSmokeSiteInViewport,
@@ -18,6 +10,7 @@ import {
   type StopAiSmokeSite,
   type StopAiSmokeViewport,
 } from "../src/fx/index.js";
+import type { StopAiSmokeFxConfig, StopAiSmokeSiteConfig } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
 
 export const STOP_AI_SMOKE_RUNTIME_ASSET = Object.freeze({
   key: STOP_AI_SMOKE_ASSET_KEY,
@@ -140,7 +133,7 @@ function circleSource(radius: number): unknown {
 
 /** Phaser adapter for the independently-owned Stop AI canister effects. */
 export class PhaserStopAiSmokeRuntime {
-  private readonly runtime = new StopAiSmokeRuntime();
+  private readonly runtime: StopAiSmokeRuntime;
   private readonly viewportProvider: (() => StopAiSmokeViewport) | undefined;
   private readonly playerPositionProvider:
     | (() => StopAiSmokePlayerPosition | undefined)
@@ -159,8 +152,10 @@ export class PhaserStopAiSmokeRuntime {
 
   constructor(
     private readonly scene: PhaserStopAiSmokeSceneLike,
+    private readonly config: StopAiSmokeFxConfig,
     options: PhaserStopAiSmokeRuntimeOptions = {},
   ) {
+    this.runtime = new StopAiSmokeRuntime(config);
     this.viewportProvider = options.viewport;
     this.playerPositionProvider = options.playerPosition;
     this.onError = options.onError;
@@ -179,7 +174,7 @@ export class PhaserStopAiSmokeRuntime {
     if (!result.ok) return result;
     if (this.graphics.size === 0) {
       try {
-        for (const site of STOP_AI_SMOKE_SITES) {
+        for (const site of this.config.sites) {
           this.graphics.set(site.site, this.createCanisterGraphic(site));
         }
       } catch {
@@ -200,15 +195,15 @@ export class PhaserStopAiSmokeRuntime {
     const checkEmitters =
       now === undefined ||
       this.lastVisibilityCheckAt === undefined ||
-      now - this.lastVisibilityCheckAt >= STOP_AI_SMOKE_VISIBILITY_CHECK_MS;
+      now - this.lastVisibilityCheckAt >= this.config.visibilityCheckMs;
     if (checkEmitters && now !== undefined) {
       this.lastVisibilityCheckAt = now;
     }
     this.runtime.setPlayerPosition(this.playerPositionProvider?.());
     const snapshot = this.runtime.updateViewport(viewport, checkEmitters);
-    for (const site of STOP_AI_SMOKE_SITES) {
+    for (const site of this.config.sites) {
       this.graphics.get(site.site)?.setVisible?.(
-        stopAiSmokeSiteInViewport(site.site, viewport),
+        stopAiSmokeSiteInViewport(site.site, viewport, this.config),
       );
     }
     for (const item of snapshot.canisters) {
@@ -257,24 +252,24 @@ export class PhaserStopAiSmokeRuntime {
     site: StopAiSmokeSite,
     layer: StopAiSmokeLayer,
   ): PhaserStopAiSmokeEmitterLike {
-    const config = stopAiSmokeEmitterConfig(site, layer);
+    const config = stopAiSmokeEmitterConfig(site, layer, this.config);
     const emitter = this.scene.add.particles(
       config.x,
       config.y,
       STOP_AI_SMOKE_ASSET_KEY,
       {
-        speed: STOP_AI_SMOKE_CONFIG.speed,
+        speed: this.config.speed,
         angle: config.angle,
-        scale: STOP_AI_SMOKE_CONFIG.scale,
+        scale: this.config.scale,
         alpha: config.alpha,
-        lifespan: STOP_AI_SMOKE_CONFIG.lifespan,
-        quantity: STOP_AI_SMOKE_CONFIG.quantity,
-        frequency: STOP_AI_SMOKE_CONFIG.frequency,
-        gravityY: STOP_AI_SMOKE_CONFIG.gravityY,
-        blendMode: STOP_AI_SMOKE_CONFIG.blendMode,
-        tint: STOP_AI_SMOKE_CONFIG.tint,
+        lifespan: this.config.lifespan,
+        quantity: this.config.quantity,
+        frequency: this.config.frequency,
+        gravityY: this.config.gravityY,
+        blendMode: this.config.blendMode,
+        tint: this.config.tint,
         emitting: false,
-        emitZone: { type: "random", source: circleSource(3) },
+        emitZone: { type: "random", source: circleSource(this.config.emitZoneRadius) },
       },
     );
     emitter.setDepth(config.depth).setVisible(false);
@@ -282,7 +277,7 @@ export class PhaserStopAiSmokeRuntime {
   }
 
   private createCanisterGraphic(
-    site: (typeof STOP_AI_SMOKE_SITES)[number],
+    site: StopAiSmokeSiteConfig,
   ): PhaserStopAiSmokeGraphicsLike {
     const graphics = this.scene.add.graphics();
     const color = site.graphicColor;
@@ -332,17 +327,17 @@ export class PhaserStopAiSmokeRuntime {
         emitter.gravityX = sign * randomBetween(15, 40);
         this.runtime.setWindActive(site, layer, true);
         this.windResetTimers.set(key, this.scene.time!.delayedCall(
-          randomBetween(STOP_AI_SMOKE_WIND_MIN_DURATION_MS, STOP_AI_SMOKE_WIND_MAX_DURATION_MS),
+          randomBetween(this.config.windMinDurationMs, this.config.windMaxDurationMs),
           () => {
             if (this.emitters.get(key) !== emitter) return;
             emitter.gravityX = 0;
             this.runtime.setWindActive(site, layer, false);
           },
         ));
-        schedule(randomBetween(STOP_AI_SMOKE_WIND_MIN_DELAY_MS, STOP_AI_SMOKE_WIND_MAX_DELAY_MS));
+        schedule(randomBetween(this.config.windMinDelayMs, this.config.windMaxDelayMs));
       }));
     };
-    schedule(STOP_AI_SMOKE_WIND_START_DELAY_MS);
+    schedule(this.config.windStartDelayMs);
   }
 
   private destroyEmitter(

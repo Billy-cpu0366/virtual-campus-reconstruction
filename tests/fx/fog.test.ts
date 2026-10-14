@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  FOG_ORANGE_SMOKE_CELLS,
-  FOG_ORANGE_SMOKE_CONFIG,
-  FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY,
+  FOG_ORANGE_SMOKE_ID,
+  createFogCells,
   FogRuntime,
 } from "../../src/fx/index.js";
 import {
@@ -13,6 +12,10 @@ import {
   type PhaserFogSceneLike,
   type PhaserFogTimerLike,
 } from "../../game/PhaserFogRuntime.js";
+import { FX_CONFIGS } from "./fixture.js";
+
+const FOG_CONFIG = FX_CONFIGS.fog;
+const FOG_CELLS = createFogCells(FOG_CONFIG.polygon, FOG_CONFIG.cellSize, FOG_ORANGE_SMOKE_ID);
 
 const VIEWPORT = Object.freeze({ left: 1_400, top: 1_100, width: 500, height: 400 });
 
@@ -95,14 +98,14 @@ function makeScene() {
 
 describe("FogRuntime", () => {
   it("calculates the orange_smoke polygon into exactly 13 cells", () => {
-    const runtime = new FogRuntime(true);
-    expect(FOG_ORANGE_SMOKE_CELLS).toHaveLength(13);
+    const runtime = new FogRuntime(true, FOG_CONFIG);
+    expect(FOG_CELLS).toHaveLength(13);
     expect(runtime.snapshot).toMatchObject({
       region: "orange_smoke",
       carsInputIntegrated: true,
     });
-    expect(FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY).toBe(2);
-    expect(FOG_ORANGE_SMOKE_CONFIG).toMatchObject({
+    expect(FOG_CONFIG.presentationQuantity).toBe(2);
+    expect(FOG_CONFIG).toMatchObject({
       depth: 1100,
       blendMode: "NORMAL",
       scale: 8,
@@ -111,13 +114,13 @@ describe("FogRuntime", () => {
       quantity: 4,
       frequency: 20,
       lifespan: { min: 350, max: 2000 },
-      respawn: 500,
+      respawnMs: 500,
     });
   });
 
   it("uses the public 32px cell viewport padding", () => {
-    const runtime = new FogRuntime();
-    const cell = FOG_ORANGE_SMOKE_CELLS[0]!;
+    const runtime = new FogRuntime(false, FOG_CONFIG);
+    const cell = FOG_CELLS[0]!;
     runtime.start({
       left: cell.x + 33,
       top: cell.y - 16,
@@ -136,7 +139,7 @@ describe("FogRuntime", () => {
   });
 
   it("clears player/cars and respawns after 500ms", () => {
-    const runtime = new FogRuntime(true);
+    const runtime = new FogRuntime(true, FOG_CONFIG);
     runtime.start(VIEWPORT);
     const cell = runtime.snapshot.cells[0]!;
     runtime.updateInteractions(
@@ -156,7 +159,7 @@ describe("PhaserFogRuntime", () => {
   it("stops one cleared emitter without hiding its living particles", () => {
     const fake = makeScene();
     let cars: readonly { x: number; y: number }[] | undefined;
-    const runtime = new PhaserFogRuntime(fake.scene, {
+    const runtime = new PhaserFogRuntime(fake.scene, FOG_CONFIG, {
       viewport: () => VIEWPORT,
       cars: () => cars,
     });
@@ -185,7 +188,7 @@ describe("PhaserFogRuntime", () => {
   it("stops adjacent cleared emitters without hiding either one", () => {
     const fake = makeScene();
     let cars: readonly { x: number; y: number }[] | undefined;
-    const runtime = new PhaserFogRuntime(fake.scene, {
+    const runtime = new PhaserFogRuntime(fake.scene, FOG_CONFIG, {
       viewport: () => VIEWPORT,
       cars: () => cars,
     });
@@ -225,7 +228,7 @@ describe("PhaserFogRuntime", () => {
   it("keeps every emitter visible while clearing the whole region", () => {
     const fake = makeScene();
     let cars: readonly { x: number; y: number }[] | undefined;
-    const runtime = new PhaserFogRuntime(fake.scene, {
+    const runtime = new PhaserFogRuntime(fake.scene, FOG_CONFIG, {
       viewport: () => VIEWPORT,
       cars: () => cars,
     });
@@ -251,7 +254,7 @@ describe("PhaserFogRuntime", () => {
   it("hides offscreen emitters and shows them again on return", () => {
     const fake = makeScene();
     let viewport: { left: number; top: number; width: number; height: number } = VIEWPORT;
-    const runtime = new PhaserFogRuntime(fake.scene, {
+    const runtime = new PhaserFogRuntime(fake.scene, FOG_CONFIG, {
       viewport: () => viewport,
     });
     expect(runtime.start()).toEqual({ ok: true });
@@ -271,7 +274,7 @@ describe("PhaserFogRuntime", () => {
   it("owns 13 emitters and tears down listeners/timers", () => {
     const fake = makeScene();
     let cars: readonly { x: number; y: number }[] | undefined;
-    const runtime = new PhaserFogRuntime(fake.scene, {
+    const runtime = new PhaserFogRuntime(fake.scene, FOG_CONFIG, {
       viewport: () => VIEWPORT,
       cars: () => cars,
     });

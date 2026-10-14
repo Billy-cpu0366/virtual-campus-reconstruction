@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  CAMPUS_CONTENT_PAYLOADS,
   CampusContentResolver,
   createCampusContentResolver,
   type CampusContentPayloadSource,
@@ -10,7 +9,10 @@ import {
   CONTENT_MENU_IDS,
   type GameUiContentPayload,
 } from "../../src/content/contract.js";
-import { CONTENT_REGISTRY } from "../../src/content/registry.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadInteractConfigs } from "../../config/骨架/03-内容线/SYS-INTERACT/逻辑/index.js";
+
+const INTERACT = await loadInteractConfigs(createDiskConfigSource());
 
 const about: GameUiContentPayload = {
   menuId: "about",
@@ -26,8 +28,8 @@ function resolverWith(
 
 describe("CampusContentResolver", () => {
   it("只提供内容层已确认的 11 个入口和最小标签", () => {
-    const resolver = createCampusContentResolver();
-    expect(Object.keys(CAMPUS_CONTENT_PAYLOADS)).toEqual(CONTENT_MENU_IDS);
+    const resolver = createCampusContentResolver(INTERACT.content);
+    expect(Object.keys(INTERACT.content)).toEqual(CONTENT_MENU_IDS);
     for (const menuId of CONTENT_MENU_IDS) {
       const result = resolver.resolve(menuId);
       expect(result.status).toBe("resolved");
@@ -37,25 +39,25 @@ describe("CampusContentResolver", () => {
       expect(result.payload.body.length).toBeGreaterThan(0);
       expect(result.payload.body.every((line) => line.trim() !== "")).toBe(true);
     }
-    expect(CAMPUS_CONTENT_PAYLOADS.tech.body).toContain("Angular");
-    expect(CAMPUS_CONTENT_PAYLOADS.projects.body).toContain("eUTxO.org");
-    expect(CAMPUS_CONTENT_PAYLOADS.cv.body).toContain("VUB Bank");
+    expect(INTERACT.content.tech.body).toContain("Angular");
+    expect(INTERACT.content.projects.body).toContain("eUTxO.org");
+    expect(INTERACT.content.cv.body).toContain("VUB Bank");
   });
 
   it("默认source用03 registry覆盖8项真实内容并保留3项fallback", () => {
-    const resolver = createCampusContentResolver();
-    for (const menuId of Object.keys(CONTENT_REGISTRY) as Array<keyof typeof CONTENT_REGISTRY>) {
+    const resolver = createCampusContentResolver(INTERACT.content);
+    for (const menuId of INTERACT.visibleMenuIds) {
       const result = resolver.resolve(menuId);
       expect(result.status).toBe("resolved");
       if (result.status !== "resolved") continue;
-      expect(result.payload).toEqual(CONTENT_REGISTRY[menuId]);
+      expect(result.payload).toEqual(INTERACT.content[menuId]);
       expect(result.payload.sections?.length).toBeGreaterThan(0);
     }
     for (const menuId of ["cv", "contact", "tech"] as const) {
       const result = resolver.resolve(menuId);
       expect(result).toEqual({
         status: "resolved",
-        payload: CAMPUS_CONTENT_PAYLOADS[menuId],
+        payload: INTERACT.content[menuId],
       });
       if (result.status === "resolved") {
         expect(result.payload.sections).toBeUndefined();

@@ -1,29 +1,3 @@
-export const FACTORY_SMOKE_TILE_SIZE = 16;
-export const FACTORY_SMOKE_VIEWPORT_PADDING = 100;
-
-export const FACTORY_SMOKE_CONFIG = Object.freeze({
-  x: 50.5 * FACTORY_SMOKE_TILE_SIZE,
-  y: 33.7 * FACTORY_SMOKE_TILE_SIZE,
-  width: 7,
-  widthEnd: 32,
-  pathHeight: 35,
-  quantity: 2,
-  frequency: 80,
-  color: "white",
-  scaleStart: 1.6,
-  alphaStart: 0.1,
-  maxAlpha: 0.25,
-  alphaEnd: 0,
-  scaleEnd: 4,
-  lifespan: 2_000,
-  // 原站确认值。呈现层另有 FACTORY_SMOKE_PRESENTATION_DEPTH = 3400（见
-  // game/PhaserFactorySmokeRuntime.ts）：为了让烟雾盖在屋顶层 3200/3300 之上。
-  // 两个数都对，别合并成一个。
-  depth: 500,
-  reactCars: false,
-  reactPlayer: false,
-} as const);
-
 export const FACTORY_SMOKE_ASSET_KEY = "particle_smoke_white";
 
 export interface SmokeViewport {
@@ -49,16 +23,19 @@ export interface FactorySmokeSnapshot {
   readonly teardownRequested: boolean;
 }
 
-function inPaddedViewport(viewport: SmokeViewport): boolean {
-  const left = viewport.left - FACTORY_SMOKE_VIEWPORT_PADDING;
-  const right = viewport.left + viewport.width + FACTORY_SMOKE_VIEWPORT_PADDING;
-  const top = viewport.top - FACTORY_SMOKE_VIEWPORT_PADDING;
-  const bottom = viewport.top + viewport.height + FACTORY_SMOKE_VIEWPORT_PADDING;
+function inPaddedViewport(
+  viewport: SmokeViewport,
+  config: Readonly<{ x: number; y: number; viewportPadding: number }>,
+): boolean {
+  const left = viewport.left - config.viewportPadding;
+  const right = viewport.left + viewport.width + config.viewportPadding;
+  const top = viewport.top - config.viewportPadding;
+  const bottom = viewport.top + viewport.height + config.viewportPadding;
   return (
-    FACTORY_SMOKE_CONFIG.x >= left &&
-    FACTORY_SMOKE_CONFIG.x <= right &&
-    FACTORY_SMOKE_CONFIG.y >= top &&
-    FACTORY_SMOKE_CONFIG.y <= bottom
+    config.x >= left &&
+    config.x <= right &&
+    config.y >= top &&
+    config.y <= bottom
   );
 }
 
@@ -77,6 +54,17 @@ export class FactorySmokeRuntime {
   private visibleState = false;
   private emittingState = false;
   private teardownRequestedState = false;
+
+  constructor(
+    private readonly config: Readonly<{
+      x: number;
+      y: number;
+      width: number;
+      widthEnd: number;
+      pathHeight: number;
+      viewportPadding: number;
+    }>,
+  ) {}
 
   get state(): FactorySmokeState {
     return this.stateState;
@@ -122,7 +110,7 @@ export class FactorySmokeRuntime {
     ) {
       return this.snapshot;
     }
-    const visible = inPaddedViewport(viewport);
+    const visible = inPaddedViewport(viewport, this.config);
     this.visibleState = visible;
     this.emittingState = visible;
     this.stateState = visible ? "emitting" : "paused";
@@ -133,14 +121,14 @@ export class FactorySmokeRuntime {
   particlePosition(lifeT: number): { readonly x: number; readonly y: number } {
     const progress = clampProgress(lifeT);
     const halfWidth = lerp(
-      FACTORY_SMOKE_CONFIG.width / 2,
-      FACTORY_SMOKE_CONFIG.widthEnd / 2,
+      this.config.width / 2,
+      this.config.widthEnd / 2,
       progress,
     );
     const bend = Math.sin(progress * Math.PI) * halfWidth;
     return Object.freeze({
       x: bend,
-      y: progress === 0 ? 0 : -FACTORY_SMOKE_CONFIG.pathHeight * progress,
+      y: progress === 0 ? 0 : -this.config.pathHeight * progress,
     });
   }
 

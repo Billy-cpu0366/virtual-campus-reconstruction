@@ -5,6 +5,7 @@ import {
   isKnownMarkerGid,
   markerGids,
 } from "../../src/layer/index.js";
+import { LAYER_CONFIGS } from "../config/layer-config-fixture.js";
 
 function dataWith(
   width: number,
@@ -27,6 +28,7 @@ describe("SYS-LAYER marker GID 与坐标", () => {
       2,
       16,
       16,
+      LAYER_CONFIGS.strategiesByName,
     );
 
     expect(records).toEqual([
@@ -50,14 +52,14 @@ describe("SYS-LAYER marker GID 与坐标", () => {
   });
 
   it("使用分层白名单，空 tile 忽略", () => {
-    expect(markerGids("cars")).toEqual([
+    expect(markerGids("cars", LAYER_CONFIGS.strategiesByName)).toEqual([
       69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352,
     ]);
-    expect(isKnownMarkerGid("particles", 69359)).toBe(false);
-    expect(isKnownMarkerGid("particles2", 69359)).toBe(false);
-    expect(isKnownMarkerGid("particles3", 69361)).toBe(true);
-    expect(isKnownMarkerGid("particles3", 69360)).toBe(false);
-    expect(isKnownMarkerGid("footsteps", 69345)).toBe(true);
+    expect(isKnownMarkerGid("particles", 69359, LAYER_CONFIGS.strategiesByName)).toBe(false);
+    expect(isKnownMarkerGid("particles2", 69359, LAYER_CONFIGS.strategiesByName)).toBe(false);
+    expect(isKnownMarkerGid("particles3", 69361, LAYER_CONFIGS.strategiesByName)).toBe(true);
+    expect(isKnownMarkerGid("particles3", 69360, LAYER_CONFIGS.strategiesByName)).toBe(false);
+    expect(isKnownMarkerGid("footsteps", 69345, LAYER_CONFIGS.strategiesByName)).toBe(true);
     expect(
       extractMarkerRecords(
         "footsteps",
@@ -67,6 +69,7 @@ describe("SYS-LAYER marker GID 与坐标", () => {
         2,
         16,
         16,
+        LAYER_CONFIGS.strategiesByName,
       ),
     ).toEqual([]);
   });
@@ -81,6 +84,7 @@ describe("SYS-LAYER marker GID 与坐标", () => {
         2,
         16,
         16,
+        LAYER_CONFIGS.strategiesByName,
       ),
     ).toThrow(
       "未知 marker GID：layer=particles3, chunk=(2,5), local=(1,0), gid=69360",

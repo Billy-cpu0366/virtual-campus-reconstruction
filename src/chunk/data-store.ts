@@ -5,7 +5,7 @@ import {
   type ChunkCoordinate,
   type ChunkGeometry,
 } from "./coordinates.js";
-import { LAYER_STRATEGIES } from "../layer/strategy.js";
+import type { LayerStrategy } from "../layer/contract.js";
 import type { ChunkLayer, ValidatedChunk } from "../world/contract.js";
 
 export type JsonLoader = (
@@ -39,7 +39,7 @@ export function isChunkRequestAbortedError(error: unknown): boolean {
 }
 
 export interface ChunkDataStoreOptions {
-  readonly maxAttempts?: number;
+  readonly maxAttempts: number;
 }
 
 export interface ChunkLoadFailure {
@@ -88,6 +88,7 @@ function parseChunk(
   value: unknown,
   coordinate: ChunkCoordinate,
   master: ChunkMaster,
+  layerStrategies: readonly LayerStrategy[],
 ): ValidatedChunk {
   if (!isRecord(value)) {
     throw new ChunkDataError("chunk must be an object");
@@ -101,9 +102,9 @@ function parseChunk(
   if (!Array.isArray(value.layers)) {
     throw new ChunkDataError("chunk layers must be an array");
   }
-  if (value.layers.length !== LAYER_STRATEGIES.length) {
+  if (value.layers.length !== layerStrategies.length) {
     throw new ChunkDataError(
-      `chunk must contain ${LAYER_STRATEGIES.length} layers`,
+      `chunk must contain ${layerStrategies.length} layers`,
     );
   }
 
@@ -112,7 +113,7 @@ function parseChunk(
     if (!isRecord(rawLayer)) {
       throw new ChunkDataError(`layer ${index} must be an object`);
     }
-    const strategy = LAYER_STRATEGIES[index];
+    const strategy = layerStrategies[index];
     if (strategy === undefined || rawLayer.name !== strategy.name) {
       throw new ChunkDataError(`layer ${index} name does not match strategy`);
     }
@@ -166,6 +167,7 @@ function sortCoordinates(
 export class ChunkDataStore {
   readonly masterUrl: string;
   readonly maxAttempts: number;
+  readonly layerStrategies: readonly LayerStrategy[];
   #loader: JsonLoader;
   #master: ChunkMaster | undefined;
   #masterError: Error | undefined;
@@ -179,11 +181,13 @@ export class ChunkDataStore {
   constructor(
     masterUrl: MasterUrl,
     loader: JsonLoader,
-    options: ChunkDataStoreOptions = {},
+    options: ChunkDataStoreOptions,
+    layerStrategies: readonly LayerStrategy[],
   ) {
     this.masterUrl = typeof masterUrl === "string" ? masterUrl : masterUrl.href;
     this.#loader = loader;
-    this.maxAttempts = options.maxAttempts ?? 3;
+    this.maxAttempts = options.maxAttempts;
+    this.layerStrategies = layerStrategies;
     assertAttempts(this.maxAttempts);
   }
 
@@ -405,7 +409,7 @@ export class ChunkDataStore {
       try {
         const raw = await this.#loader(url, this.#abortController.signal);
         this.#throwIfDestroyed();
-        const chunk = parseChunk(raw, coordinate, master);
+        const chunk = parseChunk(raw, coordinate, master, this.layerStrategies);
         this.#throwIfDestroyed();
         this.#cache.set(coordinateKey(coordinate), chunk);
         this.#failures.delete(coordinateKey(coordinate));

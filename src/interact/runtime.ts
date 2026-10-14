@@ -116,6 +116,9 @@ export class InteractRuntime {
   private readonly ui: GameUiPort;
   private readonly lease: GameplayControlLeasePort;
   private readonly onVisitReceipt: (receipt: InteractionVisitReceipt) => void;
+  private readonly pauseGame: boolean;
+  private readonly hideOnLeave: boolean;
+  private readonly suppressAfterUserClose: boolean;
   private readonly suppressedResidences = new Set<string>();
   private readonly committedResidences = new Set<string>();
   private readonly pendingReleaseTokens = new Set<GameplayControlLeaseToken>();
@@ -124,11 +127,19 @@ export class InteractRuntime {
   private unsubscribeUserClose: (() => void) | undefined;
   private destroyed = false;
 
-  constructor(options: InteractRuntimeOptions) {
+  constructor(
+    options: InteractRuntimeOptions,
+    pauseGame: boolean,
+    hideOnLeave: boolean,
+    suppressAfterUserClose: boolean,
+  ) {
     this.resolver = options.resolver;
     this.ui = options.ui;
     this.lease = options.lease;
     this.onVisitReceipt = options.onVisitReceipt ?? (() => undefined);
+    this.pauseGame = pauseGame;
+    this.hideOnLeave = hideOnLeave;
+    this.suppressAfterUserClose = suppressAfterUserClose;
     try {
       this.unsubscribeUserClose = this.ui.subscribeUserClose((event) => {
         this.handleUserClose(event);
@@ -186,18 +197,20 @@ export class InteractRuntime {
       return "invalid";
     }
 
-    let token: GameplayControlLeaseToken;
+    let token: GameplayControlLeaseToken | undefined;
     if (this.activeState === undefined) {
-      let acquired;
-      try {
-        acquired = this.lease.acquire("modal-open");
-      } catch {
-        return "lease-failed";
+      if (this.pauseGame) {
+        let acquired;
+        try {
+          acquired = this.lease.acquire("modal-open");
+        } catch {
+          return "lease-failed";
+        }
+        if (!acquired.ok) return "lease-failed";
+        token = acquired.token;
       }
-      if (!acquired.ok) return "lease-failed";
-      token = acquired.token;
     } else {
-      if (this.activeToken === undefined) return "lease-failed";
+      if (this.pauseGame && this.activeToken === undefined) return "lease-failed";
       token = this.activeToken;
     }
 
@@ -214,7 +227,7 @@ export class InteractRuntime {
     }
 
     if (showResult.status !== "shown" && showResult.status !== "already-visible") {
-      if (this.activeState === undefined) {
+      if (this.activeState === undefined && token !== undefined) {
         this.retainIfReleaseFailed(token);
       }
       return "show-failed";
@@ -256,7 +269,9 @@ export class InteractRuntime {
       return;
     }
     const token = this.activeToken;
-    this.suppressedResidences.add(identityKey(event));
+    const identity = identityKey(event);
+    if (this.suppressAfterUserClose) this.suppressedResidences.add(identity);
+    else this.committedResidences.delete(identity);
     this.activeState = undefined;
     this.activeToken = undefined;
     if (token !== undefined) this.retainIfReleaseFailed(token);
@@ -336,6 +351,7 @@ export class InteractRuntime {
     this.committedResidences.delete(identity);
     const active = this.activeState;
     if (active === undefined || !sameIdentity(active, event)) return;
+    if (!this.hideOnLeave) return;
     let hideResult;
     try {
       hideResult = this.ui.hide({
@@ -399,6 +415,14 @@ function sameIdentity(
 export const ContentInteractRuntime = InteractRuntime;
 export function createInteractRuntime(
   options: InteractRuntimeOptions,
+  pauseGame: boolean,
+  hideOnLeave: boolean,
+  suppressAfterUserClose: boolean,
 ): InteractRuntime {
-  return new InteractRuntime(options);
+  return new InteractRuntime(
+    options,
+    pauseGame,
+    hideOnLeave,
+    suppressAfterUserClose,
+  );
 }

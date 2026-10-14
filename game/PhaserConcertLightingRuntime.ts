@@ -21,47 +21,10 @@ export interface PhaserConcertLightingSceneLike {
   readonly add: { graphics(): ConcertLightingGraphicsLike };
 }
 
-export const CONCERT_LIGHTING_BOUNDS = Object.freeze({
-  left: 103 * 16,
-  top: 25 * 16,
-  right: (138 + 1) * 16,
-  bottom: (52 + 1) * 16,
-});
-
-export const CONCERT_LIGHTING_CONTRACT = Object.freeze({
-  darkZoneCount: 1,
-  spotlightCount: 2,
-  colorLightCount: 2,
-  laserCount: 6,
-  darkZoneDepth: 1_600,
-  laserDepth: 1_650,
-});
-
 type Point = { readonly x: number; readonly y: number };
-type LaserConfig = {
-  readonly source: Point;
-  readonly phase: number;
-};
-
-const SPOTLIGHT_ANCHORS = Object.freeze([
-  Object.freeze({ x: 1_860, y: 600, radius: 60, phase: 0 }),
-  Object.freeze({ x: 2_040, y: 680, radius: 50, phase: 2.1 }),
-]);
-const COLOR_LIGHT_ANCHORS = Object.freeze([
-  Object.freeze({ x: 1_850, y: 690, color: 0xff2200, phase: 1.2 }),
-  Object.freeze({ x: 2_030, y: 590, color: 0x0088ff, phase: 3.4 }),
-]);
-const LASERS: readonly LaserConfig[] = Object.freeze([
-  { source: { x: 117 * 16 + 8, y: 36 * 16 + 8 }, phase: 0 },
-  { source: { x: 125 * 16 + 8, y: 36 * 16 + 8 }, phase: 0.7 },
-  { source: { x: 110 * 16 + 8, y: 36 * 16 + 8 }, phase: 1.4 },
-  { source: { x: 132 * 16 + 8, y: 36 * 16 + 8 }, phase: 2.1 },
-  { source: { x: 113 * 16 + 8, y: 44 * 16 + 8 }, phase: 2.8 },
-  { source: { x: 128 * 16 + 8, y: 44 * 16 + 8 }, phase: 3.5 },
-]);
 
 const intersects = (
-  bounds: typeof CONCERT_LIGHTING_BOUNDS,
+  bounds: ConcertLightingFxConfig["bounds"],
   viewport: ConcertLightingViewport | undefined,
 ): boolean => viewport === undefined || !(
   bounds.right < viewport.left ||
@@ -111,26 +74,29 @@ export class PhaserConcertLightingRuntime {
   private active = false;
   private lastUpdateAt = 0;
 
-  constructor(private readonly scene: PhaserConcertLightingSceneLike) {}
+  constructor(
+    private readonly scene: PhaserConcertLightingSceneLike,
+    private readonly config: ConcertLightingFxConfig,
+  ) {}
 
   start(): boolean {
     if (this.dead || this.started) return false;
     try {
       this.darkZone = this.scene.add.graphics();
-      this.darkZone.setDepth(CONCERT_LIGHTING_CONTRACT.darkZoneDepth);
-      this.spotlights = SPOTLIGHT_ANCHORS.map(() => {
+      this.darkZone.setDepth(this.config.darkZoneDepth);
+      this.spotlights = this.config.spotlights.map(() => {
         const graphics = this.scene.add.graphics();
-        graphics.setDepth(CONCERT_LIGHTING_CONTRACT.darkZoneDepth + 1);
+        graphics.setDepth(this.config.darkZoneDepth + 1);
         return graphics;
       });
-      this.colorLights = COLOR_LIGHT_ANCHORS.map(() => {
+      this.colorLights = this.config.colorLights.map(() => {
         const graphics = this.scene.add.graphics();
-        graphics.setDepth(CONCERT_LIGHTING_CONTRACT.darkZoneDepth + 1);
+        graphics.setDepth(this.config.darkZoneDepth + 1);
         return graphics;
       });
-      this.lasers = LASERS.map(() => {
+      this.lasers = this.config.lasers.map(() => {
         const graphics = this.scene.add.graphics();
-        graphics.setDepth(CONCERT_LIGHTING_CONTRACT.laserDepth);
+        graphics.setDepth(this.config.laserDepth);
         return graphics;
       });
       this.started = true;
@@ -145,7 +111,7 @@ export class PhaserConcertLightingRuntime {
   update(now: number, viewport?: ConcertLightingViewport): void {
     if (this.dead || !this.started) return;
     this.lastUpdateAt = now;
-    const nextActive = intersects(CONCERT_LIGHTING_BOUNDS, viewport);
+    const nextActive = intersects(this.config.bounds, viewport);
     if (!nextActive) {
       if (this.active) this.setVisible(false);
       this.active = false;
@@ -184,9 +150,9 @@ export class PhaserConcertLightingRuntime {
       active: this.active,
       objectCount: this.objectCount,
       darkZoneCount: this.started ? 1 : 0,
-      spotlightCount: this.spotlights.length,
-      colorLightCount: this.colorLights.length,
-      laserCount: this.lasers.length,
+      spotlightCount: this.config.spotlights.length,
+      colorLightCount: this.config.colorLights.length,
+      laserCount: this.config.lasers.length,
       lastUpdateAt: this.lastUpdateAt,
     });
   }
@@ -202,21 +168,21 @@ export class PhaserConcertLightingRuntime {
     this.darkZone?.clear();
     this.darkZone?.fillStyle(0x662062, 0.7);
     this.darkZone?.fillRect(
-      CONCERT_LIGHTING_BOUNDS.left,
-      CONCERT_LIGHTING_BOUNDS.top,
-      CONCERT_LIGHTING_BOUNDS.right - CONCERT_LIGHTING_BOUNDS.left,
-      CONCERT_LIGHTING_BOUNDS.bottom - CONCERT_LIGHTING_BOUNDS.top,
+      this.config.bounds.left,
+      this.config.bounds.top,
+      this.config.bounds.right - this.config.bounds.left,
+      this.config.bounds.bottom - this.config.bounds.top,
     );
 
-    for (const [index, anchor] of SPOTLIGHT_ANCHORS.entries()) {
+    for (const [index, anchor] of this.config.spotlights.entries()) {
       const point = oscillate(anchor, now, anchor.phase, 84, 48);
       drawGlow(this.spotlights[index]!, point, anchor.radius, 0xffffff, 1);
     }
-    for (const [index, anchor] of COLOR_LIGHT_ANCHORS.entries()) {
+    for (const [index, anchor] of this.config.colorLights.entries()) {
       const point = oscillate(anchor, now, anchor.phase, 110, 70);
       drawGlow(this.colorLights[index]!, point, 50, anchor.color, 0.8);
     }
-    for (const [index, laser] of LASERS.entries()) {
+    for (const [index, laser] of this.config.lasers.entries()) {
       const time = now / 1_000;
       const target = {
         x: (121 + Math.sin(time * 0.6 + laser.phase) * 5) * 16 + 8,
@@ -226,7 +192,9 @@ export class PhaserConcertLightingRuntime {
       const graphics = this.lasers[index]!;
       graphics.clear();
       graphics.lineStyle(width, 0x00ff00, 0.5);
-      graphics.lineBetween(laser.source.x, laser.source.y, target.x, target.y);
+      graphics.lineBetween(laser.tileX * 16 + 8, laser.tileY * 16 + 8, target.x, target.y);
     }
   }
 }
+import type { ConcertLightingFxConfig } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
+

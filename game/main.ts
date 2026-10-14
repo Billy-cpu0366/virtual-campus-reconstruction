@@ -24,14 +24,29 @@ import type {
 } from "./ProductEntryRuntime.js";
 import { installRuntimeDiagnostics } from "./runtimeDiagnostics.js";
 import { loadNpcConfigs } from "../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+import { loadRouteConfigs } from "../config/骨架/05-旁支/SYS-ROUTE/逻辑/index.js";
+import { loadChunkConfigs } from "../config/骨架/01-地图线/SYS-CHUNK/逻辑/index.js";
+import { loadZoneConfigs } from "../config/骨架/03-内容线/SYS-ZONE/逻辑/index.js";
+import { loadMoveConfigs } from "../config/骨架/02-玩法线/SYS-MOVE/逻辑/index.js";
+import { loadInputConfigs } from "../config/骨架/02-玩法线/SYS-INPUT/逻辑/index.js";
+import { loadWorldConfigs } from "../config/骨架/01-地图线/SYS-WORLD/逻辑/index.js";
+import { loadCameraConfigs } from "../config/骨架/02-玩法线/SYS-CAMERA/逻辑/index.js";
+import { loadInteractConfigs } from "../config/骨架/03-内容线/SYS-INTERACT/逻辑/index.js";
+import { loadLayerConfigs } from "../config/骨架/02-玩法线/SYS-LAYER/逻辑/index.js";
+import { loadPlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
+import { loadEntityConfigs } from "../config/骨架/04-独立件/SYS-ENTITY/逻辑/index.js";
+import { loadFxConfigs } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
+import { loadAppConfigs, type AppConfigs } from "../config/骨架/04-独立件/SYS-APP/逻辑/index.js";
+import { loadGameUiConfigs } from "../config/骨架/04-独立件/SYS-GAME-UI/逻辑/index.js";
+import {
+  loadTransportConfigs,
+  type TransportConfigs,
+} from "../config/骨架/06-网络协议层/SYS-TRANSPORT/逻辑/index.js";
 import { createFetchConfigSource } from "../config/骨架/公共/fetch-config-source.js";
 import {
   configBaseUrlFor,
   resolveConfigSet,
 } from "../config/骨架/公共/config-location.js";
-
-const LOGICAL_WORLD_WIDTH = 480;
-const LOGICAL_WORLD_HEIGHT = 270;
 
 /**
  * 这一局读哪一套配置：网址上带 `?config=set1` 就读 set1，不带就读 `config/default/`。
@@ -114,41 +129,58 @@ const focus: DomAppFocusPort = {
   focus: (target) => target.focus?.(),
 };
 
-let appRuntime: AppRuntime;
-const appUi = new DomAppUi({
-  elements: {
-    root: asAppTarget("app-shell"),
-    loading: asAppTarget("app-loading"),
-    progressBar: asAppTarget("app-progress-bar"),
-    progressText: asAppTarget("app-progress-text"),
-    ready: asAppTarget("app-ready"),
-    play: playButton as unknown as DomAppTarget,
-    error: asAppTarget("app-error"),
-    errorText: asAppTarget("app-error-text"),
-    retry: retryButton as unknown as DomAppTarget,
-  },
-  viewport,
-  focus,
-  onViewportChange: () => {
-    currentGeneration?.game?.scale?.refresh();
-  },
-  optionalImages: [
+let appRuntime: AppRuntime | undefined;
+let appUi: DomAppUi | undefined;
+let latestAppConfig: AppConfigs | undefined;
+const configSource = createFetchConfigSource({ baseUrl: CONFIG_BASE_URL });
+
+function createAppUi(
+  gameUiConfigs: Awaited<ReturnType<typeof loadGameUiConfigs>>,
+  appConfigs: Pick<AppConfigs, "showErrorDetail">,
+): DomAppUi {
+  return new DomAppUi(
     {
-      image: asAppImageTarget("app-loading-image"),
-      fallbackAlt: "Peter Oravec portfolio loader unavailable",
+      elements: {
+        root: asAppTarget("app-shell"),
+        loading: asAppTarget("app-loading"),
+        progressBar: asAppTarget("app-progress-bar"),
+        progressText: asAppTarget("app-progress-text"),
+        ready: asAppTarget("app-ready"),
+        play: playButton as unknown as DomAppTarget,
+        error: asAppTarget("app-error"),
+        errorText: asAppTarget("app-error-text"),
+        retry: retryButton as unknown as DomAppTarget,
+      },
+      viewport,
+      focus,
+      onViewportChange: () => {
+        currentGeneration?.game?.scale?.refresh();
+      },
+      optionalImages: [
+        {
+          image: asAppImageTarget("app-loading-image"),
+          fallbackAlt: "Peter Oravec portfolio loader unavailable",
+        },
+        {
+          image: asAppImageTarget("app-logo"),
+          fallbackAlt: "Peter Oravec portfolio logo unavailable",
+        },
+      ],
+      onPlay: () => {
+        appRuntime?.play();
+      },
+      onRetry: () => {
+        appRuntime?.retry();
+      },
     },
     {
-      image: asAppImageTarget("app-logo"),
-      fallbackAlt: "Peter Oravec portfolio logo unavailable",
+      mobileBreakpoint: gameUiConfigs.breakpoint.mobile,
+      focusRing: gameUiConfigs.focusRing,
+      rootPadding: gameUiConfigs.rootPadding,
+      showErrorDetail: appConfigs.showErrorDetail,
     },
-  ],
-  onPlay: () => {
-    appRuntime.play();
-  },
-  onRetry: () => {
-    appRuntime.retry();
-  },
-});
+  );
+}
 
 function publishGuide(target: ProductEntryGuideTarget): boolean {
   guide.textContent =
@@ -199,8 +231,8 @@ function createSceneCallbacks(
     onModalVisibility: (visible) => {
       if (!isCurrent(generation)) return;
       guide.hidden = visible || guide.textContent === "";
-      if (visible) appRuntime.openModal();
-      else appRuntime.closeModal();
+      if (visible) appRuntime?.openModal();
+      else appRuntime?.closeModal();
     },
     onError: (error) => {
       if (isCurrent(generation)) callbacks.onError(error);
@@ -208,28 +240,31 @@ function createSceneCallbacks(
   };
 }
 
-function gameConfig(scene: CampusScene): Phaser.Types.Core.GameConfig {
+function gameConfig(
+  scene: CampusScene,
+  appConfigs: AppConfigs,
+): Phaser.Types.Core.GameConfig {
   return {
     type: Phaser.AUTO,
     parent: "app",
-    width: LOGICAL_WORLD_WIDTH,
-    height: LOGICAL_WORLD_HEIGHT,
-    backgroundColor: "#0f172a",
-    pixelArt: true,
-    roundPixels: true,
+    width: appConfigs.logicalWidth,
+    height: appConfigs.logicalHeight,
+    backgroundColor: appConfigs.backgroundColor,
+    pixelArt: appConfigs.pixelArt,
+    roundPixels: appConfigs.roundPixels,
     physics: {
       default: "arcade",
       arcade: {
-        gravity: { x: 0, y: 0 },
-        fixedStep: true,
-        fps: 30,
+        gravity: appConfigs.physicsGravity,
+        fixedStep: appConfigs.physicsFixedStep,
+        fps: appConfigs.physicsFps,
       },
     },
     scale: {
       mode: Phaser.Scale.ENVELOP,
       autoCenter: Phaser.Scale.CENTER_BOTH,
-      width: LOGICAL_WORLD_WIDTH,
-      height: LOGICAL_WORLD_HEIGHT,
+      width: appConfigs.logicalWidth,
+      height: appConfigs.logicalHeight,
     },
     scene: [scene],
   };
@@ -253,16 +288,50 @@ appRuntime = new AppRuntime({
       // 原因：贴图的帧规格（每帧多大、共几帧）是 `preload()` 阶段就要报给
       // Phaser 的，而 `preload()` 跟在这句后面同步跑起来，来不及等网络。
       // 所以顺序是：读配置 → 造游戏对象 → 场景自己按配置登记贴图。
-      void loadNpcConfigs(createFetchConfigSource({ baseUrl: CONFIG_BASE_URL })).then(
-        (npcConfigs) => {
+      //
+      // 两个板块**同时**发请求，不是读完一个再读另一个：它们互不依赖，
+      // 排队只会让首屏多等一趟网络。板块多了以后也一样，谁慢等谁。
+      const gameUiConfigPromise = loadGameUiConfigs(configSource);
+      let loadedAppConfig: AppConfigs | undefined;
+      const appConfigPromise = loadAppConfigs(configSource).then((config) => {
+        loadedAppConfig = config;
+        return config;
+      });
+      void Promise.all([
+        appConfigPromise,
+        gameUiConfigPromise,
+        loadNpcConfigs(configSource),
+        loadRouteConfigs(configSource),
+        loadPlayerConfigs(configSource),
+        loadTransportConfigs(configSource),
+      ]).then(
+        ([appConfigs, gameUiConfigs, npcConfigs, routeConfigs, playerConfigs, transportConfigs]) => {
           if (active.cancelled || currentGeneration !== active) return;
+          latestAppConfig = appConfigs;
+          if (appUi === undefined) {
+            appUi = createAppUi(gameUiConfigs, appConfigs);
+            appUi.render(latestAppSnapshot);
+          }
           const scene = new CampusScene(
             npcConfigs,
+            routeConfigs,
+            playerConfigs,
+            transportConfigs,
+            () => Promise.all([loadChunkConfigs(configSource)]).then(([chunk]) => chunk),
+            () => Promise.all([loadZoneConfigs(configSource)]).then(([zone]) => zone),
+            () => Promise.all([loadMoveConfigs(configSource)]).then(([move]) => move),
+            () => Promise.all([loadInputConfigs(configSource)]).then(([input]) => input),
+            () => Promise.all([loadWorldConfigs(configSource)]).then(([world]) => world),
+            () => Promise.all([loadCameraConfigs(configSource)]).then(([camera]) => camera),
+            () => Promise.all([loadInteractConfigs(configSource)]).then(([interact]) => interact),
+            () => Promise.all([loadLayerConfigs(configSource)]).then(([layer]) => layer),
+            () => loadEntityConfigs(configSource),
+            () => loadFxConfigs(configSource),
             createSceneCallbacks(generation, callbacks),
           );
           active.scene = scene;
           try {
-            active.game = new Phaser.Game(gameConfig(scene)) as PhaserGameLike;
+            active.game = new Phaser.Game(gameConfig(scene, appConfigs)) as PhaserGameLike;
           } catch (error) {
             if (currentGeneration === active) currentGeneration = undefined;
             callbacks.onError(error);
@@ -271,6 +340,15 @@ appRuntime = new AppRuntime({
         (error: unknown) => {
           if (active.cancelled || currentGeneration !== active) return;
           callbacks.onError(error);
+          if (appUi === undefined) {
+            void gameUiConfigPromise.then((gameUiConfigs) => {
+              if (active.cancelled || currentGeneration !== active || appUi !== undefined) return;
+              appUi = createAppUi(gameUiConfigs, {
+                showErrorDetail: loadedAppConfig?.showErrorDetail ?? true,
+              });
+              appUi.render(latestAppSnapshot);
+            }).catch(() => undefined);
+          }
         },
       );
       return {
@@ -333,7 +411,7 @@ appRuntime = new AppRuntime({
       playButton.disabled = false;
       retryButton.disabled = false;
     }
-    appUi.render(snapshot);
+    appUi?.render(snapshot);
   },
 });
 
@@ -348,8 +426,8 @@ if (appTestHooksEnabled) {
       guideText: guide.textContent ?? "",
       canvasCount: document.querySelectorAll("#app canvas").length,
       logicalViewport: {
-        width: LOGICAL_WORLD_WIDTH,
-        height: LOGICAL_WORLD_HEIGHT,
+        width: latestAppConfig?.logicalWidth ?? null,
+        height: latestAppConfig?.logicalHeight ?? null,
       },
     }),
   });
@@ -357,7 +435,7 @@ if (appTestHooksEnabled) {
 
 window.addEventListener("pagehide", (event) => {
   // A persisted page keeps its live generation for back/forward restoration.
-  if (!event.persisted) appRuntime.shutdown();
+  if (!event.persisted) appRuntime?.shutdown();
 });
 window.addEventListener("pageshow", (event) => {
   if (event.persisted) currentGeneration?.game?.scale?.refresh();

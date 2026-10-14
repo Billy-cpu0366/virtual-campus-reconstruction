@@ -35,7 +35,7 @@ export function playerNeighborhood(
   worldX: number,
   worldY: number,
   geometry: ChunkGeometry,
-  radius = 1,
+  radius: number,
 ): readonly ChunkCoordinate[] {
   if (!Number.isInteger(radius) || radius < 0) {
     throw new RangeError("player neighborhood radius must be non-negative");
@@ -75,7 +75,7 @@ function assertViewport(viewport: CameraViewport): void {
 export function cameraVisibleChunks(
   viewport: CameraViewport,
   geometry: ChunkGeometry,
-  padding = 1,
+  padding: number,
 ): readonly ChunkCoordinate[] {
   assertViewport(viewport);
   if (!Number.isInteger(padding) || padding < 0) {
@@ -132,9 +132,11 @@ export function targetChunks(
   playerWorldY: number,
   viewport: CameraViewport,
   geometry: ChunkGeometry,
+  playerNeighborhoodRadius: number,
+  cameraPadding: number,
 ): readonly ChunkCoordinate[] {
   return mergeChunkCoordinates(
-    playerNeighborhood(playerWorldX, playerWorldY, geometry),
-    cameraVisibleChunks(viewport, geometry),
+    playerNeighborhood(playerWorldX, playerWorldY, geometry, playerNeighborhoodRadius),
+    cameraVisibleChunks(viewport, geometry, cameraPadding),
   );
 }

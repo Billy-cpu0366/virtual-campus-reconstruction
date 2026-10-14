@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  CONCERT_LIGHTING_CONTRACT,
   PhaserConcertLightingRuntime,
   type ConcertLightingGraphicsLike,
 } from "../../game/PhaserConcertLightingRuntime.js";
+import { FX_CONFIGS } from "./fixture.js";
 
 class Graphics implements ConcertLightingGraphicsLike {
   visible = false;
@@ -31,17 +31,17 @@ describe("PhaserConcertLightingRuntime", () => {
         graphics.push(value);
         return value;
       } },
-    });
+    }, FX_CONFIGS.concertLighting);
 
     expect(runtime.start()).toBe(true);
     expect(runtime.snapshot).toMatchObject({
       started: true,
       active: false,
       objectCount: 11,
-      darkZoneCount: CONCERT_LIGHTING_CONTRACT.darkZoneCount,
-      spotlightCount: CONCERT_LIGHTING_CONTRACT.spotlightCount,
-      colorLightCount: CONCERT_LIGHTING_CONTRACT.colorLightCount,
-      laserCount: CONCERT_LIGHTING_CONTRACT.laserCount,
+      darkZoneCount: 1,
+      spotlightCount: FX_CONFIGS.concertLighting.spotlights.length,
+      colorLightCount: FX_CONFIGS.concertLighting.colorLights.length,
+      laserCount: FX_CONFIGS.concertLighting.lasers.length,
     });
     expect(graphics).toHaveLength(11);
     expect(graphics.every((value) => !value.visible)).toBe(true);

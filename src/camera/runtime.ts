@@ -1,8 +1,3 @@
-import {
-  CAMERA_END_TWEEN_DURATION_MS,
-  CAMERA_END_TWEEN_EASE,
-  CAMERA_SEQUENCE,
-} from "./sequence.js";
 import type {
   CameraPoint,
   CameraRuntimeCameraSettings,
@@ -14,34 +9,6 @@ import type {
   CameraViewport,
   CameraPosition,
 } from "./contract.js";
-import {
-  CAMERA_ZOOM,
-  DEADZONE_X,
-  DEADZONE_Y,
-  FOLLOW_LERP,
-  FOLLOW_OFFSET_X,
-  FOLLOW_OFFSET_Y,
-  ROUND_PIXELS,
-} from "./params.js";
-
-export const CAMERA_RUNTIME_SETTINGS: CameraRuntimeCameraSettings =
-  Object.freeze({
-    zoom: CAMERA_ZOOM,
-    lerpX: FOLLOW_LERP,
-    lerpY: FOLLOW_LERP,
-    followOffsetX: FOLLOW_OFFSET_X,
-    followOffsetY: FOLLOW_OFFSET_Y,
-    deadzoneX: DEADZONE_X,
-    deadzoneY: DEADZONE_Y,
-    roundPixels: ROUND_PIXELS,
-  });
-
-const DEFAULT_START_OPTIONS: Required<
-  Pick<CameraRuntimeStartOptions, "sequence" | "returnDuration">
-> = {
-  sequence: CAMERA_SEQUENCE,
-  returnDuration: CAMERA_END_TWEEN_DURATION_MS,
-};
 
 class CameraRuntimeShutdownError extends Error {
   constructor() {
@@ -145,6 +112,11 @@ type RuntimePhase = "idle" | "running" | "completed" | "failed" | "shutdown";
 export class CameraRuntime {
   private readonly driver: CameraRuntimeDriver;
   private readonly callbacks: CameraRuntimeCallbacks;
+  private readonly cameraSettings: CameraRuntimeCameraSettings;
+  private readonly defaultSequence: readonly CameraPoint[];
+  private readonly defaultReturnDuration: number;
+  private readonly pointEase: string;
+  private readonly returnEase: string;
   private phase: RuntimePhase = "idle";
   private runPromise: Promise<CameraRunResult> | undefined;
   private resolveRun: ((result: CameraRunResult) => void) | undefined;
@@ -156,9 +128,19 @@ export class CameraRuntime {
 
   constructor(
     callbacks: CameraRuntimeCallbacks,
+    cameraSettings: CameraRuntimeCameraSettings,
+    defaultSequence: readonly CameraPoint[],
+    defaultReturnDuration: number,
+    pointEase: string,
+    returnEase: string,
     driver: CameraRuntimeDriver = createTimeoutCameraRuntimeDriver(),
   ) {
     this.callbacks = callbacks;
+    this.cameraSettings = cameraSettings;
+    this.defaultSequence = defaultSequence;
+    this.defaultReturnDuration = defaultReturnDuration;
+    this.pointEase = pointEase;
+    this.returnEase = returnEase;
     this.driver = driver;
   }
 
@@ -184,9 +166,9 @@ export class CameraRuntime {
       this.currentPosition = undefined;
     }
 
-    const sequence = options.sequence ?? DEFAULT_START_OPTIONS.sequence;
+    const sequence = options.sequence ?? this.defaultSequence;
     const returnDuration =
-      options.returnDuration ?? DEFAULT_START_OPTIONS.returnDuration;
+      options.returnDuration ?? this.defaultReturnDuration;
     this.runPromise = new Promise<CameraRunResult>((resolve) => {
       this.resolveRun = resolve;
       try {
@@ -267,7 +249,7 @@ export class CameraRuntime {
           this.fail(error);
         }
       },
-      { ease: "Linear" },
+      { ease: this.pointEase },
     );
     if (this.phase === "running" && !callbackInvoked) {
       this.activeTween = tween;
@@ -344,7 +326,7 @@ export class CameraRuntime {
           this.fail(error);
         }
       },
-      { ease: CAMERA_END_TWEEN_EASE },
+      { ease: this.returnEase },
     );
     if (this.phase === "running" && !callbackInvoked) {
       this.activeTween = tween;
@@ -406,12 +388,12 @@ export class CameraRuntime {
     this.cleanupDone = true;
     let firstError: unknown;
     try {
-      this.callbacks.restoreCameraSettings(CAMERA_RUNTIME_SETTINGS);
+      this.callbacks.restoreCameraSettings(this.cameraSettings);
     } catch (error: unknown) {
       firstError ??= error;
     }
     try {
-      this.callbacks.startHardFollow(CAMERA_RUNTIME_SETTINGS);
+      this.callbacks.startHardFollow(this.cameraSettings);
     } catch (error: unknown) {
       firstError ??= error;
     }
@@ -464,6 +446,5 @@ export type {
   CameraViewport,
   CameraPosition,
 };
-export { CAMERA_END_TWEEN_EASE };
 export type CameraRuntimePhase = RuntimePhase;
 export { CameraRuntimeShutdownError };

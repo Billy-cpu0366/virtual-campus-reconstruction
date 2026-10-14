@@ -1,18 +1,14 @@
 import {
   FACTORY_SMOKE_ASSET_KEY,
-  FACTORY_SMOKE_CONFIG,
   FactorySmokeRuntime,
   type SmokeViewport,
 } from "../src/fx/index.js";
+import type { FactorySmokeFxConfig } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
 
 export const FACTORY_SMOKE_RUNTIME_ASSET = Object.freeze({
   key: FACTORY_SMOKE_ASSET_KEY,
   url: new URL("../src/fx/assets/smoke-white.webp", import.meta.url).href,
 });
-
-// 仅呈现层修正：本重构的工厂屋顶层用 depth 3200/3300，而公开包的烟雾配置
-// 保留原站确认值 depth=500（见 src/fx/factory-smoke.ts）。两个数都对，别合并成一个。
-export const FACTORY_SMOKE_PRESENTATION_DEPTH = 3_400;
 
 type SmokeListener = (...args: unknown[]) => void;
 
@@ -86,6 +82,10 @@ export interface PhaserFactorySmokeRuntimeOptions {
   readonly onError?: (reason: string) => void;
 }
 
+export function preloadFactorySmokeRuntimeAssets(loader: PhaserFactorySmokeLoaderLike): void {
+  loader.image(FACTORY_SMOKE_RUNTIME_ASSET.key, FACTORY_SMOKE_RUNTIME_ASSET.url);
+}
+
 export type PhaserFactorySmokeStartResult =
   | { readonly ok: true; readonly generation: number }
   | {
@@ -116,7 +116,7 @@ function viewportFromScene(
 
 /** Dedicated Phaser owner for the one public factory smoke generator. */
 export class PhaserFactorySmokeRuntime {
-  private readonly runtime = new FactorySmokeRuntime();
+  private readonly runtime: FactorySmokeRuntime;
   private readonly viewportProvider: (() => SmokeViewport) | undefined;
   private readonly onError: ((reason: string) => void) | undefined;
   private emitter: PhaserFactorySmokeEmitterLike | undefined;
@@ -143,18 +143,17 @@ export class PhaserFactorySmokeRuntime {
 
   constructor(
     private readonly scene: PhaserFactorySmokeSceneLike,
+    private readonly config: FactorySmokeFxConfig,
     options: PhaserFactorySmokeRuntimeOptions = {},
   ) {
+    this.runtime = new FactorySmokeRuntime(config);
     this.viewportProvider = options.viewport;
     this.onError = options.onError;
   }
 
   preload(): void {
     if (this.shutdownState) return;
-    this.scene.load.image(
-      FACTORY_SMOKE_RUNTIME_ASSET.key,
-      FACTORY_SMOKE_RUNTIME_ASSET.url,
-    );
+    preloadFactorySmokeRuntimeAssets(this.scene.load);
   }
 
   start(): PhaserFactorySmokeStartResult {
@@ -175,16 +174,16 @@ export class PhaserFactorySmokeRuntime {
 
     try {
       this.pathGraphics = this.scene.add.graphics().setDepth(
-        FACTORY_SMOKE_PRESENTATION_DEPTH + 1,
+        this.config.presentationDepth + 1,
       );
       this.emitter = this.scene.add.particles(
-        FACTORY_SMOKE_CONFIG.x,
-        FACTORY_SMOKE_CONFIG.y,
+        this.config.x,
+        this.config.y,
         FACTORY_SMOKE_RUNTIME_ASSET.key,
         this.emitterConfig(),
       );
       this.emitter
-        .setDepth(FACTORY_SMOKE_PRESENTATION_DEPTH)
+        .setDepth(this.config.presentationDepth)
         .setVisible(false);
     } catch {
       this.runtime.shutdown();
@@ -232,8 +231,8 @@ export class PhaserFactorySmokeRuntime {
   get visualSnapshot() {
     return Object.freeze({
       anchor: Object.freeze({
-        x: FACTORY_SMOKE_CONFIG.x,
-        y: FACTORY_SMOKE_CONFIG.y,
+        x: this.config.x,
+        y: this.config.y,
       }),
       aliveParticleCount: this.visibleParticleCountState,
       bounds: this.visibleParticleBoundsState,
@@ -244,22 +243,22 @@ export class PhaserFactorySmokeRuntime {
     return {
       speed: 0,
       scale: {
-        start: FACTORY_SMOKE_CONFIG.scaleStart,
-        end: FACTORY_SMOKE_CONFIG.scaleEnd,
+        start: this.config.scaleStart,
+        end: this.config.scaleEnd,
       },
       alpha: {
-        start: FACTORY_SMOKE_CONFIG.alphaStart,
-        end: FACTORY_SMOKE_CONFIG.alphaEnd,
+        start: this.config.alphaStart,
+        end: this.config.alphaEnd,
       },
-      lifespan: FACTORY_SMOKE_CONFIG.lifespan,
-      quantity: FACTORY_SMOKE_CONFIG.quantity,
-      frequency: FACTORY_SMOKE_CONFIG.frequency,
+      lifespan: this.config.lifespan,
+      quantity: this.config.quantity,
+      frequency: this.config.frequency,
       emitting: false,
       gravityY: 0,
       blendMode: "NORMAL",
       emitCallback: (particle: PhaserFactorySmokeParticleLike): void => {
         particle.velocityX = Math.random() - 0.5;
-        particle.alpha = Math.min(particle.alpha, FACTORY_SMOKE_CONFIG.maxAlpha);
+        particle.alpha = Math.min(particle.alpha, this.config.maxAlpha);
       },
     };
   }
@@ -272,9 +271,9 @@ export class PhaserFactorySmokeRuntime {
     let bottom = Number.NEGATIVE_INFINITY;
     this.emitter?.forEachAlive?.((particle) => {
       const position = this.runtime.particlePosition(particle.lifeT ?? 0);
-      particle.x = FACTORY_SMOKE_CONFIG.x + position.x;
-      particle.y = FACTORY_SMOKE_CONFIG.y + position.y;
-      particle.alpha = Math.min(particle.alpha, FACTORY_SMOKE_CONFIG.maxAlpha);
+      particle.x = this.config.x + position.x;
+      particle.y = this.config.y + position.y;
+      particle.alpha = Math.min(particle.alpha, this.config.maxAlpha);
       const halfWidth = (particle.displayWidth ?? 0) / 2;
       const halfHeight = (particle.displayHeight ?? 0) / 2;
       left = Math.min(left, particle.x - halfWidth);

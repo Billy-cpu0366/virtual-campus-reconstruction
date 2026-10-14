@@ -8,6 +8,13 @@ import {
   type DomAppViewport,
 } from "../../src/game-ui/index.js";
 
+const UI_CONFIG = {
+  mobileBreakpoint: 767,
+  focusRing: "3px solid #0b57d0",
+  rootPadding: { desktop: "24px", mobile: "16px" },
+  showErrorDetail: true,
+} as const;
+
 class FakeTarget implements DomAppTarget {
   hidden = true;
   textContent: string | null = null;
@@ -92,7 +99,7 @@ describe("DomAppUi", () => {
   it("renders real loader progress and resets only on a new generation", () => {
     const elements = makeElements();
     const viewport = new FakeViewport();
-    const ui = new DomAppUi({ elements, viewport });
+    const ui = new DomAppUi({ elements, viewport }, UI_CONFIG);
 
     expect(ui.currentView).toBe("loading");
     expect(ui.renderLoading(0.25)).toBe(true);
@@ -131,7 +138,7 @@ describe("DomAppUi", () => {
       onViewportChange: () => {
         viewportChanges += 1;
       },
-    });
+    }, UI_CONFIG);
 
     ui.renderReady();
     expect(elements.ready.hidden).toBe(false);
@@ -172,7 +179,7 @@ describe("DomAppUi", () => {
           fallbackText: "Image unavailable",
         },
       ],
-    });
+    }, UI_CONFIG);
 
     image.dispatch("error");
     expect(image.alt).toBe("Card image unavailable");
@@ -187,5 +194,22 @@ describe("DomAppUi", () => {
     expect(image.removeCount).toBe(1);
     expect(viewport.unsubscribeCount).toBe(1);
     expect(ui.renderReady()).toBe(false);
+  });
+
+  it("hides technical error details when the app setting is off", () => {
+    const elements = makeElements();
+    const ui = new DomAppUi(
+      { elements, viewport: new FakeViewport() },
+      { ...UI_CONFIG, showErrorDetail: false },
+    );
+
+    ui.render({
+      status: "ERROR",
+      generation: 1,
+      progress: 0,
+      error: { kind: "required-asset", message: "network internals" },
+    });
+
+    expect(elements.errorText.textContent).toBe("Loading failed");
   });
 });
