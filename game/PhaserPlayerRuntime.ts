@@ -1,16 +1,6 @@
 import type { Direction } from "../src/input/index.js";
 import {
-  BEACH_IDLE_FRAME,
-  BEACH_TEXTURE,
-  CLOTHES_OFF_DISPLAY_SIZE,
-  CLOTHES_OFF_FIRST_FRAME,
-  CLOTHES_OFF_LAST_FRAME,
-  CLOTHES_OFF_TEXTURE,
-  CLOTHING_FRAME_RATE,
-  DISPLAY_SIZE,
-  DRESS_ANIMATION,
   PlayerRuntimeStateMachine,
-  UNDRESS_ANIMATION,
   type ClothingChange,
   type IdleAnimation,
   type PlayerControlEffects,
@@ -22,6 +12,7 @@ import {
   type PlayerUpdateResult,
   walkFrameStart,
 } from "../src/player/index.js";
+import type { PlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
 
 export interface PhaserPlayerTextureManagerLike {
   exists(key: string): boolean;
@@ -102,67 +93,16 @@ export interface PhaserPlayerRuntimeOptions
   readonly effects?: PlayerControlEffects;
 }
 
-export const PLAYER_RUNTIME_ASSETS = [
-  {
-    key: "player-eating",
-    url: new URL(
-      "../sample/original-public-build/mirror/assets/sprites/player-eating.webp",
-      import.meta.url,
-    ).href,
-  },
-  {
-    key: "player-scratching",
-    url: new URL(
-      "../sample/original-public-build/mirror/assets/sprites/player-scratching.webp",
-      import.meta.url,
-    ).href,
-  },
-  {
-    key: "player-tying-shoe",
-    url: new URL(
-      "../sample/original-public-build/mirror/assets/sprites/player-tying-shoe.webp",
-      import.meta.url,
-    ).href,
-  },
-  {
-    key: "player-sitting",
-    url: new URL(
-      "../sample/original-public-build/mirror/assets/sprites/player-sitting.webp",
-      import.meta.url,
-    ).href,
-  },
-] as const;
-
-export const PLAYER_RUNTIME_ANIMATIONS = Object.freeze({
-  eating: "player-eating-anim",
-  scratching: "player-scratching-anim",
-  "tying-shoe": "player-tying-shoe-anim",
-  sittingDown: "player-sitting-anim",
-  standingUp: "player-sitting-reverse-anim",
-});
-
-const NORMAL_TEXTURE = "player";
-const SPECIAL_DISPLAY_SIZE = 64;
-const IDLE_TEXTURES: Readonly<Record<IdleAnimation, string>> = Object.freeze({
-  eating: "player-eating",
-  scratching: "player-scratching",
-  "tying-shoe": "player-tying-shoe",
-});
-const IDLE_ANIMATIONS: Readonly<Record<IdleAnimation, string>> = Object.freeze({
-  eating: PLAYER_RUNTIME_ANIMATIONS.eating,
-  scratching: PLAYER_RUNTIME_ANIMATIONS.scratching,
-  "tying-shoe": PLAYER_RUNTIME_ANIMATIONS["tying-shoe"],
-});
-
 export function preloadPhaserPlayerRuntimeAssets(
   loader: PhaserPlayerLoaderLike,
+  playerConfigs: PlayerConfigs,
 ): void {
-  for (const asset of PLAYER_RUNTIME_ASSETS) {
-    loader.spritesheet(asset.key, asset.url, {
-      frameWidth: 128,
-      frameHeight: 128,
-      startFrame: 0,
-      endFrame: 15,
+  for (const texture of playerConfigs.idle.textures) {
+    loader.spritesheet(texture.key, texture.url, {
+      frameWidth: playerConfigs.idle.assetFrames.frameWidth,
+      frameHeight: playerConfigs.idle.assetFrames.frameHeight,
+      startFrame: playerConfigs.idle.assetFrames.startFrame,
+      endFrame: playerConfigs.idle.assetFrames.endFrame,
     });
   }
 }
@@ -193,14 +133,15 @@ export class PhaserPlayerRuntime {
 
   private readonly handleAnimationComplete = (...args: unknown[]): void => {
     const key = animationKeyFromEvent(args[0]);
-    if (key === PLAYER_RUNTIME_ANIMATIONS.sittingDown) {
+    const animationKeys = this.playerConfigs.idle.animationKeys;
+    if (key === animationKeys.sittingDown) {
       if (this.state.completeSittingDown()) {
         this.renderedStatus = "sitting";
-        this.sprite.setFrame(15);
+        this.sprite.setFrame(this.playerConfigs.idle.assetFrames.endFrame);
       }
       return;
     }
-    if (key === PLAYER_RUNTIME_ANIMATIONS.standingUp) {
+    if (key === animationKeys.standingUp) {
       const pending = this.state.completeStandingUp();
       if (pending !== null) {
         this.pendingMovementDirection = pending;
@@ -209,7 +150,8 @@ export class PhaserPlayerRuntime {
       }
       return;
     }
-    if (key === UNDRESS_ANIMATION || key === DRESS_ANIMATION) {
+    if (key === this.playerConfigs.clothing.undressAnimationKey ||
+        key === this.playerConfigs.clothing.dressAnimationKey) {
       if (this.state.completeClothingChange()) {
         this.renderedStatus = undefined;
         this.renderedIdleAnimation = undefined;
@@ -218,9 +160,9 @@ export class PhaserPlayerRuntime {
       return;
     }
     if (
-      key === PLAYER_RUNTIME_ANIMATIONS.eating ||
-      key === PLAYER_RUNTIME_ANIMATIONS.scratching ||
-      key === PLAYER_RUNTIME_ANIMATIONS["tying-shoe"]
+      key === animationKeys.eating ||
+      key === animationKeys.scratching ||
+      key === animationKeys["tying-shoe"]
     ) {
       if (this.state.completeIdleAnimation()) {
         this.renderedStatus = undefined;
@@ -233,12 +175,13 @@ export class PhaserPlayerRuntime {
   constructor(
     private readonly scene: PhaserPlayerSceneLike,
     private readonly sprite: PhaserPlayerVisualLike,
+    private readonly playerConfigs: PlayerConfigs,
     options: PhaserPlayerRuntimeOptions = {},
   ) {
     const { effects, ...stateOptions } = options;
     const runtimeOptions: PlayerRuntimeOptions =
       effects === undefined ? stateOptions : { ...stateOptions, effects };
-    this.state = new PlayerRuntimeStateMachine(runtimeOptions);
+    this.state = new PlayerRuntimeStateMachine(playerConfigs, runtimeOptions);
     const body = sprite.body;
     this.bodyShape = body === undefined ? undefined : {
       width: body.width,
@@ -250,49 +193,53 @@ export class PhaserPlayerRuntime {
 
   preload(): void {
     if (this.shutdownState) return;
-    preloadPhaserPlayerRuntimeAssets(this.scene.load);
+    preloadPhaserPlayerRuntimeAssets(this.scene.load, this.playerConfigs);
   }
 
   createAnimations(): void {
     if (this.shutdownState) return;
     this.installAnimationListener();
-    for (const idleAnimation of Object.keys(IDLE_TEXTURES) as IdleAnimation[]) {
+    const frames = this.playerConfigs.idle.assetFrames;
+    for (const idleAnimation of this.playerConfigs.idle.animations) {
+      const texture = this.idleTexture(idleAnimation);
+      const key = this.playerConfigs.idle.animationKeys[idleAnimation];
       this.createAnimationIfAvailable(
-        IDLE_TEXTURES[idleAnimation],
-        IDLE_ANIMATIONS[idleAnimation],
-        0,
-        15,
+        texture,
+        key,
+        frames.startFrame,
+        frames.endFrame,
         5,
       );
     }
+    const sittingTexture = this.idleTexture("sitting");
     this.createAnimationIfAvailable(
-      "player-sitting",
-      PLAYER_RUNTIME_ANIMATIONS.sittingDown,
-      0,
-      15,
+      sittingTexture,
+      this.playerConfigs.idle.animationKeys.sittingDown,
+      frames.startFrame,
+      frames.endFrame,
       16,
     );
     this.createAnimationIfAvailable(
-      "player-sitting",
-      PLAYER_RUNTIME_ANIMATIONS.standingUp,
-      15,
-      0,
+      sittingTexture,
+      this.playerConfigs.idle.animationKeys.standingUp,
+      frames.endFrame,
+      frames.startFrame,
       16,
     );
     // 沙滩换装：同一张 16 帧贴图，脱衣正向播、穿衣倒放。
     this.createAnimationIfAvailable(
-      CLOTHES_OFF_TEXTURE,
-      UNDRESS_ANIMATION,
-      CLOTHES_OFF_FIRST_FRAME,
-      CLOTHES_OFF_LAST_FRAME,
-      CLOTHING_FRAME_RATE,
+      this.playerConfigs.clothing.offTexture,
+      this.playerConfigs.clothing.undressAnimationKey,
+      this.playerConfigs.clothing.frameRange.start,
+      this.playerConfigs.clothing.frameRange.end,
+      this.playerConfigs.clothing.frameRate,
     );
     this.createAnimationIfAvailable(
-      CLOTHES_OFF_TEXTURE,
-      DRESS_ANIMATION,
-      CLOTHES_OFF_LAST_FRAME,
-      CLOTHES_OFF_FIRST_FRAME,
-      CLOTHING_FRAME_RATE,
+      this.playerConfigs.clothing.offTexture,
+      this.playerConfigs.clothing.dressAnimationKey,
+      this.playerConfigs.clothing.frameRange.end,
+      this.playerConfigs.clothing.frameRange.start,
+      this.playerConfigs.clothing.frameRate,
     );
   }
 
@@ -451,20 +398,25 @@ export class PhaserPlayerRuntime {
   }
 
   private availableAnimations(): PlayerRuntimeAvailability {
-    const idleAnimations = (
-      Object.keys(IDLE_TEXTURES) as IdleAnimation[]
-    ).filter(
+    const idleAnimations = this.playerConfigs.idle.animations.filter(
       (animation) =>
-        this.hasTexture(IDLE_TEXTURES[animation]) &&
-        this.animationExists(IDLE_ANIMATIONS[animation]),
+        this.hasTexture(this.idleTexture(animation)) &&
+        this.animationExists(this.playerConfigs.idle.animationKeys[animation]),
     );
+    const animationKeys = this.playerConfigs.idle.animationKeys;
     return Object.freeze({
       idleAnimations: Object.freeze(idleAnimations),
       sitting:
-        this.hasTexture("player-sitting") &&
-        this.animationExists(PLAYER_RUNTIME_ANIMATIONS.sittingDown) &&
-        this.animationExists(PLAYER_RUNTIME_ANIMATIONS.standingUp),
+        this.hasTexture(this.idleTexture("sitting")) &&
+        this.animationExists(animationKeys.sittingDown) &&
+        this.animationExists(animationKeys.standingUp),
     });
+  }
+
+  private idleTexture(action: IdleAnimation | "sitting"): string {
+    const texture = this.playerConfigs.idle.textures.find((item) => item.action === action);
+    if (texture === undefined) throw new Error(`玩家 idle 贴图缺少配置：${action}`);
+    return texture.key;
   }
 
   private createAnimationIfAvailable(
@@ -501,8 +453,8 @@ export class PhaserPlayerRuntime {
   }
 
   private renderIdleAction(animation: IdleAnimation): boolean {
-    const texture = IDLE_TEXTURES[animation];
-    const key = IDLE_ANIMATIONS[animation];
+    const texture = this.idleTexture(animation);
+    const key = this.playerConfigs.idle.animationKeys[animation];
     if (!this.hasTexture(texture) || !this.animationExists(key)) return false;
     if (
       this.renderedStatus === "idle-action" &&
@@ -514,7 +466,7 @@ export class PhaserPlayerRuntime {
       this.sprite
         .setTexture(texture)
         .setFrame(0)
-        .setDisplaySize(SPECIAL_DISPLAY_SIZE, SPECIAL_DISPLAY_SIZE);
+        .setDisplaySize(this.playerConfigs.specialDisplaySize, this.playerConfigs.specialDisplaySize);
       if (!this.playAnimation(key)) return false;
       this.preserveBodyShape();
       this.renderedStatus = "idle-action";
@@ -526,19 +478,22 @@ export class PhaserPlayerRuntime {
   }
 
   private renderSitting(reverse: boolean): boolean {
+    const animationKeys = this.playerConfigs.idle.animationKeys;
+    const texture = this.idleTexture("sitting");
+    const frames = this.playerConfigs.idle.assetFrames;
     const key = reverse
-      ? PLAYER_RUNTIME_ANIMATIONS.standingUp
-      : PLAYER_RUNTIME_ANIMATIONS.sittingDown;
+      ? animationKeys.standingUp
+      : animationKeys.sittingDown;
     const status: PlayerStatus = reverse ? "standing-up" : "sitting-down";
-    if (!this.hasTexture("player-sitting") || !this.animationExists(key)) {
+    if (!this.hasTexture(texture) || !this.animationExists(key)) {
       return false;
     }
     if (this.renderedStatus === status) return true;
     try {
       this.sprite
-        .setTexture("player-sitting")
-        .setFrame(reverse ? 15 : 0)
-        .setDisplaySize(SPECIAL_DISPLAY_SIZE, SPECIAL_DISPLAY_SIZE);
+        .setTexture(texture)
+        .setFrame(reverse ? frames.endFrame : frames.startFrame)
+        .setDisplaySize(this.playerConfigs.specialDisplaySize, this.playerConfigs.specialDisplaySize);
       if (!this.playAnimation(key)) return false;
       this.preserveBodyShape();
       this.renderedStatus = status;
@@ -569,8 +524,11 @@ export class PhaserPlayerRuntime {
   /** 换装动画。贴图或动画缺失时返回 false，交给调用方走兜底。 */
   private renderClothingChange(change: ClothingChange | null): boolean {
     if (change === null) return false;
-    if (!this.hasTexture(CLOTHES_OFF_TEXTURE)) return false;
-    const key = change === "undressing" ? UNDRESS_ANIMATION : DRESS_ANIMATION;
+    const clothing = this.playerConfigs.clothing;
+    if (!this.hasTexture(clothing.offTexture)) return false;
+    const key = change === "undressing"
+      ? clothing.undressAnimationKey
+      : clothing.dressAnimationKey;
     if (!this.animationExists(key)) return false;
     // 每帧都会被调到，已经在播同一个方向就别重播——否则动画会被按回第 0 帧，永远播不完。
     if (
@@ -581,8 +539,8 @@ export class PhaserPlayerRuntime {
     }
     try {
       this.sprite
-        .setTexture(CLOTHES_OFF_TEXTURE)
-        .setDisplaySize(CLOTHES_OFF_DISPLAY_SIZE, CLOTHES_OFF_DISPLAY_SIZE);
+        .setTexture(clothing.offTexture)
+        .setDisplaySize(clothing.offDisplaySize, clothing.offDisplaySize);
       this.preserveBodyShape();
       this.renderedStatus = "changing-clothes";
       this.renderedIdleAnimation = undefined;
@@ -596,10 +554,13 @@ export class PhaserPlayerRuntime {
   private restoreNormalPlayer(): void {
     this.sprite.anims.stop?.();
     const onBeach = this.state.onBeach;
+    const playerTexture = this.playerConfigs;
     this.sprite
-      .setTexture(onBeach ? BEACH_TEXTURE : NORMAL_TEXTURE)
-      .setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE)
-      .setFrame(onBeach ? BEACH_IDLE_FRAME : walkFrameStart(this.state.facing));
+      .setTexture(onBeach ? playerTexture.beach.texture : playerTexture.texture)
+      .setDisplaySize(playerTexture.displaySize, playerTexture.displaySize)
+      .setFrame(onBeach
+        ? playerTexture.beach.idleFrame
+        : walkFrameStart(this.state.facing, playerTexture.animation.walkFrameStart));
     this.preserveBodyShape();
   }
 

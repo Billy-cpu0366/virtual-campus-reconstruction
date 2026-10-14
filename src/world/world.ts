@@ -1,6 +1,5 @@
 import type { ChunkCoordinate } from "../chunk/coordinates.js";
 import type { LayerStrategy } from "../layer/contract.js";
-import { LAYER_STRATEGIES } from "../layer/strategy.js";
 import { validateChunk, validateCoordinate } from "./chunk.js";
 import { validateWorldSpec } from "./spec.js";
 import type {
@@ -20,7 +19,7 @@ function coordinateKey(coordinate: ChunkCoordinate): string {
   return `${coordinate.x}_${coordinate.y}`;
 }
 
-// 图层计划结构有效性：非空且层名唯一。24 层的语义完整性由 SYS-LAYER 的 LAYER_STRATEGIES 保证；
+// 图层计划结构有效性：非空且层名唯一。层的完整语义由 SYS-LAYER 配置保证；
 // 世界不自行硬编码层名或层数（SYS-WORLD 卡：世界只消费，不硬编码语义）。
 function isWellFormedLayerPlan(plan: readonly LayerStrategy[]): boolean {
   if (plan.length === 0) {
@@ -294,7 +293,7 @@ class WorldImpl implements World {
 // 建世界工厂：规格 + 图层计划校验全部通过才发布 ready 世界；否则返回 failure。
 export function createWorld(
   spec: WorldSpec,
-  options: CreateWorldOptions = {},
+  options: CreateWorldOptions,
 ): WorldCreateResult {
   let validSpec: WorldSpec;
   try {
@@ -303,7 +302,7 @@ export function createWorld(
     return { kind: "failure", reason: errorMessage(error) };
   }
 
-  const layerPlan = options.layerPlan ?? LAYER_STRATEGIES;
+  const layerPlan = options.layerPlan;
   if (!isWellFormedLayerPlan(layerPlan)) {
     return { kind: "failure", reason: "图层策略不完整（为空或层名重复）" };
   }

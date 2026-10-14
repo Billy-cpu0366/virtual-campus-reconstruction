@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "system": "app",
+    "source": "game/main.ts; game/ProductEntryAdapters.ts; src/game-ui/app-shell.ts",
+    "sourceConstant": "logical viewport / Phaser physics and renderer flags / showErrorDetail / timed adapter duration",
+    "verified": "exact",
+    "notes": [
+      "Phaser renderer type, scale enum values, DOM parent ID, lifecycle counters and retry policy are fixed markers or behavior and stay in code.",
+      "set1 uses a wider logical viewport for a visible config demonstration.",
+      "entryTrainArrivalMs belongs to the timed fallback adapter; the live campus entry waits for the real route state."
+    ]
+  },
+  "data": {
+    "logicalWidth": 540,
+    "logicalHeight": 270,
+    "physicsFps": 30,
+    "physicsFixedStep": true,
+    "physicsGravity": { "x": 0, "y": 0 },
+    "pixelArt": true,
+    "roundPixels": true,
+    "backgroundColor": "#0f172a",
+    "showErrorDetail": true,
+    "entryTrainArrivalMs": 5000
+  }
+}

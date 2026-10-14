@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  CONTENT_REGISTRY,
   CONTENT_RESOURCE_RECEIPTS,
   MEMO6_DISCOVERY_GUIDE,
-  VISIBLE_CONTENT_MENU_IDS,
   getContentResourceReceipt,
-  getVisibleContentPayload,
 } from "../../src/content/registry.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadInteractConfigs } from "../../config/骨架/03-内容线/SYS-INTERACT/逻辑/index.js";
+
+const INTERACT = await loadInteractConfigs(createDiskConfigSource());
 
 function expectDeepFrozen(value: unknown): void {
   if (value === null || typeof value !== "object") return;
@@ -18,14 +19,16 @@ function expectDeepFrozen(value: unknown): void {
 }
 
 function allSections() {
-  return VISIBLE_CONTENT_MENU_IDS.flatMap(
-    (menuId) => CONTENT_REGISTRY[menuId].sections ?? [],
+  return INTERACT.visibleMenuIds.flatMap(
+    (menuId) => INTERACT.content[menuId].sections ?? [],
   );
 }
 
 describe("visible content registry", () => {
   it("contains exactly the evidence-backed About, Projects and Memo entries", () => {
-    expect(Object.keys(CONTENT_REGISTRY)).toEqual([
+    expect(Object.keys(INTERACT.content).filter((menuId) =>
+      INTERACT.visibleMenuIds.includes(menuId as typeof INTERACT.visibleMenuIds[number]),
+    )).toEqual([
       "about",
       "projects",
       "memo1",
@@ -35,10 +38,12 @@ describe("visible content registry", () => {
       "memo5",
       "memo6",
     ]);
-    expect(VISIBLE_CONTENT_MENU_IDS).toEqual(Object.keys(CONTENT_REGISTRY));
+    expect(INTERACT.visibleMenuIds).toEqual([
+      "about", "projects", "memo1", "memo2", "memo3", "memo4", "memo5", "memo6",
+    ]);
 
-    for (const menuId of VISIBLE_CONTENT_MENU_IDS) {
-      const payload = CONTENT_REGISTRY[menuId];
+    for (const menuId of INTERACT.visibleMenuIds) {
+      const payload = INTERACT.content[menuId];
       expect(payload.menuId).toBe(menuId);
       expect(payload.title.trim()).not.toBe("");
       expect(payload.body.length).toBeGreaterThan(0);
@@ -50,7 +55,7 @@ describe("visible content registry", () => {
   });
 
   it("keeps the P1 English About and Projects copy and mappings", () => {
-    const about = CONTENT_REGISTRY.about;
+    const about = INTERACT.content.about;
     expect(about.body).toContain(
       "I'm Peter Oravec, a creative web developer with over 19 years of experience, currently based in Bratislava, Slovakia.",
     );
@@ -66,7 +71,7 @@ describe("visible content registry", () => {
       { label: "LinkedIn", href: "https://www.linkedin.com/in/peteroravec" },
     ]);
 
-    const projects = CONTENT_REGISTRY.projects;
+    const projects = INTERACT.content.projects;
     expect(projects.body).toContain("eUTxO.org");
     expect(projects.body).toContain("Angular.sk");
     expect(projects.body).toContain("Peter Oravec portfolio v1");
@@ -103,7 +108,7 @@ describe("visible content registry", () => {
     };
 
     for (const [menuId, title] of Object.entries(expected)) {
-      const payload = CONTENT_REGISTRY[menuId as keyof typeof CONTENT_REGISTRY];
+      const payload = INTERACT.content[menuId as keyof typeof INTERACT.content];
       expect(payload.title).toBe(title);
       expect(payload.body.length).toBeGreaterThan(1);
       expect(payload.sections?.[0]?.heading).toBe(title);
@@ -113,7 +118,7 @@ describe("visible content registry", () => {
       expect(payload.sections?.[0]?.image?.fallbackText).toContain("unavailable");
     }
 
-    expect(CONTENT_REGISTRY.memo6.body).toEqual([
+    expect(INTERACT.content.memo6.body).toEqual([
       "Don't be fooled by the visuals – I'm not a game developer. My priority is large, long-term projects that require clean architecture and logical solutions.",
       "At the same time, I can be creative and flexible when the situation calls for it.",
     ]);
@@ -145,18 +150,18 @@ describe("visible content registry", () => {
   });
 
   it("deep-freezes registry data and resource receipts", () => {
-    expectDeepFrozen(CONTENT_REGISTRY);
+    expectDeepFrozen(INTERACT.content);
     expectDeepFrozen(CONTENT_RESOURCE_RECEIPTS);
     expectDeepFrozen(MEMO6_DISCOVERY_GUIDE);
 
     expect(() => {
-      (CONTENT_REGISTRY.about.body as string[]).push("mutation");
+      (INTERACT.content.about.body as string[]).push("mutation");
     }).toThrow();
     expect(() => {
-      (CONTENT_REGISTRY.projects.sections as unknown as unknown[]).pop();
+      (INTERACT.content.projects.sections as unknown as unknown[]).pop();
     }).toThrow();
     expect(() => {
-      (CONTENT_REGISTRY.memo6.sections?.[0]?.image as { src: string }).src =
+      (INTERACT.content.memo6.sections?.[0]?.image as { src: string }).src =
         "assets/other.webp";
     }).toThrow();
   });
@@ -179,7 +184,7 @@ describe("visible content registry", () => {
       { direction: "left", tiles: 36 },
       { direction: "up", tiles: 7 },
     ]);
-    expect(getVisibleContentPayload("memo6")).toBe(CONTENT_REGISTRY.memo6);
-    expect(getVisibleContentPayload("cv")).toBeUndefined();
+    expect(INTERACT.content.memo6.title).toBe("I'm not a game developer");
+    expect(INTERACT.content.cv.sections).toBeUndefined();
   });
 });

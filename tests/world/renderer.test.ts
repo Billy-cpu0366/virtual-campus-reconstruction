@@ -1,16 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  LAYER_STRATEGIES,
-  ROOF_FADE_MS,
-  type TileCoordinate,
-} from "../../src/layer/index.js";
+import type { TileCoordinate } from "../../src/layer/index.js";
+import { LAYER_CONFIGS } from "../config/layer-config-fixture.js";
 import { createWorld } from "../../src/world/index.js";
 import {
-  CLEAR_LAYERS_PER_FRAME,
   PhaserWorldRenderer,
 } from "../../game/PhaserWorldRenderer.js";
 import { makeChunk, makeSpec } from "./fixtures.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadWorldConfigs } from "../../config/骨架/01-地图线/SYS-WORLD/逻辑/index.js";
+const { clearLayersPerFrame: CLEAR_LAYERS_PER_FRAME } =
+  await loadWorldConfigs(createDiskConfigSource());
 
 class FakeTilemapLayer {
   alpha = 1;
@@ -92,7 +92,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       map,
       [],
       makeSpec(),
-      LAYER_STRATEGIES,
+      LAYER_CONFIGS,
+      CLEAR_LAYERS_PER_FRAME,
     );
     const hooks = renderer.hooks();
     const chunk = { x: 1, y: 2 };
@@ -139,7 +140,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       map,
       [],
       makeSpec(),
-      LAYER_STRATEGIES,
+      LAYER_CONFIGS,
+      CLEAR_LAYERS_PER_FRAME,
     );
     const hooks = renderer.hooks();
     const chunk = makeChunk(0, 0);
@@ -175,7 +177,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
         map,
         [],
         makeSpec(),
-        LAYER_STRATEGIES,
+        LAYER_CONFIGS,
+        CLEAR_LAYERS_PER_FRAME,
       );
       const hooks = renderer.hooks();
       const chunk = makeChunk(0, 0);
@@ -223,9 +226,13 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       map,
       [],
       makeSpec(),
-      LAYER_STRATEGIES,
+      LAYER_CONFIGS,
+      CLEAR_LAYERS_PER_FRAME,
     );
-    const worldResult = createWorld(makeSpec(), { hooks: renderer.hooks() });
+    const worldResult = createWorld(makeSpec(), {
+      layerPlan: LAYER_CONFIGS.strategies,
+      hooks: renderer.hooks(),
+    });
     if (worldResult.kind !== "ready") throw new Error(worldResult.reason);
     const chunk = setTile("cars", 69345, { x: 1, y: 1 });
     const badChunk = {
@@ -262,7 +269,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       map,
       [],
       makeSpec(),
-      LAYER_STRATEGIES,
+      LAYER_CONFIGS,
+      CLEAR_LAYERS_PER_FRAME,
     );
     const hooks = renderer.hooks();
     const chunk = makeChunk(0, 0);
@@ -283,7 +291,7 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       state: "visible",
       visible: true,
       alpha: 1,
-      durationMs: ROOF_FADE_MS,
+      durationMs: LAYER_CONFIGS.roofFadeMs,
     });
     expect(renderer.setRoofState("factory", "faded")).toEqual({
       group: "factory",
@@ -317,7 +325,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       new FakeTilemap(),
       [],
       makeSpec(),
-      LAYER_STRATEGIES,
+      LAYER_CONFIGS,
+      CLEAR_LAYERS_PER_FRAME,
       {
         onRoofStateApplied: (state, layers) => {
           applied.push({
@@ -340,7 +349,7 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
     renderer.setRoofState("factory", "faded");
     renderer.setRoofState("factory", "faded");
     expect(applied).toEqual([
-      { state: "faded", durationMs: ROOF_FADE_MS, layerCount: 2 },
+      { state: "faded", durationMs: LAYER_CONFIGS.roofFadeMs, layerCount: 2 },
     ]);
   });
 
@@ -350,7 +359,8 @@ describe("PhaserWorldRenderer SYS-LAYER 运行时语义", () => {
       map,
       [],
       makeSpec(),
-      LAYER_STRATEGIES,
+      LAYER_CONFIGS,
+      CLEAR_LAYERS_PER_FRAME,
     );
     const hooks = renderer.hooks();
     const chunk = setTile("particles3", 69361, { x: 0, y: 0 });

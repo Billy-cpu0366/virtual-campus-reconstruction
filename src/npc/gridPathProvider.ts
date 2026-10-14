@@ -101,6 +101,9 @@ const nearestWalkable = (
   grid: readonly (readonly number[])[],
   point: RouteCrowdTile,
   tileSize: number,
+  walkableValue: number,
+  blockedValue: number,
+  outOfBoundsIsWalkable: boolean,
   isBlocked?: (point: RouteCrowdTile) => boolean,
   maxRadius = 4,
 ): RouteCrowdTile | undefined => {
@@ -108,7 +111,7 @@ const nearestWalkable = (
     x: tile.x * tileSize + tileSize / 2,
     y: tile.y * tileSize + tileSize / 2,
   });
-  if (isWalkable(grid, point.x, point.y) &&
+  if (isWalkable(grid, point.x, point.y, walkableValue, blockedValue, outOfBoundsIsWalkable) &&
     !isBlocked?.(worldCenter(point))) return point;
   for (let radius = 1; radius <= maxRadius; radius += 1) {
     const candidates: RouteCrowdTile[] = [];
@@ -116,7 +119,7 @@ const nearestWalkable = (
       for (let dx = -radius; dx <= radius; dx += 1) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
         const candidate = { x: point.x + dx, y: point.y + dy };
-        if (isWalkable(grid, candidate.x, candidate.y) &&
+        if (isWalkable(grid, candidate.x, candidate.y, walkableValue, blockedValue, outOfBoundsIsWalkable) &&
           !isBlocked?.(worldCenter(candidate))) candidates.push(candidate);
       }
     }
@@ -137,7 +140,14 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
   constructor(
     private readonly grid: readonly (readonly number[])[],
     private readonly options: GridRouteCrowdPathProviderOptions,
+    private readonly walkableValue: number,
+    private readonly blockedValue: number,
+    private readonly outOfBoundsIsWalkable: boolean,
   ) {}
+
+  private isWalkable(x: number, y: number): boolean {
+    return isWalkable(this.grid, x, y, this.walkableValue, this.blockedValue, this.outOfBoundsIsWalkable);
+  }
 
   private get tileSize(): number {
     return this.options.tileSize;
@@ -185,14 +195,14 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
           x: next.x * this.tileSize + this.tileSize / 2,
           y: next.y * this.tileSize + this.tileSize / 2,
         };
-        const walkable = job.ignoreWalls || isWalkable(this.grid, next.x, next.y) ||
+        const walkable = job.ignoreWalls || this.isWalkable(next.x, next.y) ||
           (isGoal && job.allowConfiguredEndpoints);
         const blocked = !job.ignoreWalls && job.isBlocked?.(nextWorld) === true;
         if (!walkable || blocked || job.closed.has(nextKey)) continue;
         if (
           !job.ignoreWalls && direction.dx !== 0 && direction.dy !== 0 &&
-          (!isWalkable(this.grid, current.x + direction.dx, current.y) ||
-            !isWalkable(this.grid, current.x, current.y + direction.dy) ||
+          (!this.isWalkable(current.x + direction.dx, current.y) ||
+            !this.isWalkable(current.x, current.y + direction.dy) ||
             job.isBlocked?.({
               x: (current.x + direction.dx) * this.tileSize + this.tileSize / 2,
               y: current.y * this.tileSize + this.tileSize / 2,
@@ -234,7 +244,7 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
     const ignoreWalls = request.ignoreWalls === true;
     const allowConfiguredEndpoints = request.allowBlockedEndpoints === true;
     const start = ignoreWalls || (
-      isWalkable(this.grid, requestedStart.x, requestedStart.y) &&
+      this.isWalkable(requestedStart.x, requestedStart.y) &&
       this.isBlocked?.({
         x: requestedStart.x * this.tileSize + this.tileSize / 2,
         y: requestedStart.y * this.tileSize + this.tileSize / 2,
@@ -242,10 +252,10 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
     )
       ? requestedStart
       : allowConfiguredEndpoints
-        ? nearestWalkable(this.grid, requestedStart, this.tileSize, this.isBlocked)
+        ? nearestWalkable(this.grid, requestedStart, this.tileSize, this.walkableValue, this.blockedValue, this.outOfBoundsIsWalkable, this.isBlocked)
         : undefined;
     const goal = ignoreWalls || (
-      isWalkable(this.grid, requestedGoal.x, requestedGoal.y) &&
+      this.isWalkable(requestedGoal.x, requestedGoal.y) &&
       this.isBlocked?.({
         x: requestedGoal.x * this.tileSize + this.tileSize / 2,
         y: requestedGoal.y * this.tileSize + this.tileSize / 2,
@@ -253,7 +263,7 @@ export class GridRouteCrowdPathProvider implements RouteCrowdPathProvider {
     )
       ? requestedGoal
       : allowConfiguredEndpoints
-        ? nearestWalkable(this.grid, requestedGoal, this.tileSize, this.isBlocked)
+        ? nearestWalkable(this.grid, requestedGoal, this.tileSize, this.walkableValue, this.blockedValue, this.outOfBoundsIsWalkable, this.isBlocked)
         : undefined;
     if (start === undefined || goal === undefined) return undefined;
     const open = new MinHeap();

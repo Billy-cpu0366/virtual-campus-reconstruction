@@ -1,13 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  JOYSTICK_FORCE_MIN,
-  JOYSTICK_MAIN_AXIS_RATIO,
   JOYSTICK_THRESHOLD_AXIS,
   JOYSTICK_THRESHOLD_DIAGONAL,
-  joystickDirection,
-  joystickParams,
+  joystickDirection as directionOf,
+  joystickParams as paramsFor,
+  type DeviceKind,
 } from "../../src/input/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadInputConfigs } from "../../config/骨架/02-玩法线/SYS-INPUT/逻辑/index.js";
+
+const INPUT = await loadInputConfigs(createDiskConfigSource());
+const JOYSTICK_MAIN_AXIS_RATIO = INPUT.joystick.mainAxisRatio;
+const JOYSTICK_FORCE_MIN = INPUT.joystick.forceMin;
+const joystickDirection = (x: number, y: number) =>
+  directionOf(x, y, INPUT.joystick.mainAxisRatio, INPUT.vectors);
+const joystickParams = (device: DeviceKind) =>
+  paramsFor(device, INPUT.joystick.device, INPUT.joystick.forceMin);
 
 describe("摇杆归一化（主轴判定 1.5）", () => {
   it("原点返回 null", () => {

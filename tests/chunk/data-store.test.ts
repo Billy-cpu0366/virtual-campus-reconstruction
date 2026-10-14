@@ -4,7 +4,20 @@ import {
   ChunkDataError,
   ChunkDataStore,
 } from "../../src/chunk/index.js";
-import { LAYER_STRATEGIES } from "../../src/layer/index.js";
+import { LAYER_CONFIGS, LAYER_STRATEGIES } from "../config/layer-config-fixture.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadChunkConfigs } from "../../config/骨架/01-地图线/SYS-CHUNK/逻辑/index.js";
+
+const chunkConfig = await loadChunkConfigs(createDiskConfigSource());
+
+type ChunkStoreArgs = ConstructorParameters<typeof ChunkDataStore>;
+function createStore(
+  masterUrl: ChunkStoreArgs[0],
+  loader: ChunkStoreArgs[1],
+  options: ChunkStoreArgs[2],
+): ChunkDataStore {
+  return new ChunkDataStore(masterUrl, loader, options, LAYER_CONFIGS.strategies);
+}
 
 function master(): Record<string, unknown> {
   return {
@@ -52,7 +65,7 @@ describe("ChunkDataStore", () => {
       expect(url).toBe("assets/maps/chunks/chunk0.json");
       return chunk();
     });
-    const store = new ChunkDataStore(
+    const store = createStore(
       "assets/maps/chunks/master.json",
       loader,
       { maxAttempts: 1 },
@@ -71,7 +84,7 @@ describe("ChunkDataStore", () => {
       if (url.endsWith("master.json")) return master();
       return chunk({ width: 3 });
     });
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader, {
+    const store = createStore("https://test.invalid/master.json", loader, {
       maxAttempts: 1,
     });
 
@@ -91,7 +104,7 @@ describe("ChunkDataStore", () => {
       if (url.endsWith("master.json")) return Promise.resolve(master());
       return chunkRequest.promise;
     });
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
 
     const first = store.loadChunk({ x: 1, y: 0 });
     const second = store.loadChunk({ x: 1, y: 0 });
@@ -110,7 +123,7 @@ describe("ChunkDataStore", () => {
       if (chunkCalls <= 2) throw new Error("temporary");
       return chunk();
     });
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader, {
+    const store = createStore("https://test.invalid/master.json", loader, {
       maxAttempts: 2,
     });
 
@@ -133,9 +146,10 @@ describe("ChunkDataStore", () => {
       receivedSignal = signal;
       return masterRequest.promise;
     });
-    const store = new ChunkDataStore(
+    const store = createStore(
       "https://test.invalid/master.json",
       loader,
+      { maxAttempts: chunkConfig.maxAttempts },
     );
 
     const pending = store.loadMaster();
@@ -155,7 +169,7 @@ describe("ChunkDataStore", () => {
       if (url.endsWith("master.json")) return Promise.resolve(master());
       return chunkRequest.promise;
     });
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
 
     const pending = store.loadChunk({ x: 0, y: 0 });
     await vi.waitFor(() => expect(loader).toHaveBeenCalledTimes(2));
@@ -182,7 +196,7 @@ describe("ChunkDataStore", () => {
       }
       return chunk();
     });
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader, {
+    const store = createStore("https://test.invalid/master.json", loader, {
       maxAttempts: 1,
     });
 

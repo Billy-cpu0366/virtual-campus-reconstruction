@@ -5,6 +5,7 @@ import {
   type PhaserPlayerVisualSourceLike,
   type PhaserPlayerVisualSpriteLike,
 } from "../../game/PhaserPlayerVisualInterpolator.js";
+import { FX_CONFIGS } from "../fx/fixture.js";
 
 class FakeSprite implements PhaserPlayerVisualSpriteLike {
   x: number;
@@ -73,9 +74,7 @@ function setup() {
     add: { sprite: vi.fn(() => visual) },
     cameras: { main: { ignore } },
   };
-  const runtime = new PhaserPlayerVisualInterpolator(scene, body, {
-    stepMs: 1000 / 30,
-  });
+  const runtime = new PhaserPlayerVisualInterpolator(scene, body, FX_CONFIGS.playerVisual);
   return { body, visual, ignore, runtime };
 }
 

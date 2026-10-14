@@ -1,12 +1,5 @@
 import type { Direction } from "../input/index.js";
 import type { IdleAnimation } from "./contract.js";
-import {
-  IDLE_ANIMATIONS,
-  IDLE_TIME_FOR_EATING,
-  IDLE_TIME_FOR_SITTING,
-} from "./idle.js";
-import { DEFAULT_FACING } from "./facing.js";
-import { CHANGE_CLOTHES_COOLDOWN_MS } from "./clothing.js";
 
 export type PlayerStatus =
   | "disabled"
@@ -71,9 +64,14 @@ const NOOP_EFFECTS: PlayerControlEffects = {
   stopMovement: () => undefined,
 };
 
-const ALL_AVAILABLE: PlayerRuntimeAvailability = {
-  idleAnimations: IDLE_ANIMATIONS,
-  sitting: true,
+type PlayerRuntimeConfig = {
+  readonly defaultFacing: Direction;
+  readonly idle: Readonly<{
+    timeForIdleAction: number;
+    timeForSitting: number;
+    animations: readonly IdleAnimation[];
+  }>;
+  readonly clothing: Readonly<{ cooldownMs: number }>;
 };
 
 function isVisualLocked(status: PlayerStatus): boolean {
@@ -92,11 +90,12 @@ export class PlayerRuntimeStateMachine {
   private readonly now: () => number;
   private readonly random: () => number;
   private readonly effects: PlayerControlEffects;
+  private readonly playerConfig: PlayerRuntimeConfig;
   private positionState: PlayerPositionSnapshot;
   private controlEnabled = false;
   private shutdownState = false;
   private statusState: PlayerStatus = "disabled";
-  private facingState: Direction = DEFAULT_FACING;
+  private facingState: Direction;
   private activeIdleState: IdleAnimation | undefined;
   private previousIdleState: IdleAnimation | undefined;
   private pendingDirectionState: Direction | undefined;
@@ -106,7 +105,8 @@ export class PlayerRuntimeStateMachine {
   private clothingChangeState: ClothingChange | undefined;
   private clothesChangeCooldownUntil = 0;
 
-  constructor(options: PlayerRuntimeOptions = {}) {
+  constructor(playerConfig: PlayerRuntimeConfig, options: PlayerRuntimeOptions = {}) {
+    this.playerConfig = playerConfig;
     this.now = options.now ?? (() => Date.now());
     this.random = options.random ?? Math.random;
     this.effects = options.effects ?? NOOP_EFFECTS;
@@ -114,6 +114,7 @@ export class PlayerRuntimeStateMachine {
       x: options.initialPosition?.x ?? 0,
       y: options.initialPosition?.y ?? 0,
     });
+    this.facingState = playerConfig.defaultFacing;
     const createdAt = this.now();
     this.lastMovementAt = createdAt;
     this.lastIdleAnimationAt = createdAt;
@@ -193,7 +194,7 @@ export class PlayerRuntimeStateMachine {
     this.clothingChangeState = undefined;
     this.onBeachState = change === "undressing";
     this.resetState(nowMs, "normal-idle");
-    this.clothesChangeCooldownUntil = nowMs + CHANGE_CLOTHES_COOLDOWN_MS;
+    this.clothesChangeCooldownUntil = nowMs + this.playerConfig.clothing.cooldownMs;
     return true;
   }
 
@@ -259,9 +260,13 @@ export class PlayerRuntimeStateMachine {
   update(
     direction: Direction | null,
     nowMs: number = this.now(),
-    availability: PlayerRuntimeAvailability = ALL_AVAILABLE,
+    availability?: PlayerRuntimeAvailability,
   ): PlayerUpdateResult {
     this.assertActive();
+    const available = availability ?? {
+      idleAnimations: this.playerConfig.idle.animations,
+      sitting: true,
+    };
     if (!this.controlEnabled) {
       return this.result(null);
     }
@@ -300,8 +305,8 @@ export class PlayerRuntimeStateMachine {
     }
 
     const idleMs = nowMs - this.lastMovementAt;
-    if (idleMs >= IDLE_TIME_FOR_SITTING) {
-      if (availability.sitting) {
+    if (idleMs >= this.playerConfig.idle.timeForSitting) {
+      if (available.sitting) {
         this.statusState = "sitting-down";
         return this.result(null);
       }
@@ -311,12 +316,12 @@ export class PlayerRuntimeStateMachine {
 
     const sinceLastIdleAnimation = nowMs - this.lastIdleAnimationAt;
     if (
-      idleMs >= IDLE_TIME_FOR_EATING &&
-      sinceLastIdleAnimation >= IDLE_TIME_FOR_EATING
+      idleMs >= this.playerConfig.idle.timeForIdleAction &&
+      sinceLastIdleAnimation >= this.playerConfig.idle.timeForIdleAction
     ) {
-      const candidates = availability.idleAnimations.filter(
+      const candidates = available.idleAnimations.filter(
         (animation) =>
-          IDLE_ANIMATIONS.includes(animation) &&
+          this.playerConfig.idle.animations.includes(animation) &&
           animation !== this.previousIdleState,
       );
       const selected = this.selectIdleAnimation(candidates);
@@ -417,4 +422,3 @@ export class PlayerRuntimeStateMachine {
   }
 }
 
-export const PLAYER_IDLE_ACTIONS = IDLE_ANIMATIONS;

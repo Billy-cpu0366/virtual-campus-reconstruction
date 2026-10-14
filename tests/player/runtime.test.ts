@@ -5,6 +5,7 @@ import {
   type PlayerControlEffects,
   type PlayerRuntimeAvailability,
 } from "../../src/player/index.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
 
 const ALL_AVAILABLE: PlayerRuntimeAvailability = {
   idleAnimations: ["eating", "scratching", "tying-shoe"],
@@ -24,7 +25,7 @@ function makeRuntime(
     stopMovement: () => undefined,
   },
 ): PlayerRuntimeStateMachine {
-  return new PlayerRuntimeStateMachine({
+  return new PlayerRuntimeStateMachine(PLAYER_CONFIGS, {
     now,
     random: () => 0,
     effects,

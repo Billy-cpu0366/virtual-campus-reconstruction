@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  FOOTSTEP_ALPHA,
-  FOOTSTEP_DEPTH,
-  FOOTSTEP_POOL_SIZE,
   PhaserFootstepRuntime,
   type PhaserFootstepSceneLike,
   type PhaserFootstepSpriteLike,
 } from "../../game/PhaserFootstepRuntime.js";
 import type { LayerMarkerRecord } from "../../src/layer/index.js";
+import { LAYER_CONFIGS } from "../config/layer-config-fixture.js";
+import { FX_CONFIGS } from "../fx/fixture.js";
+
+const FOOTSTEP_DEPTH = LAYER_CONFIGS.footstepDepth;
+const FOOTSTEP_CONFIG = FX_CONFIGS.footstep;
+const FOOTSTEP_GIDS = LAYER_CONFIGS.strategiesByName["footsteps"]?.markerGids ?? [];
 
 class FakeSprite implements PhaserFootstepSpriteLike {
   x: number;
@@ -65,7 +68,7 @@ function setup() {
       },
     },
   };
-  const runtime = new PhaserFootstepRuntime(scene);
+  const runtime = new PhaserFootstepRuntime(scene, FOOTSTEP_CONFIG, FOOTSTEP_DEPTH, FOOTSTEP_GIDS);
   runtime.start();
   return { runtime, sprites };
 }
@@ -82,7 +85,7 @@ const movingPlayer = {
 describe("PhaserFootstepRuntime", () => {
   it("在confirmed surface按14px间距生成depth450/alpha.6脚印", () => {
     const { runtime, sprites } = setup();
-    expect(sprites).toHaveLength(FOOTSTEP_POOL_SIZE);
+    expect(sprites).toHaveLength(FOOTSTEP_CONFIG.poolSize);
 
     runtime.update(0, movingPlayer, [marker()]);
     runtime.update(100, { ...movingPlayer, x: 226 }, [marker()]);
@@ -93,14 +96,14 @@ describe("PhaserFootstepRuntime", () => {
       {
         x: 216,
         y: 1842,
-        alpha: FOOTSTEP_ALPHA,
+        alpha: FOOTSTEP_CONFIG.alpha,
         depth: FOOTSTEP_DEPTH,
         sourceChunk: "0,4",
       },
       {
         x: 231,
         y: 1842,
-        alpha: FOOTSTEP_ALPHA,
+        alpha: FOOTSTEP_CONFIG.alpha,
         depth: FOOTSTEP_DEPTH,
         sourceChunk: "0,4",
       },
@@ -108,7 +111,7 @@ describe("PhaserFootstepRuntime", () => {
     expect(sprites[0]).toMatchObject({
       visible: true,
       depth: FOOTSTEP_DEPTH,
-      alpha: FOOTSTEP_ALPHA,
+      alpha: FOOTSTEP_CONFIG.alpha,
     });
   });
 

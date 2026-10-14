@@ -2,8 +2,8 @@ import type { ChunkCoordinate } from "../chunk/coordinates.js";
 import {
   layerRole,
   layerStrategy,
-  LAYER_STRATEGIES,
 } from "./strategy.js";
+import type { LayerStrategy } from "./contract.js";
 
 export interface TileCoordinate {
   readonly x: number;
@@ -35,18 +35,26 @@ export interface LayerDiagnostic {
   readonly message: string;
 }
 
-export function markerLayerNames(): readonly string[] {
-  return LAYER_STRATEGIES.filter((strategy) => strategy.role === "marker").map(
+export function markerLayerNames(strategies: readonly LayerStrategy[]): readonly string[] {
+  return strategies.filter((strategy) => strategy.role === "marker").map(
     (strategy) => strategy.name,
   );
 }
 
-export function markerGids(layerName: string): readonly number[] {
-  return layerStrategy(layerName).markerGids ?? [];
+export function markerGids(
+  layerName: string,
+  strategiesByName: Readonly<Record<string, LayerStrategy>>,
+): readonly number[] {
+  return layerStrategy(layerName, strategiesByName).markerGids ?? [];
 }
 
-export function isKnownMarkerGid(layerName: string, gid: number): boolean {
-  return layerRole(layerName) === "marker" && markerGids(layerName).includes(gid);
+export function isKnownMarkerGid(
+  layerName: string,
+  gid: number,
+  strategiesByName: Readonly<Record<string, LayerStrategy>>,
+): boolean {
+  return layerRole(layerName, strategiesByName) === "marker" &&
+    markerGids(layerName, strategiesByName).includes(gid);
 }
 
 function freezeCoordinate(coordinate: TileCoordinate): TileCoordinate {
@@ -74,8 +82,12 @@ export function extractMarkerRecords(
   chunkHeightTiles: number,
   tileWidthPixels: number,
   tileHeightPixels: number,
+  strategiesByName: Readonly<Record<string, LayerStrategy>>,
 ): readonly LayerMarkerRecord[] {
-  if (layerRole(layerName) !== "marker" || markerGids(layerName).length === 0) {
+  if (
+    layerRole(layerName, strategiesByName) !== "marker" ||
+    markerGids(layerName, strategiesByName).length === 0
+  ) {
     throw new Error(`不是 marker 图层：${layerName}`);
   }
   if (
@@ -107,7 +119,7 @@ export function extractMarkerRecords(
       x: index % chunkWidthTiles,
       y: Math.floor(index / chunkWidthTiles),
     };
-    if (!isKnownMarkerGid(layerName, gid)) {
+    if (!isKnownMarkerGid(layerName, gid, strategiesByName)) {
       throw markerError(layerName, chunk, localTile, gid);
     }
     const worldTile = {

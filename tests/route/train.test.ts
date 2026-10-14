@@ -1,34 +1,64 @@
 import { describe, expect, it } from "vitest";
 
-import { playerDepth } from "../../src/layer/index.js";
+import { playerDepth as calculatePlayerDepth } from "../../src/layer/index.js";
 import { SPRAYER_TILE_SIZE } from "../../src/npc/index.js";
 import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
 import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
-import { SPAWN_Y } from "../../src/player/index.js";
-import {
-  TRAIN_COLLISION_BOTTOM,
-  TRAIN_COLLISION_TOP,
-  TRAIN_COLLISION_X_ZONES,
-  TRAIN_DEPARTURE_DURATION,
-  TRAIN_END_X,
-  TRAIN_ENTRY_DURATION,
-  TRAIN_HOLD_DURATION,
-  TRAIN_START_X,
-  TRAIN_Y,
-  TrainRouteRuntime,
-} from "../../src/route/index.js";
+import { loadRouteConfigs } from "../../config/骨架/05-旁支/SYS-ROUTE/逻辑/index.js";
+import { loadLayerConfigs } from "../../config/骨架/02-玩法线/SYS-LAYER/逻辑/index.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
+import { TrainRouteRuntime } from "../../src/route/index.js";
 import {
   PhaserTrainRuntime,
-  TRAIN_PRESENTATION_DEPTH,
   type PhaserTrainCollisionShapeLike,
   type PhaserTrainEventsLike,
   type PhaserTrainSceneLike,
   type PhaserTrainSpriteLike,
 } from "../../game/PhaserTrainRuntime.js";
 
+const CONFIG_SOURCE = createDiskConfigSource();
+
 /** 喷水器位置现在读磁盘上那份配置，不再从 src/ 里拿常量。 */
-const SPRAYER_CONFIGS = (await loadNpcConfigs(createDiskConfigSource()))
-  .sprayerConfigs;
+const SPRAYER_CONFIGS = (await loadNpcConfigs(CONFIG_SOURCE)).sprayerConfigs;
+
+/**
+ * 火车那一份也改成读磁盘了。下面这几个名字和原先 `src/route/train.ts` 里导出的常量
+ * 同名同义，只是**值从配置来**——测试里那些断言因此一行都不用改。
+ *
+ * 这么写不是偷懒：它正好验的是「游戏实际读的就是这份文件」。真按旧常量再抄一遍，
+ * 配置改坏了测试也照样绿。
+ */
+const ROUTE_CONFIGS = await loadRouteConfigs(CONFIG_SOURCE);
+const LAYER_CONFIGS = await loadLayerConfigs(CONFIG_SOURCE);
+const TRAIN_CONFIG = ROUTE_CONFIGS.train;
+const playerDepth = (worldY: number): number => calculatePlayerDepth(
+  worldY,
+  LAYER_CONFIGS.playerDepth.base,
+  LAYER_CONFIGS.playerDepth.yOffset,
+  LAYER_CONFIGS.playerDepth.ratio,
+);
+
+function createTrainRuntime(
+  scene: PhaserTrainSceneLike,
+  options: ConstructorParameters<typeof PhaserTrainRuntime>[1],
+): PhaserTrainRuntime {
+  return new PhaserTrainRuntime(scene, options, () => LAYER_CONFIGS.playerDepth);
+}
+
+const TRAIN_START_X = TRAIN_CONFIG.startX;
+const TRAIN_END_X = TRAIN_CONFIG.endX;
+const TRAIN_Y = TRAIN_CONFIG.y;
+const TRAIN_ENTRY_DURATION = TRAIN_CONFIG.entryDurationMs;
+const TRAIN_HOLD_DURATION = TRAIN_CONFIG.holdDurationMs;
+const TRAIN_DEPARTURE_DURATION = TRAIN_CONFIG.departureDurationMs;
+const TRAIN_COLLISION_TOP = TRAIN_CONFIG.collisionTop;
+const TRAIN_COLLISION_BOTTOM = TRAIN_CONFIG.collisionBottom;
+const TRAIN_COLLISION_X_ZONES = TRAIN_CONFIG.collisionXZones;
+/** 车画在什么深度，由配置里的 y 算出来。运行时也得算出同一个数。 */
+const TRAIN_PRESENTATION_DEPTH = playerDepth(TRAIN_Y);
+
+/** 每个用例都要递的配置。抽出来只为少写几遍。 */
+const TRAIN_OPTIONS = { config: TRAIN_CONFIG } as const;
 
 class FakeEvents implements PhaserTrainEventsLike {
   readonly listeners = new Map<string, Set<(...args: unknown[]) => void>>();
@@ -150,7 +180,10 @@ function makeScene(textureAvailable = true) {
 
 describe("TrainRouteRuntime", () => {
   it("按5秒进场、3秒停留、9秒离场推进，并让碰撞带跟随", () => {
-    const runtime = new TrainRouteRuntime({ collisionScale: 1.025 });
+    const runtime = new TrainRouteRuntime({
+      collisionScale: 1.025,
+      ...TRAIN_OPTIONS,
+    });
     expect(runtime.start(0)).toBe(true);
     expect(runtime.snapshot).toMatchObject({ state: "arriving", x: TRAIN_START_X });
     expect(runtime.start(1)).toBe(false);
@@ -185,7 +218,7 @@ describe("TrainRouteRuntime", () => {
   });
 
   it("取消和shutdown后不保留活动路线；完成后可复用同一个owner", () => {
-    const runtime = new TrainRouteRuntime();
+    const runtime = new TrainRouteRuntime({ collisionScale: 1, ...TRAIN_OPTIONS });
     runtime.start(0);
     runtime.tick(2_000);
     expect(runtime.cancel(2_000).state).toBe("cancelled");
@@ -203,8 +236,7 @@ describe("PhaserTrainRuntime", () => {
     const closestSprayerY = Math.min(
       ...SPRAYER_CONFIGS.map((config) => config.tileY * SPRAYER_TILE_SIZE),
     );
-    expect(TRAIN_PRESENTATION_DEPTH).toBe(playerDepth(TRAIN_Y));
-    expect(TRAIN_PRESENTATION_DEPTH).toBeGreaterThan(playerDepth(SPAWN_Y));
+    expect(TRAIN_PRESENTATION_DEPTH).toBeGreaterThan(playerDepth(PLAYER_CONFIGS.spawn.y));
     expect(TRAIN_PRESENTATION_DEPTH).toBeLessThan(
       playerDepth(closestSprayerY),
     );
@@ -214,7 +246,8 @@ describe("PhaserTrainRuntime", () => {
     const fake = makeScene();
     const calls: Array<readonly string[] | null> = [];
     let completes = 0;
-    const runtime = new PhaserTrainRuntime(fake.scene, {
+    const runtime = createTrainRuntime(fake.scene, {
+      route: ROUTE_CONFIGS,
       blockingZone: { setTrainBlockingZone: (cells) => calls.push(cells) },
       onComplete: () => {
         completes += 1;
@@ -267,7 +300,8 @@ describe("PhaserTrainRuntime", () => {
     const fake = makeScene();
     let departures = 0;
     let leaves = 0;
-    const runtime = new PhaserTrainRuntime(fake.scene, {
+    const runtime = createTrainRuntime(fake.scene, {
+      route: ROUTE_CONFIGS,
       viewport: () => ({ left: 400, width: 100 }),
       onDeparture: () => { departures += 1; },
       onLeaveViewport: () => { leaves += 1; },
@@ -286,7 +320,8 @@ describe("PhaserTrainRuntime", () => {
     const fake = makeScene();
     const order: string[] = [];
     let cleanupCalls = 0;
-    const runtime = new PhaserTrainRuntime(fake.scene, {
+    const runtime = createTrainRuntime(fake.scene, {
+      route: ROUTE_CONFIGS,
       connectCollision: (shape) => {
         const destroyShape = shape.destroy.bind(shape);
         shape.destroy = () => {
@@ -327,7 +362,8 @@ describe("PhaserTrainRuntime", () => {
   it("资源失败不创建对象；cancel可重启，shutdown清理并永久拒绝", () => {
     const missing = makeScene(false);
     const errors: string[] = [];
-    const failed = new PhaserTrainRuntime(missing.scene, {
+    const failed = createTrainRuntime(missing.scene, {
+      route: ROUTE_CONFIGS,
       onError: (reason) => errors.push(reason),
     });
     expect(failed.start(0)).toEqual({ ok: false, reason: "missing-texture" });
@@ -335,7 +371,9 @@ describe("PhaserTrainRuntime", () => {
     expect(errors).toContain("missing-texture");
 
     const fake = makeScene();
-    const runtime = new PhaserTrainRuntime(fake.scene);
+    const runtime = createTrainRuntime(fake.scene, {
+      route: ROUTE_CONFIGS,
+    });
     expect(runtime.start(0)).toEqual({ ok: true });
     runtime.cancel(1_000);
     expect(fake.sprites[0]?.destroyed).toBe(true);

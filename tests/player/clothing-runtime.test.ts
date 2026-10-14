@@ -1,25 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { BEACH_TRIGGER_GID, isBeachTriggerTile } from "../../src/layer/index.js";
+import { isBeachTriggerTile } from "../../src/layer/index.js";
 import {
-  CHANGE_CLOTHES_COOLDOWN_MS,
   PlayerRuntimeStateMachine,
 } from "../../src/player/index.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
 
 describe("沙滩触发块", () => {
   it("69353 是触发块，其它都不是", () => {
-    expect(BEACH_TRIGGER_GID).toBe(69353);
-    expect(isBeachTriggerTile(69353)).toBe(true);
-    expect(isBeachTriggerTile(69345)).toBe(false);
-    expect(isBeachTriggerTile(0)).toBe(false);
-    expect(isBeachTriggerTile(null)).toBe(false);
-    expect(isBeachTriggerTile(undefined)).toBe(false);
+    const gid = PLAYER_CONFIGS.beachTriggerGid;
+    expect(gid).toBe(69353);
+    expect(isBeachTriggerTile(gid, gid)).toBe(true);
+    expect(isBeachTriggerTile(69345, gid)).toBe(false);
+    expect(isBeachTriggerTile(0, gid)).toBe(false);
+    expect(isBeachTriggerTile(null, gid)).toBe(false);
+    expect(isBeachTriggerTile(undefined, gid)).toBe(false);
   });
 });
 
 function createRuntime(nowRef: { value: number }) {
   const stops: number[] = [];
-  const runtime = new PlayerRuntimeStateMachine({
+  const runtime = new PlayerRuntimeStateMachine(PLAYER_CONFIGS, {
     now: () => nowRef.value,
     effects: {
       resetKeyboard: () => undefined,
@@ -86,7 +87,7 @@ describe("换装状态机", () => {
     expect(
       runtime.beginClothingChange(
         "dressing",
-        nowRef.value + CHANGE_CLOTHES_COOLDOWN_MS,
+        nowRef.value + PLAYER_CONFIGS.clothing.cooldownMs,
       ),
     ).toBe(true);
   });

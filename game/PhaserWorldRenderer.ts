@@ -5,15 +5,11 @@ import type {
   WorldWriteHooks,
 } from "../src/world/index.js";
 import {
-  COLLISION_GID_FORCED,
   diagnosticForMarker,
   extractMarkerRecords,
   isKnownRawVisualGid,
-  NON_COLLISION_GID_FORCED,
   roofAlpha,
   roofGroupForLayer,
-  ROOF_FADE_MS,
-  ROOF_GROUPS,
   type LayerDiagnostic,
   type LayerMarkerRecord,
   type LayerStrategy,
@@ -21,6 +17,7 @@ import {
   type RoofGroupState,
   type RoofState,
 } from "../src/layer/index.js";
+import type { LayerConfigs } from "../config/骨架/02-玩法线/SYS-LAYER/逻辑/index.js";
 
 interface TileLike {
   readonly index: number;
@@ -107,8 +104,6 @@ function nextAnimationFrame(): Promise<void> {
   });
 }
 
-export const CLEAR_LAYERS_PER_FRAME = 4;
-
 /**
  * Phaser-only adapter. Each rendered chunk owns a small 28x28 Tilemap layer;
  * World still owns transaction order and rendered-chunk bookkeeping.
@@ -119,6 +114,7 @@ export class PhaserWorldRenderer {
   readonly spec: WorldSpec;
   readonly layers = new Map<string, TilemapLayerLike>();
   readonly strategies: readonly LayerStrategy[];
+  private readonly layerConfigs: LayerConfigs;
   readonly #options: PhaserWorldRendererOptions;
   readonly #collisionEnabled = new Map<string, boolean>();
   readonly #markers = new Map<string, readonly LayerMarkerRecord[]>();
@@ -136,13 +132,15 @@ export class PhaserWorldRenderer {
     map: any,
     tilesets: readonly unknown[],
     spec: WorldSpec,
-    strategies: readonly LayerStrategy[],
+    layerConfigs: LayerConfigs,
+    private readonly clearLayersPerFrame: number,
     options: PhaserWorldRendererOptions = {},
   ) {
     this.map = map;
     this.tilesets = tilesets;
     this.spec = spec;
-    this.strategies = strategies;
+    this.strategies = layerConfigs.strategies;
+    this.layerConfigs = layerConfigs;
     this.#options = options;
     this.#collisionEnabled.set("walls", true);
   }
@@ -180,7 +178,7 @@ export class PhaserWorldRenderer {
 
   get teardownSnapshot() {
     return Object.freeze({
-      clearLayersPerFrame: CLEAR_LAYERS_PER_FRAME,
+      clearLayersPerFrame: this.clearLayersPerFrame,
       asyncClearedLayers: this.#asyncClearedLayers,
       frameYields: this.#clearFrameYields,
       pendingBudgetCount: this.#clearedSinceFrameYield,
@@ -213,7 +211,7 @@ export class PhaserWorldRenderer {
       state,
       visible: true,
       alpha: roofAlpha(state),
-      durationMs: ROOF_FADE_MS,
+      durationMs: this.layerConfigs.roofFadeMs,
     };
   }
 
@@ -224,13 +222,13 @@ export class PhaserWorldRenderer {
     if (!changed) {
       return next;
     }
-    const layers = ROOF_GROUPS[group].flatMap((layerName) =>
+    const layers = this.layerConfigs.roofGroups[group].flatMap((layerName) =>
       this.layersFor(layerName),
     );
     if (this.#options.onRoofStateApplied !== undefined) {
       this.#options.onRoofStateApplied(next, layers);
     } else {
-      for (const layerName of ROOF_GROUPS[group]) {
+      for (const layerName of this.layerConfigs.roofGroups[group]) {
         for (const layer of this.layersFor(layerName)) {
           this.applyRoofState(layerName, layer);
         }
@@ -315,15 +313,15 @@ export class PhaserWorldRenderer {
       layer.setCollisionByProperty?.({ collides: true }, enabled, false);
       if (layer.forEachTile !== undefined) {
         layer.forEachTile((tile) => {
-          if (tile.index === COLLISION_GID_FORCED) {
+          if (tile.index === this.layerConfigs.collisionGidForced) {
             tile.setCollision?.(enabled);
-          } else if (tile.index === NON_COLLISION_GID_FORCED) {
+          } else if (tile.index === this.layerConfigs.nonCollisionGidForced) {
             tile.setCollision?.(false);
           }
         });
       } else {
-        layer.setCollision?.(COLLISION_GID_FORCED, enabled, false);
-        layer.setCollision?.(NON_COLLISION_GID_FORCED, false, false);
+        layer.setCollision?.(this.layerConfigs.collisionGidForced, enabled, false);
+        layer.setCollision?.(this.layerConfigs.nonCollisionGidForced, false, false);
       }
       layer.setVisible?.(false);
     } else {
@@ -413,7 +411,7 @@ export class PhaserWorldRenderer {
     layerName: string,
     layer: TilemapLayerLike,
   ): void {
-    const group = roofGroupForLayer(layerName);
+    const group = roofGroupForLayer(layerName, this.layerConfigs.roofGroups);
     if (group === undefined) {
       throw new Error(`未知 roof 图层：${layerName}`);
     }
@@ -434,6 +432,7 @@ export class PhaserWorldRenderer {
       this.spec.chunkHeightTiles,
       this.spec.tileWidthPixels,
       this.spec.tileHeightPixels,
+      this.layerConfigs.strategiesByName,
     );
     const diagnostics = records
       .map((marker) => diagnosticForMarker(marker))
@@ -528,7 +527,11 @@ export class PhaserWorldRenderer {
         if (
           gid === undefined ||
           gid === 0 ||
-          isKnownRawVisualGid(layer.name, gid)
+          isKnownRawVisualGid(
+            layer.name,
+            gid,
+            this.layerConfigs.strategiesByName,
+          )
         ) {
           continue;
         }
@@ -670,7 +673,7 @@ export class PhaserWorldRenderer {
   private async recordBudgetedLayerClear(): Promise<void> {
     this.#asyncClearedLayers += 1;
     this.#clearedSinceFrameYield += 1;
-    if (this.#clearedSinceFrameYield < CLEAR_LAYERS_PER_FRAME) return;
+    if (this.#clearedSinceFrameYield < this.clearLayersPerFrame) return;
     this.#clearedSinceFrameYield = 0;
     this.#clearFrameYields += 1;
     await nextAnimationFrame();

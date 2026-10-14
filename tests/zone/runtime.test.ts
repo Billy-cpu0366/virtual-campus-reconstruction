@@ -6,6 +6,10 @@ import {
   type ZoneScheduler,
   type ZoneSnapshot,
 } from "../../src/zone/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadZoneConfigs } from "../../config/骨架/03-内容线/SYS-ZONE/逻辑/index.js";
+
+const zoneConfigs = await loadZoneConfigs(createDiskConfigSource());
 
 class FakeScheduler implements ZoneScheduler {
   private nextHandle = 1;
@@ -54,7 +58,7 @@ describe("ZoneRuntime", () => {
   it("coalesces updates into an injected 100ms check", () => {
     const scheduler = new FakeScheduler();
     const events: string[] = [];
-    const runtime = new ZoneRuntime({
+    const runtime = new ZoneRuntime({ ...zoneConfigs,
       markers: [marker],
       scheduler,
       onResidence: (event) => events.push(event.phase),
@@ -72,7 +76,7 @@ describe("ZoneRuntime", () => {
 
   it("only considers markers inside the viewport plus the 100px margin", () => {
     const events: string[] = [];
-    const runtime = new ZoneRuntime({
+    const runtime = new ZoneRuntime({ ...zoneConfigs,
       markers: [
         marker,
         { markerId: "edge", menuId: "cv", x: 300, y: 100 },
@@ -88,7 +92,7 @@ describe("ZoneRuntime", () => {
 
   it("checks active markers after they leave the viewport+100 candidate area", () => {
     const events: string[] = [];
-    const runtime = new ZoneRuntime({
+    const runtime = new ZoneRuntime({ ...zoneConfigs,
       markers: [marker],
       onResidence: (event) => events.push(event.phase),
     });
@@ -106,7 +110,7 @@ describe("ZoneRuntime", () => {
 
   it("uses a strict distance boundary", () => {
     const events: string[] = [];
-    const runtime = new ZoneRuntime({
+    const runtime = new ZoneRuntime({ ...zoneConfigs,
       markers: [marker],
       onResidence: (event) => events.push(event.phase),
     });
@@ -119,7 +123,7 @@ describe("ZoneRuntime", () => {
 
   it("creates unique residences and accepts only matching visit receipts", () => {
     const events: Array<{ phase: string; residenceId: string }> = [];
-    const runtime = new ZoneRuntime({
+    const runtime = new ZoneRuntime({ ...zoneConfigs,
       markers: [marker],
       onResidence: (event) =>
         events.push({ phase: event.phase, residenceId: event.residenceId }),
@@ -155,7 +159,7 @@ describe("ZoneRuntime", () => {
   it("destroy is idempotent and rejects scheduled late updates", () => {
     const scheduler = new FakeScheduler();
     const events: string[] = [];
-    const runtime = new ZoneRuntime({
+    const runtime = new ZoneRuntime({ ...zoneConfigs,
       markers: [marker],
       scheduler,
       onResidence: (event) => events.push(event.phase),

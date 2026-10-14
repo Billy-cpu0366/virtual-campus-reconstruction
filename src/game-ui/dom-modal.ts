@@ -152,8 +152,6 @@ type DomModalSnapshot = {
   readonly scrollTop: number;
 };
 
-const DESKTOP_MAX_HEIGHT_RATIO = 0.9;
-const MOBILE_MAX_HEIGHT_RATIO = 0.7;
 const MOBILE_WIDTH = 767;
 const RICH_CONTENT_KEYS = [
   "heading",
@@ -382,6 +380,8 @@ export class DomModalGameUi implements GameUiPort {
   private readonly elements: Partial<DomModalElements>;
   private readonly viewport: DomModalViewport;
   private readonly content: DomModalContentPort | undefined;
+  private readonly desktopMaxHeightRatio: number;
+  private readonly mobileMaxHeightRatio: number;
   private readonly subscribers = new Set<(event: UserCloseEvent) => void>();
   private readonly richImageListeners: Array<{
     readonly image: DomModalContentNode;
@@ -417,11 +417,15 @@ export class DomModalGameUi implements GameUiPort {
   constructor(
     elements: Partial<DomModalElements>,
     viewport: DomModalViewport,
+    desktopMaxHeightRatio: number,
+    mobileMaxHeightRatio: number,
     accessibility?: DomModalAccessibility,
     content?: DomModalContentPort,
   ) {
     this.elements = elements;
     this.viewport = viewport;
+    this.desktopMaxHeightRatio = desktopMaxHeightRatio;
+    this.mobileMaxHeightRatio = mobileMaxHeightRatio;
     this.accessibility = accessibility;
     this.content = content ?? createDefaultDomModalContentPort(elements.body);
     this.bindListeners();
@@ -852,8 +856,8 @@ export class DomModalGameUi implements GameUiPort {
       return undefined;
     }
     const ratio = size.width <= MOBILE_WIDTH
-      ? MOBILE_MAX_HEIGHT_RATIO
-      : DESKTOP_MAX_HEIGHT_RATIO;
+      ? this.mobileMaxHeightRatio
+      : this.desktopMaxHeightRatio;
     return `${size.height * ratio}px`;
   }
 
@@ -1083,18 +1087,31 @@ export function createDomModalContentPort(
 export function createDomModalGameUi(
   elements: Partial<DomModalElements>,
   viewport: DomModalViewport,
+  desktopMaxHeightRatio: number,
+  mobileMaxHeightRatio: number,
   accessibility?: DomModalAccessibility,
   content?: DomModalContentPort,
 ): GameUiPort {
-  return new DomModalGameUi(elements, viewport, accessibility, content);
+  return new DomModalGameUi(
+    elements,
+    viewport,
+    desktopMaxHeightRatio,
+    mobileMaxHeightRatio,
+    accessibility,
+    content,
+  );
 }
 
 export function createDomModalGameUiFromOptions(
   options: DomModalGameUiOptions,
+  desktopMaxHeightRatio: number,
+  mobileMaxHeightRatio: number,
 ): GameUiPort {
   return new DomModalGameUi(
     options.elements,
     options.viewport,
+    desktopMaxHeightRatio,
+    mobileMaxHeightRatio,
     options.accessibility,
     options.content,
   );

@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "system": "transport",
+    "source": "game/fetchJson.ts",
+    "sourceConstant": "JSON_REQUEST_TIMEOUT_MS",
+    "verified": "exact",
+    "notes": [
+      "本轮只接 timeouts.json：值 15000 原是 game/fetchJson.ts 的 JSON_REQUEST_TIMEOUT_MS，运行期由 CampusScene 包装 JsonLoader 时显式传入；常量仍留作无参调用的默认值（测试与独立调用），换皮以本文件为准。",
+      "mapBaseUrl 与 TransportConfig 三来源（config.source / fallbackToDefault）按缺口表第 7 条冻结，不改 src/ 不落码，本轮不接。",
+      "timeouts.image / concurrency.maxInFlight / priorityOrder / retry.intraLoopBackoffMs / cache.http / failure.retryInvalidContent 是缺口，值不存在，不补。",
+      "retry.backoffInitialMs / backoffFactor / backoffMaxMs 的值存在但写在 src/chunk/coordinator.ts 的算法体内，接线需改算法，本轮红线不动。",
+      "retry.maxAttempts 与 chunkFileName / chunkIndexFormula 重复归属 §4 SYS-CHUNK，沿用 chunk-config.json 为唯一权威，此处不存第二份。",
+      "cache.inFlight / cache.memory / failure.categories / failure.cancelIsNotError 是行为开关或失败分类表，没有可存数值，留在代码。",
+      "cache.*Policy 四项是给后台的部署建议值，不是客户端运行期配置，不落客户端 JSON。"
+    ]
+  },
+  "data": {
+    "timeouts": {
+      "json": 15000
+    }
+  }
+}

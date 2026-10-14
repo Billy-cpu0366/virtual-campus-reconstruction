@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LAYER_STRATEGIES } from "../../src/layer/index.js";
+import { LAYER_STRATEGIES } from "../config/layer-config-fixture.js";
 import {
   validateChunk,
   validateCoordinate,

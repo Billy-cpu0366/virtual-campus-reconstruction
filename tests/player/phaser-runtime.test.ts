@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  PLAYER_RUNTIME_ANIMATIONS,
   PhaserPlayerRuntime,
   type PhaserPlayerAnimationConfig,
   type PhaserPlayerAnimationManagerLike,
   type PhaserPlayerSceneLike,
   type PhaserPlayerVisualLike,
 } from "../../game/PhaserPlayerRuntime.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
+
+const ANIM = PLAYER_CONFIGS.idle.animationKeys;
 
 type Listener = (...args: unknown[]) => void;
 
@@ -120,7 +122,7 @@ function makeAdapter(
   };
   const sprite = new FakeSprite();
   const calls: string[] = [];
-  const adapter = new PhaserPlayerRuntime(scene, sprite, {
+  const adapter = new PhaserPlayerRuntime(scene, sprite, PLAYER_CONFIGS, {
     now,
     random: () => 0,
     effects: {
@@ -140,7 +142,7 @@ describe("Phaser 玩家有界适配器", () => {
     adapter.enableControls(time);
     expect(adapter.update(null, 8_000).status).toBe("idle-action");
     time = 11_000;
-    sprite.complete(PLAYER_RUNTIME_ANIMATIONS.eating);
+    sprite.complete(ANIM.eating);
     expect(adapter.update(null, 18_999).status).toBe("normal-idle");
     expect(adapter.update(null, 19_000).status).toBe("idle-action");
   });
@@ -153,9 +155,7 @@ describe("Phaser 玩家有界适配器", () => {
       "player-tying-shoe",
       "player-sitting",
     ]);
-    expect(loads.every((load) => load.url.includes("sample/original-public-build"))).toBe(
-      true,
-    );
+    expect(loads.every((load) => load.url.startsWith("/sprites/"))).toBe(true);
     expect(loads.every((load) => load.url.endsWith(".webp"))).toBe(true);
     expect(loads.every((load) =>
       load.config.frameWidth === 128 &&
@@ -166,9 +166,9 @@ describe("Phaser 玩家有界适配器", () => {
 
     adapter.createAnimations();
     for (const key of [
-      PLAYER_RUNTIME_ANIMATIONS.eating,
-      PLAYER_RUNTIME_ANIMATIONS.scratching,
-      PLAYER_RUNTIME_ANIMATIONS["tying-shoe"],
+      ANIM.eating,
+      ANIM.scratching,
+      ANIM["tying-shoe"],
     ]) {
       expect(animations.created).toContainEqual(
         expect.objectContaining({ key, frameRate: 5, repeat: 0 }),
@@ -176,14 +176,14 @@ describe("Phaser 玩家有界适配器", () => {
     }
     expect(animations.created).toContainEqual(
       expect.objectContaining({
-        key: PLAYER_RUNTIME_ANIMATIONS.sittingDown,
+        key: ANIM.sittingDown,
         frameRate: 16,
         repeat: 0,
       }),
     );
     expect(animations.created).toContainEqual(
       expect.objectContaining({
-        key: PLAYER_RUNTIME_ANIMATIONS.standingUp,
+        key: ANIM.standingUp,
         frameRate: 16,
         repeat: 0,
       }),
@@ -195,7 +195,7 @@ describe("Phaser 玩家有界适配器", () => {
     const { adapter, sprite } = makeAdapter();
     adapter.createAnimations();
     adapter.enableControls(0);
-    sprite.failAnimation = PLAYER_RUNTIME_ANIMATIONS.eating;
+    sprite.failAnimation = ANIM.eating;
 
     expect(adapter.update(null, 8_000)).toMatchObject({
       status: "normal-idle",
@@ -233,7 +233,7 @@ describe("Phaser 玩家有界适配器", () => {
     adapter.enableControls(0);
 
     expect(adapter.update(null, 30_000).status).toBe("sitting-down");
-    sprite.complete(PLAYER_RUNTIME_ANIMATIONS.sittingDown);
+    sprite.complete(ANIM.sittingDown);
     expect(adapter.status).toBe("sitting");
     expect(sprite.frame).toBe(15);
     expect(adapter.update("east", 30_001)).toMatchObject({
@@ -241,7 +241,7 @@ describe("Phaser 玩家有界适配器", () => {
       movementDirection: null,
       pendingDirection: "east",
     });
-    sprite.complete(PLAYER_RUNTIME_ANIMATIONS.standingUp);
+    sprite.complete(ANIM.standingUp);
     expect(adapter.status).toBe("normal-idle");
     expect(adapter.update(null, 30_002)).toMatchObject({
       status: "walking",

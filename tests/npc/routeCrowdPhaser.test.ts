@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PhaserRouteCrowdRuntime, keepOrdinaryCrowdOffTrack } from "../../game/PhaserRouteCrowdRuntime.js";
+import { PhaserRouteCrowdRuntime as PhaserRouteCrowdRuntimeBase, keepOrdinaryCrowdOffTrack, type PhaserRouteCrowdRuntimeOptions, type PhaserRouteCrowdSceneLike } from "../../game/PhaserRouteCrowdRuntime.js";
+import { PLAYER_CONFIGS } from "../config/player-config-fixture.js";
 import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
 import { loadNpcConfigs } from "../../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
 
@@ -12,6 +13,11 @@ const ROUTE_INPUT = {
   tuning: CONFIGS.tuning.routeCrowd,
   presentation: PRESENTATION,
 };
+class PhaserRouteCrowdRuntime extends PhaserRouteCrowdRuntimeBase {
+  constructor(scene: PhaserRouteCrowdSceneLike, options: PhaserRouteCrowdRuntimeOptions) {
+    super(scene, options, PLAYER_CONFIGS);
+  }
+}
 
 class Sprite {
  x:number; y:number; depth=0; alpha=1; destroyed=false;

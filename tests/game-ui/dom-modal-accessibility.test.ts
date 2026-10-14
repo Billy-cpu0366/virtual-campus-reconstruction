@@ -110,7 +110,7 @@ describe("DomModalGameUi accessibility foundation", () => {
     const keyboard = new FakeKeyboard();
     let active: DomModalTarget | undefined = previous;
     const focused: DomModalTarget[] = [];
-    const ui = new DomModalGameUi(elements, new FakeViewport(), {
+    const ui = new DomModalGameUi(elements, new FakeViewport(), 0.9, 0.7, {
       keyboard,
       focus: {
         getActiveElement: () => active,
@@ -146,7 +146,7 @@ describe("DomModalGameUi accessibility foundation", () => {
     const keyboard = new FakeKeyboard();
     let active: DomModalTarget | undefined = elements.closeButton;
     const focused: DomModalTarget[] = [];
-    const ui = new DomModalGameUi(elements, new FakeViewport(), {
+    const ui = new DomModalGameUi(elements, new FakeViewport(), 0.9, 0.7, {
       keyboard,
       focus: {
         getActiveElement: () => active,

@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "system": "input",
+    "source": "src/input/direction.ts; src/input/joystick.ts; game/CampusScene.ts; game/PhaserVirtualJoystick.ts",
+    "sourceConstant": "SPEED / SPEED_DIAGONAL / DIRECTIONS / VECTORS / MOVEMENT_KEY_BY_CODE / JOYSTICK_MAIN_AXIS_RATIO / JOYSTICK_FORCE_MIN / joystickParams device sizes / POSITION_OFFSET / JOYSTICK_DEPTH / joystick style / tablet breakpoint / desktop visibility / blur reset",
+    "verified": "exact",
+    "notes": [
+      "两个 threshold 常量在生产代码没有读取点，保留在 src 供原始证据查阅。",
+      "方向优先级、触屏检测、Phaser 设备优先、对角键序和窗口失焦处理属于运行机制。",
+      "摇杆滑钮深度由底盘深度加 1 算出；每设备 forceMin 从顶层值递入。"
+    ]
+  },
+  "data": {
+    "speed": { "walk": 150, "diagonal": 106 },
+    "directions": ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"],
+    "vectors": {
+      "north": { "dx": 0, "dy": -1 }, "north-east": { "dx": 1, "dy": -1 },
+      "east": { "dx": 1, "dy": 0 }, "south-east": { "dx": 1, "dy": 1 },
+      "south": { "dx": 0, "dy": 1 }, "south-west": { "dx": -1, "dy": 1 },
+      "west": { "dx": -1, "dy": 0 }, "north-west": { "dx": -1, "dy": -1 }
+    },
+    "keyboard": { "mapping": {
+      "ArrowUp": "up", "KeyW": "up", "ArrowDown": "down", "KeyS": "down",
+      "ArrowLeft": "left", "KeyA": "left", "ArrowRight": "right", "KeyD": "right"
+    } },
+    "joystick": {
+      "mainAxisRatio": 1.5, "forceMin": 16, "positionOffset": 50, "depth": 10000,
+      "device": {
+        "desktop": { "radius": 15, "baseDiameter": 60, "thumbDiameter": 30, "position": "center-bottom" },
+        "tablet": { "radius": 12, "baseDiameter": 48, "thumbDiameter": 24, "position": "right-bottom" },
+        "mobile": { "radius": 15, "baseDiameter": 60, "thumbDiameter": 30, "position": "right-bottom" }
+      },
+      "style": {
+        "baseFill": { "color": 988970, "alpha": 0.45 },
+        "baseStroke": { "color": 9741240, "alpha": 0.75, "width": 2 },
+        "thumbFill": { "color": 3718648, "alpha": 0.85 },
+        "thumbStroke": { "color": 14742270, "alpha": 0.9, "width": 2 }
+      }
+    },
+    "device": { "tabletBreakpoint": 768 },
+    "desktop": { "joystickVisible": false },
+    "blurReset": true
+  }
+}

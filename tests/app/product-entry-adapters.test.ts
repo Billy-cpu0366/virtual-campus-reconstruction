@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadAppConfigs } from "../../config/骨架/04-独立件/SYS-APP/逻辑/index.js";
+import { loadCameraConfigs } from "../../config/骨架/02-玩法线/SYS-CAMERA/逻辑/index.js";
 import {
-  PRODUCT_ENTRY_CAMERA_DURATION_MS,
-  PRODUCT_ENTRY_TRAIN_ARRIVAL_MS,
   PhaserTrainArrivalAdapter,
   ProductEntryCameraAdapter,
   TimedTrainArrivalAdapter,
@@ -14,8 +15,14 @@ import type {
   CameraRuntimeStartOptions,
 } from "../../src/camera/index.js";
 
+const source = createDiskConfigSource();
+const [appConfig, cameraConfig] = await Promise.all([
+  loadAppConfigs(source),
+  loadCameraConfigs(source),
+]);
+
 describe("ProductEntryCameraAdapter", () => {
-  it("只提交当前点加3000ms回玩家，不使用默认111秒序列", async () => {
+  it("只提交当前点加配置时长回玩家，不使用默认111秒序列", async () => {
     const starts: CameraRuntimeStartOptions[] = [];
     let shutdowns = 0;
     const adapter = new ProductEntryCameraAdapter(
@@ -29,6 +36,7 @@ describe("ProductEntryCameraAdapter", () => {
         },
       },
       () => ({ x: 944, y: 928 }),
+      cameraConfig.returnDuration,
     );
 
     const first = adapter.settleOnPlayer();
@@ -39,7 +47,7 @@ describe("ProductEntryCameraAdapter", () => {
         sequence: [
           { x: 944, y: 928, duration: 0, stayDuration: 0 },
         ],
-        returnDuration: PRODUCT_ENTRY_CAMERA_DURATION_MS,
+        returnDuration: cameraConfig.returnDuration,
       },
     ]);
     expect(starts[0]?.sequence).toHaveLength(1);
@@ -58,6 +66,7 @@ describe("ProductEntryCameraAdapter", () => {
         shutdown: () => undefined,
       },
       () => ({ x: 944, y: 928 }),
+      cameraConfig.returnDuration,
       {
         preview: {
           x: 808,
@@ -81,7 +90,7 @@ describe("ProductEntryCameraAdapter", () => {
     expect(starts[0]?.sequence?.[0]?.stayDuration).toBe(0);
     expect(
       650 + (starts[0]?.returnDuration ?? 0),
-    ).toBe(PRODUCT_ENTRY_CAMERA_DURATION_MS);
+    ).toBe(cameraConfig.returnDuration);
   });
 
   it.each([
@@ -94,6 +103,7 @@ describe("ProductEntryCameraAdapter", () => {
         shutdown: () => undefined,
       },
       () => ({ x: 0, y: 0 }),
+      cameraConfig.returnDuration,
     );
 
     await expect(adapter.settleOnPlayer()).rejects.toThrow(
@@ -211,7 +221,7 @@ describe("PhaserTrainArrivalAdapter", () => {
 });
 
 describe("TimedTrainArrivalAdapter", () => {
-  it("5000ms只发布一次 arrived，并复用同一等待", async () => {
+  it("配置时长只发布一次 arrived，并复用同一等待", async () => {
     let duration = -1;
     let callback: (() => void) | undefined;
     const adapter = new TimedTrainArrivalAdapter({
@@ -220,11 +230,11 @@ describe("TimedTrainArrivalAdapter", () => {
         callback = handler;
         return {};
       },
-    });
+    }, appConfig.entryTrainArrivalMs);
 
     const first = adapter.waitForArrival();
     expect(adapter.waitForArrival()).toBe(first);
-    expect(duration).toBe(PRODUCT_ENTRY_TRAIN_ARRIVAL_MS);
+    expect(duration).toBe(appConfig.entryTrainArrivalMs);
     expect(adapter.status).toBe("entering");
     callback?.();
     await expect(first).resolves.toBeUndefined();
@@ -239,7 +249,7 @@ describe("TimedTrainArrivalAdapter", () => {
           removes += 1;
         },
       }),
-    });
+    }, appConfig.entryTrainArrivalMs);
     const pending = adapter.waitForArrival();
 
     adapter.shutdown();

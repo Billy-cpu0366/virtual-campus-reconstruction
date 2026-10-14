@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserRouteCrowdRuntime.ts",
+    "sourceConstant": "ROUTE_CROWD_TEXTURES / ROUTE_CROWD_SPECIAL_TEXTURES / ROUTE_CROWD_VISUAL_OFFSETS / CROWD_TRACK_BAND",
+    "units": {
+      "textures": "text",
+      "specialTextures": "text",
+      "visualOffsets": "pixel",
+      "textureFrameWidth": "pixel",
+      "textureFrameHeight": "pixel"
+    },
+    "notes": [
+      "这份管路线人群「用哪些贴图、显示上怎么错开」，管「去哪、几个人」的是 route-crowd-configs.json。",
+      "textures 是默认贴图池——没在 specialTextures 里点名的组，都从这里按下标轮流挑。",
+      "specialTextures 的键是组 id（见 route-crowd-configs.json），值是这组专用的贴图。加一组特殊贴图不用改代码。",
+      "visualOffsets 同样按组 id 查：数值 N 表示这个人显示位置在 N 像素范围内随机偏移，让一队人看起来不重叠。0 表示不偏移。",
+      "trackBand 是铁轨带的范围（世界像素）。普通路人不能站在铁轨上，走到带里会被弹到带外。",
+      "trackBand 虽然写在这份里，但**它服务的不止路线人群**——静态人群读的也是这一份。铁轨在哪儿是个世界事实，不是某一类 NPC 的属性，所以只留这一处，不另抄一份。改这里，两种人群一起变。",
+      "源码原先两个适配器各写了一遍一模一样的常量（PhaserRouteCrowdRuntime 和 PhaserStaticCrowdRuntime 各一个，不是共用同一个），换校园挪铁轨只会改到一半。接线时合成了一处，就是这个字段。"
+    ],
+    "verified": "mixed"
+  },
+  "data": {
+    "textures": [
+      "npc-man",
+      "npc-man2",
+      "npc-woman",
+      "npc-woman2",
+      "npc-woman3",
+      "npc-woman4",
+      "npc-woman5",
+      "npc-woman6",
+      "npc-woman7",
+      "npc-woman8",
+      "npc-man3",
+      "npc-man4",
+      "npc-man5",
+      "npc-man6",
+      "npc-man8",
+      "npc-man9",
+      "npc-man10"
+    ],
+    "specialTextures": {
+      "beach_crowd_walk": [
+        "npc-man-beach",
+        "npc-man-beach2",
+        "npc-woman-beach",
+        "npc-woman-beach2"
+      ],
+      "hazmat-crowd": ["npc-hazmat-suit"]
+    },
+    "visualOffsets": {
+      "main-crowd": 16,
+      "loop-crowd": 8,
+      "drinkers": 8,
+      "concert_crowd": 10,
+      "beach_crowd_walk": 8,
+      "vertical-crowd": 6,
+      "vertical-crowd-reverse": 0,
+      "crowd-train": 8
+    },
+    "textureFrameWidth": 48,
+    "textureFrameHeight": 48,
+    "trackBand": { "minX": 400, "maxX": 1471, "minY": 304, "maxY": 319 }
+  }
+}

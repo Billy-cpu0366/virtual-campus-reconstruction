@@ -65,8 +65,8 @@ export interface WorldWriteHooks {
 }
 
 export interface CreateWorldOptions {
-  // 图层计划（24 层策略）唯一来源是 SYS-LAYER；默认用 LAYER_STRATEGIES。世界只消费。
-  readonly layerPlan?: readonly LayerStrategy[];
+  // 图层计划由 SYS-LAYER 配置传入；世界只消费。
+  readonly layerPlan: readonly LayerStrategy[];
   readonly hooks?: WorldWriteHooks;
 }
 

@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "system": "game-ui",
+    "source": "src/game-ui/app-shell.ts",
+    "sourceConstant": "MOBILE_WIDTH / FOCUS_RING / root padding",
+    "verified": "exact",
+    "notes": [
+      "This file contains the JS-owned responsive shell values. CSS values in index.html remain pending a landing mechanism.",
+      "set1 uses a wider desktop shell padding to demonstrate live configuration."
+    ]
+  },
+  "data": {
+    "breakpoint": { "mobile": 767 },
+    "focusRing": "3px solid #0b57d0",
+    "rootPadding": { "desktop": "32px", "mobile": "16px" }
+  }
+}

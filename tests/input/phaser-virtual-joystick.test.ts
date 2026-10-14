@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { PhaserVirtualJoystick } from "../../game/PhaserVirtualJoystick.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadInputConfigs } from "../../config/骨架/02-玩法线/SYS-INPUT/逻辑/index.js";
+const INPUT = await loadInputConfigs(createDiskConfigSource());
 
 type Handler = (...args: any[]) => void;
 
@@ -112,7 +115,7 @@ describe("Phaser 原生摇杆适配器", () => {
     const zoom = 844 / 270;
     let viewport = { x: (480 - 390 / zoom) / 2, y: 0, width: 390 / zoom, height: 270 };
     Object.assign(scene.scale, { getViewPort: () => viewport });
-    const joystick = new PhaserVirtualJoystick(scene, "mobile");
+    const joystick = new PhaserVirtualJoystick(scene, "mobile", INPUT);
     const point = joystick.debugState();
     expect((point.x - 30 - viewport.x) * zoom).toBeGreaterThanOrEqual(0);
     expect((point.x + 30 - viewport.x) * zoom).toBeLessThanOrEqual(390);
@@ -125,7 +128,7 @@ describe("Phaser 原生摇杆适配器", () => {
   });
   it("只允许第一个 pointer 持有摇杆，并在释放或离开时恢复", () => {
     const scene = makeScene();
-    const joystick = new PhaserVirtualJoystick(scene, "mobile");
+    const joystick = new PhaserVirtualJoystick(scene, "mobile", INPUT);
     const point = center(scene);
 
     scene.input.emit("pointerdown", { id: 1, ...point });
@@ -152,7 +155,7 @@ describe("Phaser 原生摇杆适配器", () => {
 
   it("只把 forceMin 当作距离 deadzone", () => {
     const scene = makeScene();
-    const joystick = new PhaserVirtualJoystick(scene, "mobile");
+    const joystick = new PhaserVirtualJoystick(scene, "mobile", INPUT);
     const point = center(scene);
 
     scene.input.emit("pointerdown", { id: 1, ...point });
@@ -164,7 +167,7 @@ describe("Phaser 原生摇杆适配器", () => {
 
   it("桌面隐藏且不接管 pointer，resize 仍重定位", () => {
     const scene = makeScene();
-    const joystick = new PhaserVirtualJoystick(scene, "desktop");
+    const joystick = new PhaserVirtualJoystick(scene, "desktop", INPUT);
     const point = center(scene);
     const before = joystick.debugState();
 
@@ -186,7 +189,7 @@ describe("Phaser 原生摇杆适配器", () => {
 
   it("resize 重定位，shutdown 移除监听并清理图形", () => {
     const scene = makeScene();
-    const joystick = new PhaserVirtualJoystick(scene, "tablet");
+    const joystick = new PhaserVirtualJoystick(scene, "tablet", INPUT);
     expect(joystick.debugState().visible).toBe(true);
     expect(joystick.debugState().device).toBe("tablet");
     const before = joystick.debugState();

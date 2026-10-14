@@ -1,20 +1,43 @@
 import { describe, expect, it } from "vitest";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadRouteConfigs } from "../../config/骨架/05-旁支/SYS-ROUTE/逻辑/index.js";
 import {
-  HELICOPTER_BLADE_DISPLAY_SIZE,
-  HELICOPTER_BLADE_ANGLES_DEGREES,
-  HELICOPTER_HIGH_RESOLUTION_BASELINE,
-  HELICOPTER_MAIN_ROTOR_OFFSET,
-  HELICOPTER_POSITION,
-  HELICOPTER_TAIL_ROTOR_OFFSET_EAST,
   PhaserVehicleRuntime,
-  POLICE_POSITIONS,
-  POLICE_COLLISION_SIZE,
-  VEHICLE_RUNTIME_ASSETS,
-  VEHICLE_RUNTIME_CONTRACT,
   type PhaserVehicleDisplayObjectLike,
   type PhaserVehiclePhysicsBodyLike,
+  type PhaserVehicleRuntimeOptions,
   type PhaserVehicleSceneLike,
 } from "../../game/PhaserVehicleRuntime.js";
+
+/**
+ * 车的那几个数现在住配置文件里，不再从 `game/PhaserVehicleRuntime.ts` 导出常量。
+ * 下面这些名字和原先的常量同名同义，只是**值从配置来**——用例里的断言因此基本不用改。
+ * 这么写正好验的是「游戏实际读的就是这份文件」。
+ */
+const ROUTE_CONFIGS = await loadRouteConfigs(createDiskConfigSource());
+const VEHICLE_CONFIG = ROUTE_CONFIGS.vehicle;
+const HELICOPTER_CONFIG = VEHICLE_CONFIG.helicopter;
+const POLICE_CONFIG = VEHICLE_CONFIG.police;
+const VEHICLE_PRESENTATION = ROUTE_CONFIGS.presentation.vehicle;
+
+const HELICOPTER_POSITION = HELICOPTER_CONFIG.position;
+const HELICOPTER_MAIN_ROTOR_OFFSET = HELICOPTER_CONFIG.mainRotorOffset;
+const HELICOPTER_TAIL_ROTOR_OFFSET_EAST = HELICOPTER_CONFIG.tailRotorOffsetEast;
+const HELICOPTER_BLADE_ANGLES_DEGREES = HELICOPTER_CONFIG.bladeAnglesDegrees;
+const HELICOPTER_BLADE_DISPLAY_SIZE = HELICOPTER_CONFIG.bladeDisplaySize;
+/** 高清层宽度基准是**算出来的**：机身图每帧宽 × 缩放。 */
+const HELICOPTER_HIGH_RESOLUTION_BASELINE =
+  VEHICLE_PRESENTATION.helicopterBody.frameWidth * HELICOPTER_CONFIG.scale;
+const POLICE_POSITIONS = POLICE_CONFIG.positions;
+const POLICE_COLLISION_SIZE = POLICE_CONFIG.collisionSize;
+
+/** 每个用例都要递的配置。抽出来只为少写几遍。 */
+const vehicleOptions = (
+  extra: Partial<Omit<PhaserVehicleRuntimeOptions, "route">> = {},
+): PhaserVehicleRuntimeOptions => ({
+  route: ROUTE_CONFIGS,
+  ...extra,
+});
 
 class FakeBody implements PhaserVehiclePhysicsBodyLike {
   public width = 0;
@@ -130,7 +153,7 @@ function createScene(options: {
   const bodies: FakeBody[] = [];
   let addCount = 0;
   const textureKeys = new Set<string>(
-    Object.values(VEHICLE_RUNTIME_ASSETS).map((asset) => asset.key),
+    Object.values(VEHICLE_PRESENTATION).map((asset) => asset.key),
   );
   if (options.missing !== undefined) textureKeys.delete(options.missing);
   const makeObject = (x: number, y: number, key: string): FakeObject => {
@@ -175,7 +198,7 @@ function createScene(options: {
 describe("PhaserVehicleRuntime", () => {
   it("declares the five source-backed assets and preloads exact contracts", () => {
     const { scene, loaded } = createScene();
-    const runtime = new PhaserVehicleRuntime(scene);
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions());
 
     runtime.preload();
     runtime.preload();
@@ -211,26 +234,36 @@ describe("PhaserVehicleRuntime", () => {
         frameHeight: 84,
       },
     ]);
-    expect(Object.values(VEHICLE_RUNTIME_ASSETS)).toHaveLength(5);
-    expect(VEHICLE_RUNTIME_ASSETS.helicopterBody.url).toBe(
+    expect(Object.values(VEHICLE_PRESENTATION)).toHaveLength(5);
+    expect(VEHICLE_PRESENTATION.helicopterBody.url).toBe(
       "/sprites/npc-helicopter.webp",
     );
-    expect(VEHICLE_RUNTIME_CONTRACT).toMatchObject({
-      helicopter: {
-        bladeCount: 5,
-        bladeDepth: 2000,
-        bodyFrame: 2,
-        scale: 2,
-        position: { x: 31 * 16 + 8, y: 80 * 16 + 8 },
-        highResolutionBaseline: 84 * 2,
-      },
-      police: { count: 3, depth: 560, wheels: false, brakes: false, lights: false },
+    // 原先这里比对的是 VEHICLE_RUNTIME_CONTRACT（代码里的契约对象）。那几个数搬到
+    // 配置里之后，契约对象没了，这一段的用处变成「配置里写的确实是这些值」——
+    // 逐字段的比对在 tests/config/route-config-extraction.test.ts。
+    expect(HELICOPTER_CONFIG).toMatchObject({
+      frameEast: 2,
+      scale: 2,
+      bladeDepth: 2000,
+      mainRotorSize: 90,
+      tailRotorSize: 36,
+      rotationSpeed: 8,
+      highResolutionOffset: { x: 0, y: 0 },
     });
+    expect(HELICOPTER_CONFIG.bladeAnglesDegrees).toHaveLength(5);
+    expect(HELICOPTER_POSITION).toEqual({ x: 31 * 16 + 8, y: 80 * 16 + 8 });
+    expect(HELICOPTER_HIGH_RESOLUTION_BASELINE).toBe(84 * 2);
+    expect(POLICE_CONFIG).toMatchObject({
+      depth: 560,
+      scale: 1,
+      origin: { x: 0.5, y: 0.5 },
+    });
+    expect(POLICE_POSITIONS).toHaveLength(3);
   });
 
   it("creates the helicopter components and exactly three police bodies", () => {
     const { scene, objects } = createScene();
-    const runtime = new PhaserVehicleRuntime(scene);
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions());
 
     expect(runtime.start(0)).toEqual({ ok: true });
 
@@ -364,7 +397,7 @@ describe("PhaserVehicleRuntime", () => {
 
   it("creates centered static police collision bodies when physics is available", () => {
     const { scene, objects, bodies } = createScene({ physics: true });
-    const runtime = new PhaserVehicleRuntime(scene);
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions());
 
     expect(runtime.start(0)).toEqual({ ok: true });
     const police = objects.filter((object) => object.key === "car-police");
@@ -383,7 +416,7 @@ describe("PhaserVehicleRuntime", () => {
 
   it("uses finite bounded deltas, rotates directionally, and never recreates", () => {
     const { scene, events, objects } = createScene();
-    const runtime = new PhaserVehicleRuntime(scene);
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions());
     runtime.start(100);
     const objectCount = objects.length;
     const blades = objects.filter(
@@ -433,7 +466,7 @@ describe("PhaserVehicleRuntime", () => {
     expect(Number.isFinite(runtime.snapshot.rotorAngleRadians)).toBe(true);
     expect(objects).toHaveLength(objectCount);
 
-    const unanchored = new PhaserVehicleRuntime(createScene().scene);
+    const unanchored = new PhaserVehicleRuntime(createScene().scene, vehicleOptions());
     unanchored.start();
     unanchored.update(100);
     expect(unanchored.snapshot.lastDeltaMs).toBe(0);
@@ -444,9 +477,9 @@ describe("PhaserVehicleRuntime", () => {
   it("reports missing textures without creating anything", () => {
     const { scene, objects } = createScene({ missing: "car-police" });
     const diagnostics: string[] = [];
-    const runtime = new PhaserVehicleRuntime(scene, {
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions({
       onError: (reason) => diagnostics.push(reason),
-    });
+    }));
 
     expect(runtime.start()).toEqual({ ok: false, reason: "missing-texture" });
     expect(objects).toHaveLength(0);
@@ -458,9 +491,9 @@ describe("PhaserVehicleRuntime", () => {
   it("rolls back every partial object and listener on creation failure", () => {
     const { scene, events, objects } = createScene({ throwOnAdd: 4 });
     const diagnostics: string[] = [];
-    const runtime = new PhaserVehicleRuntime(scene, {
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions({
       onError: (reason) => diagnostics.push(reason),
-    });
+    }));
 
     expect(runtime.start()).toEqual({ ok: false, reason: "create-failed" });
     expect(objects.length).toBeGreaterThan(0);
@@ -477,9 +510,9 @@ describe("PhaserVehicleRuntime", () => {
   it("cleans up when listener attachment fails and reports a stable reason", () => {
     const { scene, events, objects } = createScene({ throwOnEvent: "shutdown" });
     const diagnostics: string[] = [];
-    const runtime = new PhaserVehicleRuntime(scene, {
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions({
       onError: (reason) => diagnostics.push(reason),
-    });
+    }));
 
     expect(runtime.start(0)).toEqual({
       ok: false,
@@ -494,7 +527,7 @@ describe("PhaserVehicleRuntime", () => {
 
   it("detaches listeners, destroys objects, and makes shutdown idempotent", () => {
     const { scene, events, objects } = createScene();
-    const runtime = new PhaserVehicleRuntime(scene);
+    const runtime = new PhaserVehicleRuntime(scene, vehicleOptions());
     runtime.start(0);
 
     events.emit("shutdown");

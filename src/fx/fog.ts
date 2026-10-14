@@ -1,80 +1,17 @@
 export const FOG_ORANGE_SMOKE_ID = "orange_smoke";
 export const FOG_ORANGE_SMOKE_REGION = 75;
 export const FOG_ORANGE_SMOKE_ASSET_KEY = "particle_smoke_white";
-export const FOG_CELL_SIZE = 32;
-export const FOG_VIEWPORT_PADDING = FOG_CELL_SIZE;
-export const FOG_PLAYER_CLEAR_AHEAD = 35;
-export const FOG_PLAYER_CLEAR_WIDTH = 85;
-export const FOG_PLAYER_CLEAR_HEIGHT = 35;
-export const FOG_CAR_CLEAR_RADIUS = 40;
-export const FOG_ORANGE_SMOKE_RESPAWN_MS = 500;
-/** 呈现层实际并发数（性能取舍）。数据层的 quantity 仍是 4（下方 config），别把 2 抄回去。 */
-export const FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY = 2;
 
 export interface FogPoint {
   readonly x: number;
   readonly y: number;
 }
 
-export const FOG_ORANGE_SMOKE_POLYGON = Object.freeze([
-  { x: 1560, y: 1160 },
-  { x: 1560, y: 1176 },
-  { x: 1576, y: 1192 },
-  { x: 1592, y: 1176 },
-  { x: 1608, y: 1176 },
-  { x: 1624, y: 1192 },
-  { x: 1640, y: 1208 },
-  { x: 1656, y: 1224 },
-  { x: 1656, y: 1240 },
-  { x: 1672, y: 1256 },
-  { x: 1656, y: 1272 },
-  { x: 1656, y: 1288 },
-  { x: 1656, y: 1304 },
-  { x: 1640, y: 1288 },
-  { x: 1624, y: 1272 },
-  { x: 1608, y: 1256 },
-  { x: 1592, y: 1256 },
-  { x: 1576, y: 1256 },
-  { x: 1560, y: 1256 },
-  { x: 1544, y: 1240 },
-  { x: 1528, y: 1240 },
-  { x: 1512, y: 1240 },
-  { x: 1496, y: 1256 },
-  { x: 1496, y: 1240 },
-  { x: 1496, y: 1224 },
-  { x: 1512, y: 1208 },
-  { x: 1512, y: 1192 },
-  { x: 1528, y: 1192 },
-  { x: 1544, y: 1176 },
-] as const);
-
-export const FOG_ORANGE_SMOKE_CONFIG = Object.freeze({
-  id: FOG_ORANGE_SMOKE_ID,
-  region: FOG_ORANGE_SMOKE_REGION,
-  assetKey: FOG_ORANGE_SMOKE_ASSET_KEY,
-  cellSize: FOG_CELL_SIZE,
-  depth: 1_100,
-  blendMode: "NORMAL",
-  scale: 8,
-  alpha: 0.3,
-  speed: 5,
-  // 数据层要发的粒子数。呈现层实际用 FOG_ORANGE_SMOKE_PRESENTATION_QUANTITY = 2（性能取舍），别被它带偏。
-  quantity: 4,
-  frequency: 20,
-  lifespan: Object.freeze({ min: 350, max: 2_000 }),
-  respawn: FOG_ORANGE_SMOKE_RESPAWN_MS,
-  tint: Object.freeze([16_724_787, 16_716_049, 13_369_344]),
-} as const);
-
 export interface FogCell {
   readonly id: string;
   readonly x: number;
   readonly y: number;
 }
-
-export const FOG_ORANGE_SMOKE_CELLS: readonly FogCell[] = Object.freeze(
-  createCells(FOG_ORANGE_SMOKE_POLYGON, FOG_CELL_SIZE, FOG_ORANGE_SMOKE_ID),
-);
 
 export interface FogViewport {
   readonly left: number;
@@ -151,8 +88,7 @@ function createCells(
   return cells;
 }
 
-function inViewport(cell: FogCell, viewport: FogViewport): boolean {
-  const padding = FOG_VIEWPORT_PADDING;
+function inViewport(cell: FogCell, viewport: FogViewport, padding: number): boolean {
   return (
     cell.x >= viewport.left - padding &&
     cell.x <= viewport.left + viewport.width + padding &&
@@ -173,14 +109,27 @@ interface FogCellState extends FogCell {
 
 /** Core state owner for the S1 orange trajectory fog region. */
 export class FogRuntime {
-  private readonly cellStates: FogCellState[] = FOG_ORANGE_SMOKE_CELLS.map(
-    (cell) => ({ ...cell, active: false, cleared: false, respawnAt: null }),
-  );
+  private readonly cellStates: FogCellState[];
   private stateState: FogSnapshot["state"] = "idle";
   private viewportState: FogViewport | null = null;
   private lastDirection = Math.PI / 2;
 
-  constructor(private readonly carsInputIntegrated = false) {}
+  constructor(
+    private readonly carsInputIntegrated: boolean,
+    private readonly config: Readonly<{
+      polygon: readonly FogPoint[];
+      cellSize: number;
+      viewportPadding: number;
+      clearAhead: number;
+      clearWidth: number;
+      clearHeight: number;
+      carClearRadius: number;
+      respawnMs: number;
+    }>,
+  ) {
+    this.cellStates = createCells(config.polygon, config.cellSize, FOG_ORANGE_SMOKE_ID)
+      .map((cell) => ({ ...cell, active: false, cleared: false, respawnAt: null }));
+  }
 
   get snapshot(): FogSnapshot {
     return Object.freeze({
@@ -206,7 +155,7 @@ export class FogRuntime {
     if (this.stateState !== "active") return this.snapshot;
     this.viewportState = Object.freeze({ ...viewport });
     for (const cell of this.cellStates) {
-      cell.active = !cell.cleared && inViewport(cell, viewport);
+      cell.active = !cell.cleared && inViewport(cell, viewport, this.config.viewportPadding);
     }
     return this.snapshot;
   }
@@ -228,8 +177,8 @@ export class FogRuntime {
         this.lastDirection =
           player.direction ?? Math.atan2(velocityY, velocityX);
         const ahead = {
-          x: player.x + Math.cos(this.lastDirection) * FOG_PLAYER_CLEAR_AHEAD,
-          y: player.y + Math.sin(this.lastDirection) * FOG_PLAYER_CLEAR_AHEAD,
+          x: player.x + Math.cos(this.lastDirection) * this.config.clearAhead,
+          y: player.y + Math.sin(this.lastDirection) * this.config.clearAhead,
         };
         for (const cell of this.cellStates) {
           const dx = cell.x - ahead.x;
@@ -242,9 +191,9 @@ export class FogRuntime {
             dy * Math.cos(-this.lastDirection);
           if (
             (localX * localX) /
-                (FOG_PLAYER_CLEAR_WIDTH * FOG_PLAYER_CLEAR_WIDTH) +
+                (this.config.clearWidth * this.config.clearWidth) +
               (localY * localY) /
-                (FOG_PLAYER_CLEAR_HEIGHT * FOG_PLAYER_CLEAR_HEIGHT) <=
+                (this.config.clearHeight * this.config.clearHeight) <=
               1
           ) {
             this.clearCell(cell.id, now);
@@ -253,14 +202,14 @@ export class FogRuntime {
       }
     }
     if (cars !== undefined) {
-      for (const car of cars) this.clearAtPosition(car, FOG_CAR_CLEAR_RADIUS, now);
+      for (const car of cars) this.clearAtPosition(car, this.config.carClearRadius, now);
     }
     return this.tick(now);
   }
 
   clearAtPosition(
     position: FogPoint,
-    radius = FOG_CAR_CLEAR_RADIUS,
+    radius = this.config.carClearRadius,
     now = 0,
   ): readonly string[] {
     const cleared: string[] = [];
@@ -279,7 +228,7 @@ export class FogRuntime {
     if (cell === undefined || cell.cleared) return false;
     cell.cleared = true;
     cell.active = false;
-    cell.respawnAt = now + FOG_ORANGE_SMOKE_RESPAWN_MS;
+    cell.respawnAt = now + this.config.respawnMs;
     return true;
   }
 
@@ -290,7 +239,7 @@ export class FogRuntime {
         cell.cleared = false;
         cell.respawnAt = null;
         cell.active =
-          this.viewportState === null || inViewport(cell, this.viewportState);
+          this.viewportState === null || inViewport(cell, this.viewportState, this.config.viewportPadding);
       }
     }
     return this.snapshot;

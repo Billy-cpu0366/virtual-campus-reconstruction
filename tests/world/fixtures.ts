@@ -1,5 +1,5 @@
 import { parseChunkMaster } from "../../src/chunk/index.js";
-import { LAYER_STRATEGIES } from "../../src/layer/index.js";
+import { LAYER_STRATEGIES } from "../config/layer-config-fixture.js";
 import { worldSpecFromMaster } from "../../src/world/index.js";
 import type {
   ChunkLayer,

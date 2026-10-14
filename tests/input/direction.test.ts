@@ -1,14 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  DIRECTIONS,
-  directionFromVector,
-  directionVector,
-  isDiagonal,
-  SPEED,
-  SPEED_DIAGONAL,
-  speedForDirection,
+  directionFromVector as fromVector,
+  directionVector as toVector,
+  isDiagonal as diagonal,
+  speedForDirection as speedOf,
+  type Direction,
 } from "../../src/input/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadInputConfigs } from "../../config/骨架/02-玩法线/SYS-INPUT/逻辑/index.js";
+
+const INPUT = await loadInputConfigs(createDiskConfigSource());
+const DIRECTIONS = INPUT.directions;
+const SPEED = INPUT.speed.walk;
+const SPEED_DIAGONAL = INPUT.speed.diagonal;
+const directionVector = (direction: Direction) => toVector(direction, INPUT.vectors);
+const directionFromVector = (dx: number, dy: number) => fromVector(dx, dy, INPUT.vectors);
+const isDiagonal = (direction: Direction) => diagonal(direction, INPUT.vectors);
+const speedForDirection = (direction: Direction) => speedOf(direction, INPUT.vectors, INPUT.speed);
 
 describe("8 方向常量", () => {
   it("共 8 个方向，顺序固定", () => {

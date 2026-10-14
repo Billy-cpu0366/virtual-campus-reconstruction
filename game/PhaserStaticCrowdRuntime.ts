@@ -6,6 +6,7 @@ import {
   type StaticCrowdViewport,
 } from "../src/npc/index.js";
 import { walkFrameStart } from "../src/player/index.js";
+import type { PlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
 import type {
   StaticCrowdPresentation,
   TrackBand,
@@ -91,7 +92,11 @@ export class PhaserStaticCrowdRuntime {
   private nextLookAroundAt = 0;
   private lookAroundIds = new Set<string>();
 
-  constructor(private readonly scene: PhaserStaticCrowdSceneLike, private readonly options: PhaserStaticCrowdRuntimeOptions) {
+  constructor(
+    private readonly scene: PhaserStaticCrowdSceneLike,
+    private readonly options: PhaserStaticCrowdRuntimeOptions,
+    private readonly playerConfigs: PlayerConfigs,
+  ) {
     this.core = new StaticCrowdRuntime({
       regions: options.crowd.regions,
       spritePools: options.crowd.spritePools,
@@ -188,7 +193,7 @@ export class PhaserStaticCrowdRuntime {
         const directions = ["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"] as const;
         const base = directions.indexOf(item.direction);
         const direction = isNew ? item.direction : directions[(base + this.lookAroundStep + item.id.length) % directions.length]!;
-        readySprite.setFrame?.(walkFrameStart(direction));
+        readySprite.setFrame?.(walkFrameStart(direction, this.playerConfigs.animation.walkFrameStart));
       }
       this.sprites.set(item.id, readySprite);
     }

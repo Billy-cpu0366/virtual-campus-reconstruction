@@ -158,16 +158,37 @@ function runtime(
   }),
   resolver: ContentResolverPort = resolverFor(),
   receipts: Array<unknown> = [],
+  behavior = { pauseGame: true, hideOnLeave: true, suppressAfterUserClose: true },
 ): InteractRuntime {
   return new InteractRuntime({
     resolver,
     ui,
     lease,
     onVisitReceipt: (receipt) => receipts.push(receipt),
-  });
+  }, behavior.pauseGame, behavior.hideOnLeave, behavior.suppressAfterUserClose);
 }
 
 describe("InteractRuntime", () => {
+  it("交互配置控制暂停、离开关闭和手动关闭抑制", () => {
+    const ui = new FakeUi();
+    const lease = new RecordingLease();
+    const interact = runtime(ui, lease, resolverFor(), [], {
+      pauseGame: false,
+      hideOnLeave: false,
+      suppressAfterUserClose: false,
+    });
+
+    expect(interact.handleResidenceEvent(event("about", "configured"))).toBe("shown");
+    expect(lease.calls).toEqual([]);
+    interact.handleResidenceEvent(event("about", "configured", "leave"));
+    expect(ui.hides).toHaveLength(0);
+    expect(interact.active?.residenceId).toBe("configured");
+    ui.emitClose({ menuId: "about", residenceId: "configured", source: "close-button" });
+    expect(interact.suppressedResidenceIds).toEqual([]);
+    expect(interact.handleResidenceEvent(event("about", "configured"))).toBe("shown");
+    expect(ui.shows).toHaveLength(2);
+  });
+
   it("validates the resolver before acquiring or showing", () => {
     const ui = new FakeUi();
     const lease = new RecordingLease();

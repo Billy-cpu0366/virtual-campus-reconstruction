@@ -1,21 +1,20 @@
 import { playerDepth } from "../src/layer/index.js";
 import {
-  TRAIN_END_X,
-  TRAIN_ENTRY_DURATION,
-  TRAIN_HOLD_DURATION,
-  TRAIN_START_X,
-  TRAIN_Y,
   TrainRouteRuntime,
   type TrainCollisionRect,
 } from "../src/route/index.js";
+import type { RouteConfigs } from "../config/骨架/05-旁支/SYS-ROUTE/逻辑/index.js";
+import type { LayerConfigs } from "../config/骨架/02-玩法线/SYS-LAYER/逻辑/index.js";
 
+/**
+ * 火车贴图。地址留在代码里没搬进配置：它要走打包器解析
+ * （`new URL(..., import.meta.url)`），写成纯文本路径在打包后会取不到图。
+ * 换贴图这条线归 §1「资源清单」管。
+ */
 export const TRAIN_RUNTIME_ASSET = Object.freeze({
   key: "train",
   url: new URL("../src/route/assets/train.webp", import.meta.url).href,
 });
-
-const TRAIN_SCALE = (1 / 3) * 0.75 * 4.1;
-export const TRAIN_PRESENTATION_DEPTH = playerDepth(TRAIN_Y);
 
 type TrainListener = (...args: unknown[]) => void;
 
@@ -91,6 +90,8 @@ export type PhaserTrainCollisionConnector = (
 ) => PhaserTrainCollisionCleanup;
 
 export interface PhaserTrainRuntimeOptions {
+  /** 这一个校园的路线与车辆配置。**必填**——火车走多远、停多久、显示多大全在里面。 */
+  readonly route: RouteConfigs;
   readonly blockingZone?: PhaserTrainBlockingZonePort;
   readonly connectCollision?: PhaserTrainCollisionConnector;
   readonly viewport?: () => PhaserTrainViewport | undefined;
@@ -120,7 +121,18 @@ function eventTime(args: readonly unknown[]): number {
 
 /** Dedicated Phaser owner for one public crowdTrain route. */
 export class PhaserTrainRuntime {
-  private readonly route = new TrainRouteRuntime({ collisionScale: TRAIN_SCALE });
+  private readonly route: TrainRouteRuntime;
+  private readonly config: RouteConfigs;
+  /**
+   * 画面上的缩放，同时也拿来缩放挡路矩形——两件事共用一个数，因为挡路的范围
+   * 本来就该跟着画面上的大小走。值来自 `train-presentation.json`。
+   */
+  private readonly presentationScale: number;
+  /**
+   * 车画在什么深度。**由配置里的 y 现算**，不是另存一个数：
+   * 一个值只有一个家，轨道挪了位置，这一层自然跟着挪。
+   */
+  private readonly layerPlayerDepth: () => LayerConfigs["playerDepth"];
   private readonly blockingZone: PhaserTrainBlockingZonePort | undefined;
   private readonly onError: ((reason: string) => void) | undefined;
   private readonly connectCollision: PhaserTrainCollisionConnector | undefined;
@@ -148,8 +160,16 @@ export class PhaserTrainRuntime {
 
   constructor(
     private readonly scene: PhaserTrainSceneLike,
-    options: PhaserTrainRuntimeOptions = {},
+    options: PhaserTrainRuntimeOptions,
+    layerPlayerDepth: () => LayerConfigs["playerDepth"],
   ) {
+    this.config = options.route;
+    this.presentationScale = this.config.presentation.train.presentationScale;
+    this.layerPlayerDepth = layerPlayerDepth;
+    this.route = new TrainRouteRuntime({
+      collisionScale: this.presentationScale,
+      config: this.config.train,
+    });
     this.blockingZone = options.blockingZone;
     this.connectCollision = options.connectCollision;
     this.onComplete = options.onComplete;
@@ -179,11 +199,15 @@ export class PhaserTrainRuntime {
     this.departureWasInViewport = false;
     this.leaveViewportNotified = false;
     try {
-      const sprite = this.scene.add.sprite(TRAIN_START_X, TRAIN_Y, TRAIN_RUNTIME_ASSET.key);
+      const sprite = this.scene.add.sprite(
+        this.config.train.startX,
+        this.config.train.y,
+        TRAIN_RUNTIME_ASSET.key,
+      );
       sprite
         .setOrigin(0, 0.5)
-        .setScale(TRAIN_SCALE)
-        .setDepth(TRAIN_PRESENTATION_DEPTH)
+        .setScale(this.presentationScale)
+        .setDepth(this.presentationDepth)
         .setAlpha(1);
       this.sprite = sprite;
       this.createCollisions(this.route.snapshot.collisionRects);
@@ -283,8 +307,18 @@ export class PhaserTrainRuntime {
       right: sprite.x + width,
       top: sprite.y - height / 2,
       bottom: sprite.y + height / 2,
-      depth: TRAIN_PRESENTATION_DEPTH,
+      depth: this.presentationDepth,
     });
+  }
+
+  private get presentationDepth(): number {
+    const config = this.layerPlayerDepth();
+    return playerDepth(
+      this.config.train.y,
+      config.base,
+      config.yOffset,
+      config.ratio,
+    );
   }
 
   private createCollisions(rects: readonly TrainCollisionRect[]): void {
@@ -386,5 +420,3 @@ export class PhaserTrainRuntime {
     this.onError?.(reason);
   }
 }
-
-export { TRAIN_END_X, TRAIN_ENTRY_DURATION, TRAIN_HOLD_DURATION };

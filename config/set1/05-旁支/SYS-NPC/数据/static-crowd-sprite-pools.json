@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/staticCrowd.ts",
+    "sourceConstant": "StaticCrowdSpritePools（字段定义）",
+    "units": {
+      "ordinary": "text",
+      "beach": "text",
+      "football": "text"
+    },
+    "notes": [
+      "图片文件本身不在配置里（换校园是换 public/ 里的图），这里只有「从哪些 key 里随机挑」。",
+      "改这些 key 之前先确认对应贴图真的被加载了——key 写错不会报错，只会让那个人隐身。",
+      "三组贴图 key 现在由调用方通过 StaticCrowdRuntimeOptions.spritePools 递进来，src/ 里那份默认表已经删掉。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "ordinary": [
+      "npc-man",
+      "npc-man2",
+      "npc-man3",
+      "npc-man4",
+      "npc-man5",
+      "npc-man6",
+      "npc-man8",
+      "npc-man9",
+      "npc-man10",
+      "npc-woman",
+      "npc-woman2",
+      "npc-woman3",
+      "npc-woman4",
+      "npc-woman5",
+      "npc-woman6",
+      "npc-woman7",
+      "npc-woman8"
+    ],
+    "beach": [
+      "npc-man-beach",
+      "npc-man-beach2",
+      "npc-woman-beach",
+      "npc-woman-beach2"
+    ],
+    "football": [
+      "npc_footballer_blue",
+      "npc_footballer_red"
+    ]
+  }
+}

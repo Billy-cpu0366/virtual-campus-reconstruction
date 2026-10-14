@@ -1,14 +1,5 @@
 import type { LayerMarkerRecord } from "../src/layer/index.js";
-
-export const FOOTSTEP_TEXTURE_KEY = "footprint";
-export const FOOTSTEP_POOL_SIZE = 95;
-export const FOOTSTEP_DEPTH = 450;
-export const FOOTSTEP_ALPHA = 0.6;
-export const FOOTSTEP_SPACING = 14;
-export const FOOTSTEP_VISIBLE_MS = 10_000;
-export const FOOTSTEP_FADE_MS = 1_000;
-export const FOOTSTEP_SPEED_THRESHOLD = 5;
-export const FOOTSTEP_MAX_PLAYER_DEPTH = 1_000;
+import type { FootstepFxConfig } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
 
 export interface PhaserFootstepSpriteLike {
   readonly x: number;
@@ -85,26 +76,31 @@ export class PhaserFootstepRuntime {
   private shutdownState = false;
   private lastSpawn: { x: number; y: number } | undefined;
 
-  constructor(private readonly scene: PhaserFootstepSceneLike) {}
+  constructor(
+    private readonly scene: PhaserFootstepSceneLike,
+    private readonly config: FootstepFxConfig,
+    private readonly depth: number,
+    private readonly tileGids: readonly number[],
+  ) {}
 
   start(): void {
     if (this.started || this.shutdownState) return;
-    if (!this.scene.textures.exists(FOOTSTEP_TEXTURE_KEY)) {
+    if (!this.scene.textures.exists(this.config.textureKey)) {
       const addCanvas = this.scene.textures.addCanvas;
       if (addCanvas === undefined) {
         throw new Error("footprint texture manager cannot add canvas");
       }
       addCanvas.call(
         this.scene.textures,
-        FOOTSTEP_TEXTURE_KEY,
+        this.config.textureKey,
         createFootprintCanvas(),
       );
     }
-    for (let index = 0; index < FOOTSTEP_POOL_SIZE; index += 1) {
+    for (let index = 0; index < this.config.poolSize; index += 1) {
       const sprite = this.scene.add
-        .sprite(0, 0, FOOTSTEP_TEXTURE_KEY)
+        .sprite(0, 0, this.config.textureKey)
         .setOrigin(0.5, 0.5)
-        .setDepth(FOOTSTEP_DEPTH)
+        .setDepth(this.depth)
         .setAlpha(0)
         .setVisible(false);
       this.pool.push({
@@ -129,20 +125,20 @@ export class PhaserFootstepRuntime {
     const surface = new Map<string, LayerMarkerRecord>();
     const loadedChunks = new Set<string>();
     for (const marker of markers) {
-      if (marker.layerName !== "footsteps" || marker.gid !== 69345) continue;
+      if (marker.layerName !== "footsteps" || !this.tileGids.includes(marker.gid)) continue;
       surface.set(markerKey(marker.worldTile.x, marker.worldTile.y), marker);
       loadedChunks.add(chunkKey(marker));
     }
     this.updatePool(nowMs, loadedChunks);
 
     const moving =
-      Math.abs(player.velocityX) > FOOTSTEP_SPEED_THRESHOLD ||
-      Math.abs(player.velocityY) > FOOTSTEP_SPEED_THRESHOLD;
+      Math.abs(player.velocityX) > this.config.speedThreshold ||
+      Math.abs(player.velocityY) > this.config.speedThreshold;
     if (
       !player.controlsEnabled ||
       player.teleporting === true ||
       !moving ||
-      player.depth >= FOOTSTEP_MAX_PLAYER_DEPTH
+      player.depth >= this.config.maxPlayerDepth
     ) {
       return;
     }
@@ -155,7 +151,7 @@ export class PhaserFootstepRuntime {
     if (
       this.lastSpawn !== undefined &&
       Math.hypot(player.x - this.lastSpawn.x, spawnY - this.lastSpawn.y) <
-        FOOTSTEP_SPACING
+        this.config.spacing
     ) {
       return;
     }
@@ -189,7 +185,7 @@ export class PhaserFootstepRuntime {
             x: entry.x,
             y: entry.y,
             alpha: entry.alpha,
-            depth: FOOTSTEP_DEPTH,
+            depth: this.depth,
             sourceChunk: entry.sourceChunk,
           }),
         ),
@@ -200,7 +196,7 @@ export class PhaserFootstepRuntime {
     for (const entry of this.pool) {
       if (!entry.active) continue;
       const age = nowMs - entry.bornAt;
-      if (age >= FOOTSTEP_VISIBLE_MS + FOOTSTEP_FADE_MS) {
+      if (age >= this.config.visibleMs + this.config.fadeMs) {
         this.recycle(entry);
         continue;
       }
@@ -210,9 +206,9 @@ export class PhaserFootstepRuntime {
       }
       const fadeProgress = Math.max(
         0,
-        (age - FOOTSTEP_VISIBLE_MS) / FOOTSTEP_FADE_MS,
+        (age - this.config.visibleMs) / this.config.fadeMs,
       );
-      entry.alpha = FOOTSTEP_ALPHA * (1 - Math.min(1, fadeProgress));
+      entry.alpha = this.config.alpha * (1 - Math.min(1, fadeProgress));
       entry.sprite.setAlpha(entry.alpha);
     }
   }
@@ -234,12 +230,12 @@ export class PhaserFootstepRuntime {
     entry.sourceChunk = sourceChunk;
     entry.x = x;
     entry.y = y;
-    entry.alpha = FOOTSTEP_ALPHA;
+    entry.alpha = this.config.alpha;
     entry.sprite
       .setPosition(x, y)
       .setRotation(rotation)
-      .setDepth(FOOTSTEP_DEPTH)
-      .setAlpha(FOOTSTEP_ALPHA)
+      .setDepth(this.depth)
+      .setAlpha(this.config.alpha)
       .setVisible(true);
     this.lastSpawn = { x, y };
   }

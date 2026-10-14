@@ -1,11 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadChunkConfigs } from "../../config/骨架/01-地图线/SYS-CHUNK/逻辑/index.js";
+
+const chunkConfig = await loadChunkConfigs(createDiskConfigSource());
 
 import {
   ChunkCoordinator,
   ChunkDataStore,
 } from "../../src/chunk/index.js";
 import { createWorld } from "../../src/world/index.js";
-import { LAYER_STRATEGIES } from "../../src/layer/index.js";
+import { LAYER_CONFIGS, LAYER_STRATEGIES } from "../config/layer-config-fixture.js";
+
+type ChunkStoreArgs = ConstructorParameters<typeof ChunkDataStore>;
+function createStore(
+  masterUrl: ChunkStoreArgs[0],
+  loader: ChunkStoreArgs[1],
+  options: ChunkStoreArgs[2],
+): ChunkDataStore {
+  return new ChunkDataStore(masterUrl, loader, options, LAYER_CONFIGS.strategies);
+}
 
 function master(): Record<string, unknown> {
   return {
@@ -35,7 +48,7 @@ function chunk(): Record<string, unknown> {
 }
 
 function readyWorld(
-  options: Parameters<typeof createWorld>[1] = {},
+  options: Omit<Parameters<typeof createWorld>[1], "layerPlan"> = {},
 ) {
   const result = createWorld({
     chunkWidthTiles: 2,
@@ -48,7 +61,7 @@ function readyWorld(
     tileHeightPixels: 16,
     worldPixelWidth: 64,
     worldPixelHeight: 32,
-  }, options);
+  }, { ...options, layerPlan: LAYER_CONFIGS.strategies });
   if (result.kind !== "ready") throw new Error(result.reason);
   return result.world;
 }
@@ -70,7 +83,7 @@ describe("ChunkCoordinator", () => {
     try {
       let online = false;
       let calls = 0;
-      const store = new ChunkDataStore("https://test.invalid/master.json", async (url) => {
+      const store = createStore("https://test.invalid/master.json", async (url) => {
         if (url.endsWith("master.json")) return master();
         calls += 1;
         if (!online) throw new Error("offline");
@@ -101,7 +114,7 @@ describe("ChunkCoordinator", () => {
   it("公开 target/requesting/cached/rendered 状态并应用缓存", async () => {
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const coordinator = new ChunkCoordinator(store, readyWorld());
 
     await coordinator.updateTargets([{ x: 0, y: 0 }]);
@@ -116,7 +129,7 @@ describe("ChunkCoordinator", () => {
   it("通过调度器延后 World 写入并等待写入完成", async () => {
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     await store.loadMaster();
     const queued: Array<() => Promise<void>> = [];
     const coordinator = new ChunkCoordinator(store, readyWorld(), {
@@ -142,7 +155,7 @@ describe("ChunkCoordinator", () => {
   it("缓存 chunk 在异步写入期间不会重复排队", async () => {
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     await store.loadChunk({ x: 0, y: 0 });
     const queued: Array<() => Promise<void>> = [];
     const coordinator = new ChunkCoordinator(store, readyWorld(), {
@@ -172,7 +185,7 @@ describe("ChunkCoordinator", () => {
       if (url.endsWith("master.json")) return Promise.resolve(master());
       return chunkRequest.promise;
     };
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const world = readyWorld();
     const coordinator = new ChunkCoordinator(store, world);
 
@@ -197,7 +210,7 @@ describe("ChunkCoordinator", () => {
     });
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const coordinator = new ChunkCoordinator(store, world);
 
     await coordinator.updateTargets([{ x: 0, y: 0 }]);
@@ -230,7 +243,7 @@ describe("ChunkCoordinator", () => {
     });
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const coordinator = new ChunkCoordinator(store, world);
 
     const loading = coordinator.updateTargets([{ x: 0, y: 0 }]);
@@ -260,7 +273,7 @@ describe("ChunkCoordinator", () => {
     });
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const coordinator = new ChunkCoordinator(store, world);
 
     await coordinator.updateTargets([{ x: 0, y: 0 }]);
@@ -291,7 +304,7 @@ describe("ChunkCoordinator", () => {
     });
     const loader = async (url: string) =>
       url.endsWith("master.json") ? master() : chunk();
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const coordinator = new ChunkCoordinator(store, world);
 
     const pending = coordinator.updateTargets([{ x: 0, y: 0 }]);
@@ -317,7 +330,7 @@ describe("ChunkCoordinator", () => {
       if (url.endsWith("master.json")) return Promise.resolve(master());
       return chunkRequest.promise;
     };
-    const store = new ChunkDataStore("https://test.invalid/master.json", loader);
+    const store = createStore("https://test.invalid/master.json", loader, { maxAttempts: chunkConfig.maxAttempts });
     const world = readyWorld();
     const coordinator = new ChunkCoordinator(store, world);
     const pending = coordinator.updateTargets([{ x: 0, y: 0 }]);

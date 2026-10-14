@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  CAMERA_RUNTIME_SETTINGS,
-  CAMERA_SEQUENCE,
   CameraRuntime,
   type CameraPosition,
   type CameraRuntimeCallbacks,
@@ -10,11 +8,38 @@ import {
   type CameraRuntimeTweenOptions,
   type CameraViewport,
 } from "../../src/camera/index.js";
+import { createDiskConfigSource } from "../../config/工具/config-source-from-disk.js";
+import { loadCameraConfigs } from "../../config/骨架/02-玩法线/SYS-CAMERA/逻辑/index.js";
 import {
   PhaserCameraRuntime,
   type PhaserCameraLike,
   type PhaserCameraSceneLike,
+  type PhaserCameraRuntimeOptions,
 } from "../../game/PhaserCameraRuntime.js";
+
+const CAMERA_CONFIGS = await loadCameraConfigs(createDiskConfigSource());
+
+function makeRuntime(
+  callbacks: CameraRuntimeCallbacks,
+  driver?: CameraRuntimeDriver,
+): CameraRuntime {
+  return new CameraRuntime(
+    callbacks,
+    CAMERA_CONFIGS.settings,
+    CAMERA_CONFIGS.sequence,
+    CAMERA_CONFIGS.returnDuration,
+    CAMERA_CONFIGS.pointEase,
+    CAMERA_CONFIGS.returnEase,
+    driver,
+  );
+}
+
+function makePhaserRuntime(
+  scene: PhaserCameraSceneLike,
+  options: PhaserCameraRuntimeOptions,
+): PhaserCameraRuntime {
+  return new PhaserCameraRuntime(scene, options, CAMERA_CONFIGS);
+}
 
 class ManualDriver implements CameraRuntimeDriver {
   readonly timers: Array<() => void> = [];
@@ -94,7 +119,7 @@ function makeCallbacks(log: string[], output: CameraViewport[] = []): {
     enableControls: () => log.push("enable"),
     stopFollow: () => log.push("stopFollow"),
     startHardFollow: (settings) => {
-      expect(settings).toEqual(CAMERA_RUNTIME_SETTINGS);
+      expect(settings).toEqual(CAMERA_CONFIGS.settings);
       log.push("startHardFollow");
     },
     getViewport: () => viewport,
@@ -104,7 +129,7 @@ function makeCallbacks(log: string[], output: CameraViewport[] = []): {
     },
     getPlayerPosition: () => ({ x: 900, y: 901 }),
     restoreCameraSettings: (settings) => {
-      expect(settings).toEqual(CAMERA_RUNTIME_SETTINGS);
+      expect(settings).toEqual(CAMERA_CONFIGS.settings);
       log.push("restoreSettings");
     },
   };
@@ -117,7 +142,7 @@ describe("CameraRuntime", () => {
     const output: CameraViewport[] = [];
     const driver = new ManualDriver();
     const { callbacks } = makeCallbacks(log, output);
-    const runtime = new CameraRuntime(callbacks, driver);
+    const runtime = makeRuntime(callbacks, driver);
 
     const sequence = [
       { x: 10, y: 20, duration: 0, stayDuration: 5 },
@@ -146,7 +171,7 @@ describe("CameraRuntime", () => {
       "enable",
     ]);
     expect(runtime.start()).toBe(first);
-    expect(CAMERA_SEQUENCE).toHaveLength(6);
+    expect(CAMERA_CONFIGS.sequence).toHaveLength(6);
     expect(log.filter((entry) => entry === "disable")).toHaveLength(1);
     expect(log.filter((entry) => entry === "restoreSettings")).toHaveLength(1);
     expect(log.filter((entry) => entry === "startHardFollow")).toHaveLength(1);
@@ -174,7 +199,7 @@ describe("CameraRuntime", () => {
         return { cancel: () => undefined };
       },
     };
-    const runtime = new CameraRuntime(callbacks, driver);
+    const runtime = makeRuntime(callbacks, driver);
 
     await expect(runtime.start()).resolves.toEqual({ status: "completed" });
     expect(delays).toEqual([7000, 7000, 5000, 5000, 7000, 5000]);
@@ -215,7 +240,7 @@ describe("CameraRuntime", () => {
         return { cancel: () => { handle.cancelled = true; } };
       },
     };
-    const runtime = new CameraRuntime(callbacks, driver);
+    const runtime = makeRuntime(callbacks, driver);
 
     await expect(
       runtime.start({
@@ -239,7 +264,7 @@ describe("CameraRuntime", () => {
         throw new Error("viewport failed");
       },
     };
-    const runtime = new CameraRuntime(failingCallbacks, driver);
+    const runtime = makeRuntime(failingCallbacks, driver);
 
     await expect(
       runtime.start({
@@ -256,7 +281,7 @@ describe("CameraRuntime", () => {
     const log: string[] = [];
     const driver = new ManualDriver();
     const { callbacks } = makeCallbacks(log);
-    const runtime = new CameraRuntime(callbacks, driver);
+    const runtime = makeRuntime(callbacks, driver);
     const running = runtime.start({
       sequence: [{ x: 1, y: 2, duration: 0, stayDuration: 100 }],
       returnDuration: 100,
@@ -311,14 +336,14 @@ describe("PhaserCameraRuntime", () => {
     };
     let providerCalls = 0;
     const effectSettings: number[] = [];
-    const runtime = new PhaserCameraRuntime(scene, {
+    const runtime = makePhaserRuntime(scene, {
       controlGate: {
         disableControls: () => camera.calls.push("disable"),
         enableControls: () => camera.calls.push("enable"),
       },
       getPlayerPosition: () => ({ x: 700, y: 701 }),
       startHardFollow: (settings) => {
-        expect(settings).toEqual(CAMERA_RUNTIME_SETTINGS);
+        expect(settings).toEqual(CAMERA_CONFIGS.settings);
         camera.calls.push("startHardFollow");
       },
       nativeScaleProvider: () => {
@@ -397,7 +422,7 @@ describe("PhaserCameraRuntime", () => {
       time: { delayedCall: () => ({}) },
       tweens: { add: () => ({}) },
     };
-    const runtime = new PhaserCameraRuntime(scene, {
+    const runtime = makePhaserRuntime(scene, {
       controlGate: {
         disableControls: () => undefined,
         enableControls: () => camera.calls.push("enable"),
@@ -444,7 +469,7 @@ describe("PhaserCameraRuntime", () => {
     const failedCamera = new FakeCamera();
     let failedProviderCalls = 0;
     let failedInstallCalls = 0;
-    const failedRuntime = new PhaserCameraRuntime(
+    const failedRuntime = makePhaserRuntime(
       makeScene(failedCamera),
       {
         controlGate: {
@@ -486,7 +511,7 @@ describe("PhaserCameraRuntime", () => {
     const shutdownCamera = new FakeCamera();
     let shutdownProviderCalls = 0;
     let shutdownInstallCalls = 0;
-    const shutdownRuntime = new PhaserCameraRuntime(
+    const shutdownRuntime = makePhaserRuntime(
       makeScene(shutdownCamera),
       {
         controlGate: {

@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "system": "zone",
+    "source": "game/CampusScene.ts; src/zone/runtime.ts",
+    "sourceConstant": "CONTENT_MARKERS / DEFAULT_INTERVAL_MS / DEFAULT_VIEWPORT_PADDING / DEFAULT_INTERACTION_DISTANCE / CONTENT_UPDATE_INTERVAL_MS",
+    "units": {
+      "interactionDistance": "pixel",
+      "intervalMs": "ms",
+      "viewportPadding": "pixel",
+      "contentUpdateIntervalMs": "ms"
+    },
+    "verified": "exact",
+    "notes": [
+      "scheduler 是调用方递进来的定时器接口，属于运行机制，不是校园数值。",
+      "contentUpdateIntervalMs 与 intervalMs 当前同为 100，但分别控制场景巡检和区域检查，保留两个独立字段。",
+      "set1 把 MEMO6 地图标记右移 64 像素，打开地图可见。"
+    ]
+  },
+  "data": {
+    "markers": [
+      { "markerId": "about", "menuId": "about", "x": 944, "y": 768 },
+      { "markerId": "cv", "menuId": "cv", "x": 480, "y": 1776 },
+      { "markerId": "projects", "menuId": "projects", "x": 1264, "y": 1264 },
+      { "markerId": "contact", "menuId": "contact", "x": 1664, "y": 2016 },
+      { "markerId": "tech", "menuId": "tech", "x": 260, "y": 990 },
+      { "markerId": "memo1", "menuId": "memo1", "x": 1760, "y": 1280 },
+      { "markerId": "memo2", "menuId": "memo2", "x": 208, "y": 2096 },
+      { "markerId": "memo3", "menuId": "memo3", "x": 1952, "y": 1696 },
+      { "markerId": "memo4", "menuId": "memo4", "x": 2096, "y": 208 },
+      { "markerId": "memo5", "menuId": "memo5", "x": 1808, "y": 624 },
+      { "markerId": "memo6", "menuId": "memo6", "x": 560, "y": 176 }
+    ],
+    "interactionDistance": 30,
+    "intervalMs": 100,
+    "viewportPadding": 100,
+    "contentUpdateIntervalMs": 100
+  }
+}

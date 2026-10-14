@@ -1,124 +1,22 @@
-export const VEHICLE_RUNTIME_ASSETS = Object.freeze({
-  helicopterBody: Object.freeze({
-    key: "npc-helicopter",
-    url: "/sprites/npc-helicopter.webp",
-    frameWidth: 84,
-    frameHeight: 84,
-  }),
-  helicopterRotorBack: Object.freeze({
-    key: "npc-helicopter-rotor-back",
-    url: "/sprites/npc-helicopter-rotor-back.webp",
-  }),
-  helicopterRotorMain: Object.freeze({
-    key: "npc-helicopter-rotor-main",
-    url: "/sprites/npc-helicopter-rotor-main.webp",
-  }),
-  helicopterHighResolution: Object.freeze({
-    key: "npc-helicopter-high-resolution",
-    url: "/sprites/npc-helicopter-high-resolution.webp",
-  }),
-  policeBody: Object.freeze({
-    key: "car-police",
-    url: "/sprites/cars/car-police.webp",
-    frameWidth: 84,
-    frameHeight: 84,
-  }),
-});
-
-export const VEHICLE_RUNTIME_ASSET_LIST = Object.freeze(
-  Object.values(VEHICLE_RUNTIME_ASSETS),
-);
-export const HELICOPTER_BODY_ASSET = VEHICLE_RUNTIME_ASSETS.helicopterBody;
-export const POLICE_BODY_ASSET = VEHICLE_RUNTIME_ASSETS.policeBody;
-export const HELICOPTER_COMPONENT_KEYS = Object.freeze([
-  HELICOPTER_BODY_ASSET.key,
-  VEHICLE_RUNTIME_ASSETS.helicopterRotorMain.key,
-  VEHICLE_RUNTIME_ASSETS.helicopterRotorBack.key,
-  VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.key,
-]);
-export const POLICE_COMPONENT_KEYS = Object.freeze([
-  POLICE_BODY_ASSET.key,
-]);
-
-export const VEHICLE_TILE_SIZE = 16;
-export const VEHICLE_DEPTH = 560;
-export const HELICOPTER_DEPTH = 600;
-export const HELICOPTER_TAIL_ROTOR_DEPTH = HELICOPTER_DEPTH + 1;
-export const HELICOPTER_BLADE_DEPTH = 2000;
-export const HELICOPTER_SCALE = 2;
-export const HELICOPTER_FRAME_EAST = 2;
-export const HELICOPTER_MAIN_ROTOR_SIZE = 90;
-export const HELICOPTER_TAIL_ROTOR_SIZE = 36;
-export const HELICOPTER_ROTATION_SPEED = 8;
-export const HELICOPTER_POSITION = Object.freeze({
-  x: 31 * VEHICLE_TILE_SIZE + 8,
-  y: 80 * VEHICLE_TILE_SIZE + 8,
-});
-export const HELICOPTER_MAIN_ROTOR_OFFSET = Object.freeze({ x: 8, y: -20 });
-export const HELICOPTER_TAIL_ROTOR_OFFSET_EAST = Object.freeze({
-  x: -36,
-  y: -11,
-});
-export const HELICOPTER_BLADE_ANGLES_DEGREES = Object.freeze([
-  0, 72, 144, 216, 288,
-]);
-export const HELICOPTER_BLADE_DISPLAY_SIZE = Object.freeze({
-  width: 18,
-  height: 117,
-});
-export const HELICOPTER_MAIN_SCALE_EAST = Object.freeze({ x: 1, y: 0.25 });
-export const HELICOPTER_TAIL_SCALE_EAST = Object.freeze({ x: 1, y: 1 });
-export const HELICOPTER_HIGH_RESOLUTION_OFFSET = Object.freeze({ x: 0, y: 0 });
-export const HELICOPTER_HIGH_RESOLUTION_BASELINE =
-  VEHICLE_RUNTIME_ASSETS.helicopterBody.frameWidth * HELICOPTER_SCALE;
-export const HELICOPTER_RUNTIME_CONTRACT = Object.freeze({
-  idleDirection: "east",
-  isHelicopter: true,
-  bodyFrame: HELICOPTER_FRAME_EAST,
-  scale: HELICOPTER_SCALE,
-  position: HELICOPTER_POSITION,
-  mainRotorSize: HELICOPTER_MAIN_ROTOR_SIZE,
-  mainRotorOffset: HELICOPTER_MAIN_ROTOR_OFFSET,
-  rotationSpeed: HELICOPTER_ROTATION_SPEED,
-  mainRotorScaleY: HELICOPTER_MAIN_SCALE_EAST.y,
-  tailRotorSize: HELICOPTER_TAIL_ROTOR_SIZE,
-  tailRotorOffset: HELICOPTER_TAIL_ROTOR_OFFSET_EAST,
-  tailRotorScaleX: HELICOPTER_TAIL_SCALE_EAST.x,
-  bladeCount: HELICOPTER_BLADE_ANGLES_DEGREES.length,
-  bladeDepth: HELICOPTER_BLADE_DEPTH,
-  bladeAnglesDegrees: HELICOPTER_BLADE_ANGLES_DEGREES,
-  bladeDisplaySize: HELICOPTER_BLADE_DISPLAY_SIZE,
-  highResolutionEnabled: true,
-  highResolutionKey: VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.key,
-  highResolutionOffset: HELICOPTER_HIGH_RESOLUTION_OFFSET,
-  highResolutionBaseline: HELICOPTER_HIGH_RESOLUTION_BASELINE,
-  highResolutionAspect: "UNKNOWN",
-  highResolutionBounds: "UNKNOWN",
-});
-
-export const POLICE_POSITIONS = Object.freeze([
-  Object.freeze({ x: 106 * VEHICLE_TILE_SIZE + 8, y: 83 * VEHICLE_TILE_SIZE + 8 - 5, frame: 3 }),
-  Object.freeze({ x: 112 * VEHICLE_TILE_SIZE + 8, y: 82 * VEHICLE_TILE_SIZE + 8 - 5, frame: 6 }),
-  Object.freeze({ x: 109 * VEHICLE_TILE_SIZE + 8, y: 84 * VEHICLE_TILE_SIZE + 8 - 5, frame: 4 }),
-]);
-export const POLICE_COLLISION_SIZE = Object.freeze({ width: 64, height: 48 });
-export const POLICE_RUNTIME_CONTRACT = Object.freeze({
-  count: 3,
-  depth: VEHICLE_DEPTH,
-  origin: Object.freeze({ x: 0.5, y: 0.5 }),
-  scale: 1,
-  positions: POLICE_POSITIONS,
-  wheels: false,
-  brakes: false,
-  lights: false,
-  policeLights: "UNKNOWN",
-});
-
-export const VEHICLE_RUNTIME_CONTRACT = Object.freeze({
-  assets: VEHICLE_RUNTIME_ASSET_LIST,
-  helicopter: HELICOPTER_RUNTIME_CONTRACT,
-  police: POLICE_RUNTIME_CONTRACT,
-});
+/**
+ * 直升机与警车的数值/贴图。原先它们是这个模块里的一排常量
+ * （`VEHICLE_RUNTIME_ASSETS`、`HELICOPTER_*`、`POLICE_*`），
+ * 现在搬去了 `config/<集名>/05-旁支/SYS-ROUTE/数据/`，由外面递进来。
+ *
+ * 少数几个**算出来的**数没有搬，仍然在这里现算——一个值只有一个家：
+ *   · 尾桨层级 = 机身层级 + 1
+ *   · 高清层宽度基准 = 机身图每帧宽 × 缩放
+ *   · 桨叶片数 = 桨叶角度数组的长度
+ *   · 警车数量 = 位置数组的长度
+ * 另外几个字段只有唯一取值（`isHelicopter` 恒真、`idleDirection` 恒 "east"、
+ * `highResolutionEnabled` 恒真、警车的轮子/刹车/灯恒假），它们同时是**类型**——
+ * 快照接口里写的就是字面量类型，搬进 JSON 得把类型放宽成普通字符串，不划算。
+ */
+import type {
+  RouteConfigs,
+  VehicleConfig,
+  VehiclePresentation,
+} from "../config/骨架/05-旁支/SYS-ROUTE/逻辑/index.js";
 
 export const VEHICLE_FAILURE_REASONS = Object.freeze({
   PRELOAD_FAILED: "preload-failed",
@@ -197,6 +95,8 @@ export interface PhaserVehicleSceneLike {
 }
 
 export interface PhaserVehicleRuntimeOptions {
+  /** 这一个校园的路线与车辆配置。**必填**——车停在哪儿、多大、用哪几张图全在里面。 */
+  readonly route: RouteConfigs;
   readonly onError?: (reason: VehicleFailureReason) => void;
 }
 
@@ -297,8 +197,41 @@ function degreesToRadians(degrees: number): number {
   return degrees * Math.PI / 180;
 }
 
+/**
+ * 直升机挂在身上的四张图，按画的顺序排（机身 → 主旋翼 → 尾桨 → 高清层）。
+ * 顺序有讲究：快照里报的就是这个顺序，改顺序等于改断言。
+ */
+const helicopterComponentKeys = (
+  presentation: VehiclePresentation,
+): readonly string[] =>
+  Object.freeze([
+    presentation.helicopterBody.key,
+    presentation.helicopterRotorMain.key,
+    presentation.helicopterRotorBack.key,
+    presentation.helicopterHighResolution.key,
+  ]);
+
+const policeComponentKeys = (
+  presentation: VehiclePresentation,
+): readonly string[] => Object.freeze([presentation.policeBody.key]);
+
+/**
+ * 高清层的宽度基准 = 机身图每帧宽 × 缩放。**现算，不另存一个数**——
+ * 换了图或改了缩放，这一层自然跟着变。
+ */
+const helicopterHighResolutionBaseline = (
+  config: VehicleConfig,
+  presentation: VehiclePresentation,
+): number =>
+  presentation.helicopterBody.frameWidth * config.helicopter.scale;
+
 /** Owns the bounded, static vehicle presentation used by the game scene. */
 export class PhaserVehicleRuntime {
+  private readonly config: VehicleConfig;
+  private readonly presentation: VehiclePresentation;
+  private readonly helicopterComponentKeys: readonly string[];
+  private readonly policeComponentKeys: readonly string[];
+  private readonly highResolutionBaseline: number;
   private state: VehicleRuntimeState = "idle";
   private preloaded = false;
   private readonly preloadedKeys = new Set<string>();
@@ -331,8 +264,16 @@ export class PhaserVehicleRuntime {
 
   public constructor(
     private readonly scene: PhaserVehicleSceneLike,
-    options: PhaserVehicleRuntimeOptions = {},
+    options: PhaserVehicleRuntimeOptions,
   ) {
+    this.config = options.route.vehicle;
+    this.presentation = options.route.presentation.vehicle;
+    this.helicopterComponentKeys = helicopterComponentKeys(this.presentation);
+    this.policeComponentKeys = policeComponentKeys(this.presentation);
+    this.highResolutionBaseline = helicopterHighResolutionBaseline(
+      this.config,
+      this.presentation,
+    );
     this.onError = options.onError;
   }
 
@@ -343,46 +284,40 @@ export class PhaserVehicleRuntime {
       operation();
       this.preloadedKeys.add(key);
     };
+    const { helicopterBody, policeBody } = this.presentation;
     try {
-      loadOnce(VEHICLE_RUNTIME_ASSETS.helicopterBody.key, () =>
-        this.scene.load.spritesheet(
-          VEHICLE_RUNTIME_ASSETS.helicopterBody.key,
-          VEHICLE_RUNTIME_ASSETS.helicopterBody.url,
-          {
-            frameWidth: VEHICLE_RUNTIME_ASSETS.helicopterBody.frameWidth,
-            frameHeight: VEHICLE_RUNTIME_ASSETS.helicopterBody.frameHeight,
-          },
-        ),
+      loadOnce(helicopterBody.key, () =>
+        this.scene.load.spritesheet(helicopterBody.key, helicopterBody.url, {
+          frameWidth: helicopterBody.frameWidth,
+          frameHeight: helicopterBody.frameHeight,
+        }),
       );
-      loadOnce(VEHICLE_RUNTIME_ASSETS.helicopterRotorBack.key, () =>
+      loadOnce(this.presentation.helicopterRotorBack.key, () =>
         this.scene.load.image(
-          VEHICLE_RUNTIME_ASSETS.helicopterRotorBack.key,
-          VEHICLE_RUNTIME_ASSETS.helicopterRotorBack.url,
+          this.presentation.helicopterRotorBack.key,
+          this.presentation.helicopterRotorBack.url,
         ),
       );
-      loadOnce(VEHICLE_RUNTIME_ASSETS.helicopterRotorMain.key, () =>
+      loadOnce(this.presentation.helicopterRotorMain.key, () =>
         this.scene.load.image(
-          VEHICLE_RUNTIME_ASSETS.helicopterRotorMain.key,
-          VEHICLE_RUNTIME_ASSETS.helicopterRotorMain.url,
+          this.presentation.helicopterRotorMain.key,
+          this.presentation.helicopterRotorMain.url,
         ),
       );
-      loadOnce(VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.key, () =>
+      loadOnce(this.presentation.helicopterHighResolution.key, () =>
         this.scene.load.image(
-          VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.key,
-          VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.url,
+          this.presentation.helicopterHighResolution.key,
+          this.presentation.helicopterHighResolution.url,
         ),
       );
-      loadOnce(VEHICLE_RUNTIME_ASSETS.policeBody.key, () =>
-        this.scene.load.spritesheet(
-          VEHICLE_RUNTIME_ASSETS.policeBody.key,
-          VEHICLE_RUNTIME_ASSETS.policeBody.url,
-          {
-            frameWidth: VEHICLE_RUNTIME_ASSETS.policeBody.frameWidth,
-            frameHeight: VEHICLE_RUNTIME_ASSETS.policeBody.frameHeight,
-          },
-        ),
+      loadOnce(policeBody.key, () =>
+        this.scene.load.spritesheet(policeBody.key, policeBody.url, {
+          frameWidth: policeBody.frameWidth,
+          frameHeight: policeBody.frameHeight,
+        }),
       );
-      this.preloaded = this.preloadedKeys.size === VEHICLE_RUNTIME_ASSET_LIST.length;
+      this.preloaded =
+        this.preloadedKeys.size === Object.keys(this.presentation).length;
     } catch {
       this.report(VEHICLE_FAILURE_REASONS.PRELOAD_FAILED);
     }
@@ -397,7 +332,7 @@ export class PhaserVehicleRuntime {
     if (this.state === "running") return { ok: false, reason: "already-running" };
 
     try {
-      const missing = VEHICLE_RUNTIME_ASSET_LIST.some(
+      const missing = Object.values(this.presentation).some(
         (asset) => !this.scene.textures.exists(asset.key),
       );
       if (missing) {
@@ -462,41 +397,42 @@ export class PhaserVehicleRuntime {
   }
 
   public get snapshot(): VehicleRuntimeSnapshot {
+    const heli = this.config.helicopter;
     const helicopter = this.body === undefined ? null : Object.freeze({
       kind: "helicopter" as const,
       id: "helicopter-static" as const,
       isHelicopter: true as const,
       idleDirection: "east" as const,
-      x: HELICOPTER_POSITION.x,
-      y: HELICOPTER_POSITION.y,
-      frame: HELICOPTER_FRAME_EAST,
-      depth: HELICOPTER_DEPTH,
+      x: heli.position.x,
+      y: heli.position.y,
+      frame: heli.frameEast,
+      depth: heli.depth,
       bounds: this.objectBounds(this.highResolution, 0.5, 0.5),
-      componentKeys: HELICOPTER_COMPONENT_KEYS,
-      scale: HELICOPTER_SCALE,
+      componentKeys: this.helicopterComponentKeys,
+      scale: heli.scale,
       bodyCreated: true,
-      mainRotorSize: HELICOPTER_MAIN_ROTOR_SIZE,
-      mainRotorOffset: HELICOPTER_MAIN_ROTOR_OFFSET,
-      rotationSpeed: HELICOPTER_ROTATION_SPEED,
-      mainRotorScaleY: HELICOPTER_MAIN_SCALE_EAST.y,
-      tailRotorSize: HELICOPTER_TAIL_ROTOR_SIZE,
-      tailRotorOffset: HELICOPTER_TAIL_ROTOR_OFFSET_EAST,
-      tailRotorScaleX: HELICOPTER_TAIL_SCALE_EAST.x,
-      mainRotorCreated: this.blades.length === HELICOPTER_BLADE_ANGLES_DEGREES.length,
+      mainRotorSize: heli.mainRotorSize,
+      mainRotorOffset: heli.mainRotorOffset,
+      rotationSpeed: heli.rotationSpeed,
+      mainRotorScaleY: heli.mainRotorScaleEast.y,
+      tailRotorSize: heli.tailRotorSize,
+      tailRotorOffset: heli.tailRotorOffsetEast,
+      tailRotorScaleX: heli.tailRotorScaleEast.x,
+      mainRotorCreated: this.blades.length === heli.bladeAnglesDegrees.length,
       tailRotorCreated: this.tailRotor !== undefined,
       bladeCount: this.blades.length,
       highResolutionEnabled: true as const,
-      highResolutionKey: VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.key,
-      highResolutionOffset: HELICOPTER_HIGH_RESOLUTION_OFFSET,
+      highResolutionKey: this.presentation.helicopterHighResolution.key,
+      highResolutionOffset: heli.highResolutionOffset,
       highResolutionCreated: this.highResolution !== undefined,
-      highResolutionBaseline: HELICOPTER_HIGH_RESOLUTION_BASELINE,
+      highResolutionBaseline: this.highResolutionBaseline,
       highResolutionAspect: "UNKNOWN" as const,
       highResolutionBounds: "UNKNOWN" as const,
     });
     const police = Object.freeze(this.police.map((item, index) => Object.freeze({
       ...item,
       bounds: this.objectBounds(this.policeObjects[index], 0.5, 0.5),
-      componentKeys: POLICE_COMPONENT_KEYS,
+      componentKeys: this.policeComponentKeys,
       collisionBodyCreated: this.policeObjects[index]?.body !== undefined,
     })));
     const diagnostics = Object.freeze([...this.diagnostics]);
@@ -511,7 +447,7 @@ export class PhaserVehicleRuntime {
         lights: false as const,
         policeLights: "UNKNOWN" as const,
       }),
-      bladeAnglesDegrees: HELICOPTER_BLADE_ANGLES_DEGREES,
+      bladeAnglesDegrees: heli.bladeAnglesDegrees,
       rotorAngleRadians: this.rotorAngleRadians,
       lastDeltaMs: this.lastDeltaMs,
       diagnostics,
@@ -520,84 +456,84 @@ export class PhaserVehicleRuntime {
   }
 
   private createHelicopter(): void {
+    const heli = this.config.helicopter;
     this.body = this.createSprite(
-      HELICOPTER_POSITION.x,
-      HELICOPTER_POSITION.y,
-      VEHICLE_RUNTIME_ASSETS.helicopterBody.key,
-      HELICOPTER_FRAME_EAST,
+      heli.position.x,
+      heli.position.y,
+      this.presentation.helicopterBody.key,
+      heli.frameEast,
     );
-    this.body.setFrame?.(HELICOPTER_FRAME_EAST);
+    this.body.setFrame?.(heli.frameEast);
     this.setOrigin(this.body, 0.5, 0.5);
-    this.setDepth(this.body, HELICOPTER_DEPTH);
+    this.setDepth(this.body, heli.depth);
     this.setVisible(this.body, false);
-    this.setScale(this.body, HELICOPTER_SCALE);
+    this.setScale(this.body, heli.scale);
 
-    const mainX = HELICOPTER_POSITION.x +
-      HELICOPTER_MAIN_ROTOR_OFFSET.x * HELICOPTER_SCALE;
-    const mainY = HELICOPTER_POSITION.y +
-      HELICOPTER_MAIN_ROTOR_OFFSET.y * HELICOPTER_SCALE;
+    const mainX = heli.position.x + heli.mainRotorOffset.x * heli.scale;
+    const mainY = heli.position.y + heli.mainRotorOffset.y * heli.scale;
 
     this.tailRotor = this.createImage(
-      HELICOPTER_POSITION.x +
-        HELICOPTER_TAIL_ROTOR_OFFSET_EAST.x * HELICOPTER_SCALE,
-      HELICOPTER_POSITION.y +
-        HELICOPTER_TAIL_ROTOR_OFFSET_EAST.y * HELICOPTER_SCALE,
-      VEHICLE_RUNTIME_ASSETS.helicopterRotorBack.key,
+      heli.position.x + heli.tailRotorOffsetEast.x * heli.scale,
+      heli.position.y + heli.tailRotorOffsetEast.y * heli.scale,
+      this.presentation.helicopterRotorBack.key,
     );
     this.setOrigin(this.tailRotor, 0.5, 0.5);
-    this.setDepth(this.tailRotor, HELICOPTER_TAIL_ROTOR_DEPTH);
+    // 尾桨的层级是机身层级 + 1，不另存一个数。
+    this.setDepth(this.tailRotor, heli.depth + 1);
     this.setVisible(this.tailRotor, true);
-    this.setDisplaySize(this.tailRotor, HELICOPTER_TAIL_ROTOR_SIZE, HELICOPTER_TAIL_ROTOR_SIZE);
+    this.setDisplaySize(
+      this.tailRotor,
+      heli.tailRotorSize,
+      heli.tailRotorSize,
+    );
     this.setScale(
       this.tailRotor,
-      HELICOPTER_TAIL_SCALE_EAST.x,
-      HELICOPTER_TAIL_SCALE_EAST.y,
+      heli.tailRotorScaleEast.x,
+      heli.tailRotorScaleEast.y,
     );
 
-    for (const angle of HELICOPTER_BLADE_ANGLES_DEGREES) {
+    for (const angle of heli.bladeAnglesDegrees) {
       const blade = this.createImage(
         mainX,
         mainY,
-        VEHICLE_RUNTIME_ASSETS.helicopterRotorMain.key,
+        this.presentation.helicopterRotorMain.key,
       );
       this.setOrigin(blade, 0.5, 1);
-      this.setDepth(blade, HELICOPTER_BLADE_DEPTH);
+      this.setDepth(blade, heli.bladeDepth);
       this.setVisible(blade, true);
       this.setDisplaySize(
         blade,
-        HELICOPTER_BLADE_DISPLAY_SIZE.width,
-        HELICOPTER_BLADE_DISPLAY_SIZE.height,
+        heli.bladeDisplaySize.width,
+        heli.bladeDisplaySize.height,
       );
       this.blades.push(blade);
     }
 
     this.highResolution = this.createImage(
-      HELICOPTER_POSITION.x + HELICOPTER_HIGH_RESOLUTION_OFFSET.x,
-      HELICOPTER_POSITION.y + HELICOPTER_HIGH_RESOLUTION_OFFSET.y,
-      VEHICLE_RUNTIME_ASSETS.helicopterHighResolution.key,
+      heli.position.x + heli.highResolutionOffset.x,
+      heli.position.y + heli.highResolutionOffset.y,
+      this.presentation.helicopterHighResolution.key,
     );
     this.setOrigin(this.highResolution, 0.5, 0.5);
-    this.setDepth(this.highResolution, HELICOPTER_DEPTH);
+    this.setDepth(this.highResolution, heli.depth);
     this.setVisible(this.highResolution, true);
-    this.setDisplayWidth(
-      this.highResolution,
-      HELICOPTER_HIGH_RESOLUTION_BASELINE,
-    );
+    this.setDisplayWidth(this.highResolution, this.highResolutionBaseline);
   }
 
   private createPolice(): void {
-    for (const position of POLICE_POSITIONS) {
+    const police = this.config.police;
+    for (const position of police.positions) {
       const sprite = this.createSprite(
         position.x,
         position.y,
-        VEHICLE_RUNTIME_ASSETS.policeBody.key,
+        this.presentation.policeBody.key,
         position.frame,
       );
-      this.setDepth(sprite, VEHICLE_DEPTH);
-      this.setOrigin(sprite, 0.5, 0.5);
+      this.setDepth(sprite, police.depth);
+      this.setOrigin(sprite, police.origin.x, police.origin.y);
       this.setVisible(sprite, true);
       sprite.setFrame?.(position.frame);
-      this.setScale(sprite, 1);
+      this.setScale(sprite, police.scale);
       this.attachPoliceCollisionBody(sprite);
       this.policeObjects.push(sprite);
       this.police.push(Object.freeze({
@@ -606,10 +542,10 @@ export class PhaserVehicleRuntime {
         x: position.x,
         y: position.y,
         frame: position.frame,
-        depth: VEHICLE_DEPTH,
+        depth: police.depth,
         bounds: "UNKNOWN" as const,
-        componentKeys: POLICE_COMPONENT_KEYS,
-        scale: 1,
+        componentKeys: this.policeComponentKeys,
+        scale: police.scale,
         collisionBodyCreated: sprite.body !== undefined,
       }));
     }
@@ -624,11 +560,8 @@ export class PhaserVehicleRuntime {
       PhaserVehiclePhysicsBodyLike | undefined;
     const body = sprite.body ?? created;
     if (body === undefined) return;
-    body.setSize?.(
-      POLICE_COLLISION_SIZE.width,
-      POLICE_COLLISION_SIZE.height,
-      true,
-    );
+    const size = this.config.police.collisionSize;
+    body.setSize?.(size.width, size.height, true);
     body.immovable = true;
     body.moves = false;
   }
@@ -713,11 +646,10 @@ export class PhaserVehicleRuntime {
   }
 
   private applyRotorState(deltaMs: number, advance: boolean): void {
+    const heli = this.config.helicopter;
     if (this.tailRotor !== undefined) {
-      this.tailRotor.x = HELICOPTER_POSITION.x +
-        HELICOPTER_TAIL_ROTOR_OFFSET_EAST.x * HELICOPTER_SCALE;
-      this.tailRotor.y = HELICOPTER_POSITION.y +
-        HELICOPTER_TAIL_ROTOR_OFFSET_EAST.y * HELICOPTER_SCALE;
+      this.tailRotor.x = heli.position.x + heli.tailRotorOffsetEast.x * heli.scale;
+      this.tailRotor.y = heli.position.y + heli.tailRotorOffsetEast.y * heli.scale;
     }
     if (!advance) return;
 
@@ -727,7 +659,7 @@ export class PhaserVehicleRuntime {
     if (this.rotorUpdateCounter < 4) return;
     this.rotorUpdateCounter = 0;
     const rotorTick = deltaMs * 0.004;
-    const tailStep = HELICOPTER_ROTATION_SPEED * rotorTick;
+    const tailStep = heli.rotationSpeed * rotorTick;
     const bladeStep = tailStep * 180 / Math.PI;
     if (!Number.isFinite(tailStep) || !Number.isFinite(bladeStep)) return;
     this.rotorAngleRadians += tailStep;
@@ -735,7 +667,7 @@ export class PhaserVehicleRuntime {
       (this.bladeAngleDegrees + bladeStep) % 360;
 
     for (let index = 0; index < this.blades.length; index += 1) {
-      const baseAngle = HELICOPTER_BLADE_ANGLES_DEGREES[index];
+      const baseAngle = heli.bladeAnglesDegrees[index];
       const blade = this.blades[index];
       if (baseAngle === undefined || blade === undefined) continue;
       this.setBladeState(blade, baseAngle);
@@ -753,12 +685,13 @@ export class PhaserVehicleRuntime {
       this.bladeAngleDegrees + baseAngleDegrees + 90,
     );
     this.setRotation(blade, angle);
-    const perspective = 1 - (1 - HELICOPTER_MAIN_SCALE_EAST.y) *
+    const heli = this.config.helicopter;
+    const perspective = 1 - (1 - heli.mainRotorScaleEast.y) *
       0.85 * (1 - Math.abs(Math.sin(angle)));
     this.setDisplaySize(
       blade,
-      HELICOPTER_BLADE_DISPLAY_SIZE.width,
-      HELICOPTER_BLADE_DISPLAY_SIZE.height * perspective,
+      heli.bladeDisplaySize.width,
+      heli.bladeDisplaySize.height * perspective,
     );
   }
 

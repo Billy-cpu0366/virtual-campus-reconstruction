@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { createWorld } from "../../src/world/index.js";
+import type { CreateWorldOptions, WorldSpec } from "../../src/world/index.js";
+import { LAYER_CONFIGS } from "../config/layer-config-fixture.js";
 import { makeChunk, makeChunkLayers, makeSpec } from "./fixtures.js";
 
 function readyWorld(
-  ...args: Parameters<typeof createWorld>
+  spec: WorldSpec,
+  options: Pick<CreateWorldOptions, "hooks"> = {},
 ): NonNullable<Extract<ReturnType<typeof createWorld>, { kind: "ready" }>["world"]> {
-  const result = createWorld(...args);
+  const result = createWorld(spec, {
+    ...options,
+    layerPlan: LAYER_CONFIGS.strategies,
+  });
   if (result.kind !== "ready") {
     throw new Error(`expected ready world, got ${result.kind}`);
   }
@@ -15,7 +21,7 @@ function readyWorld(
 
 describe("createWorld 建世界", () => {
   it("合法规格返回 ready 世界", () => {
-    const result = createWorld(makeSpec());
+    const result = createWorld(makeSpec(), { layerPlan: LAYER_CONFIGS.strategies });
     expect(result.kind).toBe("ready");
     if (result.kind === "ready") {
       expect(result.world.state).toBe("ready");
@@ -24,7 +30,9 @@ describe("createWorld 建世界", () => {
   });
 
   it("规格不自洽返回 failure", () => {
-    const result = createWorld({ ...makeSpec(), worldWidthTiles: 141 });
+    const result = createWorld({ ...makeSpec(), worldWidthTiles: 141 }, {
+      layerPlan: LAYER_CONFIGS.strategies,
+    });
     expect(result.kind).toBe("failure");
   });
 

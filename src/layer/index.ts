@@ -21,15 +21,11 @@ export {
 } from "./markers.js";
 export {
   activeBridgeWallLayer,
-  BRIDGES,
   layerNames,
   layerRole,
   layerStrategy,
-  LAYER_STRATEGIES,
   rawVisualGids,
   isKnownRawVisualGid,
-  ROOF_GROUPS,
-  ROOF_LAYERS,
   roofGroupForLayer,
 } from "./strategy.js";
 export {
@@ -37,16 +33,11 @@ export {
   isBridge1ExitZone,
   isBridge2Zone,
 } from "./bridge-zones.js";
-export { BEACH_TRIGGER_GID, isBeachTriggerTile } from "./beach-zone.js";
+export { isBeachTriggerTile } from "./beach-zone.js";
 export {
-  BRIDGE_PLAYER_DEPTH,
-  COLLISION_GID_FORCED,
-  FOOTSTEP_DEPTH,
   isForcedCollision,
   isForcedNonCollision,
-  NON_COLLISION_GID_FORCED,
   playerDepth,
   roofAlpha,
-  ROOF_FADE_MS,
-  WALLS_DEPTH,
+  wallsDepth,
 } from "./depth.js";

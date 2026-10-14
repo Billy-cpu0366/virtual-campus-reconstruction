@@ -167,7 +167,7 @@ describe("DomModalGameUi rich sections renderer", () => {
   it("renders sections in order using text nodes and secure external links", () => {
     const elements = makeElements();
     const content = new FakeContentPort();
-    const ui = new DomModalGameUi(elements, new FakeViewport(), undefined, content);
+    const ui = new DomModalGameUi(elements, new FakeViewport(), 0.9, 0.7, undefined, content);
 
     expect(ui.show(request("projects", "rich-1", richSections))).toEqual({
       status: "shown",
@@ -209,7 +209,7 @@ describe("DomModalGameUi rich sections renderer", () => {
   it("uses body text fallback when sections are absent and rejects unsafe sections atomically", () => {
     const elements = makeElements();
     const content = new FakeContentPort();
-    const ui = new DomModalGameUi(elements, new FakeViewport(), undefined, content);
+    const ui = new DomModalGameUi(elements, new FakeViewport(), 0.9, 0.7, undefined, content);
 
     expect(ui.show(request("about", "plain"))).toEqual({ status: "shown" });
     expect(elements.body.children).toHaveLength(0);
@@ -242,7 +242,7 @@ describe("DomModalGameUi rich sections renderer", () => {
   it("keeps layout and正文 when an image fails, and ignores stale image events", () => {
     const elements = makeElements();
     const content = new FakeContentPort();
-    const ui = new DomModalGameUi(elements, new FakeViewport(), undefined, content);
+    const ui = new DomModalGameUi(elements, new FakeViewport(), 0.9, 0.7, undefined, content);
 
     expect(ui.show(request("projects", "rich-1", richSections))).toEqual({
       status: "shown",

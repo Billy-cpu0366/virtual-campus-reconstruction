@@ -1,34 +1,42 @@
 import type { RoofState } from "./contract.js";
 import { layerStrategy } from "./strategy.js";
+import type { LayerStrategy } from "./contract.js";
 
 // 玩家常态 depth（SYS-LAYER 为深度 SSOT）。
 // 注：原站与 SYS-PLAYER 卡记的是 `500 + y*0.1`，本 CORE 用的是 `500 + (y+24)*0.1`。
 // 两者是刻意不同的决策口径（本 CORE 以本卡设计决定为准），不是待修的不一致。
-export function playerDepth(worldY: number): number {
-  return 500 + (worldY + 24) * 0.1;
+export function playerDepth(
+  worldY: number,
+  base: number,
+  yOffset: number,
+  ratio: number,
+): number {
+  return base + (worldY + yOffset) * ratio;
 }
 
-export const BRIDGE_PLAYER_DEPTH = 1650;
-export const ROOF_FADE_MS = 300;
-export const FOOTSTEP_DEPTH = 450;
-
-// walls 层 depth 的 SSOT 在 LAYER_STRATEGIES（SYS-LAYER 图层合同）；此处派生，避免重复硬编码。
-const wallsDepth = layerStrategy("walls").depth;
-if (wallsDepth === undefined) {
-  throw new Error("walls 层必须在 LAYER_STRATEGIES 中定义 depth");
-}
-export const WALLS_DEPTH = wallsDepth;
-
-// walls 碰撞 GID。
-export const COLLISION_GID_FORCED = 69345;
-export const NON_COLLISION_GID_FORCED = 69346;
-
-export function isForcedCollision(gid: number): boolean {
-  return gid === COLLISION_GID_FORCED;
+// walls 层深度从 SYS-LAYER 的唯一策略表派生，不另存一份。
+export function wallsDepth(
+  strategiesByName: Readonly<Record<string, LayerStrategy>>,
+): number {
+  const depth = layerStrategy("walls", strategiesByName).depth;
+  if (depth === undefined) {
+    throw new Error("walls 层必须在 SYS-LAYER 策略中定义 depth");
+  }
+  return depth;
 }
 
-export function isForcedNonCollision(gid: number): boolean {
-  return gid === NON_COLLISION_GID_FORCED;
+export function isForcedCollision(
+  gid: number,
+  collisionGidForced: number,
+): boolean {
+  return gid === collisionGidForced;
+}
+
+export function isForcedNonCollision(
+  gid: number,
+  nonCollisionGidForced: number,
+): boolean {
+  return gid === nonCollisionGidForced;
 }
 
 // 屋顶淡隐/恢复：alpha 1（visible）→ 0（faded）→ 1。

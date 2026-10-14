@@ -1,6 +1,3 @@
-const DEFAULT_STEP_MS = 1000 / 30;
-const DEFAULT_SNAP_DISTANCE = 96;
-
 export interface PhaserPlayerVisualFrameLike {
   readonly name: string | number;
 }
@@ -91,11 +88,11 @@ export class PhaserPlayerVisualInterpolator {
   constructor(
     scene: PhaserPlayerVisualSceneLike,
     private readonly source: PhaserPlayerVisualSourceLike,
-    options: PhaserPlayerVisualInterpolatorOptions = {},
+    config: Readonly<{ stepMs: number; snapDistance: number }>,
   ) {
-    this.stepMs = finitePositive(options.stepMs ?? DEFAULT_STEP_MS, "stepMs");
+    this.stepMs = finitePositive(config.stepMs, "stepMs");
     this.snapDistance = finitePositive(
-      options.snapDistance ?? DEFAULT_SNAP_DISTANCE,
+      config.snapDistance,
       "snapDistance",
     );
     this.fromX = source.x;

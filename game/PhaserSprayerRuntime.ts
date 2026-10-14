@@ -1,4 +1,5 @@
-import { walkFrameStart, WALK_FRAMES_PER_DIRECTION } from "../src/player/appearance.js";
+import { walkFrameStart } from "../src/player/appearance.js";
+import type { PlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
 import type { Direction } from "../src/input/index.js";
 import {
   SprayerGroupRuntime,
@@ -214,6 +215,7 @@ export class PhaserSprayerRuntime {
   constructor(
     private readonly scene: PhaserSprayerSceneLike,
     options: PhaserSprayerRuntimeOptions,
+    private readonly playerConfigs: PlayerConfigs,
   ) {
     this.configs = options.configs;
     this.presentation = options.presentation;
@@ -246,10 +248,11 @@ export class PhaserSprayerRuntime {
     // The running sheet has eight direction rows of eight frames. Never loop all 64 frames.
     const running = sprayerAssetFor(this.presentation, SPRAYER_RUNNING_TEXTURE);
     for (const direction of RUNNING_DIRECTIONS) {
-      const start = walkFrameStart(direction);
+      const animation = this.playerConfigs.animation;
+      const start = walkFrameStart(direction, animation.walkFrameStart);
       this.createAnimationIfAvailable(
         running.key, runningAnimation(direction),
-        start, start + WALK_FRAMES_PER_DIRECTION - 1, running.frameRate, -1,
+        start, start + animation.walkFramesPerDirection - 1, running.frameRate, -1,
       );
     }
   }

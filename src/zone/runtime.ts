@@ -38,19 +38,15 @@ export interface ZoneRuntimeOptions {
   readonly markers: readonly ZoneMarker[];
   readonly onResidence: (event: ZoneResidenceEvent) => void;
   readonly scheduler?: ZoneScheduler;
-  readonly intervalMs?: number;
-  readonly viewportPadding?: number;
-  readonly interactionDistance?: number;
+  readonly intervalMs: number;
+  readonly viewportPadding: number;
+  readonly interactionDistance: number;
 }
 
 interface ResidenceState {
   readonly marker: ZoneMarker;
   readonly residenceId: string;
 }
-
-const DEFAULT_INTERVAL_MS = 100;
-const DEFAULT_VIEWPORT_PADDING = 100;
-const DEFAULT_INTERACTION_DISTANCE = 30;
 
 function isMenuId(value: unknown): value is ContentMenuId {
   return (
@@ -113,10 +109,9 @@ export class ZoneRuntime {
     }
     this.onResidence = options.onResidence;
     this.scheduler = options.scheduler;
-    this.intervalMs = options.intervalMs ?? DEFAULT_INTERVAL_MS;
-    this.viewportPadding = options.viewportPadding ?? DEFAULT_VIEWPORT_PADDING;
-    this.interactionDistance =
-      options.interactionDistance ?? DEFAULT_INTERACTION_DISTANCE;
+    this.intervalMs = options.intervalMs;
+    this.viewportPadding = options.viewportPadding;
+    this.interactionDistance = options.interactionDistance;
     if (
       !Number.isFinite(this.intervalMs) ||
       this.intervalMs < 0 ||

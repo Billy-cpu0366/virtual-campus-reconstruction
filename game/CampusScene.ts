@@ -12,40 +12,19 @@ import {
   type JsonLoader,
 } from "../src/chunk/index.js";
 import {
-  DIRECTIONS,
   keyboardDirection,
   resolveMovement,
   type Direction,
   type KeyState,
 } from "../src/input/index.js";
+import { blockedInDirection, velocityForDirection } from "../src/move/index.js";
 import {
-  COLLIDE_WORLD_BOUNDS,
-  PLAYER_BODY_HEIGHT,
-  PLAYER_BODY_OFFSET_X,
-  PLAYER_BODY_OFFSET_Y,
-  PLAYER_BODY_WIDTH,
-  PLAYER_DRAG,
-  PLAYER_MAX_VELOCITY,
-  blockedInDirection,
-  velocityForDirection,
-} from "../src/move/index.js";
-import {
-  ANIMATION_FRAME_RATE,
-  BEACH_TEXTURE,
   beachWalkAnimation,
-  CLOTHES_OFF_FRAME_HEIGHT,
-  CLOTHES_OFF_FRAME_WIDTH,
-  CLOTHES_OFF_TEXTURE,
-  DEFAULT_FACING,
-  DISPLAY_SIZE,
-  SPAWN_X,
-  SPAWN_Y,
-  WALK_FRAMES_PER_DIRECTION,
+  walkFrameRange,
   walkFrameStart,
 } from "../src/player/index.js";
 import {
   PhaserPlayerRuntime,
-  PLAYER_RUNTIME_ASSETS,
   preloadPhaserPlayerRuntimeAssets,
   type PhaserPlayerSceneLike,
   type PhaserPlayerVisualLike,
@@ -60,20 +39,15 @@ import {
   type PhaserCameraSceneLike,
 } from "./PhaserCameraRuntime.js";
 import {
-  CAMERA_BOUNDS,
-  CAMERA_SEQUENCE,
-  CAMERA_ZOOM,
-  FOLLOW_LERP,
   type CameraRunResult,
   type CameraRuntimeStartOptions,
 } from "../src/camera/index.js";
-import { FACTORY_SMOKE_CONFIG } from "../src/fx/index.js";
+import type { CameraConfigs } from "../config/骨架/02-玩法线/SYS-CAMERA/逻辑/index.js";
 import {
   type ContentMenuId,
   type GameUiPort,
   type GameplayControlLeaseToken,
 } from "../src/content/contract.js";
-import { isVisibleContentMenuId } from "../src/content/index.js";
 import { InteractRuntime } from "../src/interact/index.js";
 import {
   DomModalGameUi,
@@ -88,7 +62,7 @@ import {
   type ZoneMarker,
   type ZoneSnapshot,
 } from "../src/zone/index.js";
-import { createCampusContentResolver } from "./CampusContentResolver.js";
+import { CampusContentResolver } from "./CampusContentResolver.js";
 import { AppGameUiBridge } from "./AppGameUiBridge.js";
 import { GameplayControlLeaseRuntime } from "./GameplayControlLeaseRuntime.js";
 import {
@@ -122,8 +96,13 @@ import { PhaserVenueCrowdRuntime, preloadVenueCrowdRuntimeAssets } from "./Phase
 import { PhaserDancingCrowdRuntime, preloadDancingCrowdRuntimeAssets } from "./PhaserDancingCrowdRuntime.js";
 import { GridRouteCrowdPathProvider } from "../src/npc/index.js";
 import type { NpcConfigs } from "../config/骨架/05-旁支/SYS-NPC/逻辑/index.js";
+import type { RouteConfigs } from "../config/骨架/05-旁支/SYS-ROUTE/逻辑/index.js";
+import type { MoveConfigs } from "../config/骨架/02-玩法线/SYS-MOVE/逻辑/index.js";
+import type { InputConfigs } from "../config/骨架/02-玩法线/SYS-INPUT/逻辑/index.js";
+import type { WorldConfigs } from "../config/骨架/01-地图线/SYS-WORLD/逻辑/index.js";
 import {
   PhaserFactorySmokeRuntime,
+  preloadFactorySmokeRuntimeAssets,
   type PhaserFactorySmokeSceneLike,
 } from "./PhaserFactorySmokeRuntime.js";
 import {
@@ -135,8 +114,6 @@ import {
   type PhaserFogSceneLike,
 } from "./PhaserFogRuntime.js";
 import {
-  POLICE_COLLISION_SIZE,
-  POLICE_POSITIONS,
   PhaserVehicleRuntime,
   type PhaserVehicleSceneLike,
 } from "./PhaserVehicleRuntime.js";
@@ -157,15 +134,10 @@ import {
   type ProductEntrySnapshot,
 } from "./ProductEntryRuntime.js";
 import {
-  BEACH_TRIGGER_GID,
-  BRIDGE_PLAYER_DEPTH,
-  BRIDGES,
-  COLLISION_GID_FORCED,
   isBeachTriggerTile,
   isBridge1EntryZone,
   isBridge1ExitZone,
   isBridge2Zone,
-  LAYER_STRATEGIES,
   playerDepth,
   type RoofGroupState,
 } from "../src/layer/index.js";
@@ -187,6 +159,14 @@ import {
   independentLayerUrl,
   tilesetImageUrl,
 } from "../src/asset/index.js";
+import type { ChunkConfigs } from "../config/骨架/01-地图线/SYS-CHUNK/逻辑/index.js";
+import type { ZoneConfigs } from "../config/骨架/03-内容线/SYS-ZONE/逻辑/index.js";
+import type { InteractConfigs } from "../config/骨架/03-内容线/SYS-INTERACT/逻辑/index.js";
+import type { LayerConfigs } from "../config/骨架/02-玩法线/SYS-LAYER/逻辑/index.js";
+import type { EntityCleanupStep, EntityConfigs } from "../config/骨架/04-独立件/SYS-ENTITY/逻辑/index.js";
+import type { PlayerConfigs } from "../config/骨架/02-玩法线/SYS-PLAYER/逻辑/index.js";
+import type { FxConfigs } from "../config/骨架/05-旁支/SYS-FX/逻辑/index.js";
+import type { TransportConfigs } from "../config/骨架/06-网络协议层/SYS-TRANSPORT/逻辑/index.js";
 
 const CHUNK_MASTER_URL = chunkMasterUrl();
 const PHASER_ASSET_PROGRESS_WEIGHT = 0.72;
@@ -194,38 +174,9 @@ const MASTER_READY_PROGRESS = 0.8;
 const WORLD_OWNER_READY_PROGRESS = 0.88;
 const INITIAL_TARGETS_STARTED_PROGRESS = 0.92;
 const INITIAL_TARGETS_READY_PROGRESS = 0.98;
-const CHUNK_UPDATE_INTERVAL_MS = 500;
-const CONTENT_UPDATE_INTERVAL_MS = 100;
 const LOGICAL_VIEWPORT_WIDTH = 480;
 const LOGICAL_VIEWPORT_HEIGHT = 270;
-const ENTRY_CORRIDOR_SAMPLES = 6;
-const ENTRY_CAMERA_START = Object.freeze({ x: 944, y: 928 });
-const FACTORY_ROOF_BOUNDS = Object.freeze({
-  left: 112,
-  right: 640,
-  top: 736,
-  bottom: 1_152,
-});
-const CONCERT_ROOF_BOUNDS = Object.freeze({
-  left: 1_632,
-  right: 2_208,
-  top: 384,
-  bottom: 848,
-});
 type RoofTweenHandle = { stop?(): unknown; remove?(): unknown };
-const CONTENT_MARKERS: readonly ZoneMarker[] = Object.freeze([
-  { markerId: "about", menuId: "about", x: 944, y: 768 },
-  { markerId: "cv", menuId: "cv", x: 480, y: 1776 },
-  { markerId: "projects", menuId: "projects", x: 1264, y: 1264 },
-  { markerId: "contact", menuId: "contact", x: 1664, y: 2016 },
-  { markerId: "tech", menuId: "tech", x: 260, y: 990 },
-  { markerId: "memo1", menuId: "memo1", x: 1760, y: 1280 },
-  { markerId: "memo2", menuId: "memo2", x: 208, y: 2096 },
-  { markerId: "memo3", menuId: "memo3", x: 1952, y: 1696 },
-  { markerId: "memo4", menuId: "memo4", x: 2096, y: 208 },
-  { markerId: "memo5", menuId: "memo5", x: 1808, y: 624 },
-  { markerId: "memo6", menuId: "memo6", x: 496, y: 176 },
-]);
 const CONTENT_MARKER_LABELS: Readonly<Record<ContentMenuId, string>> =
   Object.freeze({
     about: "About me",
@@ -240,28 +191,6 @@ const CONTENT_MARKER_LABELS: Readonly<Record<ContentMenuId, string>> =
     memo5: "Memo #5",
     memo6: "Memo #6",
   });
-const CAMPUS_MAP_MARKERS: readonly CampusMapMarker[] = Object.freeze(
-  CONTENT_MARKERS.map((marker) =>
-    Object.freeze({
-      ...marker,
-      label: CONTENT_MARKER_LABELS[marker.menuId],
-      kind: marker.menuId.startsWith("memo")
-        ? "vortex" as const
-        : "sunburn" as const,
-      enabled: isVisibleContentMenuId(marker.menuId),
-    }),
-  ),
-);
-const CAMERA_TEST_HOOK_START_OPTIONS: CameraRuntimeStartOptions = Object.freeze({
-  sequence: CAMERA_SEQUENCE.map((point) =>
-    Object.freeze({
-      ...point,
-      duration: point.duration === 0 ? 0 : 200,
-      stayDuration: 100,
-    }),
-  ),
-  returnDuration: 200,
-});
 function mergeChunkTargets(
   ...groups: readonly (readonly ChunkCoordinate[])[]
 ): readonly ChunkCoordinate[] {
@@ -277,17 +206,6 @@ function mergeChunkTargets(
     ),
   );
 }
-
-const MOVEMENT_KEY_BY_CODE = new Map<string, keyof KeyState>([
-  ["ArrowUp", "up"],
-  ["KeyW", "up"],
-  ["ArrowDown", "down"],
-  ["KeyS", "down"],
-  ["ArrowLeft", "left"],
-  ["KeyA", "left"],
-  ["ArrowRight", "right"],
-  ["KeyD", "right"],
-]);
 
 export interface CampusAmbientGuideStep {
   readonly direction: "north" | "south" | "east" | "west";
@@ -397,21 +315,37 @@ export class CampusScene extends Phaser.Scene {
   private contentUi: GameUiPort | undefined;
   private interactRuntime: InteractRuntime | undefined;
   private zoneRuntime: ZoneRuntime | undefined;
-  private contentUpdateElapsed = CONTENT_UPDATE_INTERVAL_MS;
+  private contentUpdateElapsed = 0;
+  private zoneConfigs: ZoneConfigs | undefined;
+  private moveConfigs: MoveConfigs | undefined;
+  private inputConfigs: InputConfigs | undefined;
+  private worldConfigs: WorldConfigs | undefined;
+  private cameraConfigs: CameraConfigs | undefined;
+  private interactConfigs: InteractConfigs | undefined;
+  private layerConfigs: LayerConfigs | undefined;
+  private entityConfigs: EntityConfigs | undefined;
+  private fxConfigs: FxConfigs | undefined;
+  private entityConfigsPromise: Promise<EntityConfigs> | undefined;
+  /**
+   * §17 传输配置的实测面：create() 里存下的值就是包装 JsonLoader 时
+   * 喂给 fetchJson 的那份超时。config-live 冒烟量它，证明配置穿过了运行路径。
+   */
+  transportSnapshot: { readonly jsonTimeoutMs: number } | undefined;
   private joystick!: PhaserVirtualJoystick;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<
     "up" | "down" | "left" | "right",
     Phaser.Input.Keyboard.Key
   >;
-  private lastDirection: Direction = DEFAULT_FACING;
+  private lastDirection: Direction;
   private coordinator: ChunkCoordinator | undefined;
   private worldRenderer: PhaserWorldRenderer | undefined;
   private dataStore: ChunkDataStore | undefined;
   private dynamicWorldShutdown: Promise<void> | undefined;
   private worldSpec: WorldSpec | undefined;
   private entryChunkTargetLock: readonly ChunkCoordinate[] | undefined;
-  private chunkUpdateElapsed = CHUNK_UPDATE_INTERVAL_MS;
+  private chunkUpdateElapsed = 0;
+  private chunkConfigs: ChunkConfigs | undefined;
   private bridgeCheckFrames = 0;
   private bridge1DownVisible = true;
   private bridge2DownVisible = true;
@@ -451,20 +385,21 @@ export class CampusScene extends Phaser.Scene {
   private readonly mutationScheduler = new PhaserWorldMutationScheduler();
 
   private readonly handleKeyDown = (event: KeyboardEvent): void => {
-    const key = MOVEMENT_KEY_BY_CODE.get(event.code);
+    const key = this.inputConfigs?.keyboard.mapping[event.code];
     if (key !== undefined) {
       this.heldMovementKeys.add(key);
     }
   };
 
   private readonly handleKeyUp = (event: KeyboardEvent): void => {
-    const key = MOVEMENT_KEY_BY_CODE.get(event.code);
+    const key = this.inputConfigs?.keyboard.mapping[event.code];
     if (key !== undefined) {
       this.heldMovementKeys.delete(key);
     }
   };
 
   private readonly handleWindowBlur = (): void => {
+    if (this.inputConfigs?.blurReset === false) return;
     if (this.playerRuntime !== undefined) {
       this.playerRuntime.blur(this.time.now);
       return;
@@ -482,17 +417,33 @@ export class CampusScene extends Phaser.Scene {
   };
 
   /**
-   * `npcConfigs` 是**场景造出来之前就读好的**。
+   * 三份配置都是**场景造出来之前就读好的**。
    *
    * 为什么非得这么早：`preload()` 是同步的，而登记贴图必须在那时候说清楚
    * 「这图每一帧多大、一共几帧」。这些数字全在配置里。所以顺序只能是
    * 先读配置 → 再造 Phaser 游戏对象 → `preload()` 才有数可依。
+   *
+   * 各板块分别递入配置：板块之间不该互相认识，新增一块时只增加自己的入口。
    */
   constructor(
     private readonly npcConfigs: NpcConfigs,
+    private readonly routeConfigs: RouteConfigs,
+    private readonly playerConfigs: PlayerConfigs,
+    private readonly transportConfigs: TransportConfigs,
+    private readonly loadChunkConfigs: () => Promise<ChunkConfigs>,
+    private readonly loadZoneConfigs: () => Promise<ZoneConfigs>,
+    private readonly loadMoveConfigs: () => Promise<MoveConfigs>,
+    private readonly loadInputConfigs: () => Promise<InputConfigs>,
+    private readonly loadWorldConfigs: () => Promise<WorldConfigs>,
+    private readonly loadCameraConfigs: () => Promise<CameraConfigs>,
+    private readonly loadInteractConfigs: () => Promise<InteractConfigs>,
+    private readonly loadLayerConfigs: () => Promise<LayerConfigs>,
+    private readonly loadEntityConfigs: () => Promise<EntityConfigs>,
+    private readonly loadFxConfigs: () => Promise<FxConfigs>,
     private readonly entryCallbacks: CampusSceneEntryCallbacks = {},
   ) {
     super("campus");
+    this.lastDirection = playerConfigs.defaultFacing;
   }
 
   preload(): void {
@@ -504,7 +455,7 @@ export class CampusScene extends Phaser.Scene {
     this.load.on("loaderror", (file: { readonly key?: unknown }) => {
       if (this.sceneDestroyed) return;
       const key = typeof file?.key === "string" ? file.key : "required asset";
-      if (PLAYER_RUNTIME_ASSETS.some((asset) => asset.key === key)) {
+      if (this.playerConfigs.idle.textures.some((texture) => texture.key === key)) {
         this.recordSideFailure(`optional-player-asset:${key}`);
         return;
       }
@@ -515,6 +466,7 @@ export class CampusScene extends Phaser.Scene {
     this.trainRuntime = new PhaserTrainRuntime(
       this as unknown as PhaserTrainSceneLike,
       {
+        route: this.routeConfigs,
         blockingZone: {
           setTrainBlockingZone: (cells) => {
             this.trainBlockingCells = Object.freeze([...(cells ?? [])]);
@@ -538,55 +490,19 @@ export class CampusScene extends Phaser.Scene {
         },
         onError: (reason) => this.recordSideFailure(`train:${reason}`),
       },
-    );
-    this.smokeRuntime = new PhaserFactorySmokeRuntime(
-      this as unknown as PhaserFactorySmokeSceneLike,
-      {
-        viewport: () => this.smokeViewport(),
-        onError: (reason) => this.recordSideFailure(`smoke:${reason}`),
-      },
-    );
-    const stopAiPlayerPosition = () => {
-      const position = this.playerRuntime?.position;
-      if (position === undefined || this.player === undefined) return undefined;
-      return {
-        ...position,
-        bodyBottom: (this.player.body as any).bottom as number,
-        depth: (this.player as any).depth as number,
-      };
-    };
-    this.stopAiSmokeRuntime = new PhaserStopAiSmokeRuntime(
-      this as unknown as PhaserStopAiSmokeSceneLike,
-      {
-        viewport: () => this.smokeViewport(),
-        playerPosition: stopAiPlayerPosition,
-        onError: (reason) => this.recordSideFailure(`stop-ai-smoke:${reason}`),
-      },
-    );
-    this.fogRuntime = new PhaserFogRuntime(
-      this as unknown as PhaserFogSceneLike,
-      {
-        viewport: () => this.smokeViewport(),
-        player: () => {
-          const position = this.playerRuntime?.position;
-          if (position === undefined || this.player === undefined) return undefined;
-          return {
-            ...position,
-            velocityX: this.player.body.velocity.x,
-            velocityY: this.player.body.velocity.y,
-          };
-        },
-        onError: (reason) => this.recordSideFailure(`fog:${reason}`),
-      },
+      () => this.layerConfigs!.playerDepth,
     );
     this.vehicleRuntime = new PhaserVehicleRuntime(
       this as unknown as PhaserVehicleSceneLike,
-      { onError: (reason) => this.recordSideFailure(`vehicle:${reason}`) },
+      {
+        route: this.routeConfigs,
+        onError: (reason) => this.recordSideFailure(`vehicle:${reason}`),
+      },
     );
     const presentation = this.npcConfigs.presentation;
     preloadSprayerRuntimeAssets(this.load, presentation.sprayer);
     this.trainRuntime.preload();
-    this.smokeRuntime.preload();
+    preloadFactorySmokeRuntimeAssets(this.load);
     this.vehicleRuntime.preload();
     preloadRouteCrowdRuntimeAssets(this.load, presentation.routeCrowd);
     preloadStaticNpcRuntimeAssets(this.load, presentation.staticNpc);
@@ -599,28 +515,28 @@ export class CampusScene extends Phaser.Scene {
     this.load.image("collisions-objects", tilesetImageUrl("collisions-objects.webp"));
     this.load.json("walls-layer", independentLayerUrl("walls-layer.json"));
     this.load.image("tileset-particles", tilesetImageUrl("tileset-particles.webp"));
-    this.load.spritesheet("player", "/sprites/player.webp", {
-      frameWidth: 48,
-      frameHeight: 48,
+    this.load.spritesheet(this.playerConfigs.texture, this.playerConfigs.textureUrl, {
+      frameWidth: this.playerConfigs.spritesheet.frameSize.width,
+      frameHeight: this.playerConfigs.spritesheet.frameSize.height,
+      startFrame: 0,
+      endFrame: this.playerConfigs.spritesheet.frames - 1,
     });
-    // 沙滩换装用：泳装跟常服同规格（384×384 / 48×48 格 / 64 帧），
-    // 换装贴图是 512×512 / 128×128 格 / 16 帧（原站加载参数一致）。
-    this.load.spritesheet(BEACH_TEXTURE, "/sprites/player-beach.webp", {
-      frameWidth: 48,
-      frameHeight: 48,
+    this.load.spritesheet(this.playerConfigs.beach.texture, this.playerConfigs.beach.textureUrl, {
+      frameWidth: this.playerConfigs.spritesheet.frameSize.width,
+      frameHeight: this.playerConfigs.spritesheet.frameSize.height,
+      startFrame: 0,
+      endFrame: this.playerConfigs.spritesheet.frames - 1,
     });
-    this.load.spritesheet(CLOTHES_OFF_TEXTURE, "/sprites/player-clothes-off.webp", {
-      frameWidth: CLOTHES_OFF_FRAME_WIDTH,
-      frameHeight: CLOTHES_OFF_FRAME_HEIGHT,
+    this.load.spritesheet(this.playerConfigs.clothing.offTexture, this.playerConfigs.clothing.offTextureUrl, {
+      frameWidth: this.playerConfigs.clothing.frameSize.width,
+      frameHeight: this.playerConfigs.clothing.frameSize.height,
+      startFrame: this.playerConfigs.clothing.assetFrames.startFrame,
+      endFrame: this.playerConfigs.clothing.assetFrames.endFrame,
     });
-    preloadPhaserPlayerRuntimeAssets(this.load);
+    preloadPhaserPlayerRuntimeAssets(this.load, this.playerConfigs);
   }
 
   create(): void {
-    this.createPlayerAndInput();
-    this.createCamera(CAMERA_BOUNDS);
-    this.createContentFoundation();
-    this.createMapFoundation();
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
     window.addEventListener("blur", this.handleWindowBlur);
@@ -684,6 +600,7 @@ export class CampusScene extends Phaser.Scene {
             y: camera.scrollY + camera.height / (2 * zoom),
           });
         },
+        this.cameraConfigs!.returnDuration,
       ),
       train: trainAdapter,
       guide: {
@@ -713,6 +630,8 @@ export class CampusScene extends Phaser.Scene {
 
   update(): void {
     if (this.sceneDestroyed) return;
+    if (!this.sceneReady) return;
+    if (this.moveConfigs === undefined || this.inputConfigs === undefined) return;
     this.routeCrowdRuntime?.update(this.time.now);
     this.staticNpcRuntime?.update();
     this.staticCrowdRuntime?.update();
@@ -747,11 +666,13 @@ export class CampusScene extends Phaser.Scene {
         : playerUpdate.movementDirection;
     if (direction !== null) {
       this.lastDirection = direction;
-      const { vx, vy } = velocityForDirection(direction);
+      const { vx, vy } = velocityForDirection(
+        direction, this.inputConfigs.vectors, this.inputConfigs.speed,
+      );
       this.player.setVelocity(vx, vy);
       if (blockedInDirection(direction, this.player.body.blocked)) {
         this.player.anims.stop();
-        this.player.setFrame(walkFrameStart(direction));
+        this.player.setFrame(walkFrameStart(direction, this.playerConfigs.animation.walkFrameStart));
       } else {
         this.player.anims.play(
           playerUpdate?.onBeach === true
@@ -764,7 +685,7 @@ export class CampusScene extends Phaser.Scene {
       this.player.setVelocity(0, 0);
       if (playerUpdate?.visualLocked !== true) {
         this.player.anims.stop();
-        this.player.setFrame(walkFrameStart(this.lastDirection));
+        this.player.setFrame(walkFrameStart(this.lastDirection, this.playerConfigs.animation.walkFrameStart));
       }
     }
 
@@ -773,7 +694,7 @@ export class CampusScene extends Phaser.Scene {
     this.updateConcertRoof();
     this.updateFootsteps();
     this.bridgeCheckFrames += 1;
-    if (this.bridgeCheckFrames >= 3) {
+    if (this.bridgeCheckFrames >= this.worldConfigs!.bridgeCheckFrames) {
       this.bridgeCheckFrames = 0;
       this.updateBridgeZones();
       this.updateBeachClothing();
@@ -781,12 +702,14 @@ export class CampusScene extends Phaser.Scene {
 
     const delta = this.game?.loop?.delta ?? 16.67;
     this.contentUpdateElapsed += delta;
-    if (this.contentUpdateElapsed >= CONTENT_UPDATE_INTERVAL_MS) {
+    if (this.zoneConfigs !== undefined &&
+        this.contentUpdateElapsed >= this.zoneConfigs.contentUpdateIntervalMs) {
       this.contentUpdateElapsed = 0;
       this.updateContentZones();
     }
     this.chunkUpdateElapsed += delta;
-    if (this.chunkUpdateElapsed >= CHUNK_UPDATE_INTERVAL_MS) {
+    if (this.chunkConfigs !== undefined &&
+        this.chunkUpdateElapsed >= this.chunkConfigs.updateIntervalMs) {
       this.chunkUpdateElapsed = 0;
       this.updateDynamicTargets();
     }
@@ -794,32 +717,36 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private createPlayerAndInput(): void {
-    this.player = this.physics.add.sprite(SPAWN_X, SPAWN_Y, "player");
-    this.player.setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE);
-    this.player.setCollideWorldBounds(COLLIDE_WORLD_BOUNDS);
+    const move = this.moveConfigs!;
+    const player = this.playerConfigs;
+    const offsetX = (player.displaySize - move.body.width) / 2;
+    const offsetY = player.displaySize - move.body.height - 4;
+    this.player = this.physics.add.sprite(player.spawn.x, player.spawn.y, player.texture);
+    this.player.setDisplaySize(player.displaySize, player.displaySize);
+    this.player.setCollideWorldBounds(move.collideWorldBounds);
     this.player.body
-      .setSize(PLAYER_BODY_WIDTH, PLAYER_BODY_HEIGHT)
-      .setOffset(PLAYER_BODY_OFFSET_X, PLAYER_BODY_OFFSET_Y)
-      .setDrag(PLAYER_DRAG, PLAYER_DRAG)
-      .setMaxVelocity(PLAYER_MAX_VELOCITY, PLAYER_MAX_VELOCITY);
+      .setSize(move.body.width, move.body.height)
+      .setOffset(offsetX, offsetY)
+      .setDrag(move.drag, move.drag)
+      .setMaxVelocity(move.maxVelocity, move.maxVelocity);
 
-    for (const dir of DIRECTIONS) {
-      const start = walkFrameStart(dir);
-      const range = {
-        start,
-        end: start + WALK_FRAMES_PER_DIRECTION - 1,
-      };
+    for (const dir of this.inputConfigs!.directions) {
+      const range = walkFrameRange(
+        dir,
+        player.animation.walkFrameStart,
+        player.animation.walkFramesPerDirection,
+      );
       this.anims.create({
         key: `walk-${dir}`,
-        frames: this.anims.generateFrameNumbers("player", range),
-        frameRate: ANIMATION_FRAME_RATE,
+        frames: this.anims.generateFrameNumbers(player.texture, range),
+        frameRate: player.animation.frameRate,
         repeat: -1,
       });
       // 泳装走路：帧布局与常服完全一致，只是换一张贴图。
       this.anims.create({
         key: beachWalkAnimation(dir),
-        frames: this.anims.generateFrameNumbers(BEACH_TEXTURE, range),
-        frameRate: ANIMATION_FRAME_RATE,
+        frames: this.anims.generateFrameNumbers(player.beach.texture, range),
+        frameRate: player.animation.frameRate,
         repeat: -1,
       });
     }
@@ -838,11 +765,13 @@ export class CampusScene extends Phaser.Scene {
     };
     this.joystick = new PhaserVirtualJoystick(
       this as unknown as JoystickSceneLike,
-      deviceKindForPhaserScene(this),
+      deviceKindForPhaserScene(this, this.inputConfigs!.device.tabletBreakpoint),
+      this.inputConfigs!,
     );
     this.playerRuntime = new PhaserPlayerRuntime(
       this as unknown as PhaserPlayerSceneLike,
       this.player as unknown as PhaserPlayerVisualLike,
+      this.playerConfigs,
       {
         now: () => this.time.now,
         effects: {
@@ -861,14 +790,25 @@ export class CampusScene extends Phaser.Scene {
     this.playerVisualInterpolator = new PhaserPlayerVisualInterpolator(
       this as unknown as PhaserPlayerVisualSceneLike,
       this.player as unknown as PhaserPlayerVisualSourceLike,
+      this.fxConfigs!.playerVisual,
     );
-    this.footstepRuntime = new PhaserFootstepRuntime(
-      this as unknown as PhaserFootstepSceneLike,
-    );
-    this.footstepRuntime.start();
+  }
+
+  private campusMapMarkers(): readonly CampusMapMarker[] {
+    return Object.freeze(this.zoneConfigs!.markers.map((marker: ZoneMarker) =>
+      Object.freeze({
+        ...marker,
+        label: CONTENT_MARKER_LABELS[marker.menuId],
+        kind: marker.menuId.startsWith("memo")
+          ? "vortex" as const
+          : "sunburn" as const,
+        enabled: this.interactConfigs!.visibleMenuIds.includes(marker.menuId),
+      }),
+    ));
   }
 
   private createContentFoundation(): void {
+    const CAMPUS_MAP_MARKERS = this.campusMapMarkers();
     const domTarget = (id: string): DomModalTarget | undefined => {
       const element = document.getElementById(id);
       return element === null
@@ -919,11 +859,17 @@ export class CampusScene extends Phaser.Scene {
           "button:not([disabled]), a[href], [tabindex]:not([tabindex='-1'])",
         )] as unknown as readonly DomModalTarget[],
     };
-    const modalUi = new DomModalGameUi(elements, viewport, {
+    const modalUi = new DomModalGameUi(
+      elements,
+      viewport,
+      this.interactConfigs!.modal.desktopMaxHeightRatio,
+      this.interactConfigs!.modal.mobileMaxHeightRatio,
+      {
       keyboard,
       focus,
       focusRing: "3px solid #facc15",
-    });
+      },
+    );
     const ui = new AppGameUiBridge(modalUi, (visible) => {
       this.mapRuntime?.setContentModalVisible(visible);
       this.entryCallbacks.onModalVisibility?.(visible);
@@ -942,7 +888,7 @@ export class CampusScene extends Phaser.Scene {
         return playerRuntime.enableControls(this.time.now);
       },
     });
-    const resolver = createCampusContentResolver();
+    const resolver = new CampusContentResolver(this.interactConfigs!.content);
     let zone: ZoneRuntime | undefined;
     const interact = new InteractRuntime({
       resolver,
@@ -951,7 +897,10 @@ export class CampusScene extends Phaser.Scene {
       onVisitReceipt: (receipt) => {
         zone?.acceptVisitReceipt(receipt);
       },
-    });
+    },
+    this.interactConfigs!.behavior.pauseGame,
+    this.interactConfigs!.behavior.hideOnLeave,
+    this.interactConfigs!.behavior.suppressAfterUserClose);
     // Map selections have no physical zone that can emit a leave event.
     // Subscribe after Interact so its successful close is committed first.
     ui.subscribeUserClose((event) => {
@@ -965,7 +914,10 @@ export class CampusScene extends Phaser.Scene {
       });
     });
     zone = new ZoneRuntime({
-      markers: CONTENT_MARKERS,
+      markers: this.zoneConfigs!.markers,
+      intervalMs: this.zoneConfigs!.intervalMs,
+      viewportPadding: this.zoneConfigs!.viewportPadding,
+      interactionDistance: this.zoneConfigs!.interactionDistance,
       onResidence: (event) => {
         interact.handleResidenceEvent(event);
       },
@@ -977,6 +929,7 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private createMapFoundation(): void {
+    const CAMPUS_MAP_MARKERS = this.campusMapMarkers();
     const requiredMapElement = (id: string): CampusMapElementLike => {
       const element = document.getElementById(id);
       if (element === null) throw new Error(`missing campus map element: #${id}`);
@@ -996,8 +949,8 @@ export class CampusScene extends Phaser.Scene {
         });
       });
     const runtime = new PhaserCampusMapRuntime({
-      worldWidth: CAMERA_BOUNDS.width,
-      worldHeight: CAMERA_BOUNDS.height,
+      worldWidth: this.worldSpec!.worldPixelWidth,
+      worldHeight: this.worldSpec!.worldPixelHeight,
       markers: CAMPUS_MAP_MARKERS,
       elements: {
         hud: requiredMapElement("campus-map-hud"),
@@ -1250,49 +1203,63 @@ export class CampusScene extends Phaser.Scene {
       }
     };
 
-    cleanup("entry", () => this.entryRuntime?.shutdown());
-    cleanup("sprayer", () => this.sprayerRuntime?.shutdown());
-    cleanup("route-crowd", () => this.routeCrowdRuntime?.shutdown());
-    cleanup("static-npc", () => this.staticNpcRuntime?.shutdown());
-    cleanup("static-crowd", () => this.staticCrowdRuntime?.shutdown());
-    cleanup("bug-crowd", () => this.bugCrowdRuntime?.shutdown());
-    cleanup("venue-crowd", () => this.venueCrowdRuntime?.shutdown());
-    cleanup("dancing-crowd", () => this.dancingCrowdRuntime?.shutdown());
-    cleanup("stop-ai-smoke", () => this.stopAiSmokeRuntime?.shutdown());
-    cleanup("fog", () => this.fogRuntime?.shutdown());
-    cleanup("police-colliders", () => this.disconnectPoliceCollisions());
-    cleanup("vehicle", () => this.vehicleRuntime?.shutdown());
-    cleanup("factory-smoke", () => this.smokeRuntime?.shutdown());
-    cleanup("train", () => this.trainRuntime?.shutdown(this.time?.now));
-    cleanup("entry-camera", () => this.entryCameraRuntime?.shutdown());
-    cleanup("entry-train", () => this.entryTrainAdapter?.shutdown());
+    const operations: Record<EntityCleanupStep, () => void> = {
+      "scene-destroyed": () => {
+        this.sceneDestroyed = true;
+        this.sceneReady = false;
+        this.entryChunkTargetLock = undefined;
+      },
+      entry: () => cleanup("entry", () => this.entryRuntime?.shutdown()),
+      sprayer: () => cleanup("sprayer", () => this.sprayerRuntime?.shutdown()),
+      "route-crowd": () => cleanup("route-crowd", () => this.routeCrowdRuntime?.shutdown()),
+      "static-npc": () => cleanup("static-npc", () => this.staticNpcRuntime?.shutdown()),
+      "static-crowd": () => cleanup("static-crowd", () => this.staticCrowdRuntime?.shutdown()),
+      "bug-crowd": () => cleanup("bug-crowd", () => this.bugCrowdRuntime?.shutdown()),
+      "venue-crowd": () => cleanup("venue-crowd", () => this.venueCrowdRuntime?.shutdown()),
+      "dancing-crowd": () => cleanup("dancing-crowd", () => this.dancingCrowdRuntime?.shutdown()),
+      "stop-ai-smoke": () => cleanup("stop-ai-smoke", () => this.stopAiSmokeRuntime?.shutdown()),
+      fog: () => cleanup("fog", () => this.fogRuntime?.shutdown()),
+      "police-colliders": () => cleanup("police-colliders", () => this.disconnectPoliceCollisions()),
+      vehicle: () => cleanup("vehicle", () => this.vehicleRuntime?.shutdown()),
+      "factory-smoke": () => cleanup("factory-smoke", () => this.smokeRuntime?.shutdown()),
+      train: () => cleanup("train", () => this.trainRuntime?.shutdown(this.time?.now)),
+      "entry-camera": () => cleanup("entry-camera", () => this.entryCameraRuntime?.shutdown()),
+      "entry-train": () => cleanup("entry-train", () => this.entryTrainAdapter?.shutdown()),
+      camera: () => cleanup("camera", () => this.cameraRuntime?.shutdown()),
+      "camera-lease": () => cleanup("camera-lease", () => this.releaseCameraControlLease()),
+      map: () => cleanup("map", () => this.mapRuntime?.destroy()),
+      zone: () => cleanup("zone", () => this.zoneRuntime?.destroy()),
+      interact: () => cleanup("interact", () => this.interactRuntime?.destroy()),
+      "content-lease": () => cleanup("content-lease", () => this.contentLeaseRuntime?.shutdown()),
+      roof: () => cleanup("roof", () => this.stopRoofTweens()),
+      footstep: () => cleanup("footstep", () => this.footstepRuntime?.shutdown()),
+      player: () => cleanup("player", () => this.playerRuntime?.shutdown()),
+      "player-visual": () => cleanup("player-visual", () => this.playerVisualInterpolator?.shutdown()),
+      joystick: () => cleanup("joystick", () => this.joystick?.shutdown()),
+      movement: () => cleanup("movement", () => this.stopPlayerMovement()),
+      scheduler: () => cleanup("scheduler", () => this.mutationScheduler.destroy()),
+    };
+    let cleanupOrder: readonly EntityCleanupStep[] = [];
+    try {
+      const entityConfigs = this.entityConfigs ?? await this.loadEntityConfigsOnce();
+      this.entityConfigs = entityConfigs;
+      cleanupOrder = entityConfigs.cleanupOrder;
+    } catch (error) {
+      failures.push(error);
+    }
+    for (const step of cleanupOrder) operations[step]();
+
     this.entryRuntime = undefined;
     this.entryCameraRuntime = undefined;
     this.entryTrainAdapter = undefined;
-
-    cleanup("camera", () => this.cameraRuntime?.shutdown());
-    cleanup("camera-lease", () => this.releaseCameraControlLease());
     this.cameraRuntime = undefined;
     this.pendingCameraViewport = undefined;
-
-    cleanup("map", () => this.mapRuntime?.destroy());
-    cleanup("zone", () => this.zoneRuntime?.destroy());
-    cleanup("interact", () => this.interactRuntime?.destroy());
-    cleanup("content-lease", () => this.contentLeaseRuntime?.shutdown());
     this.mapRuntime = undefined;
     this.zoneRuntime = undefined;
     this.interactRuntime = undefined;
     this.contentUi = undefined;
     this.contentLeaseRuntime = undefined;
-
-    cleanup("roof", () => this.stopRoofTweens());
-    cleanup("footstep", () => this.footstepRuntime?.shutdown());
-    cleanup("player", () => this.playerRuntime?.shutdown());
-    cleanup("player-visual", () => this.playerVisualInterpolator?.shutdown());
     this.playerVisualInterpolator = undefined;
-    cleanup("joystick", () => this.joystick?.shutdown());
-    cleanup("movement", () => this.stopPlayerMovement());
-    cleanup("scheduler", () => this.mutationScheduler.destroy());
     cleanup("test-hooks", () => this.clearRuntimeTestHooks());
     window.removeEventListener("keydown", this.handleKeyDown);
     window.removeEventListener("keyup", this.handleKeyUp);
@@ -1360,15 +1327,17 @@ export class CampusScene extends Phaser.Scene {
     readonly height: number;
   }): void {
     this.physics.world.setBounds(0, 0, bounds.width, bounds.height);
-    this.player.setCollideWorldBounds(COLLIDE_WORLD_BOUNDS);
+    this.player.setCollideWorldBounds(this.moveConfigs!.collideWorldBounds);
     const camera = this.cameras.main;
     camera.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
     camera.stopFollow();
-    camera.setZoom(CAMERA_ZOOM);
-    camera.setFollowOffset(0, 0);
-    camera.setDeadzone(0, 0);
-    camera.centerOn(ENTRY_CAMERA_START.x, ENTRY_CAMERA_START.y);
-    camera.roundPixels = true;
+    const settings = this.cameraConfigs!.settings;
+    camera.setZoom(settings.zoom);
+    camera.setFollowOffset(settings.followOffsetX, settings.followOffsetY);
+    camera.setDeadzone(settings.deadzoneX, settings.deadzoneY);
+    camera.centerOn(this.worldConfigs!.entryCameraStart.x,
+      this.worldConfigs!.entryCameraStart.y);
+    camera.roundPixels = settings.roundPixels;
   }
 
   private async initializeDynamicWorld(): Promise<void> {
@@ -1377,12 +1346,87 @@ export class CampusScene extends Phaser.Scene {
     // 错误会走到弹错误页。**宁可进不去，也不要拿一份半对的配置把场景糊起来**：
     // 糊起来的表现是「有一部分 NPC 站错地方」，比干脆报错难查得多。
     const npcConfigs = this.npcConfigs;
+    [this.chunkConfigs, this.zoneConfigs, this.moveConfigs, this.inputConfigs,
+      this.worldConfigs, this.cameraConfigs, this.interactConfigs, this.layerConfigs,
+      this.entityConfigs, this.fxConfigs] = await Promise.all([
+      this.loadChunkConfigs(),
+      this.loadZoneConfigs(),
+      this.loadMoveConfigs(),
+      this.loadInputConfigs(),
+      this.loadWorldConfigs(),
+      this.loadCameraConfigs(),
+      this.loadInteractConfigs(),
+      this.loadLayerConfigs(),
+      this.loadEntityConfigsOnce(),
+      this.loadFxConfigs(),
+    ]);
+    this.chunkUpdateElapsed = this.chunkConfigs.updateIntervalMs;
+    this.contentUpdateElapsed = this.zoneConfigs.contentUpdateIntervalMs;
     if (this.sceneDestroyed) return;
-
+    const stopAiPlayerPosition = () => {
+      const position = this.playerRuntime?.position;
+      if (position === undefined || this.player === undefined) return undefined;
+      return {
+        ...position,
+        bodyBottom: (this.player.body as any).bottom as number,
+        depth: (this.player as any).depth as number,
+      };
+    };
+    this.smokeRuntime = new PhaserFactorySmokeRuntime(
+      this as unknown as PhaserFactorySmokeSceneLike,
+      this.fxConfigs.factorySmoke,
+      {
+        viewport: () => this.smokeViewport(),
+        onError: (reason) => this.recordSideFailure(`smoke:${reason}`),
+      },
+    );
+    this.stopAiSmokeRuntime = new PhaserStopAiSmokeRuntime(
+      this as unknown as PhaserStopAiSmokeSceneLike,
+      this.fxConfigs.stopAiSmoke,
+      {
+        viewport: () => this.smokeViewport(),
+        playerPosition: stopAiPlayerPosition,
+        onError: (reason) => this.recordSideFailure(`stop-ai-smoke:${reason}`),
+      },
+    );
+    this.fogRuntime = new PhaserFogRuntime(
+      this as unknown as PhaserFogSceneLike,
+      this.fxConfigs.fog,
+      {
+        viewport: () => this.smokeViewport(),
+        player: () => {
+          const position = this.playerRuntime?.position;
+          if (position === undefined || this.player === undefined) return undefined;
+          return {
+            ...position,
+            velocityX: this.player.body.velocity.x,
+            velocityY: this.player.body.velocity.y,
+          };
+        },
+        onError: (reason) => this.recordSideFailure(`fog:${reason}`),
+      },
+    );
+    const footstepStrategy = this.layerConfigs.strategiesByName["footsteps"];
+    if (footstepStrategy?.markerGids === undefined) {
+      throw new Error("SYS-LAYER 缺少 footsteps.markerGids");
+    }
+    this.footstepRuntime = new PhaserFootstepRuntime(
+      this as unknown as PhaserFootstepSceneLike,
+      this.fxConfigs.footstep,
+      this.layerConfigs.footstepDepth,
+      footstepStrategy.markerGids,
+    );
+    this.footstepRuntime.start();
+    const jsonTimeoutMs = this.transportConfigs.timeouts.json;
+    this.transportSnapshot = Object.freeze({ jsonTimeoutMs });
+    // §17 transport.timeouts.json：超时从这里穿进 fetchJson（不再用模块默认值）。
+    const jsonLoader: JsonLoader = (url, signal) =>
+      fetchJson(url, signal, jsonTimeoutMs);
     const store = new ChunkDataStore(
       CHUNK_MASTER_URL,
-      fetchJson as JsonLoader,
-      { maxAttempts: 3 }, // 与 data-store.ts 的默认值一致，此处不再单独调低
+      jsonLoader,
+      { maxAttempts: this.chunkConfigs.maxAttempts },
+      this.layerConfigs!.strategies,
     );
     this.dataStore = store;
     const master = await store.loadMaster();
@@ -1391,12 +1435,15 @@ export class CampusScene extends Phaser.Scene {
 
     const spec = worldSpecFromMaster(master);
     this.worldSpec = spec;
+    this.createPlayerAndInput();
     this.createCamera({
       x: 0,
       y: 0,
       width: spec.worldPixelWidth,
       height: spec.worldPixelHeight,
     });
+    this.createContentFoundation();
+    this.createMapFoundation();
 
     const map = this.make.tilemap({
       tileWidth: spec.tileWidthPixels,
@@ -1439,7 +1486,8 @@ export class CampusScene extends Phaser.Scene {
       map,
       tilesets,
       spec,
-      LAYER_STRATEGIES,
+      this.layerConfigs!,
+      this.worldConfigs.clearLayersPerFrame,
       {
         onCollisionLayerCreated: this.handleCollisionLayerCreated,
         onCollisionLayerDestroyed: this.handleCollisionLayerDestroyed,
@@ -1450,7 +1498,10 @@ export class CampusScene extends Phaser.Scene {
     );
     this.worldRenderer = renderer;
     this.configureInitialCollisionLayers();
-    const worldResult = createWorld(spec, { hooks: renderer.hooks() });
+    const worldResult = createWorld(spec, {
+      layerPlan: this.layerConfigs!.strategies,
+      hooks: renderer.hooks(),
+    });
     if (worldResult.kind !== "ready") {
       throw new Error(`World 创建失败：${worldResult.reason}`);
     }
@@ -1517,7 +1568,7 @@ export class CampusScene extends Phaser.Scene {
           clothingChange: this.playerRuntime?.clothingChange ?? null,
           clothesChange: {
             tileIndex: renderer.tileIndexAtWorld(
-              "walls",
+              this.worldConfigs!.tileQuery.layer,
               this.player.x,
               this.player.y,
             ),
@@ -1549,10 +1600,10 @@ export class CampusScene extends Phaser.Scene {
           roundPixels: this.cameras.main.roundPixels,
         },
         body: {
-          width: PLAYER_BODY_WIDTH,
-          height: PLAYER_BODY_HEIGHT,
-          offsetX: PLAYER_BODY_OFFSET_X,
-          offsetY: PLAYER_BODY_OFFSET_Y,
+          width: this.moveConfigs!.body.width,
+          height: this.moveConfigs!.body.height,
+          offsetX: (this.playerConfigs.displaySize - this.moveConfigs!.body.width) / 2,
+          offsetY: this.playerConfigs.displaySize - this.moveConfigs!.body.height - 4,
           blocked: this.player.body.blocked,
         },
         playerVelocity: {
@@ -1635,6 +1686,7 @@ export class CampusScene extends Phaser.Scene {
         },
         onError: (reason) => this.recordSideFailure(`sprayer:${reason}`),
       },
+      this.playerConfigs,
     );
     this.sprayerRuntime.createAnimations();
     const sprayerStarted = this.sprayerRuntime.start(this.time.now);
@@ -1643,15 +1695,18 @@ export class CampusScene extends Phaser.Scene {
     }
     const wallData = this.cache.json.get("walls-layer") as { grid?: readonly (readonly number[])[] } | undefined;
     if (wallData?.grid === undefined) throw new Error("route crowd walls grid unavailable");
+    // 警车的位置和碰撞尺寸都来自配置——寻路要绕开它们，所以得跟车停的地方是同一份数。
+    const policeConfig = this.routeConfigs.vehicle.police;
     const isPoliceBlocked = (point: { readonly x: number; readonly y: number }): boolean =>
-      POLICE_POSITIONS.some((police) =>
-        Math.abs(point.x - police.x) <= POLICE_COLLISION_SIZE.width / 2 + 24 &&
-        Math.abs(point.y - police.y) <= POLICE_COLLISION_SIZE.height / 2 + 24,
+      policeConfig.positions.some((police) =>
+        Math.abs(point.x - police.x) <= policeConfig.collisionSize.width / 2 + 24 &&
+        Math.abs(point.y - police.y) <= policeConfig.collisionSize.height / 2 + 24,
       );
     const pathProvider = new GridRouteCrowdPathProvider(wallData.grid, {
       ...npcConfigs.tuning.path,
       isBlocked: isPoliceBlocked,
-    });
+    }, this.moveConfigs!.walkableValue, this.moveConfigs!.blockedValue,
+    this.moveConfigs!.outOfBoundsIsWalkable);
     this.routeCrowdRuntime = new PhaserRouteCrowdRuntime(
       this as unknown as import("./PhaserRouteCrowdRuntime.js").PhaserRouteCrowdSceneLike, {
       configs: npcConfigs.routeCrowdConfigs,
@@ -1670,7 +1725,7 @@ export class CampusScene extends Phaser.Scene {
       },
       viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }),
       scheduleNextUpdate: (callback) => this.events.once("update", callback),
-    });
+    }, this.playerConfigs);
     this.staticNpcRuntime = new PhaserStaticNpcRuntime(
       this as unknown as import("./PhaserStaticNpcRuntime.js").PhaserStaticNpcSceneLike,
       {
@@ -1706,6 +1761,7 @@ export class CampusScene extends Phaser.Scene {
         trackBand: npcConfigs.presentation.routeCrowd.trackBand,
         onError: (reason) => this.recordSideFailure(`static-crowd:${reason}`),
       },
+      this.playerConfigs,
     );
     const staticNpcStarted = this.staticNpcRuntime.start();
     if (!staticNpcStarted.ok) {
@@ -1725,7 +1781,7 @@ export class CampusScene extends Phaser.Scene {
       { config: npcConfigs.bugCrowd, pathProvider, presentation: npcConfigs.presentation.bugCrowd, viewport: () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), onError: (reason) => this.recordSideFailure(`bug-crowd:${reason}`) },
     );
     if (!this.bugCrowdRuntime.start(this.time.now)) this.recordSideFailure("bug-crowd:start-failed");
-    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), { regions: npcConfigs.venueCrowdRegions, tuning: npcConfigs.tuning.venueCrowd }, npcConfigs.presentation.venueCrowd, Date.now);
+    this.venueCrowdRuntime = new PhaserVenueCrowdRuntime(this as unknown as import("./PhaserVenueCrowdRuntime.js").PhaserVenueCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), { regions: npcConfigs.venueCrowdRegions, tuning: npcConfigs.tuning.venueCrowd }, npcConfigs.presentation.venueCrowd, this.playerConfigs, Date.now);
     if (!this.venueCrowdRuntime.start()) this.recordSideFailure("venue-crowd:start-failed");
     this.dancingCrowdRuntime = new PhaserDancingCrowdRuntime(this as unknown as import("./PhaserDancingCrowdRuntime.js").PhaserDancingCrowdSceneLike, () => ({ left: this.cameras.main.worldView.x, top: this.cameras.main.worldView.y, width: this.cameras.main.worldView.width, height: this.cameras.main.worldView.height }), npcConfigs.dancingCrowd, npcConfigs.presentation.dancingCrowd);
     if (!this.dancingCrowdRuntime.start()) this.recordSideFailure("dancing-crowd:start-failed");
@@ -1754,6 +1810,14 @@ export class CampusScene extends Phaser.Scene {
     window.setTimeout(() => {
       if (!this.sceneDestroyed) this.routeCrowdRuntime?.start(this.time.now);
     }, 0);
+  }
+
+  private loadEntityConfigsOnce(): Promise<EntityConfigs> {
+    if (this.entityConfigsPromise === undefined) {
+      this.entityConfigsPromise = this.loadEntityConfigs();
+      void this.entityConfigsPromise.catch(() => undefined);
+    }
+    return this.entityConfigsPromise;
   }
 
   private createEntryCameraRuntime(): PhaserCameraRuntime {
@@ -1785,6 +1849,7 @@ export class CampusScene extends Phaser.Scene {
         },
         warn: () => undefined,
       },
+      this.cameraConfigs!,
     );
   }
 
@@ -1824,10 +1889,18 @@ export class CampusScene extends Phaser.Scene {
           this.cameraViewportUpdates += 1;
         },
       },
+      this.cameraConfigs!,
     );
     this.cameraRuntime = runtime;
-    const options = this.cameraTestHooksEnabled
-      ? CAMERA_TEST_HOOK_START_OPTIONS
+    const options: CameraRuntimeStartOptions | undefined = this.cameraTestHooksEnabled
+      ? {
+        sequence: this.cameraConfigs!.sequence.map((point) => ({
+          ...point,
+          duration: point.duration === 0 ? 0 : this.worldConfigs!.cameraTestTour.duration,
+          stayDuration: this.worldConfigs!.cameraTestTour.stayDuration,
+        })),
+        returnDuration: this.worldConfigs!.cameraTestTour.returnDuration,
+      }
       : undefined;
     const run = options === undefined ? runtime.start() : runtime.start(options);
     void run
@@ -1909,10 +1982,11 @@ export class CampusScene extends Phaser.Scene {
   }
 
   private readonly handleCollisionLayerCreated = (
-    _name: string,
+    name: string,
     layer: TilemapLayerLike,
   ): void => {
-    if (this.sceneDestroyed || this.collisionColliders.has(layer)) {
+    if (this.sceneDestroyed || this.collisionColliders.has(layer) ||
+        !this.moveConfigs!.collisionLayerNames.includes(name)) {
       return;
     }
     const collider = this.physics.add.collider(
@@ -2000,23 +2074,23 @@ export class CampusScene extends Phaser.Scene {
       return;
     }
     renderer.setCollisionLayerEnabled("walls", true);
-    renderer.setCollisionLayerEnabled(BRIDGES.bridge1.down, true);
-    renderer.setCollisionLayerEnabled(BRIDGES.bridge1.up, false);
-    renderer.setCollisionLayerEnabled(BRIDGES.bridge2.down, true);
-    renderer.setCollisionLayerEnabled(BRIDGES.bridge2.up, false);
+    renderer.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge1.down, true);
+    renderer.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge1.up, false);
+    renderer.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge2.down, true);
+    renderer.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge2.up, false);
   }
 
   private setBridge1DownVisible(value: boolean): void {
     this.bridge1DownVisible = value;
-    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge1.down, value);
-    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge1.up, !value);
+    this.worldRenderer?.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge1.down, value);
+    this.worldRenderer?.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge1.up, !value);
     this.updatePlayerDepth();
   }
 
   private setBridge2DownVisible(value: boolean): void {
     this.bridge2DownVisible = value;
-    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge2.down, value);
-    this.worldRenderer?.setCollisionLayerEnabled(BRIDGES.bridge2.up, !value);
+    this.worldRenderer?.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge2.down, value);
+    this.worldRenderer?.setCollisionLayerEnabled(this.layerConfigs!.bridges.bridge2.up, !value);
     this.updatePlayerDepth();
   }
 
@@ -2027,17 +2101,36 @@ export class CampusScene extends Phaser.Scene {
     const bridgeIsRaised =
       !this.bridge1DownVisible || !this.bridge2DownVisible;
     this.player.setDepth(
-      bridgeIsRaised ? BRIDGE_PLAYER_DEPTH : playerDepth(this.player.y),
+      bridgeIsRaised
+        ? this.layerConfigs!.bridgePlayerDepth
+        : this.playerDepthForY(this.player.y),
     );
+  }
+
+  private playerDepthForY(worldY: number): number {
+    const config = this.layerConfigs!.playerDepth;
+    return playerDepth(worldY, config.base, config.yOffset, config.ratio);
   }
 
   private updateBridgeZones(): void {
     const tileX = Math.floor(this.player.x / 16);
     const tileY = Math.floor(this.player.y / 16);
-    const inBridge1Entry = isBridge1EntryZone(tileX, tileY);
-    const inBridge1Exit = isBridge1ExitZone(tileX, tileY);
+    const inBridge1Entry = isBridge1EntryZone(
+      tileX,
+      tileY,
+      this.layerConfigs!.bridgeZones.bridge1.entry,
+    );
+    const inBridge1Exit = isBridge1ExitZone(
+      tileX,
+      tileY,
+      this.layerConfigs!.bridgeZones.bridge1.exit,
+    );
     const inBridge1ExitTrigger = inBridge1Exit && !inBridge1Entry;
-    const inBridge2 = isBridge2Zone(tileX, tileY);
+    const inBridge2 = isBridge2Zone(
+      tileX,
+      tileY,
+      this.layerConfigs!.bridgeZones.bridge2.zones,
+    );
 
     if (
       inBridge1Entry &&
@@ -2074,21 +2167,21 @@ export class CampusScene extends Phaser.Scene {
     if (renderer === undefined || runtime === undefined) return;
 
     const tileIndex = renderer.tileIndexAtWorld(
-      "walls",
+      this.worldConfigs!.tileQuery.layer,
       this.player.x,
       this.player.y,
     );
-    const onBeachTile = isBeachTriggerTile(tileIndex);
+    const onBeachTile = isBeachTriggerTile(tileIndex, this.playerConfigs.beachTriggerGid);
     const changing = runtime.clothingChange !== null;
 
     if (onBeachTile && !runtime.onBeach && !changing) {
       runtime.beginClothingChange("undressing", this.time.now);
     } else if (
       !onBeachTile &&
-      tileIndex !== COLLISION_GID_FORCED &&
+      tileIndex !== this.layerConfigs!.collisionGidForced &&
       runtime.onBeach &&
       !changing &&
-      this.playerLastTileIndex === BEACH_TRIGGER_GID
+      this.playerLastTileIndex === this.playerConfigs.beachTriggerGid
     ) {
       runtime.beginClothingChange("dressing", this.time.now);
     }
@@ -2102,15 +2195,15 @@ export class CampusScene extends Phaser.Scene {
     }
     this.player.setVelocity(0, 0);
     this.player.anims.stop();
-    this.player.setFrame(walkFrameStart(this.lastDirection));
+    this.player.setFrame(walkFrameStart(this.lastDirection, this.playerConfigs.animation.walkFrameStart));
   }
 
   private updateFactoryRoof(): void {
-    this.updateRoofGroup("factory", FACTORY_ROOF_BOUNDS);
+    this.updateRoofGroup("factory", this.layerConfigs!.roofZones.factory);
   }
 
   private updateConcertRoof(): void {
-    this.updateRoofGroup("concert", CONCERT_ROOF_BOUNDS);
+    this.updateRoofGroup("concert", this.layerConfigs!.roofZones.concert);
   }
 
   private updateRoofGroup(
@@ -2146,7 +2239,7 @@ export class CampusScene extends Phaser.Scene {
       {
         x: this.player.x,
         y: this.player.y,
-        depth: (this.player as any).depth ?? playerDepth(this.player.y),
+        depth: (this.player as any).depth ?? this.playerDepthForY(this.player.y),
         velocityX: this.player.body.velocity.x,
         velocityY: this.player.body.velocity.y,
         controlsEnabled: this.playerRuntime?.control.enabled ?? false,
@@ -2167,7 +2260,7 @@ export class CampusScene extends Phaser.Scene {
       targets: [...layers],
       alpha: state.alpha,
       duration: state.durationMs,
-      ease: "Power2",
+      ease: this.layerConfigs!.roofTweenEase,
       onComplete: () => {
         if (this.getRoofTween(state.group) === tween) {
           this.setRoofTween(state.group, undefined);
@@ -2226,32 +2319,34 @@ export class CampusScene extends Phaser.Scene {
   ): readonly ChunkCoordinate[] {
     const targets: Array<readonly ChunkCoordinate[]> = [];
     const centers = [
-      ENTRY_CAMERA_START,
+      this.worldConfigs!.entryCameraStart,
       Object.freeze({
-        x: FACTORY_SMOKE_CONFIG.x,
-        y: FACTORY_SMOKE_CONFIG.y,
+        x: this.fxConfigs?.factorySmoke.x ?? 0,
+        y: this.fxConfigs?.factorySmoke.y ?? 0,
       }),
-      Object.freeze({ x: SPAWN_X, y: SPAWN_Y }),
+      this.playerConfigs.spawn,
     ];
     for (let segment = 1; segment < centers.length; segment += 1) {
       const from = centers[segment - 1]!;
       const to = centers[segment]!;
-      for (let index = 0; index <= ENTRY_CORRIDOR_SAMPLES; index += 1) {
-        const progress = index / ENTRY_CORRIDOR_SAMPLES;
+      for (let index = 0; index <= this.worldConfigs!.entryCorridorSamples; index += 1) {
+        const progress = index / this.worldConfigs!.entryCorridorSamples;
         const centerX = from.x + (to.x - from.x) * progress;
         const centerY = from.y + (to.y - from.y) * progress;
         targets.push(
           targetChunks(
-            SPAWN_X,
-            SPAWN_Y,
+            this.playerConfigs.spawn.x,
+            this.playerConfigs.spawn.y,
             {
               scrollX: centerX - LOGICAL_VIEWPORT_WIDTH / 2,
               scrollY: centerY - LOGICAL_VIEWPORT_HEIGHT / 2,
               width: LOGICAL_VIEWPORT_WIDTH,
               height: LOGICAL_VIEWPORT_HEIGHT,
-              zoom: CAMERA_ZOOM,
+              zoom: this.cameraConfigs!.settings.zoom,
             },
             geometry,
+            this.chunkConfigs!.playerNeighborhoodRadius,
+            this.chunkConfigs!.cameraPadding,
           ),
         );
       }
@@ -2295,6 +2390,8 @@ export class CampusScene extends Phaser.Scene {
         height: LOGICAL_VIEWPORT_HEIGHT,
       },
       geometry,
+      this.chunkConfigs!.playerNeighborhoodRadius,
+      this.chunkConfigs!.cameraPadding,
     );
     await coordinator.updateTargets(
       this.entryChunkTargetLock === undefined
