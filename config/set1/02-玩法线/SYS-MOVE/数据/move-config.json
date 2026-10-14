@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "system": "move",
+    "source": "src/move/body.ts; src/move/walls.ts",
+    "sourceConstant": "PLAYER_BODY_WIDTH / PLAYER_BODY_HEIGHT / PLAYER_DRAG / PLAYER_MAX_VELOCITY / COLLIDE_WORLD_BOUNDS / COLLISION_WALL_LAYER_NAMES / WALKABLE / BLOCKED / out-of-bounds behavior",
+    "verified": "exact",
+    "notes": ["示范移动手感：松手后的 drag 从 300 调为 180。", "offsetX 与 offsetY 按玩家显示尺寸和碰撞盒尺寸计算。"]
+  },
+  "data": {
+    "body": { "width": 20, "height": 8 },
+    "drag": 180,
+    "maxVelocity": 200,
+    "collideWorldBounds": true,
+    "collisionLayerNames": ["walls", "bridge1_up_wall", "bridge1_down_wall", "bridge2_up_wall", "bridge2_down_wall"],
+    "walkableValue": 0,
+    "blockedValue": 1,
+    "outOfBoundsIsWalkable": false
+  }
+}

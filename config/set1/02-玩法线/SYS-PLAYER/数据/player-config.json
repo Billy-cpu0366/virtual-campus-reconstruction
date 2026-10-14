@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "system": "player",
+    "source": "src/player/appearance.ts; src/player/facing.ts; src/player/idle.ts; src/player/clothing.ts; src/player/runtime.ts; src/layer/beach-zone.ts; game/CampusScene.ts; game/PhaserPlayerRuntime.ts",
+    "sourceConstant": "spawn / texture keys and URLs / display sizes / sprite frame layout / walk animation / idle thresholds and animation assets / beach clothing / beach trigger GID / blur reset",
+    "verified": "exact",
+    "notes": [
+      "spritesheet.frames、idleFrame 和 beach.idleFrame 可由 walkFrameStart 与默认朝向推导，因此不在数据中重复保存。",
+      "idle.repeatGuard、statusMachine 和 missingFallback 是算法或状态语义，保留在 src/player。",
+      "holding.texture/displaySize 当前没有运行时读取；clothing.timeoutMs 在总表中标为缺口，不在本配置中造值。",
+      "blurReset 与 SYS-INPUT 的 input.blurReset 是同一个窗口失焦恢复门控，复用 SYS-INPUT 配置，不重复保存。"
+    ]
+  },
+  "data": {
+    "spawn": { "x": 1088, "y": 304 },
+    "texture": "player",
+    "textureUrl": "/sprites/player.webp",
+    "displaySize": 56,
+    "specialDisplaySize": 64,
+    "spritesheet": { "frameSize": { "width": 48, "height": 48 } },
+    "animation": {
+      "walkFramesPerDirection": 8,
+      "frameRate": 10,
+      "walkFrameStart": {
+        "east": 0,
+        "north-east": 8,
+        "north-west": 16,
+        "north": 24,
+        "south-east": 32,
+        "south-west": 40,
+        "south": 48,
+        "west": 56
+      }
+    },
+    "defaultFacing": "south",
+    "idle": {
+      "timeForIdleAction": 8000,
+      "timeForSitting": 30000,
+      "animations": ["eating", "scratching", "tying-shoe"],
+      "textures": [
+        { "action": "eating", "key": "player-eating", "url": "/sprites/player-eating.webp" },
+        { "action": "scratching", "key": "player-scratching", "url": "/sprites/player-scratching.webp" },
+        { "action": "tying-shoe", "key": "player-tying-shoe", "url": "/sprites/player-tying-shoe.webp" },
+        { "action": "sitting", "key": "player-sitting", "url": "/sprites/player-sitting.webp" }
+      ],
+      "animationKeys": {
+        "eating": "player-eating-anim",
+        "scratching": "player-scratching-anim",
+        "tying-shoe": "player-tying-shoe-anim",
+        "sittingDown": "player-sitting-anim",
+        "standingUp": "player-sitting-reverse-anim"
+      },
+      "assetFrames": { "frameWidth": 128, "frameHeight": 128, "startFrame": 0, "endFrame": 15 }
+    },
+    "beach": {
+      "texture": "player-beach",
+      "textureUrl": "/sprites/player-beach.webp"
+    },
+    "clothing": {
+      "offTexture": "player-clothes-off",
+      "offTextureUrl": "/sprites/player-clothes-off.webp",
+      "undressAnimationKey": "player-undressing",
+      "dressAnimationKey": "player-dressing",
+      "frameSize": { "width": 128, "height": 128 },
+      "assetFrames": { "startFrame": 0, "endFrame": 15 },
+      "frameRange": { "start": 0, "end": 13 },
+      "frameRate": 8,
+      "offDisplaySize": 64,
+      "cooldownMs": 1000
+    },
+    "beachTriggerGid": 69353
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "system": "world",
+    "source": "game/CampusScene.ts; game/PhaserWorldRenderer.ts; src/world/spec.ts",
+    "sourceConstant": "ENTRY_CAMERA_START / ENTRY_CORRIDOR_SAMPLES / bridgeCheckFrames threshold / CLEAR_LAYERS_PER_FRAME / CAMERA_TEST_HOOK_START_OPTIONS / tile query layer",
+    "verified": "exact",
+    "notes": [
+      "八个 world 几何基础值从 master.json 读取，master 是唯一出处；世界像素宽高由它们相乘得到。",
+      "逻辑视口尺寸与 SYS-APP 共用；在 SYS-APP 接线时一并替换，避免重复配置。",
+      "tileQuery.layer 表示世界坐标查脚下格时所用图层；配置原值 walls。"
+    ]
+  },
+  "data": {
+    "entryCameraStart": { "x": 944, "y": 928 },
+    "entryCorridorSamples": 6,
+    "bridgeCheckFrames": 3,
+    "clearLayersPerFrame": 4,
+    "cameraTestTour": { "duration": 200, "stayDuration": 100, "returnDuration": 200 },
+    "tileQuery": { "layer": "walls" }
+  }
+}

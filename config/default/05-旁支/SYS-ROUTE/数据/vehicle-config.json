@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "system": "route",
+    "source": "game/PhaserVehicleRuntime.ts",
+    "sourceConstant": "HELICOPTER_* / POLICE_POSITIONS / POLICE_COLLISION_SIZE / VEHICLE_DEPTH 等模块常量",
+    "notes": [
+      "这里只管「车停在哪儿、多大、什么顺序画」。用哪几张图在 vehicle-presentation.json。",
+      "这份故意没有 meta.units：字段都嵌在 helicopter / police 两层里，而 meta.units 的键只能是顶层字段名。单位照样管得住——真正的校验依据是 逻辑/shapes.ts，那里每个字段都标了单位。",
+      "三个**算出来的**数没有搬进来，别在这儿再抄一份：",
+      "  · 直升机尾桨的层级 = 机身层级 + 1（源码写成 HELICOPTER_DEPTH + 1）",
+      "  · 高清层的宽度基准 = 机身图每帧宽 84 × 缩放 2 = 168",
+      "  · 警车数量 = positions 的条数（3 条就是 3 辆）",
+      "四个只有唯一取值的字段也没搬：isHelicopter（恒真）、idleDirection（恒 \"east\"）、highResolutionEnabled（恒真）、警车的 wheels / brakes / lights（恒假）。它们同时是类型——快照接口里写的就是字面量类型 \"east\" 和 true，搬进 JSON 就得把类型放宽成普通字符串，那是拿类型换数据，不划算。同样的处理见 SYS-NPC 的 bug-crowd-config.json（mode 字段）。",
+      "policeLights / highResolutionAspect / highResolutionBounds 三个是 \"UNKNOWN\"——原版就没弄明白，照原样留着，不是配置。",
+      "位置原先写成 106 * 16 + 8 - 5 这种式子。这里存算好的像素值，并把原始格坐标记在后面，免得以后想按格挪车时找不到换算关系：",
+      "  · 直升机 格(31, 80) → 像素(504, 1288)",
+      "  · 警车一 格(106, 83) 帧 3 → 像素(1704, 1331)",
+      "  · 警车二 格(112, 82) 帧 6 → 像素(1800, 1315)",
+      "  · 警车三 格(109, 84) 帧 4 → 像素(1752, 1347)",
+      "警车的 y 比「格 × 16 + 8」少 5 像素，这是源码里写死的一次位置修正（汽车贴图的重心比直升机低），已经算进上面的数里了。",
+      "「一格 16 像素」这个换算基准（原 VEHICLE_TILE_SIZE）没有搬进配置：值已经算成像素了，再放一份等于同一个事实有两个家。同理，一格的中心偏移 8 也一并算进位置里。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "helicopter": {
+      "position": {
+        "x": 504,
+        "y": 1288
+      },
+      "scale": 2,
+      "depth": 600,
+      "bladeDepth": 2000,
+      "frameEast": 2,
+      "mainRotorSize": 90,
+      "tailRotorSize": 36,
+      "rotationSpeed": 8,
+      "mainRotorOffset": {
+        "x": 8,
+        "y": -20
+      },
+      "tailRotorOffsetEast": {
+        "x": -36,
+        "y": -11
+      },
+      "bladeAnglesDegrees": [
+        0,
+        72,
+        144,
+        216,
+        288
+      ],
+      "bladeDisplaySize": {
+        "width": 18,
+        "height": 117
+      },
+      "mainRotorScaleEast": {
+        "x": 1,
+        "y": 0.25
+      },
+      "tailRotorScaleEast": {
+        "x": 1,
+        "y": 1
+      },
+      "highResolutionOffset": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "police": {
+      "depth": 560,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "scale": 1,
+      "collisionSize": {
+        "width": 64,
+        "height": 48
+      },
+      "positions": [
+        {
+          "x": 1704,
+          "y": 1331,
+          "frame": 3
+        },
+        {
+          "x": 1800,
+          "y": 1315,
+          "frame": 6
+        },
+        {
+          "x": 1752,
+          "y": 1347,
+          "frame": 4
+        }
+      ]
+    }
+  }
+}

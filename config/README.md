@@ -7,9 +7,32 @@ created: 2026-09-19
 
 **这个文件夹，是把游戏里「能改的值」从代码里拎出来之后的落脚点。** 以后换校园，改这里，不动 `src/`。
 
-**现在已经生效的部分**：NPC 那个板块的 **22 份配置全部接上了**——数据层 15 份（谁去哪、去几个人）和呈现层 7 份（用哪几张图、每帧切多大）都是游戏运行时去读的。改一个数、刷新页面就生效，**不用重新构建**。其余板块还没接，见下面的[已知缺口](#已知缺口)。
+**现在已经落盘的部分**：16 个板块、**40 份配置**。13 个板块已完整接线（含 SYS-NPC、SYS-ROUTE）；SYS-APP 与 SYS-GAME-UI 已接通 JS 侧字段，SYS-TRANSPORT 已接通 JSON 超时字段。SYS-ASSET 资产清单轴、§11/§12 HTML/CSS 机制和 §17 其余冻结/缺口字段仍待处理。
 
-**这套东西在真浏览器里跑通过**（2026-09-21）：开发服务器和生产构建产物各跑一次，都能进到可玩状态、没有报错；并且实测了「改一个数、不重新构建、刷新即生效」——改 `maxCreatePerSync` 和一张图的 `frameCount`，刷新后页面读到的就是新值。
+| 板块 | 份数 | 管什么 |
+|---|---|---|
+| **SYS-NPC**（§14） | 22 | 数据层 15 份（谁去哪、去几个人）+ 呈现层 7 份（用哪几张图、每帧切多大） |
+| **SYS-ROUTE**（§15） | 4 | 火车从哪开进来停多久、直升机悬在哪、三辆警车摆哪、车辆贴图用哪几张 |
+| **SYS-CHUNK**（§4） | 1 | 地图分块更新间隔、玩家周边块数、相机预载边距和重试次数 |
+| **SYS-ZONE**（§9） | 1 | 内容触发点的坐标、进入距离和巡检间隔 |
+| **SYS-MOVE**（§6） | 1 | 玩家碰撞盒、阻力、限速、碰撞层与网格语义 |
+| **SYS-INPUT**（§5） | 1 | 移动速度、方向向量、键位、摇杆尺寸和样式 |
+| **SYS-WORLD**（§2） | 1 | 入场相机起点、走廊采样、图层清理预算和格子查询图层；地图几何仍读 master.json |
+| **SYS-CAMERA**（§8） | 1 | 相机缩放、跟随参数、开场航拍序列和结束缓动 |
+| **SYS-INTERACT**（§10） | 1 | 弹窗内容、正式内容菜单、交互行为和弹窗高度 |
+| **SYS-LAYER**（§3） | 1 | 图层角色与深度、GID 过滤、桥区和屋顶区 |
+| **SYS-PLAYER**（§7） | 1 | 玩家出生点、贴图规格、行走与待机动作、沙滩换装 |
+| **SYS-ENTITY**（§13） | 1 | 场景关停时的 30 步清理顺序 |
+| **SYS-APP**（§11） | 1 | Phaser 视口、物理参数、渲染开关和错误页细节 |
+| **SYS-GAME-UI**（§12） | 1 | JS 侧断点、聚焦框和页面壳边距；HTML/CSS 仍待落地机制 |
+| **SYS-FX**（§16） | 1 | 脚印、烟雾、雾效、停机烟、演唱会灯光和玩家视觉参数 |
+| **SYS-TRANSPORT**（§17） | 1 | JSON 请求超时；其余缺口与冻结项按总表保留 |
+
+已接线字段由游戏运行时读取。**改一个值、刷新页面就生效，不用重新构建。** SYS-ASSET 的资产清单轴、SYS-APP/SYS-GAME-UI 的 HTML/CSS 机制和 SYS-TRANSPORT 的剩余字段仍列在[已知缺口](#已知缺口)。
+
+**这套东西在真浏览器里跑通过**：开发服务器和生产构建产物各跑一次，都能进到可玩状态、没有报错；并且实测了「改一个数、不重新构建、刷新即生效」——NPC 那边改 `maxCreatePerSync` 和一张图的 `frameCount`（2026-09-21），SYS-ROUTE 这边改直升机的 `scale`、悬停坐标、警车 `scale`、火车 `exitDistance`（2026-10-06），刷新后页面读到的都是新值。
+
+**下一个板块怎么接，看[《接入一个板块》](文档/接入一个板块.md)。** 三步：抽值 → 定目录 → 换读取方式，最后四关验收。这份指南是拿 SYS-ROUTE 真走了一遍之后写下来的，不是凭空定的规矩。
 
 ---
 
@@ -17,14 +40,94 @@ created: 2026-09-19
 
 ```
 config/
-├── 文档/                    方案、格式规范、换皮总表
+├── 文档/                    方案、格式规范、换皮总表、接入指南
 ├── 工具/                    测试用：从磁盘直接读配置（游戏里不用它）
 ├── 骨架/                    ← 所有校园共用，换校园时不动
 │   ├── 公共/                读配置的零件（读哪一套、去哪儿取、怎么校验、冻结）
-│   └── 05-旁支/SYS-NPC/逻辑/  NPC 板块的逻辑
-└── default/                 ← 一个校园一套，只放「数据」
-    └── 05-旁支/SYS-NPC/数据/ 22 份 JSON
+│   ├── 01-地图线/SYS-CHUNK/逻辑/ 地图分块的读法与校验
+│   ├── 01-地图线/SYS-WORLD/逻辑/ 世界场景参数的读法与校验
+│   ├── 02-玩法线/SYS-INPUT/逻辑/ 方向、键位和摇杆的读法与校验
+│   ├── 02-玩法线/SYS-MOVE/逻辑/ 玩家移动与寻路网格的读法与校验
+│   ├── 02-玩法线/SYS-CAMERA/逻辑/ 相机参数与航拍序列的读法与校验
+│   ├── 03-内容线/SYS-ZONE/逻辑/ 内容触发点的读法与校验
+│   ├── 03-内容线/SYS-INTERACT/逻辑/ 弹窗内容与交互设置的读法与校验
+│   ├── 04-独立件/SYS-APP/逻辑/ 应用启动配置的读法与校验
+│   ├── 04-独立件/SYS-GAME-UI/逻辑/ 游戏 UI 配置的读法与校验
+│   ├── 04-独立件/SYS-ENTITY/逻辑/ 场景生命周期配置的读法与校验
+│   ├── 05-旁支/SYS-NPC/逻辑/  NPC 板块的读法与校验
+│   ├── 02-玩法线/SYS-LAYER/逻辑/ 图层、深度、桥区和屋顶区的读法与校验
+│   ├── 02-玩法线/SYS-PLAYER/逻辑/ 玩家、待机动作与换装配置的读法与校验
+│   ├── 05-旁支/SYS-FX/逻辑/ 动效与粒子配置的读法与校验
+│   ├── 05-旁支/SYS-ROUTE/逻辑/ 路线的读法与校验
+│   └── 06-网络协议层/SYS-TRANSPORT/逻辑/ 网络传输配置的读法与校验
+├── default/                 ← 原版那一套，当基准用，别改
+│   ├── 01-地图线/SYS-CHUNK/数据/ 1 份 JSON
+│   ├── 01-地图线/SYS-WORLD/数据/ 1 份 JSON
+│   ├── 02-玩法线/SYS-INPUT/数据/ 1 份 JSON
+│   ├── 02-玩法线/SYS-MOVE/数据/ 1 份 JSON
+│   ├── 02-玩法线/SYS-CAMERA/数据/ 1 份 JSON
+│   ├── 03-内容线/SYS-ZONE/数据/ 1 份 JSON
+│   ├── 03-内容线/SYS-INTERACT/数据/ 1 份 JSON
+│   ├── 05-旁支/SYS-NPC/数据/ 22 份 JSON
+│   ├── 02-玩法线/SYS-LAYER/数据/ 1 份 JSON
+│   ├── 02-玩法线/SYS-PLAYER/数据/ 1 份 JSON
+│   ├── 04-独立件/SYS-ENTITY/数据/ 1 份 JSON
+│   ├── 04-独立件/SYS-APP/数据/ 1 份 JSON
+│   ├── 04-独立件/SYS-GAME-UI/数据/ 1 份 JSON
+│   ├── 05-旁支/SYS-FX/数据/ 1 份 JSON
+│   ├── 05-旁支/SYS-ROUTE/数据/ 4 份 JSON
+│   └── 06-网络协议层/SYS-TRANSPORT/数据/ 1 份 JSON
+└── set1/                    ← 换皮示范的一套，和 default 差 30 个值
+    ├── 01-地图线/SYS-CHUNK/数据/ 1 份 JSON
+    ├── 01-地图线/SYS-WORLD/数据/ 1 份 JSON
+    ├── 02-玩法线/SYS-INPUT/数据/ 1 份 JSON
+    ├── 02-玩法线/SYS-MOVE/数据/ 1 份 JSON
+    ├── 02-玩法线/SYS-CAMERA/数据/ 1 份 JSON
+    ├── 03-内容线/SYS-ZONE/数据/ 1 份 JSON
+    ├── 03-内容线/SYS-INTERACT/数据/ 1 份 JSON
+    ├── 05-旁支/SYS-NPC/数据/ 22 份 JSON
+    ├── 02-玩法线/SYS-LAYER/数据/ 1 份 JSON
+    ├── 04-独立件/SYS-APP/数据/ 1 份 JSON
+    ├── 04-独立件/SYS-GAME-UI/数据/ 1 份 JSON
+    ├── 05-旁支/SYS-FX/数据/ 1 份 JSON
+    ├── 05-旁支/SYS-ROUTE/数据/ 4 份 JSON
+    └── 06-网络协议层/SYS-TRANSPORT/数据/ 1 份 JSON
 ```
+
+**为什么要有两套。** `default/` 是**复刻基准**——40 份配置的 `meta.verified` 写着 `exact`，意思是「这版的值和原版逐一对得上」。要证明这一点，就得有一份从没被改过的原值摆在那儿。所以想试新数字，**另开一套**，别动 `default/`。
+
+**一套 set 必须齐全。** 缺文件不是「缺的那部分用原版」，是**根本开不了游戏**：所有板块的配置是一次性并发读的，谁缺谁把整批拖下水。这是故意的——照着下面[三步走](#怎么加一套校园配置)复制 `default/` 整个目录，正常路径下不会缺；真缺了就该当场报错，而不是「看着正常、其实一半读的还是原版」。
+
+`set1/` 就是这么来的（2026-10-06 建），"能改的都改一遍"的示范。它和 `default/` 只差下面这 24 项，一共 30 个值：
+
+| 配置 | 字段 | default | set1 |
+|---|---|---|---|
+| `SYS-NPC/…/dancing-crowd-config.json` | `npcCount` | 8 | 20 |
+| `SYS-NPC/…/dancing-crowd-config.json` | `scale` | 0.9 | 1.3 |
+| `SYS-NPC/…/bug-crowd-config.json` | `npcCount` | 10 | 24 |
+| `SYS-NPC/…/sprayer-configs.json` | 4 个喷水器的 `scale` | 0.9 | 1.4 |
+| `SYS-NPC/…/static-crowd-tuning.json` | `factor` | 0.004 | 0.009 |
+| `SYS-NPC/…/static-crowd-tuning.json` | `minSpacing` | 20 | 12 |
+| `SYS-NPC/…/static-npc-configs.json` | 猫的 `tileY` | 106 | 100 |
+| `SYS-NPC/…/venue-crowd-presentation.json` | `slogans` | 三句英文 | 三句中文 |
+| `SYS-NPC/…/venue-crowd-presentation.json` | `speechBubble.fontSizePx` | 8 | 11 |
+| **`SYS-ROUTE/…/vehicle-config.json`** | **直升机的 `scale`** | **2** | **3** |
+| `SYS-CHUNK/…/chunk-config.json` | `cameraPadding` | 1 | 2 |
+| `SYS-ZONE/…/zone-config.json` | MEMO6 的 `x` | 496 | 560 |
+| `SYS-MOVE/…/move-config.json` | `drag` | 300 | 180 |
+| `SYS-INPUT/…/input-config.json` | `speed.walk` | 150 | 170 |
+| `SYS-WORLD/…/world-config.json` | `entryCameraStart.x` | 944 | 1000 |
+| `SYS-CAMERA/…/camera-config.json` | `settings.zoom` | 1 | 1.2 |
+| `SYS-INTERACT/…/interact-config.json` | `content.about.title` | `About me` | `About me · set1` |
+| `SYS-LAYER/…/layer-config.json` | `strategies[layer1].depth` | 100 | 120 |
+| `SYS-PLAYER/…/player-config.json` | `displaySize` | 48 | 56 |
+| `SYS-ENTITY/…/entity-config.json` | `cleanupOrder` 中静态人群与静态 NPC 的顺序 | NPC → 人群 | 人群 → NPC |
+| `SYS-APP/…/app-config.json` | `logicalWidth` | 480 | 540 |
+| `SYS-GAME-UI/…/game-ui-config.json` | `rootPadding.desktop` | 24px | 32px |
+| `SYS-FX/…/fx-config.json` | `factorySmoke.x` | 808 | 880 |
+| `SYS-TRANSPORT/…/transport-config.json` | `timeouts.json` | 15000 | 30000 |
+
+看它跑起来的样子：`http://localhost:4175/?config=set1`——直升机会明显大一圈，玩家按 set1 的显示尺寸呈现，场景关停轨迹会先清理静态人群。每一项改动的实测证据记在 `bak/配置实测-2026-10-06/`、`bak/SYS-ROUTE实测-2026-10-06/` 和对应板块的 `bak/` 目录。
 
 **为什么要分成「骨架」和「一套一套」**：一个校园换一套的，只有**数字**（谁站哪、走哪条路、贴图几帧）。**读配置的代码和板块逻辑，到哪个校园都是同一份。** 要是每套各存一份代码，五套配置就有五份一模一样的逻辑，改一处 bug 要改五处，漏一处那一套的行为就跟别人不一样。
 
@@ -34,7 +137,7 @@ config/
 
 三步，**不用改任何代码**：
 
-1. **复制** `default/` 整个目录，改个名（比如 `set1/`）。
+1. **复制** `default/` 整个目录，改个名（比如 `set2/`）。
 2. **改里面的数字**。照着 [总表](文档/换皮配置总表.md) 找哪个数管哪件事；每份 JSON 顶上的 `meta` 写着它是从哪儿抽出来的。
 3. **在网址上指明读它**：`http://localhost:4175/?config=set1`。不带参数就读 `default/`。
 
@@ -51,6 +154,7 @@ config/
 | **打算怎么做、规矩是什么、现在到哪了** | [文档/配置方案.md](文档/配置方案.md) |
 | **一个配置文件该怎么写** | [文档/配置格式规范.md](文档/配置格式规范.md) |
 | **哪些配置项已经定了、长什么样** | [文档/换皮配置总表.md](文档/换皮配置总表.md) |
+| **手上这个板块怎么接上** | [文档/接入一个板块.md](文档/接入一个板块.md) |
 | **哪些规矩吵过架、最后怎么定的** | [已经定下来的事](#已经定下来的事) ↓ |
 | **现在有哪些坑、改了不生效的地方** | [已知缺口](#已知缺口) ↓ |
 

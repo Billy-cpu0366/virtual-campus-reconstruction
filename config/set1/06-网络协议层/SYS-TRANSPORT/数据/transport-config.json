@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "system": "transport",
+    "source": "game/fetchJson.ts",
+    "sourceConstant": "JSON_REQUEST_TIMEOUT_MS",
+    "verified": "exact",
+    "notes": [
+      "set1 放宽 JSON 超时到 30000ms 演示换集读取；画面上看不出差别，浏览器实测经 transportSnapshot 量到。",
+      "其余字段的处置同 default 那份的 notes，不在此重复。"
+    ]
+  },
+  "data": {
+    "timeouts": {
+      "json": 30000
+    }
+  }
+}

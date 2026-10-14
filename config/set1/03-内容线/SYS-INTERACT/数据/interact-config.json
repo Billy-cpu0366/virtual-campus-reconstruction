@@ -1,0 +1,340 @@
+{
+  "meta": {
+    "system": "interact",
+    "source": "src/content/registry.ts; game/CampusContentResolver.ts; src/interact/runtime.ts; src/game-ui/dom-modal.ts",
+    "sourceConstant": "VISIBLE_CONTENT_MENU_IDS / CONTENT_REGISTRY / CAMPUS_CONTENT_PAYLOADS / InteractRuntime behavior / DESKTOP_MAX_HEIGHT_RATIO / MOBILE_MAX_HEIGHT_RATIO",
+    "verified": "mixed",
+    "notes": [
+      "菜单 ID 是 src/content/contract.ts 的类型契约；这里只存当前可见内容列表。",
+      "mobileBreakpoint、弹窗宽度、遮罩颜色属于 SYS-GAME-UI / HTML 样式，此文件不重复存储。",
+      "每条内容以 menuId 作为对象键；读取时由骨架补回类型标识。"
+    ]
+  },
+  "data": {
+    "visibleMenuIds": [
+      "about",
+      "projects",
+      "memo1",
+      "memo2",
+      "memo3",
+      "memo4",
+      "memo5",
+      "memo6"
+    ],
+    "content": {
+      "about": {
+        "title": "About me · set1",
+        "body": [
+          "Peter Oravec",
+          "Front-end & MEAN Stack developer",
+          "Bridging the Gap Between Design and Code",
+          "Front-end & MEAN Stack developer",
+          "I'm Peter Oravec, a creative web developer with over 19 years of experience, currently based in Bratislava, Slovakia.",
+          "My primary focus is on Front-End, JavaScript and Angular, but I also have deep experience as a full-stack developer, especially in the MEAN stack (MongoDB, Express, Angular, Node.js).",
+          "I feel most at home building Single Page Applications (SPAs) in Angular, especially those requiring complex animations and fluid interactivity. However, my strongest asset isn't just my code—it's my ability to act as the vital link between graphics, front-end, and backend.",
+          "I understand the visual language of designers and the structural needs of backend engineers, ensuring a flawless final product.",
+          "LinkedIn: https://www.linkedin.com/in/peteroravec"
+        ],
+        "sections": [
+          {
+            "heading": "Peter Oravec",
+            "paragraphs": [
+              "Front-end & MEAN Stack developer"
+            ],
+            "image": {
+              "src": "assets/images/peter-oravec.webp",
+              "alt": "Peter Oravec CV photo",
+              "fallbackText": "Peter Oravec photo unavailable."
+            },
+            "links": [
+              {
+                "label": "LinkedIn",
+                "href": "https://www.linkedin.com/in/peteroravec"
+              }
+            ]
+          },
+          {
+            "heading": "Bridging the Gap Between Design and Code",
+            "paragraphs": [
+              "I'm Peter Oravec, a creative web developer with over 19 years of experience, currently based in Bratislava, Slovakia.",
+              "My primary focus is on Front-End, JavaScript and Angular, but I also have deep experience as a full-stack developer, especially in the MEAN stack (MongoDB, Express, Angular, Node.js)."
+            ]
+          },
+          {
+            "paragraphs": [
+              "I feel most at home building Single Page Applications (SPAs) in Angular, especially those requiring complex animations and fluid interactivity. However, my strongest asset isn't just my code—it's my ability to act as the vital link between graphics, front-end, and backend.",
+              "I understand the visual language of designers and the structural needs of backend engineers, ensuring a flawless final product."
+            ]
+          }
+        ]
+      },
+      "cv": {
+        "title": "CV",
+        "body": [
+          "GAMO",
+          "SCR",
+          "Kremsa Digital",
+          "Bethereum",
+          "VUB Bank"
+        ]
+      },
+      "projects": {
+        "title": "Projects",
+        "body": [
+          "Projects",
+          "Here is a selection of my personal projects. Besides these experiments, I have a lot of work on other large projects under my belt. You can find my full career path and a more detailed overview in the Resume (CV) section.",
+          "eUTxO.org",
+          "Visual Blockchain Explorer for Cardano",
+          "I have a general interest in crypto and blockchain technologies and this is one of my most complex side projects. It's a visual tool for Cardano cryptocurrency to help you understand the UTXO model and the content of Cardano blocks.",
+          "Serverless Node.js, Google Firestore DB, BlockFrost API, PhaserJS, Tailwind CSS",
+          "Visit: https://eutxo.org",
+          "Angular.sk",
+          "Free online course for Angular 2+",
+          "Angular.sk is my side project. I created a series of instructional videos for beginners who want to learn working with Angular 2+.",
+          "Visit: https://angular.sk",
+          "Peter Oravec portfolio v1",
+          "100% human-coded, no AI",
+          "The first version of this pixel art portfolio, which I programmed entirely by myself without any help from artificial intelligence. Every line of code, every sprite and every mechanic is purely my work. The current version you are on right now is its successor.",
+          "Angular, PhaserJS, Tiled",
+          "Visit: https://old.peteroravec.com"
+        ],
+        "sections": [
+          {
+            "heading": "Projects",
+            "paragraphs": [
+              "Here is a selection of my personal projects. Besides these experiments, I have a lot of work on other large projects under my belt. You can find my full career path and a more detailed overview in the Resume (CV) section."
+            ]
+          },
+          {
+            "heading": "eUTxO.org",
+            "paragraphs": [
+              "Visual Blockchain Explorer for Cardano",
+              "I have a general interest in crypto and blockchain technologies and this is one of my most complex side projects. It's a visual tool for Cardano cryptocurrency to help you understand the UTXO model and the content of Cardano blocks."
+            ],
+            "image": {
+              "src": "assets/images/portfolio/portfolio-eutxo.webp",
+              "alt": "eUTxO.org - Visual Blockchain Explorer",
+              "fallbackText": "eUTxO.org preview unavailable."
+            },
+            "links": [
+              {
+                "label": "Visit",
+                "href": "https://eutxo.org"
+              }
+            ],
+            "tags": [
+              "Serverless Node.js",
+              "Google Firestore DB",
+              "BlockFrost API",
+              "PhaserJS",
+              "Tailwind CSS"
+            ]
+          },
+          {
+            "heading": "Angular.sk",
+            "paragraphs": [
+              "Free online course for Angular 2+",
+              "Angular.sk is my side project. I created a series of instructional videos for beginners who want to learn working with Angular 2+."
+            ],
+            "image": {
+              "src": "assets/images/portfolio/portfolio-angularsk.webp",
+              "alt": "Angular.sk",
+              "fallbackText": "Angular.sk preview unavailable."
+            },
+            "links": [
+              {
+                "label": "Visit",
+                "href": "https://angular.sk"
+              }
+            ]
+          },
+          {
+            "heading": "Peter Oravec portfolio v1",
+            "paragraphs": [
+              "100% human-coded, no AI",
+              "The first version of this pixel art portfolio, which I programmed entirely by myself without any help from artificial intelligence. Every line of code, every sprite and every mechanic is purely my work. The current version you are on right now is its successor."
+            ],
+            "image": {
+              "src": "assets/images/portfolio/peteroravec-v1.webp",
+              "alt": "PeterOravec.com portfolio v1",
+              "fallbackText": "Peter Oravec portfolio v1 preview unavailable."
+            },
+            "links": [
+              {
+                "label": "Visit",
+                "href": "https://old.peteroravec.com"
+              }
+            ],
+            "tags": [
+              "Angular",
+              "PhaserJS",
+              "Tiled"
+            ]
+          }
+        ]
+      },
+      "contact": {
+        "title": "Contact",
+        "body": [
+          "LinkedIn",
+          "Email"
+        ]
+      },
+      "tech": {
+        "title": "Technologies",
+        "body": [
+          "Angular",
+          "Node.js",
+          "Express.js",
+          "JavaScript",
+          "Other technologies"
+        ]
+      },
+      "memo1": {
+        "title": "100% Vibe coding",
+        "body": [
+          "This entire website was created as an experiment with a modern approach to development – so-called vibe coding. My goal was to test the limits of human-AI collaboration when building a complex digital product completely from scratch.",
+          "The result? A fascinating synergy that has its clear rules.",
+          "AI provided speed, but I had to provide direction, logical consistency and the final integration of all parts into a functional whole.",
+          "Context is king: Without deep understanding of the code and the ability to precisely define the task, AI quickly gets tangled up.",
+          "Critical thinking: Every line generated by the machine went through rigorous human review and manual fine-tuning of details that escape the machine.",
+          "This website is proof that AI can push the boundaries of what's possible, but only in the hands of someone who knows exactly what they're doing. It's a brilliant assistant, but you must remain the captain and architect."
+        ],
+        "sections": [
+          {
+            "heading": "100% Vibe coding",
+            "paragraphs": [
+              "This entire website was created as an experiment with a modern approach to development – so-called vibe coding. My goal was to test the limits of human-AI collaboration when building a complex digital product completely from scratch.",
+              "The result? A fascinating synergy that has its clear rules.",
+              "AI provided speed, but I had to provide direction, logical consistency and the final integration of all parts into a functional whole.",
+              "Context is king: Without deep understanding of the code and the ability to precisely define the task, AI quickly gets tangled up.",
+              "Critical thinking: Every line generated by the machine went through rigorous human review and manual fine-tuning of details that escape the machine.",
+              "This website is proof that AI can push the boundaries of what's possible, but only in the hands of someone who knows exactly what they're doing. It's a brilliant assistant, but you must remain the captain and architect."
+            ],
+            "image": {
+              "src": "/assets/images/cards/card1_base.webp",
+              "alt": "Collectible card - 100% Vibe coding",
+              "fallbackText": "Memo 1 card image unavailable."
+            }
+          }
+        ]
+      },
+      "memo2": {
+        "title": "Automatic testing",
+        "body": [
+          "Nobody likes bugs. I personally have experience with automatic testing of both backend and frontend.",
+          "My favorite tools for End-To-End frontend testing include Midnight, Playwright and Puppeteer. With them, I can create tests that run in a CI environment before every deployment or other browser automation.",
+          "When API testing is needed, I use Mocha and Chai libraries. I'm a fan of automation."
+        ],
+        "sections": [
+          {
+            "heading": "Automatic testing",
+            "paragraphs": [
+              "Nobody likes bugs. I personally have experience with automatic testing of both backend and frontend.",
+              "My favorite tools for End-To-End frontend testing include Midnight, Playwright and Puppeteer. With them, I can create tests that run in a CI environment before every deployment or other browser automation.",
+              "When API testing is needed, I use Mocha and Chai libraries. I'm a fan of automation."
+            ],
+            "image": {
+              "src": "/assets/images/cards/card2_base.webp",
+              "alt": "Collectible card - Automated Testing",
+              "fallbackText": "Memo 2 card image unavailable."
+            }
+          }
+        ]
+      },
+      "memo3": {
+        "title": "From Node.js logic to visual art in Canvas",
+        "body": [
+          "I've been specializing in the JS ecosystem for a long time, where I feel at home. Whether it's a robust backend in Node.js and Express.js, dynamic frontends in Angular, or creative visual solutions in Canvas, I see JavaScript as a tool with unlimited possibilities.",
+          "My main strength is that I'm a mix of designer, front-end developer and backend developer in one. It has always been this way and I'm used to covering all the pain points of development."
+        ],
+        "sections": [
+          {
+            "heading": "From Node.js logic to visual art in Canvas",
+            "paragraphs": [
+              "I've been specializing in the JS ecosystem for a long time, where I feel at home. Whether it's a robust backend in Node.js and Express.js, dynamic frontends in Angular, or creative visual solutions in Canvas, I see JavaScript as a tool with unlimited possibilities.",
+              "My main strength is that I'm a mix of designer, front-end developer and backend developer in one. It has always been this way and I'm used to covering all the pain points of development."
+            ],
+            "image": {
+              "src": "/assets/images/cards/card3_base.webp",
+              "alt": "Collectible card - From Node.js to Canvas",
+              "fallbackText": "Memo 3 card image unavailable."
+            }
+          }
+        ]
+      },
+      "memo4": {
+        "title": "Technologies I buried",
+        "body": [
+          "They say what doesn't kill you makes you stronger. Lotus Notes didn't kill me, although it tried very hard. After years of fighting with it, PHP and WordPress, I closed this chapter with relief (and a mild celebration).",
+          "Today I use these battle scars to create better, faster and more stable solutions. Exclusively in JavaScript."
+        ],
+        "sections": [
+          {
+            "heading": "Technologies I buried",
+            "paragraphs": [
+              "They say what doesn't kill you makes you stronger. Lotus Notes didn't kill me, although it tried very hard. After years of fighting with it, PHP and WordPress, I closed this chapter with relief (and a mild celebration).",
+              "Today I use these battle scars to create better, faster and more stable solutions. Exclusively in JavaScript."
+            ],
+            "image": {
+              "src": "/assets/images/cards/card4_base.webp",
+              "alt": "Collectible card - Deprecated Technologies",
+              "fallbackText": "Memo 4 card image unavailable."
+            }
+          }
+        ]
+      },
+      "memo5": {
+        "title": "AI: Competitor or colleague?",
+        "body": [
+          "The ability to write syntactically correct code is no longer rare. AI does it faster, for free, and 24/7.",
+          "However, programming isn't about writing lines, but knowing which lines not to write. AI is just a powerful generator and I am the filter."
+        ],
+        "sections": [
+          {
+            "heading": "AI: Competitor or colleague?",
+            "paragraphs": [
+              "The ability to write syntactically correct code is no longer rare. AI does it faster, for free, and 24/7.",
+              "However, programming isn't about writing lines, but knowing which lines not to write. AI is just a powerful generator and I am the filter."
+            ],
+            "image": {
+              "src": "/assets/images/cards/card5_base.webp",
+              "alt": "Collectible card - AI as Assistant",
+              "fallbackText": "Memo 5 card image unavailable."
+            }
+          }
+        ]
+      },
+      "memo6": {
+        "title": "I'm not a game developer",
+        "body": [
+          "Don't be fooled by the visuals – I'm not a game developer. My priority is large, long-term projects that require clean architecture and logical solutions.",
+          "At the same time, I can be creative and flexible when the situation calls for it."
+        ],
+        "sections": [
+          {
+            "heading": "I'm not a game developer",
+            "paragraphs": [
+              "Don't be fooled by the visuals – I'm not a game developer. My priority is large, long-term projects that require clean architecture and logical solutions.",
+              "At the same time, I can be creative and flexible when the situation calls for it."
+            ],
+            "image": {
+              "src": "/assets/images/cards/card6_base.webp",
+              "alt": "Collectible card - I'm not a game developer",
+              "fallbackText": "Memo 6 card image unavailable."
+            }
+          }
+        ]
+      }
+    },
+    "behavior": {
+      "pauseGame": true,
+      "hideOnLeave": true,
+      "suppressAfterUserClose": true
+    },
+    "modal": {
+      "desktopMaxHeightRatio": 0.9,
+      "mobileMaxHeightRatio": 0.7
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/sprayer.ts",
+    "sourceConstant": "SprayerRuntimeOptions.tuning（五个字段）",
+    "units": {
+      "fleeSpeed": "pxPerSec",
+      "groupDelay": "ms",
+      "sprayDelayMax": "ms",
+      "triggerVerticalMaxTiles": "tile",
+      "triggerHorizontalTiles": "tile"
+    },
+    "notes": [
+      "triggerVerticalMaxTiles / triggerHorizontalTiles 原先写死在 isInsideTrigger() 函数体里（0..2 和 ±2）。现在这两项改成从参数递进来，所以「改不了」这个缺口没有了。",
+      "五项全部走 SprayerRuntimeOptions.tuning，src/ 里那三个常量已经删掉。"
+    ],
+    "verified": "mixed"
+  },
+  "data": {
+    "fleeSpeed": 140,
+    "groupDelay": 300,
+    "sprayDelayMax": 3000,
+    "triggerVerticalMaxTiles": 2,
+    "triggerHorizontalTiles": 2
+  }
+}

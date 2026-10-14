@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "system": "entity",
+    "source": "game/CampusScene.ts",
+    "sourceConstant": "30-step scene shutdown order",
+    "verified": "exact",
+    "notes": [
+      "cleanupSteps 是 cleanupOrder 的长度；receiptFields 从收据对象推导。",
+      "cleanupTimeoutMs、saveStateOnShutdown 和 asyncCleanupRetries 在总表中标为缺口，本配置不新增这些值。",
+      "set1 只交换静态 NPC 与静态人群的清理顺序；两个运行时各自清理资源，没有相互依赖。"
+    ]
+  },
+  "data": {
+    "cleanupOrder": [
+      "scene-destroyed",
+      "entry",
+      "sprayer",
+      "route-crowd",
+      "static-npc",
+      "static-crowd",
+      "bug-crowd",
+      "venue-crowd",
+      "dancing-crowd",
+      "stop-ai-smoke",
+      "fog",
+      "police-colliders",
+      "vehicle",
+      "factory-smoke",
+      "train",
+      "entry-camera",
+      "entry-train",
+      "camera",
+      "camera-lease",
+      "map",
+      "zone",
+      "interact",
+      "content-lease",
+      "roof",
+      "footstep",
+      "player",
+      "player-visual",
+      "joystick",
+      "movement",
+      "scheduler"
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserStaticNpcRuntime.ts",
+    "sourceConstant": "STATIC_NPC_RUNTIME_ASSETS",
+    "units": {
+      "url": "text",
+      "frameWidth": "pixel",
+      "frameHeight": "pixel",
+      "frameCount": "count"
+    },
+    "notes": [
+      "这份管「贴图怎么切」，不管「谁站在哪」——站位在 static-npc-configs.json。",
+      "[].key 必须和 static-npc-configs.json 里的 spriteKey 一模一样。写错了不会报错，那个人直接不显示。",
+      "frameWidth/frameHeight 是「一张大图里每小格多大」，不是显示大小。显示大小是 static-npc-configs.json 里的 scale。",
+      "reading 和 eating 是 64×64，猫是 48×48——三种规格不一样，别统一。",
+      "frameCount 是这张图上一共几帧，也就是动画循环播几帧。三张都是 16 帧。**原先这个数写死在代码里**（game/PhaserStaticNpcRuntime.ts 的 Array.from({ length: 16 })），换一张帧数不同的图就会出现「人照样站着，但动画播不全」——不报错，看着不对。",
+      "16 这个数的出处：原版把这三张图登记进加载队列时写的是 startFrame: 0, endFrame: 15，也就是 0~15 共 16 帧。"
+    ],
+    "verified": "exact"
+  },
+  "data": [
+    {
+      "key": "npc-special-reading",
+      "url": "/sprites/special/npc-special-reading.webp",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameCount": 16
+    },
+    {
+      "key": "npc-special-eating",
+      "url": "/sprites/special/npc-special-eating.webp",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameCount": 16
+    },
+    {
+      "key": "npc-cat-licking",
+      "url": "/sprites/special/npc-cat-licking.webp",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 16
+    }
+  ]
+}
