@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "system": "camera",
+    "source": "src/camera/params.ts; src/camera/sequence.ts; src/camera/runtime.ts",
+    "sourceConstant": "CAMERA_ZOOM / FOLLOW_LERP / FOLLOW_OFFSET_X / FOLLOW_OFFSET_Y / DEADZONE_X / DEADZONE_Y / ROUND_PIXELS / CAMERA_SEQUENCE / CAMERA_END_TWEEN_DURATION_MS / CAMERA_END_TWEEN_EASE / sequence tween Linear ease",
+    "verified": "exact",
+    "notes": [
+      "相机边界与开场起点由 SYS-WORLD 提供，不在此重复存储。",
+      "nativeScale 的设备像素比来源与三个换算公式属于平台机制和算法。",
+      "physicsFps 归 SYS-APP；camera.effects 由设备运行时探测插件是否安装。"
+    ]
+  },
+  "data": {
+    "settings": {
+      "zoom": 1,
+      "lerpX": 1,
+      "lerpY": 1,
+      "followOffsetX": 0,
+      "followOffsetY": 0,
+      "deadzoneX": 0,
+      "deadzoneY": 0,
+      "roundPixels": true
+    },
+    "sequence": [
+      { "x": 944, "y": 928, "duration": 0, "stayDuration": 7000 },
+      { "x": 1552, "y": 1216, "duration": 15000, "stayDuration": 7000 },
+      { "x": 912, "y": 1136, "duration": 15000, "stayDuration": 5000 },
+      { "x": 1216, "y": 656, "duration": 15000, "stayDuration": 5000 },
+      { "x": 2048, "y": 2048, "duration": 15000, "stayDuration": 7000 },
+      { "x": 944, "y": 928, "duration": 15000, "stayDuration": 5000 }
+    ],
+    "pointEase": "Linear",
+    "returnDuration": 3000,
+    "returnEase": "Power2"
+  }
+}

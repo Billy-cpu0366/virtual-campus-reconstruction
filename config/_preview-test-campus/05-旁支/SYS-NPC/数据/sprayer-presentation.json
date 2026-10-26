@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserSprayerRuntime.ts",
+    "sourceConstant": "SPRAYER_RUNTIME_ASSETS（帧规格）+ createAnimations() 里的字面量 6（帧速）",
+    "units": {
+      "url": "text",
+      "frameWidth": "pixel",
+      "frameHeight": "pixel",
+      "startFrame": "count",
+      "endFrame": "count"
+    },
+    "notes": [
+      "这份管喷水器「贴图怎么切、动画多快」，管「在哪、往哪跑」的是 sprayer-configs.json。",
+      "两张图规格完全不同：站着喷水是 64×64 共 16 帧；跑动是 48×48 共 64 帧（8 个方向 × 每方向 8 帧）。换图时必须和美术给的排布一致。",
+      "frameRate 是这张图上的动画每秒放几帧。两张图各有一份，因为站着喷水和跑动本来就是两套动画。**喷水器是 6，比人物走路那套（10）慢**——这是原版就有的差别，不是笔误，照抄不动。",
+      "url 是网页上的取图地址，和其它几份呈现层表（static-npc-presentation.json 等）写法一致：图放在 public/sprites/ 下，由 scripts/prepare-runtime-assets.mjs 从原站镜像拷过去。**原先这里记的是 sourceFile（项目根目录下的文件路径），靠 new URL(..., import.meta.url) 现拼地址**——那种写法打包器静态分析不了，动态拼出来的路径会被解析成一个空值，贴图登记不进 Phaser，整个动态世界起不来（实机验证见 2026-09-21）。换图现在是换 public/sprites/ 下那个文件，或者改这里的 url。",
+      "[].key 是代码里认的名字，改名要连代码一起改，一般不动。",
+      "标成 mixed 而不是 exact 的原因：帧规格（frameWidth 等）能逐个和源码对上，但 url 是把源码那句 new URL(...) 的结果改成运行期地址后的写法，不是原样的字符串；frameRate 原先也不是导出常量，是直接写在 createAnimations() 里的字面量。所以不算全量可比对。"
+    ],
+    "verified": "mixed"
+  },
+  "data": [
+    {
+      "key": "npc-sprayer",
+      "url": "/sprites/npc-sprayer.webp",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "startFrame": 0,
+      "endFrame": 15,
+      "frameRate": 6
+    },
+    {
+      "key": "npc-sprayer-running",
+      "url": "/sprites/npc-sprayer-running.webp",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "startFrame": 0,
+      "endFrame": 63,
+      "frameRate": 6
+    }
+  ]
+}

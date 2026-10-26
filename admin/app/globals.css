@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+:root { color-scheme: light; }
+body { margin: 0; background: #f5f7fb; color: #152238; font-family: Arial, "Microsoft YaHei", sans-serif; }
+button, input, textarea { font: inherit; }

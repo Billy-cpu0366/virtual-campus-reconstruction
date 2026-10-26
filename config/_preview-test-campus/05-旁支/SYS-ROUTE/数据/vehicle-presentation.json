@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "system": "route",
+    "source": "game/PhaserVehicleRuntime.ts",
+    "sourceConstant": "VEHICLE_RUNTIME_ASSETS",
+    "notes": [
+      "这份故意没有 meta.units：顶层字段是五个角色名（都是对象），没有单位可标。url、frameWidth 这些的单位写在 逻辑/shapes.ts 里，校验照样管得住。",
+      "这份管「用哪几张图、每帧切多大」，不管「车停在哪儿」——位置在 vehicle-config.json。",
+      "键名（helicopterBody / helicopterRotorBack / helicopterRotorMain / helicopterHighResolution / policeBody）是**代码里写死的角色名**，不能自己加。所以这份的键用 object 声明而不是 record——加一个角色要同时改代码。",
+      "helicopterBody 和 policeBody 是要切片子的动画图，所以多 frameWidth / frameHeight；另外三张（尾桨、主旋翼、高清层）是整张图，没有这两个字段。",
+      "frameWidth / frameHeight 是「一张大图里每小格多大」，不是显示大小。显示大小由 vehicle-config.json 里的 scale 和 bladeDisplaySize 决定。两张都是 84×84。",
+      "url 是网页上的取图地址（public/sprites/ 下），和 SYS-NPC 那几份写得一样。",
+      "换图、换图上的帧排布都只改这个文件。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "helicopterBody": {
+      "key": "npc-helicopter",
+      "url": "/sprites/npc-helicopter.webp",
+      "frameWidth": 84,
+      "frameHeight": 84
+    },
+    "helicopterRotorBack": {
+      "key": "npc-helicopter-rotor-back",
+      "url": "/sprites/npc-helicopter-rotor-back.webp"
+    },
+    "helicopterRotorMain": {
+      "key": "npc-helicopter-rotor-main",
+      "url": "/sprites/npc-helicopter-rotor-main.webp"
+    },
+    "helicopterHighResolution": {
+      "key": "npc-helicopter-high-resolution",
+      "url": "/sprites/npc-helicopter-high-resolution.webp"
+    },
+    "policeBody": {
+      "key": "car-police",
+      "url": "/sprites/cars/car-police.webp",
+      "frameWidth": 84,
+      "frameHeight": 84
+    }
+  }
+}

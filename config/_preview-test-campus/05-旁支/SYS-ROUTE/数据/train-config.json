@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "system": "route",
+    "source": "src/route/train.ts",
+    "sourceConstant": "TRAIN_START_X / TRAIN_END_X / TRAIN_Y / TRAIN_EXIT_DISTANCE / TRAIN_ENTRY_DURATION / TRAIN_HOLD_DURATION / TRAIN_DEPARTURE_DURATION / TRAIN_TILE_SIZE / TRAIN_COLLISION_TOP / TRAIN_COLLISION_BOTTOM / TRAIN_COLLISION_X_ZONES",
+    "units": {
+      "endX": "pixel",
+      "y": "pixel",
+      "entryDurationMs": "ms",
+      "holdDurationMs": "ms",
+      "departureDurationMs": "ms",
+      "tileSize": "pixel",
+      "collisionTop": "pixel",
+      "collisionBottom": "pixel"
+    },
+    "notes": [
+      "这列火车不是「从地图这边开到那边」，而是从地图外开进来、停一会儿、再开出地图外。所以 startX（2480）和 exitDistance（4000）都比世界宽度（2240 像素）大——这是对的，别当成写错了。也正因为它们超出 0..2240 的正常像素范围，这两个字段没标 pixel 单位：标了会被范围校验拦下。",
+      "startX 2_480 → 停站位置 endX 480，中间用 cubicEaseOut（先快后慢）减速进站；离站用 quadEaseIn（先慢后快）加速走掉。这两条**曲线是算法不是数据**，所以没有搬进来——换一段曲线等于换运动方式，不是调参。",
+      "源码里时长写成 5_000 这种带下划线的数字，JSON 不合法，本文件写成 5000。",
+      "collisionTop 323 的来由：它要比出生点玩家的脚底更低一点。不然火车一进站就压在玩家身上，开局就卡住。",
+      "collisionXZones 的四段是火车挡路的横向区间，相邻两段故意重叠 5 像素（0-365、360-720、715-1078、1073-1435）。重叠是为了让火车移动时两段交接处不漏出一格空隙——把它改成首尾相接会看到一格宽的缝。",
+      "collisionXZones 里的 left/right 是**火车没动时**的本地坐标，实际挡哪几格要用「当前 x + 本地坐标 × collisionScale」现算。collisionScale 是呈现层的缩放，见 train-presentation.json。",
+      "状态机（idle / arriving / holding / departing / complete / cancelled / shutdown）是类型不是数据，没搬进来。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "startX": 2480,
+    "endX": 480,
+    "y": 310,
+    "exitDistance": 4000,
+    "entryDurationMs": 5000,
+    "holdDurationMs": 3000,
+    "departureDurationMs": 9000,
+    "tileSize": 16,
+    "collisionTop": 323,
+    "collisionBottom": 359,
+    "collisionXZones": [
+      {
+        "left": 0,
+        "right": 365
+      },
+      {
+        "left": 360,
+        "right": 720
+      },
+      {
+        "left": 715,
+        "right": 1078
+      },
+      {
+        "left": 1073,
+        "right": 1435
+      }
+    ]
+  }
+}

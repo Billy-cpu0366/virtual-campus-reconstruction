@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/staticNpc.ts",
+    "sourceConstant": "StaticNpcRuntimeOptions.viewportMargin（字段定义）",
+    "units": {
+      "viewportMargin": "pixel"
+    },
+    "verified": "exact"
+  },
+  "data": {
+    "viewportMargin": 300
+  }
+}

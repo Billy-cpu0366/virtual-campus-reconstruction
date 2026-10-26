@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "system": "chunk",
+    "source": "game/CampusScene.ts; src/chunk/targets.ts; src/chunk/data-store.ts",
+    "sourceConstant": "CHUNK_UPDATE_INTERVAL_MS / playerNeighborhood.radius / cameraVisibleChunks.padding / ChunkDataStoreOptions.maxAttempts",
+    "units": {
+      "updateIntervalMs": "ms",
+      "playerNeighborhoodRadius": "count",
+      "cameraPadding": "count",
+      "maxAttempts": "count"
+    },
+    "verified": "exact",
+    "notes": [
+      "文件名 chunk{index}.json 与 index = y × 横向块数 + x 是推导规则，保留在算法中。",
+      "entryPrefetchPadding 在总表中标为缺口，现有代码没有独立取值，本轮不补。",
+      "maxAttempts 与网络协议层描述同一重试次数，以此字段为唯一运行期数值。"
+    ]
+  },
+  "data": {
+    "updateIntervalMs": 500,
+    "playerNeighborhoodRadius": 1,
+    "cameraPadding": 1,
+    "maxAttempts": 3
+  }
+}
