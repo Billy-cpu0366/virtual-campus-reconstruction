@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserBugCrowdRuntime.ts",
+    "sourceConstant": "BUG_CROWD_FRAME_WIDTH / _FRAME_HEIGHT / _FRAME_COUNT / _FRAME_RATE / _DISPLAY_SCALE / _ORIGIN / _FACING_FRAME_START",
+    "units": {
+      "frameWidth": "pixel",
+      "frameHeight": "pixel",
+      "frameCount": "count",
+      "origin": "ratio",
+      "facingFrameStart": "count"
+    },
+    "notes": [
+      "这是虫子「长什么样」，虫子「有几只、去哪」在 bug-crowd-config.json。",
+      "frameCount 24 是整张雪碧图一共 24 帧；facingFrameStart 是四个方向的起始帧号——南 0~5、北 6~11、西 12~17、东 18~23，一段 6 帧。",
+      "「一段 6 帧」不用单独填：代码拿 frameCount ÷ 方向数（24 ÷ 4 = 6）算出来。**原先这 6 是写死在代码里的**，换一张每方向帧数不同的图（比如 32 帧、一段 8 帧），虫子会播错帧——不报错，只是看着不对。现在改 frameCount 和 facingFrameStart 两处就够。",
+      "换虫子贴图时，这四段必须和美术给的排布一致，否则虫子会朝反方向走。",
+      "displayScale 0.63 是缩到多小，scale 越大虫子看着越大。",
+      "origin 是「图片的哪个点对齐到地面坐标」——y 0.85 表示偏下方，改错了虫子会浮空或钻进地里。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "frameWidth": 38,
+    "frameHeight": 38,
+    "frameCount": 24,
+    "frameRate": 10,
+    "displayScale": 0.63,
+    "origin": { "x": 0.5, "y": 0.85 },
+    "facingFrameStart": { "south": 0, "north": 6, "west": 12, "east": 18 }
+  }
+}

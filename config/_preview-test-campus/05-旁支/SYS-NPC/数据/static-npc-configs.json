@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/staticNpc.ts",
+    "sourceConstant": "StaticNpcConfig（元素类型）",
+    "units": {
+      "tileX": "tile",
+      "tileY": "tile"
+    },
+    "notes": [
+      "frameDurations 是可选字段——只对「某几帧要额外停留」的角色写。不写就纯按 frameRate 播。",
+      "源码里 duration 写成 2_000 这种带下划线的数字，JSON 不合法，本文件写成 2000。",
+      "spriteKey 是资源 key，不是文件路径；文件在 public/ 下由构建期准备。"
+    ],
+    "verified": "exact"
+  },
+  "data": [
+    {
+      "id": "special-reading",
+      "spriteKey": "npc-special-reading",
+      "tileX": 72,
+      "tileY": 53,
+      "scale": 0.9,
+      "frameRate": 3,
+      "frameDurations": [
+        {
+          "frame": 1,
+          "duration": 2000
+        },
+        {
+          "frame": 9,
+          "duration": 3000
+        }
+      ]
+    },
+    {
+      "id": "special-eating",
+      "spriteKey": "npc-special-eating",
+      "tileX": 54,
+      "tileY": 63,
+      "scale": 0.73,
+      "frameRate": 4
+    },
+    {
+      "id": "cat-licking",
+      "spriteKey": "npc-cat-licking",
+      "tileX": 12,
+      "tileY": 106,
+      "scale": 1,
+      "frameRate": 6,
+      "frameDurations": [
+        {
+          "frame": 0,
+          "duration": 3000
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CampusMeta {
+  slug        String   @id
+  displayName String
+  status      String   @default("draft")
+  basedOn     String?
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Revision {
+  id         String   @id @default(cuid())
+  campusSlug String
+  kind       String
+  number     Int
+  dir        String
+  fileCount  Int
+  createdBy  String
+  note       String?
+  createdAt  DateTime @default(now())
+  @@unique([campusSlug, number])
+  @@index([campusSlug, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  campusSlug String?
+  path       String?
+  beforeHash String?
+  afterHash  String?
+  detail     String?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  @@index([campusSlug, createdAt])
+  @@index([action, createdAt])
+}

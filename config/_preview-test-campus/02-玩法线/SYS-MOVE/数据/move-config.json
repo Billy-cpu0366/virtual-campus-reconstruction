@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "system": "move",
+    "source": "src/move/body.ts; src/move/walls.ts",
+    "sourceConstant": "PLAYER_BODY_WIDTH / PLAYER_BODY_HEIGHT / PLAYER_DRAG / PLAYER_MAX_VELOCITY / COLLIDE_WORLD_BOUNDS / COLLISION_WALL_LAYER_NAMES / WALKABLE / BLOCKED / out-of-bounds behavior",
+    "verified": "exact",
+    "notes": [
+      "碰撞盒 offsetX=(player.displaySize-body.width)/2，offsetY=player.displaySize-body.height-4；这两项是派生值，保持公式，不另存一份。",
+      "速度来源、被挡住的判定和标志重置属于机制，留在 src。",
+      "碰撞层名称来自 SYS-LAYER；本文件只登记玩家要碰撞的层。"
+    ]
+  },
+  "data": {
+    "body": { "width": 20, "height": 8 },
+    "drag": 300,
+    "maxVelocity": 200,
+    "collideWorldBounds": true,
+    "collisionLayerNames": ["walls", "bridge1_up_wall", "bridge1_down_wall", "bridge2_up_wall", "bridge2_down_wall"],
+    "walkableValue": 0,
+    "blockedValue": 1,
+    "outOfBoundsIsWalkable": false
+  }
+}

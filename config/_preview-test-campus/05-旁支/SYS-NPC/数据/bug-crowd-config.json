@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/bugCrowd.ts",
+    "sourceConstant": "BugCrowdConfig（字段定义）",
+    "units": {
+      "startTiles": "tile",
+      "endTiles": "tile",
+      "movementSpeed": "pxPerSec",
+      "speedVariation": "ratio",
+      "wanderDistance": "pixel",
+      "wanderInterval": "ms"
+    },
+    "notes": [
+      "speedVariation 在本系统是单个乘数（.3 表示 ±30%），不是 {min,max} 区间——别照 routeCrowd 的写法套。",
+      "原来的 mode（\"wander\"）已经拿掉了：它的合法取值只有这一个，等于写死，不是配置项。现在它是 src/npc/bugCrowd.ts 里的 BugCrowdMode 类型。",
+      "randomPositions / wanderDistance / maxActiveInViewport 这三项全仓都没有消费者——写多少都不影响画面。它们先原样留着，因为「让它们生效」是改算法，不属于抽配置这一步。"
+    ],
+    "verified": "exact"
+  },
+  "data": {
+    "id": "bug-area",
+    "startTiles": [
+      {
+        "x": 5,
+        "y": 128
+      },
+      {
+        "x": 9,
+        "y": 129
+      },
+      {
+        "x": 13,
+        "y": 130
+      },
+      {
+        "x": 17,
+        "y": 131
+      },
+      {
+        "x": 21,
+        "y": 132
+      },
+      {
+        "x": 7,
+        "y": 133
+      },
+      {
+        "x": 11,
+        "y": 128
+      },
+      {
+        "x": 15,
+        "y": 129
+      },
+      {
+        "x": 19,
+        "y": 130
+      }
+    ],
+    "endTiles": [
+      {
+        "x": 23,
+        "y": 133
+      },
+      {
+        "x": 19,
+        "y": 132
+      },
+      {
+        "x": 15,
+        "y": 131
+      },
+      {
+        "x": 11,
+        "y": 130
+      },
+      {
+        "x": 7,
+        "y": 129
+      },
+      {
+        "x": 21,
+        "y": 128
+      },
+      {
+        "x": 17,
+        "y": 133
+      },
+      {
+        "x": 13,
+        "y": 132
+      },
+      {
+        "x": 9,
+        "y": 131
+      }
+    ],
+    "npcCount": 10,
+    "movementSpeed": 15,
+    "speedVariation": 0.3,
+    "randomPositions": true,
+    "wanderDistance": 24,
+    "wanderInterval": {
+      "minMs": 2000,
+      "maxMs": 4000
+    },
+    "sprite": "npc-bug",
+    "maxActiveInViewport": 40
+  }
+}

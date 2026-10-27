@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserDancingCrowdRuntime.ts",
+    "sourceConstant": "（内联字面量，源码里没有命名常量）",
+    "units": {
+      "textureKeyPrefix": "text",
+      "textureUrlPrefix": "text",
+      "textureUrlSuffix": "text",
+      "textureFrameWidth": "pixel",
+      "textureFrameHeight": "pixel",
+      "animationFrameStart": "count",
+      "animationFrameEnd": "count"
+    },
+    "notes": [
+      "这份管跳舞人群「贴图怎么找、怎么切」，管「在哪个范围跳、几个人」的是 dancing-crowd-config.json。",
+      "贴图是一人一张：key 和文件名都按方向拼出来（npc-dancing-down / npc-dancing-up / …）。有哪几个方向由 dancing-crowd-config.json 的 directions 决定，这里只给拼接规则。",
+      "整套贴图统一 48×48、每个方向 16 帧——和喷水器、虫子都不一样。",
+      "源码里这几项是写死在压缩成一行的方法体里的，没有命名常量，所以只能手抄，标成 manual。",
+      "depth / scale / frameRate 这三项不在这份表里：它们是每张图一样的显示参数，住在 dancing-crowd-config.json，适配器直接读那份（原先适配器自己写死 500 / 0.9 / 6，接线后已改成读配置）。"
+    ],
+    "verified": "manual"
+  },
+  "data": {
+    "textureKeyPrefix": "npc-dancing-",
+    "textureUrlPrefix": "/sprites/special/npc-dancing-",
+    "textureUrlSuffix": ".webp",
+    "textureFrameWidth": 48,
+    "textureFrameHeight": 48,
+    "animationFrameStart": 0,
+    "animationFrameEnd": 15
+  }
+}

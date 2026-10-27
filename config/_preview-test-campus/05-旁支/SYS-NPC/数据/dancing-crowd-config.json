@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/dancingCrowd.ts",
+    "sourceConstant": "DancingCrowdConfig（字段定义）",
+    "units": {
+      "minTileX": "tile",
+      "minTileY": "tile",
+      "maxTileX": "tile",
+      "maxTileY": "tile"
+    },
+    "verified": "exact",
+    "notes": [
+      "原来的 directions（down/left/right/up）已经拿掉了，它不是配置点：它同时是类型——src/npc/dancingCrowd.ts 里的 DancingDirection 就是这四个字符串拼出来的联合类型，每个人的 direction 字段靠它定类型；搬进配置就得把这个类型放宽成普通字符串。现在它是同一文件里的 DANCING_DIRECTIONS，和类型放在一起。（原先这里写的理由是「下载发生在读配置之前」，那是错的，2026-09-21 订正：配置就是在下载之前读的，静态人群和路线人群的贴图名单本身就是配置。）"
+    ]
+  },
+  "data": {
+    "minTileX": 114,
+    "minTileY": 100,
+    "maxTileX": 131,
+    "maxTileY": 102,
+    "npcCount": 8,
+    "depth": 500,
+    "scale": 0.9,
+    "frameRate": 6
+  }
+}

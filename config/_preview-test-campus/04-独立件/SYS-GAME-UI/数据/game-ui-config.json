@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "system": "game-ui",
+    "source": "src/game-ui/app-shell.ts",
+    "sourceConstant": "MOBILE_WIDTH / FOCUS_RING / root padding",
+    "verified": "exact",
+    "notes": [
+      "This file contains the JS-owned responsive shell values. CSS values in index.html remain pending a landing mechanism.",
+      "focusRing shares its current literal with SYS-INTERACT; SYS-GAME-UI uses the value injected into DomAppUi."
+    ]
+  },
+  "data": {
+    "breakpoint": { "mobile": 767 },
+    "focusRing": "3px solid #0b57d0",
+    "rootPadding": { "desktop": "24px", "mobile": "16px" }
+  }
+}

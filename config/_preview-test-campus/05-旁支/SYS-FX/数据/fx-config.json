@@ -1,0 +1,350 @@
+{
+  "meta": {
+    "system": "fx",
+    "source": "src/fx/* and game/Phaser*Runtime.ts",
+    "sourceConstant": "validated values in SYS-FX field table §16",
+    "verified": "exact",
+    "notes": [
+      "footstep.depth and footstep.tileGids reuse SYS-LAYER values; particle asset keys and URLs stay in the asset runtime.",
+      "fog.quantity is the declared data value 4; presentationQuantity is the separate renderer cap 2.",
+      "concert-lighting bounds use pixel coordinates; laser sources are derived from the source tile centers in the table.",
+      "set1 changes the factory smoke anchor x only, preserving the measured 72px presentation depth gap."
+    ]
+  },
+  "data": {
+    "footstep": {
+      "textureKey": "footprint",
+      "poolSize": 95,
+      "alpha": 0.6,
+      "spacing": 14,
+      "visibleMs": 10000,
+      "fadeMs": 1000,
+      "speedThreshold": 5,
+      "maxPlayerDepth": 1000
+    },
+    "factorySmoke": {
+      "x": 808,
+      "y": 539.2,
+      "width": 7,
+      "widthEnd": 32,
+      "pathHeight": 35,
+      "quantity": 2,
+      "frequency": 80,
+      "scaleStart": 1.6,
+      "alphaStart": 0.1,
+      "maxAlpha": 0.25,
+      "alphaEnd": 0,
+      "scaleEnd": 4,
+      "lifespan": 2000,
+      "depth": 500,
+      "reactCars": false,
+      "reactPlayer": false,
+      "viewportPadding": 100,
+      "presentationDepth": 3400
+    },
+    "fog": {
+      "polygon": [
+        {
+          "x": 1560,
+          "y": 1160
+        },
+        {
+          "x": 1560,
+          "y": 1176
+        },
+        {
+          "x": 1576,
+          "y": 1192
+        },
+        {
+          "x": 1592,
+          "y": 1176
+        },
+        {
+          "x": 1608,
+          "y": 1176
+        },
+        {
+          "x": 1624,
+          "y": 1192
+        },
+        {
+          "x": 1640,
+          "y": 1208
+        },
+        {
+          "x": 1656,
+          "y": 1224
+        },
+        {
+          "x": 1656,
+          "y": 1240
+        },
+        {
+          "x": 1672,
+          "y": 1256
+        },
+        {
+          "x": 1656,
+          "y": 1272
+        },
+        {
+          "x": 1656,
+          "y": 1288
+        },
+        {
+          "x": 1656,
+          "y": 1304
+        },
+        {
+          "x": 1640,
+          "y": 1288
+        },
+        {
+          "x": 1624,
+          "y": 1272
+        },
+        {
+          "x": 1608,
+          "y": 1256
+        },
+        {
+          "x": 1592,
+          "y": 1256
+        },
+        {
+          "x": 1576,
+          "y": 1256
+        },
+        {
+          "x": 1560,
+          "y": 1256
+        },
+        {
+          "x": 1544,
+          "y": 1240
+        },
+        {
+          "x": 1528,
+          "y": 1240
+        },
+        {
+          "x": 1512,
+          "y": 1240
+        },
+        {
+          "x": 1496,
+          "y": 1256
+        },
+        {
+          "x": 1496,
+          "y": 1240
+        },
+        {
+          "x": 1496,
+          "y": 1224
+        },
+        {
+          "x": 1512,
+          "y": 1208
+        },
+        {
+          "x": 1512,
+          "y": 1192
+        },
+        {
+          "x": 1528,
+          "y": 1192
+        },
+        {
+          "x": 1544,
+          "y": 1176
+        }
+      ],
+      "cellSize": 32,
+      "viewportPadding": 32,
+      "clearAhead": 35,
+      "clearWidth": 85,
+      "clearHeight": 35,
+      "carClearRadius": 40,
+      "respawnMs": 500,
+      "depth": 1100,
+      "blendMode": "NORMAL",
+      "scale": 8,
+      "alpha": 0.3,
+      "speed": 5,
+      "quantity": 4,
+      "frequency": 20,
+      "lifespan": {
+        "min": 350,
+        "max": 2000
+      },
+      "tint": [
+        16724787,
+        16716049,
+        13369344
+      ],
+      "presentationQuantity": 2
+    },
+    "stopAiSmoke": {
+      "sites": [
+        {
+          "site": "canister-1",
+          "x": 1800,
+          "y": 1352,
+          "graphicColor": 5596757,
+          "graphicAngle": -25,
+          "angle": {
+            "min": -30,
+            "max": 30
+          }
+        },
+        {
+          "site": "canister-2",
+          "x": 1480,
+          "y": 1272,
+          "graphicColor": 13369344,
+          "graphicAngle": -15,
+          "angle": {
+            "min": -40,
+            "max": 20
+          }
+        },
+        {
+          "site": "canister-3",
+          "x": 1672,
+          "y": 1304,
+          "graphicColor": 13369344,
+          "graphicAngle": 15,
+          "angle": {
+            "min": 160,
+            "max": 220
+          }
+        }
+      ],
+      "layers": [
+        "back",
+        "main",
+        "front"
+      ],
+      "layerSettings": {
+        "back": {
+          "alphaStart": 0.6,
+          "alphaEnd": 0.15,
+          "depth": 350
+        },
+        "main": {
+          "alphaStart": 1,
+          "alphaEnd": 0.3,
+          "depth": 1160
+        },
+        "front": {
+          "alphaStart": 0.6,
+          "alphaEnd": 0.15,
+          "depth": 1550
+        }
+      },
+      "speed": {
+        "min": 15,
+        "max": 35
+      },
+      "scale": {
+        "start": 0.1,
+        "end": 3
+      },
+      "lifespan": 1800,
+      "quantity": 2,
+      "frequency": 20,
+      "gravityY": -20,
+      "emitZoneRadius": 3,
+      "tint": [
+        16724787,
+        16716049,
+        13369344
+      ],
+      "blendMode": "NORMAL",
+      "emitterViewportPadding": 53,
+      "graphicViewportPadding": 100,
+      "visibilityCheckMs": 500,
+      "windStartDelayMs": 6000,
+      "windMinDelayMs": 3000,
+      "windMaxDelayMs": 6000,
+      "windMinDurationMs": 1500,
+      "windMaxDurationMs": 4000
+    },
+    "concertLighting": {
+      "bounds": {
+        "left": 1648,
+        "top": 400,
+        "right": 2224,
+        "bottom": 848
+      },
+      "darkZoneDepth": 1600,
+      "spotlights": [
+        {
+          "x": 1860,
+          "y": 600,
+          "radius": 60,
+          "phase": 0
+        },
+        {
+          "x": 2040,
+          "y": 680,
+          "radius": 50,
+          "phase": 2.1
+        }
+      ],
+      "colorLights": [
+        {
+          "x": 1850,
+          "y": 690,
+          "color": 16720384,
+          "phase": 1.2
+        },
+        {
+          "x": 2030,
+          "y": 590,
+          "color": 35071,
+          "phase": 3.4
+        }
+      ],
+      "lasers": [
+        {
+          "phase": 0,
+          "tileX": 117,
+          "tileY": 36
+        },
+        {
+          "phase": 0.7,
+          "tileX": 125,
+          "tileY": 36
+        },
+        {
+          "phase": 1.4,
+          "tileX": 110,
+          "tileY": 36
+        },
+        {
+          "phase": 2.1,
+          "tileX": 132,
+          "tileY": 36
+        },
+        {
+          "phase": 2.8,
+          "tileX": 113,
+          "tileY": 44
+        },
+        {
+          "phase": 3.5,
+          "tileX": 128,
+          "tileY": 44
+        }
+      ],
+      "laserDepth": 1650
+    },
+    "playerVisual": {
+      "stepMs": 33.333333333333336,
+      "snapDistance": 96
+    }
+  }
+}

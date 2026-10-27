@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "src/npc/routeCrowd.ts",
+    "sourceConstant": "RouteCrowdRuntimeOptions（三个字段）",
+    "units": {
+      "baseSpeed": "pxPerSec",
+      "startBatchSize": "perFrame",
+      "safeMargin": "pixel"
+    },
+    "notes": [
+      "safeMargin 原先是不导出的模块级常量 ROUTE_CROWD_SAFE_MARGIN。现在三项都由调用方递进来（RouteCrowdRuntimeOptions），「没有导出所以对不上」这个缺口没有了。",
+      "startBatchSize 是「开场每帧最多算几条路径」：写 1 开场会明显慢一拍，写太大开场会卡一下。4 是原值。"
+    ],
+    "verified": "mixed"
+  },
+  "data": {
+    "baseSpeed": 48,
+    "startBatchSize": 4,
+    "safeMargin": 100
+  }
+}

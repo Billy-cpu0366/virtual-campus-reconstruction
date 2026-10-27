@@ -1,0 +1,6 @@
+.next/
+node_modules/
+admin-data/
+.env*
+!.env.example
+*.tsbuildinfo

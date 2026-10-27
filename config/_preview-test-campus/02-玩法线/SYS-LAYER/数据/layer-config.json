@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "system": "layer",
+    "source": "src/layer/strategy.ts; src/layer/depth.ts; src/layer/bridge-zones.ts; game/CampusScene.ts; game/PhaserWorldRenderer.ts; game/PhaserFootstepRuntime.ts",
+    "sourceConstant": "LAYER_STRATEGIES / BRIDGES / ROOF_GROUPS / playerDepth formula / BRIDGE_PLAYER_DEPTH / ROOF_FADE_MS / FOOTSTEP_DEPTH / forced collision GIDs / bridge zones / roof bounds / roof tween ease",
+    "verified": "mixed",
+    "notes": [
+      "wallsDepth 和 roofLayers 可由 strategies、roofGroups 派生，所以只保留派生结果，不在数据里重复存。",
+      "BridgeZone 与 RoofGroup 的类型语义由 src/layer 保持；配置只提供对应数据。",
+      "单值状态名、-1 空格语义及屋顶 alpha 算法留在 src。"
+    ]
+  },
+  "data": {
+    "strategies": [
+      { "name": "layer1", "role": "visual", "depth": 100 },
+      { "name": "layer2", "role": "visual", "depth": 200 },
+      { "name": "layer3", "role": "visual", "depth": 300 },
+      { "name": "layer4", "role": "visual", "depth": 400 },
+      { "name": "layer5", "role": "visual", "depth": 500 },
+      { "name": "layer6", "role": "visual", "depth": 1500 },
+      { "name": "layer7", "role": "visual", "depth": 1600 },
+      { "name": "layer8", "role": "visual", "depth": 1700 },
+      { "name": "layer9", "role": "visual", "depth": 1800 },
+      { "name": "layer10", "role": "visual", "depth": 1900 },
+      { "name": "cars", "role": "marker", "depth": 550, "markerGids": [69345, 69346, 69347, 69348, 69349, 69350, 69351, 69352] },
+      { "name": "roof_concert", "role": "dynamic-visual", "depth": 3000 },
+      { "name": "roof_concert2", "role": "dynamic-visual", "depth": 3100 },
+      { "name": "roof_factory", "role": "dynamic-visual", "depth": 3200 },
+      { "name": "roof_factory2", "role": "dynamic-visual", "depth": 3300 },
+      { "name": "bridge1_up_wall", "role": "dynamic-collision", "depth": 3500 },
+      { "name": "bridge1_down_wall", "role": "dynamic-collision", "depth": 3500 },
+      { "name": "bridge2_up_wall", "role": "dynamic-collision", "depth": 3500 },
+      { "name": "bridge2_down_wall", "role": "dynamic-collision", "depth": 3500 },
+      { "name": "walls", "role": "collision", "depth": 550 },
+      { "name": "particles", "role": "visual", "depth": 0, "rawGids": [69355, 69356, 69357, 69358, 69359] },
+      { "name": "particles2", "role": "visual", "depth": 0, "rawGids": [69355, 69356, 69357, 69358, 69359] },
+      { "name": "particles3", "role": "marker", "depth": null, "markerGids": [69361] },
+      { "name": "footsteps", "role": "marker", "depth": null, "markerGids": [69345] }
+    ],
+    "bridges": {
+      "bridge1": { "up": "bridge1_up_wall", "down": "bridge1_down_wall" },
+      "bridge2": { "up": "bridge2_up_wall", "down": "bridge2_down_wall" }
+    },
+    "roofGroups": {
+      "concert": ["roof_concert", "roof_concert2"],
+      "factory": ["roof_factory", "roof_factory2"]
+    },
+    "playerDepth": { "base": 500, "yOffset": 24, "ratio": 0.1 },
+    "bridgePlayerDepth": 1650,
+    "roofFadeMs": 300,
+    "roofTweenEase": "Power2",
+    "footstepDepth": 450,
+    "collisionGidForced": 69345,
+    "nonCollisionGidForced": 69346,
+    "bridgeZones": {
+      "bridge1": {
+        "entry": [
+          { "minX": 89, "maxX": 90, "minY": 56, "maxY": 67 },
+          { "minX": 112, "maxX": 113, "minY": 57, "maxY": 59 }
+        ],
+        "exit": [
+          { "minX": 92, "maxX": 111, "minY": 54, "maxY": 55 },
+          { "minX": 92, "maxX": 101, "minY": 68, "maxY": 70 },
+          { "minX": 114, "maxX": 116, "minY": 57, "maxY": 70 },
+          { "minX": 87, "maxX": 89, "minY": 56, "maxY": 67 }
+        ]
+      },
+      "bridge2": {
+        "zones": [
+          { "minX": 63, "maxX": 66, "minY": 87, "maxY": 87 },
+          { "minX": 63, "maxX": 66, "minY": 99, "maxY": 102 }
+        ]
+      }
+    },
+    "roofZones": {
+      "factory": { "left": 112, "right": 640, "top": 736, "bottom": 1152 },
+      "concert": { "left": 1632, "right": 2208, "top": 384, "bottom": 848 }
+    }
+  }
+}

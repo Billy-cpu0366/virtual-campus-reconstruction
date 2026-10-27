@@ -1,15 +1,15 @@
 ---
 workflow-ref: 03-执行层/README.md
-current-work-item: none
-work-item-status: none
+current-work-item: WI-ADMIN-PLATFORM-001
+work-item-status: active
 node-refs: not-applicable
-current-phase: design-complete
-current-gate: selection
-gate-status: idle
-authorization-ref: not-applicable
+current-phase: implementation
+current-gate: implementation
+gate-status: authorized
+authorization-ref: Human-2026-10-20-admin-platform-activation
 preauthorized-next-work-item: none
 next-phase: implementation
-updated: 2026-10-14
+updated: 2026-10-20
 retrospective-ref: doc/复盘-2026-09-07.md
 collaboration-mode: single-person
 ---
@@ -18,7 +18,7 @@ collaboration-mode: single-person
 
 ## ⏱ 当前状态（一眼看懂）
 
-- **正在做**：**配置工作（换皮配置）**——2026-09-19 起持续进行，**没有正式工作项编号**，进度与缺口见 [`config/README.md`](../config/README.md)。除配置外无其他在工作项（`current-work-item: none`）。执行层 16 张系统卡**全部**已完成详细设计（SYS-ENTITY 于 2026-09-14 补齐，16/16 `designed`）；8 个确定性 CORE 已实现并验证。
+- **正在做**：`WI-ADMIN-PLATFORM-001`（校园内容与配置运营平台 A0），按任务卡 §4、§12 执行。配置工作（换皮配置）的历史进度与缺口见 [`config/README.md`](../config/README.md)。执行层 16 张系统卡**全部**已完成详细设计（SYS-ENTITY 于 2026-09-14 补齐，16/16 `designed`）；8 个确定性 CORE 已实现并验证。
 - **最近完成**：两波并行设计（M1 地图 + P1 玩家 + SYS-CAMERA 范围已定稿）、碰撞集成、运行时安全修复、SYS-ZONE 设计、SYS-LAYER 运行时收束、地图生命周期收口、SYS-ENTITY 实体生命周期设计（已关闭工作项索引末条）、两轮有界运行时修复、网络协议层独立成层、SYS-ENTITY 卡按当前代码重对、**地图资源根收口（根值取原站 `/assets/maps`，`src/asset/` 接入运行期成为唯一入口）**。2026-09-19 起转入**配置工作**，至 2026-10-14 已推至全 16 个板块（见下方同日条目）。
 - **明确不做**：不关闭 `Q-LAYER-002/003`，不实现车辆/NPC/轨迹/脚印/内容线，不自动合并或推送。
 - **阻塞项**：**无技术阻塞**。原记载的两项经 2026-09-14 复核均已不成立：仓库无任何 rebase/merge 残留状态（`git ls-files -u` 为 0），全仓只有一个 worktree，`impl/gameplay-serial` 分支从未创建。真正阻止正式代码写入的是**没有已授权的工作项**，不是环境。
@@ -289,7 +289,7 @@ collaboration-mode: single-person
 
 ## 当前工作项
 
-当前没有 active 工作项（`current-work-item: none`）。上一项 `WI-MAP-GAMEPLAY-PARALLEL-WAVE1-001`（两波并行集成：M1 地图运行时收口 + P1 玩家运行时）的设计阶段已完成并通过 Human 签字，但 WSL 沙箱拦截 `git worktree` 命令导致正式代码窗口尚未创建——所以暂停了实现阶段。并行设计的产出（接口文档、文件所有权划分、M1/P1/CAMERA 范围）已落盘于 `task-todos/` 和 API 契约表。
+`WI-ADMIN-PLATFORM-001`（校园内容与配置运营平台 A0）已由 Human 于 2026-10-20 激活，进入 implementation。执行边界、步骤和验收标准见 [任务卡](task-todos/WI-ADMIN-PLATFORM-001.md)；本轮只实现 §4 范围，按 §12 顺序执行。
 
 皮/骨架接口仍以 [`02-接口层/API契约表.md`](02-接口层/API契约表.md) 为唯一索引；SYS-CAMERA 正式实现当前禁止开工（需等 M1+P1 先跑通）。
 

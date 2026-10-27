@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "system": "npc",
+    "source": "game/PhaserStaticCrowdRuntime.ts",
+    "sourceConstant": "STATIC_CROWD_EXTRA_TEXTURES / NPC_HALF_SIZE",
+    "units": {
+      "defaultTexture": "text",
+      "extraTextures": "text",
+      "textureFrameWidth": "pixel",
+      "textureFrameHeight": "pixel",
+      "npcHalfSize": "pixel",
+      "lookAroundIntervalMs": "ms",
+      "maxCreatePerSync": "count"
+    },
+    "notes": [
+      "这份管静态人群「用哪些贴图、怎么判定在不在屏幕里」，管「撒在哪、撒多密」的是 static-crowd-tuning.json。",
+      "defaultTexture 是兜底贴图：贴图池里挑到的那张如果没加载成功，就用它。",
+      "extraTextures 是「不在 defaultTexture 所在图集里、要单独下载」的几张贴图（沙滩、足球）。真正从哪些图里随机挑，看 static-crowd-sprite-pools.json。",
+      "npcHalfSize 是判定「在不在屏幕里」用的半宽。这是个估计值，不是贴图真实尺寸——贴图换了不用跟着改，除非人物明显变大。",
+      "lookAroundIntervalMs 是「隔多久让几个人转过头看看」的间隔，纯观感，不影响行为。",
+      "maxCreatePerSync 是每帧最多让几个人新出现，防止一次涌出一大片卡帧。**和 venue-crowd-presentation.json 里那个同名的项是一回事**（场馆人群也有这个担忧），原先只有场馆那边抽出来了，静态人群这半边写死在 game/PhaserStaticCrowdRuntime.ts 里（created >= 16）。数字调小会更平滑，但人多的地方出现得慢。",
+      "铁轨带（trackBand）不在这份里——它住在 route-crowd-presentation.json，静态人群运行时读的是同一份。铁轨在哪儿是世界事实，不是静态人群的属性，所以两方面共读一处、不各抄一份。"
+    ],
+    "verified": "mixed"
+  },
+  "data": {
+    "defaultTexture": "npc-man",
+    "extraTextures": [
+      "npc-man-beach",
+      "npc-man-beach2",
+      "npc-woman-beach",
+      "npc-woman-beach2",
+      "npc_footballer_blue",
+      "npc_footballer_red"
+    ],
+    "textureFrameWidth": 48,
+    "textureFrameHeight": 48,
+    "npcHalfSize": 24,
+    "lookAroundIntervalMs": 1000,
+    "maxCreatePerSync": 16
+  }
+}
